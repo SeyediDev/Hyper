@@ -1,0 +1,11 @@
+services:
+  web:
+    container_name: bpms_web
+    build:
+      context: .
+    ports:
+      - "8050:80"
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_HTTP_PORTS=80
+

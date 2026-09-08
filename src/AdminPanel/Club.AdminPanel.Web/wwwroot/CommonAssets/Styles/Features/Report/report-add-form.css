@@ -1,0 +1,282 @@
+/**
+ * Report Add Form - Modern Visual Selection
+ * فرم افزودن گزارش جدید با انتخاب دیداری
+ */
+
+/* ===== Report Type Visual Selection Container ===== */
+.report-type-selection-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 24px 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.report-type-selection-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.report-type-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 12px;
+}
+
+/* ===== Report Type Card ===== */
+.report-type-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 20px;
+    background: #ffffff;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-height: 160px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.report-type-card:hover {
+    border-color: #3b82f6;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(59, 130, 246, 0.15);
+    background: #f8faff;
+}
+
+.report-type-card.selected {
+    border-color: #2563eb;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.report-type-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ===== Report Type Icon ===== */
+.report-type-icon {
+    width: 64px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 32px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2);
+}
+
+.report-type-card:hover .report-type-icon {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 6px 12px rgba(59, 130, 246, 0.3);
+}
+
+.report-type-card.selected .report-type-icon {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+}
+
+/* Chart Icon */
+.report-type-card[data-type="Chart"] .report-type-icon {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.report-type-card[data-type="Chart"].selected .report-type-icon {
+    background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%);
+}
+
+/* ReportList Icon */
+.report-type-card[data-type="ReportList"] .report-type-icon {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.report-type-card[data-type="ReportList"].selected .report-type-icon {
+    background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+}
+
+/* GroupByList Icon */
+.report-type-card[data-type="GroupByList"] .report-type-icon {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.report-type-card[data-type="GroupByList"].selected .report-type-icon {
+    background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
+}
+
+/* ===== Report Type Title ===== */
+.report-type-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 6px;
+    transition: color 0.3s ease;
+}
+
+.report-type-card:hover .report-type-title {
+    color: #2563eb;
+}
+
+.report-type-card.selected .report-type-title {
+    color: #1e40af;
+}
+
+/* ===== Report Type Description ===== */
+.report-type-description {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.5;
+    margin-top: 4px;
+    transition: color 0.3s ease;
+}
+
+.report-type-card:hover .report-type-description {
+    color: #475569;
+}
+
+.report-type-card.selected .report-type-description {
+    color: #334155;
+}
+
+/* ===== Selection Indicator ===== */
+.report-type-card::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 24px;
+    height: 24px;
+    border: 2px solid #cbd5e1;
+    border-radius: 50%;
+    background: #ffffff;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.report-type-card.selected::before {
+    border-color: #2563eb;
+    background: #2563eb;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M13.333 4L6 11.333 2.667 8' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 14px;
+}
+
+/* ===== RTL Support ===== */
+[dir="rtl"] .report-type-card::before {
+    right: auto;
+    left: 12px;
+}
+
+[dir="rtl"] .report-type-options {
+    direction: rtl;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 768px) {
+    .report-type-options {
+        grid-template-columns: 1fr;
+    }
+    
+    .report-type-card {
+        min-height: 140px;
+        padding: 20px 16px;
+    }
+    
+    .report-type-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 28px;
+    }
+}
+
+/* ===== Form Improvements ===== */
+.report-add-form-container {
+    padding: 24px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.report-add-form-container .form-group {
+    margin-bottom: 24px;
+}
+
+.report-add-form-container label {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 8px;
+    display: block;
+    font-size: 14px;
+}
+
+.report-add-form-container input[type="text"],
+.report-add-form-container input[type="number"],
+.report-add-form-container textarea,
+.report-add-form-container select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    background: #ffffff;
+}
+
+.report-add-form-container input[type="text"]:focus,
+.report-add-form-container input[type="number"]:focus,
+.report-add-form-container textarea:focus,
+.report-add-form-container select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* ===== Submit Button ===== */
+.report-add-form-submit {
+    margin-top: 32px;
+    padding: 14px 32px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.2);
+}
+
+.report-add-form-submit:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(59, 130, 246, 0.3);
+}
+
+.report-add-form-submit:active {
+    transform: translateY(0);
+}
+
+/* ===== Hidden Original ComboBox ===== */
+.report-type-combobox-hidden {
+    display: none !important;
+}
+

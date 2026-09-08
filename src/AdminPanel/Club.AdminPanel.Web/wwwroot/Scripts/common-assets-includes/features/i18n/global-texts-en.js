@@ -1,0 +1,59 @@
+﻿(function(internationalization) {
+	internationalization.addDictionary({
+		'Version': 'Version',
+		'Settings': 'Settings',
+		'New Folder': 'New Folder',
+		'Remove': 'Remove',
+		'Edit': 'Edit',
+        'Error Occured': 'Something went wrong unexpectedly.!',
+		'Saved!': 'Saved!',
+		'Copy': 'Copy',
+		'Yes': 'Yes',
+		'No': 'No',
+		// logic
+		'InvalidInputValue': 'Invalid Value',
+		'RequiredError': 'Required',
+		'FirstSelectAValue': 'Please select a value first.',
+		// filter
+		'SureToDeleteFilter': 'Are you sure you want to delete this filter?',
+		'SetFilterValues': 'Set Filter Values',
+		'FolderChangeError': 'Error in changing folder',
+		// folder
+		'SureToDeleteFolder': 'Are you sure you want to delete this folder?',
+		// report
+		'SureToDeleteConfig': 'Are you sure you want to delete this design?',
+		'Country': 'Country',
+        'PleaseSetRequiredFilters': 'Please set required filters.',
+		//// report - chart-view
+		'No Record': 'No Record',
+		//// report - AddSubReport
+		'SureToChangeSubConfigType': 'Are you sure you want to change the sub report\'s type?',
+		'SubConfigTypeChanged': 'Sub-report\'s type changed successfully.',
+		'EnterSubConfigName': 'Please enter your desired name for the sub report',
+		//// report - reportSettings
+		'ConstantMin': 'Constant Min',
+		'ConstantMax': 'Constant Max',
+		'Color': 'Color',
+		//// report - columnSettings.js
+		'EditFormula': 'Edit formula',
+		'AddNewFormula': 'Add new formula',
+		//dashboard
+		'EnterNewNameOfConfig': 'Please enter new name of the config',
+		'EnterNewConfigName': 'Please enter name of the new config',
+		'SureToDeleteDashboardConfig': 'Are you sure you want to remove {0}?',
+		// form
+		'YourChangesNotSaved': 'Your changes are not saved.',
+		'NotSaved': 'Not saved',
+		// form controls
+        'UnableToSubmitWhileUploading': 'It\'s not possible to submit the form while upload is in progress.',
+		'Successful!': 'Successful!',
+		'UploadForbiddenFileFormat':'It is not possible to select this file format',
+		// excel import
+		'OverviewResultsTitle': 'Sheets',
+		'RowsCount': 'Rows Count',
+		'ErrorsCount': 'Errors Count',
+		'ExcelReadErrors': 'Excel Read Errors',
+		'ReadErrorTemplate': '{3} at row {0}, column {1} of {2}',
+		'ApplyErrors': 'Apply Errors'
+	});
+})(window.tetaI18n);

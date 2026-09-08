@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+	
+	<ItemGroup>
+		<ProjectReference Include="..\..\Core\Hyper.Application\Hyper.Application.csproj" />
+		<ProjectReference Include="..\..\Core\Hyper.Domain\Hyper.Domain.csproj" />
+	</ItemGroup>
+	
+	<ItemGroup>
+		<!-- TODO: Replace with NuGet packages after Neo.Bpms is published -->
+		<!-- Temporary local project references -->
+		<ProjectReference Include="..\..\..\..\..\Neo-Bpms\src\Neo.Bpms.Domain\Neo.Bpms.Domain.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Remove="UiDefinitions\Customers\CustomerTenants\**" />
+		<Compile Remove="UiDefinitions\Customers\CustomerSegments\**" />
+		<Compile Remove="UiDefinitions\Customers\CustomerTransactions\**" />
+		<Compile Remove="UiDefinitions\Customers\CustomerPointLevelUiDefinitions.cs" />
+		<Compile Remove="UiDefinitions\Customers\CustomerReferrerUiDefinitions.cs" />
+		<Compile Remove="UiDefinitions\Customers\TenantUiDefinitions.cs" />
+		<Compile Remove="UiDefinitions\Customers\ReferrerCodeUiDefinitions.cs" />
+		<Compile Remove="UiDefinitions\Promotions\LotteryUiDefinitions.cs" />
+		<Compile Remove="UiDefinitions\Promotions\LotteryParticipantUiDefinitions.cs" />
+		<Compile Remove="UiDefinitions\Promotions\LotteryRewardUiDefinitions.cs" />
+	</ItemGroup>
+
+	
+	<ItemGroup>
+	  <Folder Include="UiDefinitions\Financial\" />
+	</ItemGroup>
+	
+</Project>

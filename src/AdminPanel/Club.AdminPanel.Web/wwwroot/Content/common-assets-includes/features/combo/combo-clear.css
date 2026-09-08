@@ -1,0 +1,169 @@
+/**
+ * دکمه Clear برای کمبوباکس‌ها
+ * طراحی Subtle و Minimal با رعایت اصول UI/UX
+ */
+
+/* Container wrapper برای positioning - فقط برای فرم‌های غیر فیلتر */
+.modern-form .dWrapper {
+    position: relative !important;
+}
+
+/* دکمه Clear - مخفی به صورت پیش‌فرض، نمایش فقط در هاور/فوکس */
+.combo-clear-btn {
+    position: absolute !important;
+    left: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    
+    /* Styling */
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 24px !important;
+    height: 24px !important;
+    
+    /* Icon - display flex but opacity handled by controls-modern.css */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    
+    /* Color - خاکستری ملایم */
+    color: #94a3b8 !important;
+    
+    /* Cursor */
+    cursor: pointer !important;
+    
+    /* Transition */
+    transition: all 0.2s ease !important;
+    
+    /* Z-index */
+    z-index: 10 !important;
+    
+    /* Prevent text selection */
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    
+    /* Border radius */
+    border-radius: 50% !important;
+    
+    /* فونت سایز آیکن */
+    font-size: 14px !important;
+    line-height: 1 !important;
+}
+
+/* Hover effect - برجسته‌تر شدن */
+.combo-clear-btn:hover {
+    color: #ef4444 !important; /* قرمز ملایم */
+    background: rgba(239, 68, 68, 0.1) !important;
+    transform: translateY(-50%) scale(1.1) !important;
+}
+
+/* Active/Click effect */
+.combo-clear-btn:active {
+    transform: translateY(-50%) scale(0.95) !important;
+    background: rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Focus visible برای accessibility */
+.combo-clear-btn:focus-visible {
+    outline: 2px solid #3b82f6 !important;
+    outline-offset: 2px !important;
+}
+
+/* آیکن داخل دکمه */
+.combo-clear-btn i {
+    font-size: 14px !important;
+    line-height: 1 !important;
+    pointer-events: none !important;
+}
+
+/* فاصله برای select تا دکمه روی متن نیفتد - فقط در فرم‌ها */
+.modern-form .dWrapper select.cBox {
+    padding-left: 45px !important; /* فضا برای دکمه */
+}
+
+/* برای RTL (فارسی) - فقط در فرم‌ها */
+.modern-form [dir="rtl"] .combo-clear-btn {
+    left: auto !important;
+    right: 12px !important;
+}
+
+.modern-form [dir="rtl"] .dWrapper select.cBox {
+    padding-left: 20px !important;
+    padding-right: 45px !important;
+}
+
+/* برای multi-select */
+select.cBox[multiple] + .combo-clear-btn {
+    top: 20px !important;
+    transform: translateY(0) !important;
+}
+
+select.cBox[multiple] + .combo-clear-btn:hover {
+    transform: translateY(0) scale(1.1) !important;
+}
+
+select.cBox[multiple] + .combo-clear-btn:active {
+    transform: translateY(0) scale(0.95) !important;
+}
+
+/* ReadOnly state - مخفی کردن دکمه - فقط در فرم‌ها */
+.modern-form .dWrapper:has(select.cBox[readonly]) .combo-clear-btn,
+.modern-form .dWrapper:has(select.cBox[disabled]) .combo-clear-btn {
+    display: none !important;
+}
+
+/* Animation برای نمایش/مخفی شدن */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: translateY(-50%) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-50%) scale(1);
+    }
+}
+
+.combo-clear-btn {
+    animation: fadeInScale 0.2s ease !important;
+}
+
+/* در حالت Filter (اگر نیاز بود در آینده) */
+.filter-form .combo-clear-btn {
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 12px !important;
+}
+
+/* Responsive - موبایل - فقط در فرم‌ها */
+@media (max-width: 768px) {
+    .modern-form .combo-clear-btn {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 16px !important;
+    }
+    
+    .modern-form .dWrapper select.cBox {
+        padding-left: 50px !important;
+    }
+    
+    .modern-form [dir="rtl"] .dWrapper select.cBox {
+        padding-left: 20px !important;
+        padding-right: 50px !important;
+    }
+}
+
+/* Dark mode support (اگر در آینده نیاز بود) */
+@media (prefers-color-scheme: dark) {
+    .combo-clear-btn {
+        color: #64748b !important;
+    }
+    
+    .combo-clear-btn:hover {
+        color: #f87171 !important;
+        background: rgba(248, 113, 113, 0.15) !important;
+    }
+}
+

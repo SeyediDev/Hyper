@@ -1,0 +1,484 @@
+@* @using Neo.Bpms.UI.MVC
+@using Neo.Bpms.UI.MVC.Controllers
+@using Neo.Bpms.UI.MVC.Controls
+@using Neo.Bpms.UI.MVC.PartialModels
+@using Neo.Bpms.UI.MVC.PartialModels.Common
+@using Neo.Bpms.UI.MVC.ViewModels.Account
+@using Neo.Bpms.UI.Resources.Resources
+@using Hyper.AdminPanel.Web.ViewModels.Account
+@using Neo.Bpms.MetaModel.UserAndOrganization
+@model AssignAccessViewModel
+
+@{
+    ViewBag.Title = ViewTexts.AssignAccess;
+
+    var pageName = ViewBag.PagePackId as string;
+    var pageIcon = PageIconHelper.GetPageMenuIcon(pageName);
+
+    //    var groups = Model.GroupBy(m => m.ActivityType);
+    var items = Model.Items;
+    var forms = items.Where(m => m.ActivityType == EActivityType.Form).ToList();
+    //                     .OrderBy(f => f.NamespaceId)
+    //                     .ThenBy(f => f.EntityId)
+    //                     .ThenBy(f => f.FormType);
+    var reports = items.Where(m => m.ActivityType == EActivityType.Report).ToList();
+    var dashboards = items.Where(m => m.ActivityType == EActivityType.Dashboard).ToList();
+    var controllerActions = items.Where(m => m.ActivityType == EActivityType.ControllerAction).ToList();
+    var systemFeatures = items.Where(m => m.ActivityType == EActivityType.SystemFeature);
+    var processes = items.Where(m => m.ActivityType == EActivityType.Process).OrderBy(p => p.NamespaceId + "." + p.EntityId).ToList();
+    var globalModelIndex = 0;
+    var userGroups = (Model.UserGroups ?? Enumerable.Empty<GroupViewModel>()).ToList();
+}
+<style>
+    .root-cell { vertical-align: top !important; }
+</style>
+
+<partial name="Common/TopBar" model="new TopBarModel
+{
+    Title = Model.IsPrivatePage ? ViewTexts.MyAssignedAccess : ViewTexts.AssignAccess,
+    PageIcon = pageIcon
+}" />
+
+<div class="customDiv">
+@if (ViewBag.AssigneeType == AssigneeType.User)
+{
+    <div class="row">
+        <div class="col-md-2">
+            <span class="titleSpan">@ViewTexts.Username:</span>
+            <span class="valueSpan">@ViewBag.AssigneeUserName</span>
+        </div>
+
+        <div class="col-md-2">
+            <span class="titleSpan">@ViewTexts.Name:</span>
+            <span class="valueSpan">@ViewBag.AssigneeFirstName</span>
+        </div>
+
+        <div class="col-md-2">
+            <span class="titleSpan">@ViewTexts.LastName:</span>
+            <span class="valueSpan">@ViewBag.AssigneeLastName</span>
+        </div>
+        <div class="col-md-2">
+            <span class="titleSpan">@ViewTexts.OrganizationalPosition :</span>
+            <span class="valueSpan">@(string.Join(" - ", Model.Positions.Select(p => p.Name)))</span>
+        </div>
+    </div>
+    <div>
+        <span class="titleSpan">@ViewTexts.UserGroups:</span>
+        <span class="valueSpan">
+            @foreach (var userGroup in userGroups)
+            {
+                WriteUserGroup(userGroup);
+            }
+        </span>
+    </div>
+}
+else if (ViewBag.AssigneeType == AssigneeType.UserGroup)
+{
+    <span class="titleSpan">@ViewTexts.UserGroup :</span>
+    <span class="valueSpan">@ViewBag.AssigneeName</span>
+}
+<hr/>
+<form asp-action="AssignAccess" method="post">
+    <input type="hidden" name="assigneeId" value="@ViewBag.AssigneeId"/>
+    <input type="hidden" name="assigneeType" value="@ViewBag.AssigneeType"/>
+    <div class="accordion" id="collapse" role="tablist" aria-multiselectable="true">
+        <div class="card">
+            <div class="card-header" role="tab" id="collapse-heading-one">
+                <h5 class="m-0">
+                    <a role="button" data-toggle="collapse" data-parent="#collapse" href="#collapse-one" aria-expanded="true" aria-controls="collapse-one">
+                        @ViewTexts.Forms
+                    </a>
+                </h5>
+            </div>
+            <div id="collapse-one" class="collapse" role="tabpanel" aria-labelledby="collapse-heading-one">
+                @{
+                    WriteEntityItems(userGroups, forms, globalModelIndex, true, ViewTexts.Form, "forms");
+                    globalModelIndex += forms.Count;
+                }
+            </div>
+        </div>
+        <div class="card bg-success">
+            <div class="card-header" role="tab" id="collapse-heading-two">
+                <h5 class="m-0">
+                    <a class="collapsed text-white" role="button" data-toggle="collapse" data-parent="#collapse" href="#collapse-two" aria-expanded="false" aria-controls="collapse-two">
+                        @ViewTexts.Reports
+                    </a>
+                </h5>
+            </div>
+            <div id="collapse-two" class="collapse" role="tabpanel" aria-labelledby="collapse-heading-two">
+                @{
+                    WriteEntityItems(userGroups, reports, globalModelIndex, false, ViewTexts.Report, "reports");
+                    globalModelIndex += reports.Count;
+                }
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header bg-success" role="tab" id="collapse-heading-three">
+                <h5 class="m-0">
+                    <a class="collapsed text-white" role="button" data-toggle="collapse" data-parent="#collapse" href="#collapse-three" aria-expanded="false" aria-controls="collapse-three">
+                        @ViewTexts.Dashboards
+                    </a>
+                </h5>
+            </div>
+            <div id="collapse-three" class="collapse" role="tabpanel" aria-labelledby="collapse-heading-three">
+                @{
+                    WriteEntityItems(userGroups, dashboards, globalModelIndex, false, ViewTexts.Dashboard, "dashboards");
+                    globalModelIndex += dashboards.Count;
+                }
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header" role="tab" id="collapse-heading-four">
+                <h5 class="m-0">
+                    <a class="collapsed" role="button" data-toggle="collapse" data-parent="#collapse" href="#collapse-four" aria-expanded="false" aria-controls="collapse-four">
+                        @ViewTexts.SpecialPages
+                    </a>
+                </h5>
+            </div>
+            <div id="collapse-four" class="collapse" role="tabpanel" aria-labelledby="collapse-heading-four">
+                <div class="card-body">
+                    <div class="table-responsive t-table-wrapper custom-scroll">
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr class="sticky-row">
+                                <th class="text-center cColumn">@ViewTexts.Controller</th>
+                                <th class="text-center cColumn">@ViewTexts.Action</th>
+                                @{ WriteActivityFixHeader(userGroups); }
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @{
+                                var currentController = "";
+                                foreach (var action in controllerActions)
+                                {
+                                    <tr>
+                                        @if (action.Controller != currentController)
+                                        {
+                                            currentController = action.Controller;
+                                            var allcChildrenAreChecked = controllerActions.Where(ca => ca.Controller == currentController).All(c => c.IsAccessible);
+                                            <td rowspan="@controllerActions.Count(ca => ca.Controller == currentController)" class="root-cell">
+                                                @action.Controller
+                                                <input type="checkbox" class="parent-checkbox controller-@currentController"
+                                                       children-class="ctrl-@currentController"
+                                                       @(Model.IsPrivatePage ? "disabled" : "")
+                                                       @(allcChildrenAreChecked ? "checked" : "")/>
+                                            </td>
+                                        }
+                                        <td>
+                                            @action.Action
+                                            <input type="hidden" name="accesses[@globalModelIndex].Controller" value="@action.Controller"/>
+                                            <input type="hidden" name="accesses[@globalModelIndex].Action" value="@action.Action"/>
+                                        </td>
+                                        <td>
+                                            @{ WriteIsAccessible(globalModelIndex, action, "controller-" + currentController, "ctrl-" + currentController); }
+                                        </td>
+                                        @{
+                                            WriteIsDiactivated(globalModelIndex, action);
+                                            WriteUserGroupsIsAccess(action, userGroups);
+                                        }
+                                    </tr>
+                                    globalModelIndex++;
+                                }
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card bg-danger">
+            <div class="card-header" role="tab" id="collapse-heading-five">
+                <h5 class="m-0">
+                    <a class="collapsed text-white" role="button" data-toggle="collapse" data-parent="#collapse" href="#collapse-five" aria-expanded="false" aria-controls="collapse-five">
+                        @ViewTexts.SpecialSystemFeatures
+                    </a>
+                </h5>
+            </div>
+            <div id="collapse-five" class="collapse" role="tabpanel" aria-labelledby="collapse-heading-five">
+                <div class="card-body bg-white">
+                    <div class="table-responsive t-table-wrapper custom-scroll">
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr class="sticky-row">
+                                <th class="text-center cColumn">@ViewTexts.Title</th>
+                                @{ WriteActivityFixHeader(userGroups); }
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var feature in systemFeatures)
+                            {
+                                <tr>
+                                    <td title="@feature.SystemFeature.ToString()">
+                                        @feature.SystemFeatureAlias
+                                        <input type="hidden" name="accesses[@globalModelIndex].SystemFeature" value="@feature.SystemFeature"/>
+                                    </td>
+                                    <td>
+                                        @{ WriteIsAccessible(globalModelIndex, feature, "", ""); }
+                                    </td>
+                                    @{
+                                        WriteIsDiactivated(globalModelIndex, feature);
+                                        WriteUserGroupsIsAccess(feature, userGroups);
+
+                                    }
+                                </tr>
+                                globalModelIndex++;
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card bg-warning">
+            <div class="card-header" role="tab" id="collapse-heading-six">
+                <h5 class="m-0">
+                    <a class="collapsed text-dark" role="button" data-toggle="collapse" data-parent="#collapse" href="#collapse-six" aria-expanded="false" aria-controls="collapse-six">
+                        @ViewTexts.Processes
+                    </a>
+                </h5>
+            </div>
+            <div id="collapse-six" class="collapse" role="tabpanel" aria-labelledby="collapse-heading-six">
+                @{
+                    WriteEntityItems(userGroups, processes, globalModelIndex, false, ViewTexts.Process, "processes");
+                    globalModelIndex += processes.Count;
+                }
+            </div>
+        </div>
+    </div>
+    @if (!Model.IsPrivatePage)
+    {
+        <input type="submit" class="btn btn-primary btn-block mt-1" value="@ViewTexts.Submit"/>
+    }
+</form>
+</div>
+
+<partial name="Common/BackButton"/>
+
+<script>
+    $('.parent-checkbox').on('change', changeChildCheckboxes);
+    $('.child-checkbox').on('change', changeParentCheckboxes);
+
+    function analyzeCheckboxes(selector) {
+        var allChecked = true;
+        var allUnchecked = true;
+        $(selector)
+            .each(function() {
+                if (!allChecked && !allUnchecked)
+                    return null;
+                if ($(this).prop('checked'))
+                    allUnchecked = false;
+                else
+                    allChecked = false;
+            });
+        return {
+            allChecked: allChecked,
+            allUnchecked: allUnchecked
+        };
+    }
+
+    function changeChildCheckboxes() {
+        var childrenClass = $(this).attr('children-class');
+        var childrenSelector = '.' + childrenClass;
+        //        var analysisResult = analyzeCheckboxes(childrenSelector);
+
+        if (!$(this).prop('checked')) {
+            $(childrenSelector)
+                .each(function() {
+                    $(this).prop('checked', false);
+                });
+        } else {
+            $(childrenSelector)
+                .each(function() {
+                    $(this).prop('checked', true);
+                });
+        }
+    }
+
+    function changeParentCheckboxes() {
+        var parentClass = $(this).attr('parent-class');
+        var siblingsSelector = 'input[parent-class="' + parentClass + '"]';
+        var analysisResult = analyzeCheckboxes(siblingsSelector);
+
+        if (analysisResult.allChecked)
+            $('.' + parentClass).prop('checked', true);
+        else if (analysisResult.allUnchecked)
+            $('.' + parentClass).prop('checked', false);
+    }
+</script>
+
+@functions
+{
+    void WriteUserGroupsIsAccess(AssignAccessItemViewModel item, IList<GroupViewModel> userGroups)
+    {
+        if (userGroups.Any())
+        {
+            <td>
+                @for (var i = 0; i < userGroups.Count && i < item.UserGroupsIsAccessible.Count; i++)
+                {
+                    if (item.UserGroupsIsAccessible[i])
+                    {
+                        WriteUserGroup(userGroups[i]);
+                        <br/>
+                    }
+                }
+            </td>
+        }
+    }
+
+    void WriteActivityFixHeader(IList<GroupViewModel> userGroups)
+    {
+        <th class="text-center cColumn">@ViewTexts.HasAccess</th>
+        if (!Model.IsPrivatePage)
+        {
+            <th class="text-center cColumn">@ViewTexts.DisableAccess</th>
+        }
+        if (userGroups.Any())
+        {
+            <th class="text-center cColumn">@ViewTexts.AccessViaUserGroup</th>
+        }
+    }
+
+    void WriteEntityItemFixRowColumns(int globalModelIndex, AssignAccessItemViewModel item, IList<GroupViewModel> userGroups, bool isForm, string itemsEnName)
+    {
+        if (isForm)
+        {
+            <td>
+                @item.FormType
+                <input type="hidden" name="accesses[@globalModelIndex].FormType" value="@item.FormType"/>
+
+                @if (!string.IsNullOrEmpty(item.FormSubjectAlias))
+                {
+                    <br/>
+                    <span title="@item.FormSubjectId">@item.FormSubjectAlias</span>
+                }
+                <input type="hidden" name="accesses[@globalModelIndex].FormSubjectId" value="@item.FormSubjectId"/>
+            </td>
+        }
+        <td title="@item.EntityItemId">
+            @item.EntityItemAlias
+            <input type="hidden" name="accesses[@globalModelIndex].EntityItemId" value="@item.EntityItemId"/>
+        </td>
+        <td>
+            <input type="hidden" name="accesses[@globalModelIndex].NamespaceId" value="@item.NamespaceId"/>
+            <input type="hidden" name="accesses[@globalModelIndex].EntityId" value="@item.EntityId"/>
+            @{
+        WriteIsAccessible(globalModelIndex, item,
+            itemsEnName + "-entity" + item.EntityId,
+            itemsEnName + "-entt-" + item.EntityId + " " + itemsEnName + "-nmspc-" + item.NamespaceId);
+            }
+        </td>
+
+        WriteIsDiactivated(globalModelIndex, item);
+        WriteUserGroupsIsAccess(item, userGroups);
+    }
+
+    void WriteUserGroup(GroupViewModel userGroup)
+    {
+        if (userGroup.UserHasAccess && !Model.IsPrivatePage)
+        {
+            <a href="/Account/AssignAccess?AssigneeId=@userGroup.Id&AssigneeType=UserGroup">
+                <i class="fa fa-link"></i>
+                @userGroup.Name
+            </a>
+        }
+        else
+        {
+            <span>@userGroup.Name</span>
+        }
+    }
+
+    void WriteIsAccessible(int globalModelIndex, AssignAccessItemViewModel item, string parentClassName, string className)
+    {
+        <input type="hidden" name="accesses[@globalModelIndex].Id" value="@item.Id"/>
+        <input type="hidden" name="accesses[@globalModelIndex].ActivityType" value="@item.ActivityType"/>
+        <input name="accesses[@globalModelIndex].IsAccessible" type="checkbox" value="true"
+               @(Model.IsPrivatePage ? "disabled" : "")
+               @(item.IsAccessible ? "checked" : "")
+               parent-class="@parentClassName"
+               class="@className child-checkbox"/>
+    }
+
+    void WriteIsDiactivated(int globalModelIndex, AssignAccessItemViewModel item)
+    {
+        if (!Model.IsPrivatePage)
+        {
+            <td>
+                <input type="hidden" name="accesses[@globalModelIndex].PrevIsDiactivated" value="@item.PrevIsDiactivated.ToString()"/>
+                <input name="accesses[@globalModelIndex].IsDiactivated" type="checkbox" value="true"
+                       @(item.IsDiactivated ? "checked" : "") @(item.IsAccessible ? "" : "disabled")/>
+            </td>
+        }
+    }
+
+    void WriteEntityItems(List<GroupViewModel> userGroups, List<AssignAccessItemViewModel> items, int globalModelIndex, bool isForm, string itemsName, string itemsEnName)
+    {
+        <div class="card-body bg-white">
+            <div class="table-responsive t-table-wrapper custom-scroll">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr class="sticky-row">
+                        <th class="text-center cColumn">@ViewTexts.Namespace</th>
+                        <th class="text-center cColumn">@ViewTexts.Entity</th>
+                        @if (isForm)
+                        {
+                            <th class="text-center cColumn">
+                                @ViewTexts.FormType<br/>@ViewTexts.FormSubject
+                            </th>
+                        }
+                        <th class="text-center cColumn">@itemsName</th>
+                        @{
+        WriteActivityFixHeader(userGroups);
+                        }
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @{
+        var currentNamespaceId = "";
+        var currentEntityId = "";
+        foreach (var item in items)
+        {
+            <tr>
+
+                @if (item.NamespaceId != currentNamespaceId)
+                {
+                    currentNamespaceId = item.NamespaceId;
+                    var allnfChildrenAreChecked = items.Where(f => f.NamespaceId == item.NamespaceId).All(nf => nf.IsAccessible);
+
+                    <td title="@item.NamespaceId" rowspan="@items.Count(f => f.NamespaceId == item.NamespaceId)" class="root-cell">
+                        @item.NamespaceAlias
+                        <input type="checkbox"
+                               class="parent-checkbox @itemsEnName-namespace-@item.NamespaceId"
+                               children-class="@itemsEnName-nmspc-@item.NamespaceId"
+                               @(Model.IsPrivatePage ? "disabled" : "")
+                               @(allnfChildrenAreChecked ? "checked" : "")/>
+                    </td>
+                }
+
+                @if (item.EntityId != currentEntityId)
+                {
+                    currentEntityId = item.EntityId;
+                    var allefChildrenAreChecked = items.Where(f => f.NamespaceId == item.NamespaceId && f.EntityId == item.EntityId).All(ef => ef.IsAccessible);
+                    <td title="@item.EntityId" rowspan="@items.Count(f => f.NamespaceId == item.NamespaceId && f.EntityId == item.EntityId)" class="root-cell">
+                        @item.EntityAlias
+                        <input type="checkbox"
+                               class="@itemsEnName-nmspc-@item.NamespaceId @itemsEnName-entity-@item.EntityId parent-checkbox child-checkbox"
+                               children-class="@itemsEnName-entt-@item.EntityId"
+                               parent-class="@itemsEnName-namespace-@item.NamespaceId"
+                               @(Model.IsPrivatePage ? "disabled" : "")
+                               @(allefChildrenAreChecked ? "checked" : "")/>
+                    </td>
+                }
+                @{
+            WriteEntityItemFixRowColumns(globalModelIndex, item, userGroups, isForm, itemsEnName);
+                }
+            </tr>
+            globalModelIndex++;
+        }
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+} *@

@@ -1,0 +1,123 @@
+@using Neo.Bpms.Domain.Utility
+@using Neo.Bpms.UI.MVC.Helpers
+@using Microsoft.Extensions.Configuration
+
+@{
+    string displayVersion = "1.0.0";
+    bool isRtl = CultureHelper.IsRightToLeft() ? true : false;
+    string neutralCulture = CultureHelper.GetCurrentNeutralCulture();
+}
+<script>
+    // Set global configs immediately to prevent 'isRtl is not defined' errors
+    window.tetaConfigs = {
+        neutralCulture: '@neutralCulture',
+        isRtl: @(isRtl ? "true" : "false"),
+        version: '@displayVersion'
+    };
+    
+    // Backward-compat alias for legacy pages expecting a global 'isRtl' flag
+    window.isRtl = window.tetaConfigs.isRtl === true;
+</script>
+<script src="~/Scripts/business-configs.js" asp-append-version="true"></script>
+<script>
+    // Highcharts global configuration - disable accessibility warnings
+    // This must be set before Highcharts is loaded
+    if (typeof window.Highcharts === 'undefined') {
+        window.HighchartsConfig = window.HighchartsConfig || {};
+        window.HighchartsConfig.accessibility = { enabled: false };
+    }
+    
+    // Highcharts treemap module loader - loads after Highcharts is available
+    // This ensures treemap module is available when charts try to render
+    (function () {
+        var treemapLoaderInitialized = false;
+        var pollingTimer = null;
+        
+        var loadTreemapModule = function() {
+            if (window.Highcharts && window.Highcharts.seriesTypes) {
+                // Check if treemap is already loaded
+                if (!window.Highcharts.seriesTypes.treemap) {
+                    var script = document.createElement('script');
+                    script.src = '/Scripts/common-assets-includes/common-plugins/global/high-charts/treemap.js';
+                    script.async = false; // Load synchronously to ensure it's ready
+                    document.head.appendChild(script);
+                }
+                // Apply accessibility config after Highcharts is loaded
+                if (window.Highcharts && window.Highcharts.setOptions) {
+                    window.Highcharts.setOptions({
+                        accessibility: { enabled: false }
+                    });
+                }
+                // Stop polling if it's running
+                if (pollingTimer) {
+                    clearInterval(pollingTimer);
+                    pollingTimer = null;
+                }
+                return true;
+            }
+            return false;
+        };
+        
+        // Try to load immediately if Highcharts is already available
+        if (loadTreemapModule()) {
+            treemapLoaderInitialized = true;
+        } else {
+            // Listen for Highcharts module loaded events
+            if (typeof window.addEventListener !== 'undefined') {
+                var moduleLoadedHandler = function(event) {
+                    if (!treemapLoaderInitialized && loadTreemapModule()) {
+                        treemapLoaderInitialized = true;
+                        window.removeEventListener('HighchartsModuleLoaded', moduleLoadedHandler);
+                    }
+                };
+                window.addEventListener('HighchartsModuleLoaded', moduleLoadedHandler);
+            }
+            
+            // Watch for script tags being added (for charts.js lazy loading)
+            if (typeof MutationObserver !== 'undefined') {
+                var observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node.nodeName === 'SCRIPT' && node.src) {
+                                // Check if it's charts.js or highcharts bundle
+                                if (node.src.indexOf('charts') !== -1 || 
+                                    node.src.indexOf('highcharts') !== -1 ||
+                                    node.src.indexOf('high-charts') !== -1) {
+                                    // Script added, wait a bit then check for Highcharts
+                                    setTimeout(function() {
+                                        if (!treemapLoaderInitialized && loadTreemapModule()) {
+                                            treemapLoaderInitialized = true;
+                                            observer.disconnect();
+                                        }
+                                    }, 100);
+                                }
+                            }
+                        });
+                    });
+                });
+                
+                // Start observing
+                observer.observe(document.head || document.documentElement, {
+                    childList: true,
+                    subtree: true
+                });
+            }
+            
+            // Fallback: poll for Highcharts (with longer timeout for lazy-loaded charts)
+            // Note: charts.js may load later when chart views are rendered
+            var tries = 0, maxTries = 200, delay = 100; // Increased to 20 seconds
+            pollingTimer = setInterval(function () {
+                tries++;
+                if (loadTreemapModule()) {
+                    treemapLoaderInitialized = true;
+                    return;
+                }
+                if (tries >= maxTries) {
+                    clearInterval(pollingTimer);
+                    pollingTimer = null;
+                    // Silent failure - treemap will be loaded by _chartView.cshtml when needed
+                }
+            }, delay);
+        }
+    })();
+</script>

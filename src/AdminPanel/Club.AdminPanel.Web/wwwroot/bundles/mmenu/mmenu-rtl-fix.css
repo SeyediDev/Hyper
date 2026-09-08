@@ -1,0 +1,308 @@
+/**
+ * Mmenu RTL & UI Fixes
+ * اصلاح منوی همبرگری برای فارسی
+ * 
+ * Issues Fixed:
+ * 1. فلش‌های منو برعکس بودند (RTL)
+ * 2. اعداد mm-counter گیج‌کننده بودند → آیکن جایگزین
+ */
+
+/* ===== 1. RTL Arrow Fix (فلش‌ها برای فارسی) ===== */
+
+/* فلش next/prev برای RTL - معکوس افقی (180 درجه) */
+[dir="rtl"] .mm-btn_next::after,
+[dir="rtl"] .mm-btn--next::after,
+[dir="rtl"] .mm-listitem_vertical > .mm-next::after {
+    /* نگه داشتن border های اصلی */
+    border-left-width: 2px !important;
+    border-top-width: 2px !important;
+    border-left-color: currentColor !important;
+    /* معکوس افقی با scaleX برای چرخش 180 درجه */
+    transform: scaleX(-1) !important;
+    right: auto !important;
+    left: 20px !important;
+}
+
+/* فلش prev (برگشت) برای RTL */
+[dir="rtl"] .mm-btn_prev::before,
+[dir="rtl"] .mm-navbar__btn_prev::before {
+    border-right-width: 0 !important;
+    border-left-width: 2px !important;
+    border-left-color: currentColor !important;
+    border-top-width: 2px !important;
+    transform: rotate(135deg) !important; /* فلش راست */
+    left: auto !important;
+    right: 20px !important;
+}
+
+/* تراز کردن فلش‌ها */
+[dir="rtl"] .mm-listitem_vertical {
+    text-align: right !important;
+}
+
+/* ===== 2. حذف اعداد Counter و جایگزین با آیکن ===== */
+
+/* مخفی کردن اعداد mm-counter */
+.mm-counter {
+    display: none !important;
+}
+
+/* آیکن جایگزین برای sub-menu */
+.mm-listitem_vertical > a::after,
+.mm-listitem:has(.mm-panel) > a::after {
+    content: "" !important;
+    display: inline-block !important;
+    width: 16px !important;
+    height: 16px !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='9 18 15 12 9 6'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    opacity: 0.6 !important;
+    position: absolute !important;
+    right: 15px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    transition: opacity 0.2s ease, transform 0.2s ease !important;
+}
+
+/* RTL: آیکن سمت چپ - فلش به سمت راست (جهت باز شدن submenu) */
+[dir="rtl"] .mm-listitem_vertical > a::after,
+[dir="rtl"] .mm-listitem:has(.mm-panel) > a::after {
+    right: auto !important;
+    left: 15px !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='9 18 15 12 9 6'%3E%3C/polyline%3E%3C/svg%3E") !important;
+    transform: translateY(-50%) !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Hover effect for icon */
+.mm-listitem_vertical > a:hover::after,
+.mm-listitem:has(.mm-panel) > a:hover::after {
+    opacity: 1 !important;
+}
+
+/* LTR hover: move right - حذف شد، به بخش 9 منتقل شد */
+/* RTL hover: move right - حذف شد، به بخش 9 منتقل شد */
+
+/* حذف آیکن از item های بدون sub-menu */
+.mm-listitem_nosubitems > a::after {
+    display: none !important;
+}
+
+/* ===== 3. sidemenu-icon بهبود - ABSOLUTE POSITION ===== */
+
+/* آیکن‌های منو - مستقل از تورفتگی */
+.sidemenu-icon {
+    width: 24px !important;
+    height: 24px !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+    /* ABSOLUTE positioning برای استقلال از تورفتگی */
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    opacity: 0.8 !important;
+    transition: opacity 0.2s ease, transform 0.2s ease !important;
+}
+
+/* RTL: آیکن سمت راست (ثابت) */
+[dir="rtl"] .sidemenu-icon {
+    right: 50px !important; /* ثابت از راست */
+    left: auto !important;
+}
+
+/* LTR: آیکن سمت چپ (ثابت) */
+[dir="ltr"] .sidemenu-icon {
+    left: 15px !important;
+    right: auto !important;
+}
+
+/* Hover effect */
+.mm-listitem > a:hover .sidemenu-icon {
+    opacity: 1 !important;
+    transform: translateY(-50%) scale(1.1) !important;
+}
+
+/* Active state */
+.mm-listitem_selected .sidemenu-icon {
+    opacity: 1 !important;
+    filter: brightness(1.2) !important;
+}
+
+/* ===== 4. Text Padding Fix (جلوگیری از overlap با آیکن) ===== */
+
+/* RTL: همه item ها - padding با آیکن */
+[dir="rtl"] .mm-listitem > a {
+    padding-right: 80px !important; /* فاصله برای آیکن (50px) + margin (30px) */
+    padding-left: 20px !important; /* پایه */
+    text-align: right !important;
+    direction: rtl !important;
+    position: relative !important; /* برای absolute positioning آیکن */
+}
+
+/* RTL: item هایی که sub-menu دارند - padding بیشتر سمت چپ */
+[dir="rtl"] .mm-listitem_vertical > a,
+[dir="rtl"] .mm-listitem:has(.mm-panel) > a {
+    padding-left: 50px !important; /* فاصله سمت چپ برای chevron icon */
+}
+
+/* LTR: با آیکن */
+[dir="ltr"] .mm-listitem > a {
+    padding-left: 50px !important; /* فاصله برای آیکن */
+    position: relative !important;
+}
+
+/* LTR: default padding for sub-menu */
+[dir="ltr"] .mm-listitem_vertical > a,
+[dir="ltr"] .mm-listitem:has(.mm-panel) > a {
+    padding-right: 45px !important;
+}
+
+/* ===== 5. منوی Navbar RTL ===== */
+
+/* عنوان navbar */
+[dir="rtl"] .mm-navbar__title {
+    text-align: center !important;
+}
+
+/* دکمه‌های navbar */
+[dir="rtl"] .mm-navbar__btn {
+    direction: rtl !important;
+}
+
+/* ===== 6. Search Field RTL ===== */
+
+[dir="rtl"] .mm-searchfield input {
+    text-align: right !important;
+    direction: rtl !important;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+    .sidemenu-icon {
+        width: 20px !important;
+        height: 20px !important;
+    }
+    
+    /* موبایل: آیکن نزدیک‌تر */
+    [dir="rtl"] .sidemenu-icon {
+        right: 40px !important;
+    }
+    
+    [dir="ltr"] .sidemenu-icon {
+        left: 12px !important;
+    }
+    
+    /* موبایل: padding کمتر */
+    [dir="rtl"] .mm-listitem > a {
+        padding-right: 65px !important;
+    }
+    
+    [dir="ltr"] .mm-listitem > a {
+        padding-left: 40px !important;
+    }
+    
+    .mm-listitem_vertical > a::after,
+    .mm-listitem:has(.mm-panel) > a::after {
+        width: 14px !important;
+        height: 14px !important;
+    }
+}
+
+/* ===== ثبت در #menu2 به صورت مستقیم ===== */
+
+#menu2[dir="ltr"] .mm-btn_next::after,
+#menu2[dir="ltr"] .mm-listitem_vertical > .mm-next::after {
+    transform: rotate(45deg) !important; /* فلش راست برای LTR */
+}
+
+#menu2[dir="ltr"] .mm-btn_prev::before,
+#menu2[dir="ltr"] .mm-navbar__btn_prev::before {
+    transform: rotate(-135deg) !important; /* فلش چپ برای LTR */
+}
+
+/* ===== 8. Fix Menu Item Background Split Issue ===== */
+
+/* یکپارچه کردن پس‌زمینه آیتم‌های انتخاب شده */
+.mm-listitem_selected > .mm-listitem__text,
+.mm-listitem_selected > .mm-listitem__btn {
+    background: rgba(255, 255, 255, 0.4) !important;
+    background: var(--mm-color-background-emphasis) !important;
+}
+
+/* یکپارچه کردن پس‌زمینه آیتم‌های باز شده */
+.mm-listitem_opened > .mm-listitem__btn,
+.mm-listitem_opened > .mm-listitem__text {
+    background: rgba(0, 0, 0, 0.05) !important;
+    background: var(--mm-color-background-highlight) !important;
+}
+
+/* RTL: اطمینان از یکپارچگی در RTL */
+[dir="rtl"] .mm-listitem_selected > .mm-listitem__text,
+[dir="rtl"] .mm-listitem_selected > .mm-listitem__btn {
+    background: rgba(255, 255, 255, 0.4) !important;
+    background: var(--mm-color-background-emphasis) !important;
+}
+
+/* ===== 9. Override mmenu default rotation for opened items ===== */
+
+/* جلوگیری از چرخش فلش در حالت باز شده - با specificity بالاتر */
+.mm-menu .mm-listitem_opened > .mm-listitem__btn:after,
+.mm-menu .mm-listitem_opened > a:after,
+.mm-listitem_opened > .mm-listitem__btn:after,
+.mm-listitem_opened > a:after {
+    transform: translateY(-50%) !important;
+    /* حذف rotate(225deg) از mmenu اصلی */
+}
+
+/* RTL: اطمینان از عدم چرخش در حالت باز شده */
+[dir="rtl"] .mm-menu .mm-listitem_opened > .mm-listitem__btn:after,
+[dir="rtl"] .mm-menu .mm-listitem_opened > a:after,
+[dir="rtl"] .mm-listitem_opened > .mm-listitem__btn:after,
+[dir="rtl"] .mm-listitem_opened > a:after {
+    transform: translateY(-50%) !important;
+    /* حذف rotate(225deg) از mmenu اصلی */
+}
+
+/* اضافی: جلوگیری از چرخش در حالت hover هم */
+.mm-menu .mm-listitem_vertical > a:hover::after,
+.mm-menu .mm-listitem:has(.mm-panel) > a:hover::after,
+.mm-listitem_vertical > a:hover::after,
+.mm-listitem:has(.mm-panel) > a:hover::after {
+    /* فقط حرکت و scale، بدون چرخش */
+    transform: translateY(-50%) translateX(3px) scale(1.05) !important;
+}
+
+/* ===== 10. Fix Active State (Click and Hold) for Non-Leaf Items ===== */
+
+/* حالت active برای آیتم‌های غیربرگ - یکپارچه کردن پس‌زمینه با رنگ آبی روشن */
+.mm-listitem:not(.mm-listitem_nosubitems) > a:active,
+.mm-listitem:has(.mm-panel) > a:active {
+    background: rgba(59, 130, 246, 0.1) !important;
+    /* آبی روشن مشابه رنگ قبلی */
+}
+
+.mm-listitem:not(.mm-listitem_nosubitems) > .mm-listitem__btn:active,
+.mm-listitem:not(.mm-listitem_nosubitems) > .mm-listitem__text:active,
+.mm-listitem:has(.mm-panel) > .mm-listitem__btn:active,
+.mm-listitem:has(.mm-panel) > .mm-listitem__text:active {
+    background: rgba(59, 130, 246, 0.1) !important;
+    /* آبی روشن مشابه رنگ قبلی */
+}
+
+/* RTL: اطمینان از یکپارچگی در RTL */
+[dir="rtl"] .mm-listitem:not(.mm-listitem_nosubitems) > a:active,
+[dir="rtl"] .mm-listitem:has(.mm-panel) > a:active {
+    background: rgba(59, 130, 246, 0.1) !important;
+    /* آبی روشن مشابه رنگ قبلی */
+}
+
+[dir="rtl"] .mm-listitem:not(.mm-listitem_nosubitems) > .mm-listitem__btn:active,
+[dir="rtl"] .mm-listitem:not(.mm-listitem_nosubitems) > .mm-listitem__text:active,
+[dir="rtl"] .mm-listitem:has(.mm-panel) > .mm-listitem__btn:active,
+[dir="rtl"] .mm-listitem:has(.mm-panel) > .mm-listitem__text:active {
+    background: rgba(59, 130, 246, 0.1) !important;
+    /* آبی روشن مشابه رنگ قبلی */
+}
+

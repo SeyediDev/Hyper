@@ -1,0 +1,69 @@
+@using Neo.Bpms.Domain.Model.Project
+@using Neo.Bpms.UI.Resources.Resources
+@model Neo.Bpms.UI.MVC.PartialModels.Layout.UserMenuModel
+
+<div class="dropdown ">
+	<a href="#" data-toggle="dropdown" style="float: left; direction: ltr; margin: 0 10px;">
+         @if (!string.IsNullOrEmpty(Model.user.AvatarPicture))
+        {
+            <img src="@Url.Content(string.Format("~/Download/DL/{0}", Model.user.AvatarPicture))" onerror="handleAvatarError(this)"  class="avatar" alt="User Image"/>
+        }
+        else
+        {
+             <img src="@Url.Content("~/Content/common-assets-includes/images/global/login.png")"
+                 class="avatar" alt="User Image">
+        }
+
+		@if (Model.showUserAlias)
+		{
+            <span class="d-none d-lg-inline top-bar-title">
+				@if (string.IsNullOrEmpty(Model.user.FirstName) && string.IsNullOrEmpty(Model.user.LastName))
+				{
+					@Model.user.UserName
+				}
+				else
+				{
+					@(Model.user.FirstName+" "+Model.user.LastName)
+
+                }
+			</span>
+		}
+	</a>
+    <div class="dropdown-menu userMenu dw-box" >
+		<div class="user-image-wrapper">
+			<div class="list-group user-info-list">
+				<div class="list-group-item">
+					@if (string.IsNullOrEmpty(Model.user.FirstName) && string.IsNullOrEmpty(Model.user.LastName))
+					{
+						@Model.user.Email
+					}
+					else
+					{
+						@Model.user.FirstName
+						<text> </text>
+						@Model.user.LastName
+                        <br />
+                        <small>@Model.user.UserName</small>
+					}
+				</div>
+				<div class="list-group-item">
+                    <partial name="Layout/LanguageSelection" />
+                </div>
+				<div class="list-group-item">
+                    <partial name="Layout/ThemeSelection" />
+                </div>
+                <div class="list-group-item">
+                    <a href='@Url.Action("LogOff", "Account")' class="text-danger userLinks w-100" style=" margin-bottom: 0px;">@ViewTexts.LogOut</a>
+                </div>
+			</div>
+		</div>
+		<div class="user-menu-footer">
+			<div class="float-start">
+			</div>
+            <div class="float-end w-100 text-center" style="">
+                
+			</div>
+		</div>
+	</div>
+</div>
+

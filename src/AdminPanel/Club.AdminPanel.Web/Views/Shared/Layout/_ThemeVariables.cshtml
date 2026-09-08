@@ -1,0 +1,240 @@
+@using Hyper.Domain.Enums
+@using Hyper.Domain.Features
+@using Hyper.Domain.Features.Themes
+@using Neo.Bpms.Domain.Models.Security.Authentication
+@inject IThemeService themeService
+@{
+    var user = ViewBag.user as IdentityUser;
+    ThemePreference theme = ThemePreference.Simotek;
+
+    // Try to get theme from ViewBag first (set by controller)
+    if (ViewBag.UserTheme != null )
+    {
+        if (ViewBag.UserTheme is ThemePreference viewBagTheme)
+            theme = viewBagTheme;
+        else
+            theme = FallbackToSession();
+    }
+    else
+    {
+        theme = FallbackToSession();
+    }
+    var themeObj = themeService.GetTheme(theme);
+    
+    ThemePreference FallbackToSession()
+    {
+        try
+        {
+            var session = Context.Session;
+            if (session != null && session.IsAvailable)
+            {
+                var sessionTheme = session.GetInt32("UserTheme");
+                if (sessionTheme.HasValue && Enum.IsDefined(typeof(ThemePreference), sessionTheme.Value))
+                {
+                    return (ThemePreference)sessionTheme.Value;
+                }
+            }
+        }
+        catch (InvalidOperationException)
+        {
+            // Session is not configured, use default theme
+        }
+        return ThemePreference.Simotek; // Default theme
+    }
+}
+
+
+<style>
+    :root {
+        /* Primary Colors - Dynamic based on user theme */
+        --neo-menu-primary: @themeObj.Primary;
+        --neo-menu-primary-hover: @themeObj.PrimaryHover;
+        --neo-menu-primary-active: @themeObj.PrimaryActive;
+        --neo-menu-primary-light: @themeObj.PrimaryLight;
+        
+        /* Secondary Colors */
+        --neo-menu-secondary: @themeObj.Secondary;
+        --neo-menu-secondary-hover: @themeObj.SecondaryHover;
+        --neo-menu-secondary-active: @themeObj.SecondaryActive;
+        
+        /* Semantic Colors */
+        --neo-dashboard-success: @themeObj.Success;
+        --neo-dashboard-warning: @themeObj.Warning;
+        --neo-dashboard-danger: @themeObj.Danger;
+        --neo-dashboard-info: @themeObj.Info;
+        
+        /* Dashboard Theme Overrides */
+        --neo-dashboard-primary: @themeObj.Primary;
+        --neo-dashboard-primary-hover: @themeObj.PrimaryHover;
+        --neo-dashboard-primary-active: @themeObj.PrimaryActive;
+        --neo-dashboard-secondary: @themeObj.Secondary;
+        
+        /* Background Colors */
+        --neo-menu-bg-primary: @themeObj.BackgroundPrimary;
+        --neo-menu-bg-hover: @themeObj.BackgroundHover;
+        --neo-menu-bg-active: @themeObj.BackgroundActive;
+        --neo-menu-bg-light: @themeObj.BackgroundLight;
+        --neo-dashboard-bg-primary: @themeObj.BackgroundPrimary;
+        --neo-dashboard-bg-secondary: @themeObj.BackgroundSecondary;
+        --neo-dashboard-bg-tertiary: @themeObj.BackgroundTertiary;
+        --neo-dashboard-bg-card: @themeObj.BackgroundCard;
+        
+        /* Text Colors */
+        --neo-text-primary: @themeObj.TextPrimary;
+        --neo-text-secondary: @themeObj.TextSecondary;
+        --neo-text-muted: @themeObj.TextMuted;
+        --neo-text-on-dark: @themeObj.TextOnDark;
+        
+        /* Border Colors */
+        --neo-dashboard-border-light: @themeObj.BorderLight;
+        --neo-dashboard-border-medium: @themeObj.BorderMedium;
+        --neo-dashboard-border-dark: @themeObj.BorderDark;
+        
+        /* Chart Colors */
+        --neo-chart-text: @themeObj.ChartText;
+        --neo-chart-text-secondary: @themeObj.ChartTextSecondary;
+        --neo-chart-background: @themeObj.ChartBackground;
+        --neo-chart-plot-background: @themeObj.ChartPlotBackground;
+        --neo-chart-grid-line: @themeObj.ChartGridLine;
+        --neo-chart-axis-line: @themeObj.ChartAxisLine;
+        
+        /* Report Colors */
+        --neo-report-text: @themeObj.ReportText;
+        --neo-report-text-secondary: @themeObj.ReportTextSecondary;
+        --neo-report-background: @themeObj.ReportBackground;
+        --neo-report-header-background: @themeObj.ReportHeaderBackground;
+        --neo-report-table-border: @themeObj.ReportTableBorder;
+        --neo-report-table-row-alternate: @themeObj.ReportTableRowAlternate;
+        
+        /* Header & Navigation */
+        --neo-header-background: @themeObj.HeaderBackground;
+        --neo-header-text: @themeObj.HeaderText;
+        --neo-header-user-background: @themeObj.HeaderUserBackground;
+        --neo-header-user-text: @themeObj.HeaderUserText;
+        
+        /* Dashboard Headers & Widgets */
+        --neo-dashboard-tab-background: @themeObj.DashboardTabBackground;
+        --neo-dashboard-tab-text: @themeObj.DashboardTabText;
+        --neo-dashboard-widget-background: @themeObj.DashboardWidgetBackground;
+        --neo-dashboard-widget-border: @themeObj.DashboardWidgetBorder;
+        --neo-dashboard-widget-title-text: @(string.IsNullOrEmpty(themeObj.DashboardWidgetTitleText) ? "#ffffff" : themeObj.DashboardWidgetTitleText);
+        
+        /* Form */
+        --neo-form-background: @themeObj.FormBackground;
+        --neo-form-input-background: @themeObj.FormInputBackground;
+        --neo-form-input-text: @themeObj.FormInputText;
+        --neo-form-input-border: @themeObj.FormInputBorder;
+        --neo-form-input-border-focus: @themeObj.FormInputBorderFocus;
+        --neo-form-button-background: @themeObj.FormButtonBackground;
+        --neo-form-button-text: @themeObj.FormButtonText;
+    }
+</style>
+
+<script>
+    // Always load theme from API to ensure it's up-to-date
+    (function() {
+        // Load theme immediately on page load
+        fetch('@Url.Action("GetThemeVariables", "Theme")')
+            .then(response => {
+                // Check if response is actually JSON (not HTML redirect)
+                const contentType = response.headers.get('content-type');
+                if (!response.ok || !contentType || !contentType.includes('application/json')) {
+                    // If not JSON (likely a redirect to login), silently fail
+                    return null;
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data && data.success && data.variables) {
+                    var root = document.documentElement;
+                    var vars = data.variables;
+                    
+                    // Primary Colors
+                    root.style.setProperty('--neo-menu-primary', vars.primary);
+                    root.style.setProperty('--neo-menu-primary-hover', vars.primaryHover);
+                    root.style.setProperty('--neo-menu-primary-active', vars.primaryActive);
+                    root.style.setProperty('--neo-menu-primary-light', vars.primaryLight);
+                    root.style.setProperty('--neo-dashboard-primary', vars.primary);
+                    root.style.setProperty('--neo-dashboard-primary-hover', vars.primaryHover);
+                    root.style.setProperty('--neo-dashboard-primary-active', vars.primaryActive);
+                    
+                    // Secondary Colors
+                    if (vars.secondary) {
+                        root.style.setProperty('--neo-menu-secondary', vars.secondary);
+                        root.style.setProperty('--neo-menu-secondary-hover', vars.secondaryHover);
+                        root.style.setProperty('--neo-menu-secondary-active', vars.secondaryActive);
+                        root.style.setProperty('--neo-dashboard-secondary', vars.secondary);
+                    }
+                    
+                    // Semantic Colors
+                    if (vars.success) root.style.setProperty('--neo-dashboard-success', vars.success);
+                    if (vars.warning) root.style.setProperty('--neo-dashboard-warning', vars.warning);
+                    if (vars.danger) root.style.setProperty('--neo-dashboard-danger', vars.danger);
+                    if (vars.info) root.style.setProperty('--neo-dashboard-info', vars.info);
+                    
+                    // Background Colors
+                    root.style.setProperty('--neo-menu-bg-primary', vars.backgroundPrimary);
+                    root.style.setProperty('--neo-menu-bg-hover', vars.backgroundHover);
+                    root.style.setProperty('--neo-menu-bg-active', vars.backgroundActive);
+                    root.style.setProperty('--neo-menu-bg-light', vars.backgroundLight);
+                    if (vars.backgroundSecondary) root.style.setProperty('--neo-dashboard-bg-secondary', vars.backgroundSecondary);
+                    if (vars.backgroundTertiary) root.style.setProperty('--neo-dashboard-bg-tertiary', vars.backgroundTertiary);
+                    if (vars.backgroundCard) root.style.setProperty('--neo-dashboard-bg-card', vars.backgroundCard);
+                    
+                    // Text Colors
+                    if (vars.textPrimary) root.style.setProperty('--neo-text-primary', vars.textPrimary);
+                    if (vars.textSecondary) root.style.setProperty('--neo-text-secondary', vars.textSecondary);
+                    if (vars.textMuted) root.style.setProperty('--neo-text-muted', vars.textMuted);
+                    if (vars.textOnDark) root.style.setProperty('--neo-text-on-dark', vars.textOnDark);
+                    
+                    // Border Colors
+                    if (vars.borderLight) root.style.setProperty('--neo-dashboard-border-light', vars.borderLight);
+                    if (vars.borderMedium) root.style.setProperty('--neo-dashboard-border-medium', vars.borderMedium);
+                    if (vars.borderDark) root.style.setProperty('--neo-dashboard-border-dark', vars.borderDark);
+                    
+                    // Chart Colors
+                    if (vars.chartText) root.style.setProperty('--neo-chart-text', vars.chartText);
+                    if (vars.chartTextSecondary) root.style.setProperty('--neo-chart-text-secondary', vars.chartTextSecondary);
+                    if (vars.chartBackground) root.style.setProperty('--neo-chart-background', vars.chartBackground);
+                    if (vars.chartPlotBackground) root.style.setProperty('--neo-chart-plot-background', vars.chartPlotBackground);
+                    if (vars.chartGridLine) root.style.setProperty('--neo-chart-grid-line', vars.chartGridLine);
+                    if (vars.chartAxisLine) root.style.setProperty('--neo-chart-axis-line', vars.chartAxisLine);
+                    
+                    // Report Colors
+                    if (vars.reportText) root.style.setProperty('--neo-report-text', vars.reportText);
+                    if (vars.reportTextSecondary) root.style.setProperty('--neo-report-text-secondary', vars.reportTextSecondary);
+                    if (vars.reportBackground) root.style.setProperty('--neo-report-background', vars.reportBackground);
+                    if (vars.reportHeaderBackground) root.style.setProperty('--neo-report-header-background', vars.reportHeaderBackground);
+                    if (vars.reportTableBorder) root.style.setProperty('--neo-report-table-border', vars.reportTableBorder);
+                    if (vars.reportTableRowAlternate) root.style.setProperty('--neo-report-table-row-alternate', vars.reportTableRowAlternate);
+                    
+                    // Header & Navigation
+                    if (vars.headerBackground) root.style.setProperty('--neo-header-background', vars.headerBackground);
+                    if (vars.headerText) root.style.setProperty('--neo-header-text', vars.headerText);
+                    if (vars.headerUserBackground) root.style.setProperty('--neo-header-user-background', vars.headerUserBackground);
+                    if (vars.headerUserText) root.style.setProperty('--neo-header-user-text', vars.headerUserText);
+                    // Dashboard
+                    if (vars.dashboardTabBackground) root.style.setProperty('--neo-dashboard-tab-background', vars.dashboardTabBackground);
+                    if (vars.dashboardTabText) root.style.setProperty('--neo-dashboard-tab-text', vars.dashboardTabText);
+                    if (vars.dashboardWidgetBackground) root.style.setProperty('--neo-dashboard-widget-background', vars.dashboardWidgetBackground);
+                    if (vars.dashboardWidgetBorder) root.style.setProperty('--neo-dashboard-widget-border', vars.dashboardWidgetBorder);
+                    if (vars.dashboardWidgetTitleText) root.style.setProperty('--neo-dashboard-widget-title-text', vars.dashboardWidgetTitleText);
+                    // Form
+                    if (vars.formBackground) root.style.setProperty('--neo-form-background', vars.formBackground);
+                    if (vars.formInputBackground) root.style.setProperty('--neo-form-input-background', vars.formInputBackground);
+                    if (vars.formInputText) root.style.setProperty('--neo-form-input-text', vars.formInputText);
+                    if (vars.formInputBorder) root.style.setProperty('--neo-form-input-border', vars.formInputBorder);
+                    if (vars.formInputBorderFocus) root.style.setProperty('--neo-form-input-border-focus', vars.formInputBorderFocus);
+                    if (vars.formButtonBackground) root.style.setProperty('--neo-form-button-background', vars.formButtonBackground);
+                    if (vars.formButtonText) root.style.setProperty('--neo-form-button-text', vars.formButtonText);
+                }
+            })
+            .catch(err => {
+                // Silently handle errors (user might not be authenticated)
+                if (err.message && !err.message.includes('JSON')) {
+                    console.error('Error loading theme:', err);
+                }
+            });
+    })();
+</script>
+

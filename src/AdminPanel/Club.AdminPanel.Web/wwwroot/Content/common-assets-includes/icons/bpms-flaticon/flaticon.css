@@ -1,0 +1,66 @@
+	/*
+  	Flaticon icon font: BpmsFlaticon
+  	Creation date: 08/11/2020 19:35
+  	*/
+
+@font-face {
+  font-family: "BpmsFlaticon";
+  src: url("./Flaticon.eot");
+  src: url("./Flaticon.eot?#iefix") format("embedded-opentype"),
+       url("./Flaticon.woff2?d=20201108") format("woff2"),
+       url("./Flaticon.woff?d=20201108") format("woff"),
+       url("./Flaticon.ttf?d=20201108") format("truetype"),
+       url("./Flaticon.svg#Flaticon") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@media screen and (-webkit-min-device-Hyperel-ratio:0) {
+  @font-face {
+    font-family: "BpmsFlaticon";
+    src: url("./Flaticon.svg#Flaticon") format("svg");
+  }
+}
+
+[class^="bpms-flaticon-"]:before, [class*=" bpms-flaticon-"]:before,
+[class^="bpms-flaticon-"]:after, [class*=" bpms-flaticon-"]:after {
+	font-family: BpmsFlaticon;
+    font-style: normal;
+}
+
+.bpms-flaticon-people:before { content: "\f100"; }
+.bpms-flaticon-traffic-light:before { content: "\f101"; }
+.bpms-flaticon-admin-with-cogwheels:before { content: "\f102"; }
+.bpms-flaticon-cartable-computer-work:before { content: "\f103"; }
+.bpms-flaticon-hanging-over-the-key:before { content: "\f104"; }
+.bpms-flaticon-dashboard-1:before { content: "\f105"; }
+.bpms-flaticon-dashboard:before { content: "\f106"; }
+.bpms-flaticon-filter-design:before { content: "\f107"; }
+.bpms-flaticon-engineering:before { content: "\f108"; }
+.bpms-flaticon-flow-chart:before { content: "\f109"; }
+.bpms-flaticon-high-design:before { content: "\f10a"; }
+.bpms-flaticon-equal:before { content: "\f10b"; }
+.bpms-flaticon-not-equal:before { content: "\f10c"; }
+.bpms-flaticon-is-not-an-element-of:before { content: "\f10d"; }
+.bpms-flaticon-is-an-element-of:before { content: "\f10e"; }
+.bpms-flaticon-is-greater-than:before { content: "\f10f"; }
+.bpms-flaticon-is-less-than:before { content: "\f110"; }
+.bpms-flaticon-is-greater-than-or-equal-to:before { content: "\f111"; }
+.bpms-flaticon-is-less-than-or-equal-to:before { content: "\f112"; }
+.bpms-flaticon-is-approximately-equal-to:before { content: "\f113"; }
+.bpms-flaticon-empty-set:before { content: "\f114"; }
+.bpms-flaticon-abc:before { content: "\f115"; }
+.bpms-flaticon-left-quote:before { content: "\f116"; }
+.bpms-flaticon-right-quote-sign:before { content: "\f117"; }
+.bpms-flaticon-spark:before { content: "\f118"; }
+.bpms-flaticon-folder-plus:before { content: "\f119"; }
+.bpms-flaticon-csv-file:before { content: "\f11a"; }
+.bpms-flaticon-import:before { content: "\f11b"; }
+.bpms-flaticon-export:before { content: "\f11c"; }
+.bpms-flaticon-user-time-2:before { content: "\f11d"; }
+.bpms-flaticon-user-time-1:before { content: "\f11e"; }
+.bpms-flaticon-users-hierarchy-1:before { content: "\f11f"; }
+.bpms-flaticon-password:before { content: "\f120"; }
+.bpms-flaticon-authorization-2:before { content: "\f121"; }
+.bpms-flaticon-authorization-1:before { content: "\f122"; }
+.bpms-flaticon-users-hierarchy-2:before { content: "\f123"; }

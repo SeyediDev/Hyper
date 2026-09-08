@@ -1,0 +1,82 @@
+﻿body {
+	direction:rtl;
+	font-family: 'Yekan';
+	font-size:13px;
+}
+svg, text, span { font-family: 'Yekan', Calibri, Tahoma !important; }
+@media print {
+	th {
+		font-size:smaller;
+		font-family: 'Yekan';
+		color: black;
+		background-color: lightgrey;
+	}
+		th.inf {
+			background-color: #9fa9cb;
+			color: black;
+			background-color: lightgrey;
+			border-bottom: 2px solid #46454f;
+			height: 100px;
+		}
+		th.inf td {
+			border: none;
+		}
+	thead {
+		display: table-header-group;
+	}
+	tbody {
+		display: table-row-group;
+	}
+	table td {
+		border-bottom: 1px solid gray;
+		text-align:center;
+		padding:0px 5px;
+	}
+	tr {page-break-inside: avoid;}
+}
+@media screen {
+	th {
+		font-family: 'Yekan';
+		color: black;
+		background-color: lightgrey;
+		border-right:1px solid #808080;
+		border-left:1px solid #808080;
+	}
+		th.inf {
+			background-color:#c2d8ee;
+			color:#808080;
+			border-bottom:2px solid #46454f;
+		}
+			th.inf td {
+				border: none;
+			}
+
+	thead {
+		display: table-header-group;
+	}
+
+	tbody {
+		display: table-row-group;
+	}
+	table td {
+		border-bottom: 1px solid #808080;
+		border-right:1px solid #808080;
+		border-left:1px solid #808080;
+		padding-right:5px;
+	}
+	tr {page-break-inside: avoid;}
+	
+}
+/*@page {
+	margin: 2cm 0cm;
+}*/
+
+/*@page :left {
+  margin-left: 4cm;
+  margin-right: 3cm;
+}
+
+@page :right {
+  margin-left: 3cm;
+  margin-right: 4cm;
+}*/

@@ -1,0 +1,47 @@
+﻿.ordersSettingsModal ul.order-sortable-report-columns {
+	min-height: 200px;
+	border-top: solid rgb(160, 160, 160) 1px;
+	border-top: solid rgba(0, 0, 0, 0.4) 1px;
+}
+
+.ordersSettingsModal ul.order-sortable-report-columns li {
+	background-color: white;
+	border-right: solid rgb(160, 160, 160) 1px;
+	border-right: solid rgba(0, 0, 0, 0.4) 1px;
+	border-left: solid rgb(160, 160, 160) 1px;
+	border-left: solid rgba(0, 0, 0, 0.4) 1px;
+	border-bottom: solid rgb(160, 160, 160) 1px;
+	border-bottom: solid rgba(0, 0, 0, 0.4) 1px;
+	padding: 2px 0;
+}
+
+.ordersSettingsModal ul.order-sortable-report-columns li > div > i { display: none; }
+
+.ordersSettingsModal .order-type-icons { margin-right: 2px; }
+
+.ordersSettingsModal .order-by-what-icons { margin-left: 2px; }
+
+.ordersSettingsModal ul.selected-columns li > div > i.governor {
+	display: inline-block !important;
+	cursor: pointer;
+}
+
+.ordersSettingsModal ul.selected-columns li > div > i.governor2 {
+	display: inline-block !important;
+	cursor: pointer;
+}
+
+.ordersSettingsModal ul.order-sortable-report-columns li:hover {
+	cursor: move; /* fallback if grab cursor is unsupported */
+	cursor: grab;
+	cursor: -moz-grab;
+	cursor: -webkit-grab;
+}
+
+.ordersSettingsModal ul.order-sortable-report-columns li.ui-sortable-helper {
+	cursor: move;
+	cursor: -moz-grabbing;
+	cursor: -webkit-grabbing;
+}
+
+.ordersSettingsModal ul.order-sortable-report-columns li.selected { background-color: #CCE8FF; }

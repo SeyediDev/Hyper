@@ -1,0 +1,31 @@
+{
+  "x-generator": "NSwag v14.2.0.0 (NJsonSchema v11.1.0.0 (Newtonsoft.Json v13.0.0.0))",
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Hyper Channel API - health",
+    "version": "1.0.0"
+  },
+  "components": {
+    "securitySchemes": {
+      "OAuth2": {
+        "type": "oauth2",
+        "description": "OAuth 2.0 Client Credentials Flow",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "/api/v1/auth/token",
+            "scopes": {
+              "channel:write": "دسترسی به ارسال رویدادها",
+              "channel:read": "دسترسی به خواندن اطلاعات کانال"
+            }
+          }
+        }
+      },
+      "Bearer": {
+        "type": "http",
+        "description": "JWT token دریافت شده از endpoint /api/v1/auth/token",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

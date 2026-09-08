@@ -1,0 +1,409 @@
+/*!
+ * Neo Login Page Styles
+ * Version: 1.0.0
+ * Author: Neo Development Team
+ */
+
+/* ===== LOGIN PAGE LAYOUT ===== */
+.neo-login-container {
+  display: flex;
+  height: 100vh;
+  justify-content: space-between;
+  align-content: center;
+  background: #f8fafc;
+}
+
+.neo-login-form-section {
+  flex-basis: 50%;
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background: #ffffff;
+  position: relative;
+}
+
+.neo-login-brand-section {
+  flex-basis: 50%;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border-radius: 0 100px 100px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.neo-login-brand-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(0, 255, 0, 0.1) 0%, rgba(0, 255, 0, 0.05) 100%);
+  pointer-events: none;
+}
+
+/* ===== LOGIN FORM STYLES ===== */
+.neo-login-form {
+  width: 410px;
+  padding: 2rem;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.neo-login-title {
+  text-align: center;
+  color: #1e293b;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.neo-login-subtitle {
+  text-align: center;
+  color: #64748b;
+  font-size: 1rem;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.neo-login-form-group {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.neo-login-input-container {
+  position: relative;
+}
+
+.neo-login-input-icon {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 20px;
+  height: 20px;
+  opacity: 0.6;
+}
+
+.neo-login-input {
+    width: 98%;
+    height: 54px;
+    padding: 0 50px 0 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 400;
+    color: #1e293b;
+    background: #ffffff;
+    transition: all 0.3s ease;
+    direction: ltr;
+}
+
+.neo-login-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.neo-login-input::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.neo-login-input:focus::placeholder {
+  color: #cbd5e1;
+}
+
+.neo-login-submit-btn {
+  width: 100%;
+  height: 54px;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border: none;
+  border-radius: 16px;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.neo-login-submit-btn:hover {
+  background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(30, 41, 59, 0.3);
+}
+
+.neo-login-submit-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 15px rgba(30, 41, 59, 0.2);
+}
+
+.neo-login-submit-btn:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ===== VALIDATION STYLES ===== */
+.neo-login-field-validation-error {
+  color: #dc2626;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  display: block;
+}
+
+.neo-login-field-validation-error:empty {
+  display: none;
+}
+
+.neo-login-input.error {
+  border-color: #dc2626;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+/* ===== BRAND SECTION STYLES ===== */
+.neo-login-brand-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.neo-login-brand-logo {
+  width: 280px;
+  height: 126px;
+  margin-bottom: 2rem;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.neo-login-brand-title {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.neo-login-brand-footer {
+  text-align: center;
+  padding-bottom: 1.5rem;
+  direction: ltr;
+  color: #94a3b8;
+  font-size: 0.875rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+  .neo-login-container {
+    flex-direction: column;
+  }
+  
+  .neo-login-form-section,
+  .neo-login-brand-section {
+    flex-basis: 100%;
+  }
+  
+  .neo-login-brand-section {
+    border-radius: 0 0 100px 100px;
+    min-height: 40vh;
+  }
+  
+  .neo-login-form {
+    width: 90%;
+    max-width: 400px;
+    margin: 1rem;
+  }
+  
+  .neo-login-brand-logo {
+    width: 200px;
+    height: 90px;
+  }
+}
+
+@media (max-width: 480px) {
+  .neo-login-form {
+    width: 95%;
+    padding: 1.5rem;
+  }
+  
+  .neo-login-title {
+    font-size: 1.5rem;
+  }
+  
+  .neo-login-brand-logo {
+    width: 160px;
+    height: 72px;
+  }
+}
+
+/* ===== LOADING STATES ===== */
+.neo-login-submit-btn.loading {
+  position: relative;
+  color: transparent;
+}
+
+.neo-login-submit-btn.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 20px;
+  border: 2px solid #ffffff;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: neo-login-spin 1s linear infinite;
+}
+
+@keyframes neo-login-spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* ===== ACCESSIBILITY ===== */
+.neo-login-input:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.neo-login-submit-btn:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+/* ===== VERIFY PAGE SPECIFIC STYLES ===== */
+.neo-login-resend-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.neo-login-checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.neo-login-checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+.neo-login-checkbox-label {
+  font-size: 0.875rem;
+  color: #64748b;
+  cursor: pointer;
+  user-select: none;
+}
+
+.neo-login-resend-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.neo-login-resend-section:hover {
+  opacity: 0.8;
+}
+
+.neo-login-resend-section.active {
+  color: #3b82f6;
+}
+
+.neo-login-resend-icon {
+  color: #6b7280;
+  transition: color 0.3s ease;
+}
+
+.neo-login-resend-section.active .neo-login-resend-icon {
+  color: #3b82f6;
+}
+
+.neo-login-countdown {
+  font-family: 'Courier New', monospace;
+  font-weight: 600;
+  color: #dc2626;
+  font-size: 0.875rem;
+}
+
+#resendText {
+  font-size: 0.875rem;
+  color: #64748b;
+  transition: color 0.3s ease;
+}
+
+.neo-login-resend-section.active #resendText {
+  color: #3b82f6;
+}
+
+/* ===== DARK MODE SUPPORT ===== */
+@media (prefers-color-scheme: dark) {
+  .neo-login-form-section {
+    background: #0f172a;
+  }
+  
+  .neo-login-form {
+    background: #1e293b;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  }
+  
+  .neo-login-title {
+    color: #f1f5f9;
+  }
+  
+  .neo-login-subtitle {
+    color: #94a3b8;
+  }
+  
+  .neo-login-input {
+    background: #334155;
+    border-color: #475569;
+    color: #f1f5f9;
+  }
+  
+  .neo-login-input::placeholder {
+    color: #64748b;
+  }
+  
+  .neo-login-resend-container {
+    background: #334155;
+    border-color: #475569;
+  }
+  
+  .neo-login-checkbox-label {
+    color: #94a3b8;
+  }
+  
+  #resendText {
+    color: #94a3b8;
+  }
+  
+  .neo-login-resend-icon {
+    color: #94a3b8;
+  }
+}

@@ -1,0 +1,136 @@
+﻿/* ===== مدال تنظیمات ستون‌ها - نسخه بزرگ ===== */
+.columnsSettingsModal .modal-fullscreen {
+  width: 100vw;
+  max-width: none;
+  height: 100vh;
+  margin: 0;
+}
+
+.columnsSettingsModal .modal-content {
+  height: 100vh;
+  border-radius: 0;
+  border: none;
+}
+
+.columnsSettingsModal .modal-header {
+  background: linear-gradient(90deg, #60a5fa 0%, #93c5fd 50%, #bfdbfe 100%);
+  color: white;
+  border-bottom: 2px solid #3b82f6;
+  padding: 20px 30px;
+}
+
+.columnsSettingsModal .modal-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.columnsSettingsModal .modal-body {
+  padding: 30px;
+  background: #f8fafc;
+  height: calc(100vh - 140px);
+  overflow-y: auto;
+}
+
+.columnsSettingsModal .modal-footer {
+  background: #f1f5f9;
+  border-top: 2px solid #e2e8f0;
+  padding: 20px 30px;
+}
+
+.columnsSettingsModal ul.vertical-sortable-list {
+	min-height: 300px;
+	border-top: solid rgb(160, 160, 160) 1px;
+	border-top: solid rgba(0, 0, 0, 0.4) 1px;
+}
+
+.columnsSettingsModal ul.vertical-sortable-list li {
+	background-color: white;
+	border-right: solid rgb(160, 160, 160) 1px;
+	border-right: solid rgba(0, 0, 0, 0.4) 1px;
+	border-left: solid rgb(160, 160, 160) 1px;
+	border-left: solid rgba(0, 0, 0, 0.4) 1px;
+	border-bottom: solid rgb(160, 160, 160) 1px;
+	border-bottom: solid rgba(0, 0, 0, 0.4) 1px;
+	float: right;
+	padding: 2px 4px;
+	width: 100%;
+	position: relative;
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+}
+
+.columnsSettingsModal ul.vertical-sortable-list li:hover {
+	cursor: move; /* fallback if grab cursor is unsupported */
+	cursor: grab;
+	cursor: -moz-grab;
+	cursor: -webkit-grab;
+}
+
+.columnsSettingsModal ul.vertical-sortable-list li.selected { background-color: #CCE8FF; }
+
+.columnsSettingsModal ul.vertical-sortable-list li.ui-sortable-helper {
+	cursor: move;
+	cursor: -moz-grabbing;
+	cursor: -webkit-grabbing;
+	opacity: 0.8;
+	z-index: 1000;
+	pointer-events: none;
+}
+
+.columnsSettingsModal ul.vertical-sortable-list li.ui-sortable-placeholder {
+	visibility: visible !important;
+	background-color: #f0f0f0;
+	border: 2px dashed #999;
+	height: 30px;
+	margin: 2px 0;
+}
+
+
+
+.columnsSettingsModal ul.vertical-sortable-list input {
+	direction: rtl;
+	background-color: white !important;
+}
+
+input.formulaText { direction: ltr; }
+
+
+.columnsSettingsModal ul li > div > i { display: none; }
+
+.columnsSettingsModal ul.selected-column-ul li > div > i.tooltipNo {
+	display: inline-block !important;
+	cursor: pointer;
+	color: gray;
+	opacity: 0.2;
+	/*margin-left: -5px;*/
+}
+
+.columnsSettingsModal ul.selected-column-ul li > div > i.tooltipYes {
+	display: inline-block !important;
+	cursor: pointer;
+	color: #4cae4c;
+	/*margin-left: -5px;*/
+}
+
+.columnsSettingsModal ul.selected-column-ul li > div > i.matrixTypeHorizontal {
+	display: inline-block !important;
+	cursor: pointer;
+	color: gray;
+	opacity: 0.2;
+	margin-left: 1px;
+}
+
+.columnsSettingsModal ul.selected-column-ul li > div > i.matrixTypeVertical {
+	display: inline-block !important;
+	cursor: pointer;
+	color: #4cae4c;
+	margin-left: 1px;
+}
+
+.scrollbar {
+	height: 400px;
+	overflow-y: auto;
+}

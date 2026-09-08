@@ -1,0 +1,216 @@
+# ===============================================
+# GitLab CI/CD Pipeline for Hyper Backend
+# ===============================================
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: "/certs"
+  DOCKER_REGISTRY: registry.gitlab.com
+  # Update these variables
+  PROJECT_PATH: your-group/Hyper-backend
+  NEO_REPO: your-group/neo
+  NEO_BPMS_REPO: your-group/neo-bpms
+
+stages:
+  - prepare
+  - build
+  - test
+  - docker-build
+  - deploy
+
+# ==========================================
+# Templates
+# ==========================================
+.dotnet_template: &dotnet_template
+  image: mcr.microsoft.com/dotnet/sdk:8.0
+  before_script:
+    - dotnet --version
+
+.docker_template: &docker_template
+  image: docker:24
+  services:
+    - docker:24-dind
+  before_script:
+    - docker info
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" --password-stdin $DOCKER_REGISTRY
+
+# ==========================================
+# Prepare Stage - Clone Dependencies
+# ==========================================
+clone_dependencies:
+  stage: prepare
+  image: alpine/git:latest
+  script:
+    - echo "Cloning Neo repository..."
+    - git clone --depth 1 --branch ${NEO_BRANCH:-master} https://oauth2:${CI_JOB_TOKEN}@gitlab.com/${NEO_REPO}.git ../Neo
+    - echo "Cloning Neo.Bpms repository..."
+    - git clone --depth 1 --branch ${NEO_BPMS_BRANCH:-master} https://oauth2:${CI_JOB_TOKEN}@gitlab.com/${NEO_BPMS_REPO}.git ../Neo.Bpms
+  artifacts:
+    paths:
+      - ../Neo
+      - ../Neo.Bpms
+    expire_in: 1 hour
+  only:
+    - branches
+    - tags
+    - merge_requests
+
+# ==========================================
+# Build Stage
+# ==========================================
+restore:
+  <<: *dotnet_template
+  stage: build
+  dependencies:
+    - clone_dependencies
+  script:
+    - cd Hyper/Backend
+    - dotnet restore Hyper.Backend.sln
+  artifacts:
+    paths:
+      - Hyper/Backend/**/obj
+      - Hyper/Backend/**/bin
+    expire_in: 1 hour
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .nuget/packages
+  only:
+    - branches
+    - tags
+    - merge_requests
+
+build:
+  <<: *dotnet_template
+  stage: build
+  dependencies:
+    - clone_dependencies
+    - restore
+  script:
+    - cd Hyper/Backend
+    - dotnet build Hyper.Backend.sln --configuration Release --no-restore
+  artifacts:
+    paths:
+      - Hyper/Backend/**/bin/Release
+    expire_in: 1 day
+  only:
+    - branches
+    - tags
+    - merge_requests
+
+# ==========================================
+# Test Stage
+# ==========================================
+unit_tests:
+  <<: *dotnet_template
+  stage: test
+  dependencies:
+    - clone_dependencies
+    - build
+  script:
+    - cd Hyper/Backend
+    - dotnet test Hyper.Backend.sln --configuration Release --no-build --logger "trx;LogFileName=test-results.trx"
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - Hyper/Backend/**/TestResults/*.trx
+    expire_in: 7 days
+  coverage: '/Total\s+\|\s+(\d+\.?\d*)%/'
+  only:
+    - branches
+    - tags
+    - merge_requests
+
+# ==========================================
+# Docker Build Stage
+# ==========================================
+docker_build_admin_panel:
+  <<: *docker_template
+  stage: docker-build
+  dependencies:
+    - clone_dependencies
+  script:
+    - cd ../..
+    - docker build -f Hyper/Backend/src/AdminPanel/Hyper.AdminPanel.Web/Dockerfile.new -t $DOCKER_REGISTRY/$PROJECT_PATH/admin-panel:$CI_COMMIT_SHORT_SHA -t $DOCKER_REGISTRY/$PROJECT_PATH/admin-panel:latest .
+    - docker push $DOCKER_REGISTRY/$PROJECT_PATH/admin-panel:$CI_COMMIT_SHORT_SHA
+    - docker push $DOCKER_REGISTRY/$PROJECT_PATH/admin-panel:latest
+  only:
+    - master
+    - develop
+    - tags
+
+docker_build_channel_api:
+  <<: *docker_template
+  stage: docker-build
+  dependencies:
+    - clone_dependencies
+  script:
+    - cd ../..
+    - docker build -f Hyper/Backend/src/Channel/Hyper.Channel.Api/Dockerfile.new -t $DOCKER_REGISTRY/$PROJECT_PATH/channel-api:$CI_COMMIT_SHORT_SHA -t $DOCKER_REGISTRY/$PROJECT_PATH/channel-api:latest .
+    - docker push $DOCKER_REGISTRY/$PROJECT_PATH/channel-api:$CI_COMMIT_SHORT_SHA
+    - docker push $DOCKER_REGISTRY/$PROJECT_PATH/channel-api:latest
+  only:
+    - master
+    - develop
+    - tags
+
+docker_build_customer_portal_api:
+  <<: *docker_template
+  stage: docker-build
+  dependencies:
+    - clone_dependencies
+  script:
+    - cd ../..
+    - docker build -f Hyper/Backend/src/CustomerPortal/Hyper.CustomerPortal.Api/Dockerfile.new -t $DOCKER_REGISTRY/$PROJECT_PATH/customer-portal-api:$CI_COMMIT_SHORT_SHA -t $DOCKER_REGISTRY/$PROJECT_PATH/customer-portal-api:latest .
+    - docker push $DOCKER_REGISTRY/$PROJECT_PATH/customer-portal-api:$CI_COMMIT_SHORT_SHA
+    - docker push $DOCKER_REGISTRY/$PROJECT_PATH/customer-portal-api:latest
+  only:
+    - master
+    - develop
+    - tags
+
+# ==========================================
+# Deploy Stage (Example for Kubernetes)
+# ==========================================
+deploy_staging:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  dependencies: []
+  script:
+    - echo "Deploying to staging environment..."
+    - kubectl config use-context staging
+    - kubectl set image deployment/Hyper-admin-panel Hyper-admin-panel=$DOCKER_REGISTRY/$PROJECT_PATH/admin-panel:$CI_COMMIT_SHORT_SHA -n Hyper-staging
+    - kubectl set image deployment/Hyper-channel-api Hyper-channel-api=$DOCKER_REGISTRY/$PROJECT_PATH/channel-api:$CI_COMMIT_SHORT_SHA -n Hyper-staging
+    - kubectl set image deployment/Hyper-customer-portal-api Hyper-customer-portal-api=$DOCKER_REGISTRY/$PROJECT_PATH/customer-portal-api:$CI_COMMIT_SHORT_SHA -n Hyper-staging
+    - kubectl rollout status deployment/Hyper-admin-panel -n Hyper-staging
+    - kubectl rollout status deployment/Hyper-channel-api -n Hyper-staging
+    - kubectl rollout status deployment/Hyper-customer-portal-api -n Hyper-staging
+  environment:
+    name: staging
+    url: https://staging.Hyper.example.com
+  only:
+    - develop
+  when: manual
+
+deploy_production:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  dependencies: []
+  script:
+    - echo "Deploying to production environment..."
+    - kubectl config use-context production
+    - kubectl set image deployment/Hyper-admin-panel Hyper-admin-panel=$DOCKER_REGISTRY/$PROJECT_PATH/admin-panel:$CI_COMMIT_SHORT_SHA -n Hyper-production
+    - kubectl set image deployment/Hyper-channel-api Hyper-channel-api=$DOCKER_REGISTRY/$PROJECT_PATH/channel-api:$CI_COMMIT_SHORT_SHA -n Hyper-production
+    - kubectl set image deployment/Hyper-customer-portal-api Hyper-customer-portal-api=$DOCKER_REGISTRY/$PROJECT_PATH/customer-portal-api:$CI_COMMIT_SHORT_SHA -n Hyper-production
+    - kubectl rollout status deployment/Hyper-admin-panel -n Hyper-production
+    - kubectl rollout status deployment/Hyper-channel-api -n Hyper-production
+    - kubectl rollout status deployment/Hyper-customer-portal-api -n Hyper-production
+  environment:
+    name: production
+    url: https://Hyper.example.com
+  only:
+    - master
+    - tags
+  when: manual
+

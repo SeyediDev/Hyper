@@ -1,0 +1,48 @@
+@using Neo.Bpms.UI.MVC.Helpers
+@model bool
+
+@if (Model)
+{
+    <link href="@Url.Content("~/Content/common-assets-includes/fonts/pfont/yekan-persian-digits.css")" rel="stylesheet">
+}
+else
+{
+    <link href="@Url.Content("~/Content/common-assets-includes/fonts/pfont/yekan.css")" rel="stylesheet">
+}
+
+<link href="@Url.Content("~/Content/common-assets-includes/fonts/font-awesome420/css/font-awesome.min.css")" rel="stylesheet" />
+<link href="@Url.Content("~/Content/common-assets-includes/fonts/font-awesome420/css/font-awesome-animation.css")" rel="stylesheet"/>
+<link href="@Url.Content("~/Content/common-assets-includes/icons/bpms-flaticon/flaticon.css?d=20201101")" rel="stylesheet"/>
+<link href="@CommonBundles.LayoutCssBundle" asp-append-version="true" rel="stylesheet" />
+@if (CultureHelper.IsRightToLeft())
+{
+    <link href="@CommonBundles.RtlCssBundle" asp-append-version="true" rel="stylesheet" />
+}
+else
+{
+    <link href="@CommonBundles.LtrCssBundle" asp-append-version="true" rel="stylesheet" />
+}
+<partial name="Layout/JsGlobalConfigs" />
+<script src="@CommonBundles.LayoutJsBundle" asp-append-version="true"></script>
+<!-- jVectorMap library and maps - must load after jQuery (which is in LayoutJsBundle) -->
+<script src="~/Scripts/common-assets-includes/common-plugins/global/jvector-map/jquery-jvectormap-2.0.5.min.js" asp-append-version="true"></script>
+<script src="~/Scripts/common-assets-includes/common-plugins/global/jvector-map/jquery-jvectormap-world-mill.js" asp-append-version="true"></script>
+<script src="~/Scripts/common-assets-includes/common-plugins/global/jvector-map/jquery-jvectormap-iran-mill.js" asp-append-version="true"></script>
+<script src="~/Scripts/common-assets-includes/common-plugins/global/jvector-map/fix-iran-iso.js" asp-append-version="true"></script>
+<partial name="Utility/I18NAwareBundle" model="CommonBundles.GlobalTextsBundle"/>
+<!--[if lt IE 9]>
+    <script src="~/Scripts/common-assets-includes/common-plugins/global/shiv/html5shiv.js"></script>
+    <script src="~/Scripts/common-assets-includes/common-plugins/global/shim/respond.min.js"></script>
+<![endif]-->
+
+@if (CultureHelper.GetCurrentNeutralCulture() == "fa")
+{
+    <script src="@Url.Content("~/Scripts/common-assets-includes/common-plugins/global/jquery-mmenu/mmenu-fa/jquery.mmenu.fa.js")"></script>
+}
+<link href="@Url.Content("~/bundles/tailwindcss.css")" rel="stylesheet" />
+<link href="@Url.Content("~/bundles/ux-theme.css")" rel="stylesheet" />
+<link href="@Url.Content("~/Content/common-assets-includes/features/global/neo-login.css")" rel="stylesheet" />
+<link href="@Url.Content("~/Content/common-assets-includes/features/global/neo-dashboard.css")" rel="stylesheet" />
+<link href="@Url.Content("~/Content/common-assets-includes/features/global/neo-detail.css")" rel="stylesheet" />
+<link href="@Url.Content("~/Content/common-assets-includes/features/global/neo-index.css")" rel="stylesheet" />
+<link href="@Url.Content("~/Content/common-assets-includes/common-plugins/global/jvector-map/jquery-jvectormap-2.0.5.css")" rel="stylesheet" />

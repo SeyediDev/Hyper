@@ -1,0 +1,12 @@
+﻿.captcha-place {
+    margin: 10px 0 20px 0;
+    background-color: whitesmoke;
+    padding: 5px;
+}
+
+.captcha-text {
+    margin-top: 10px;
+    width: 100%;
+    direction: ltr;
+    font-family: Calibri, Tahoma;
+}

@@ -1,0 +1,854 @@
+@using Hyper.Domain.Enums
+@{
+    // Default theme
+    string currentTheme = "Simotek";
+    
+    // Try to get theme from ViewBag first (set by controller)
+    if (ViewBag.UserTheme != null)
+    {
+        currentTheme = ViewBag.UserTheme.ToString();
+    }
+    else
+    {
+        // Fallback to session if ViewBag is not set
+        try
+        {
+            var session = Context.Session;
+            if (session != null && session.IsAvailable)
+            {
+                currentTheme = session.GetString("UserTheme") ?? "Simotek";
+            }
+        }
+        catch (InvalidOperationException)
+        {
+            // Session is not configured, use default theme
+            currentTheme = "Simotek";
+        }
+    }
+}
+
+<div class="theme-selection">
+    <div class="dropdown" style="width: 100%;">
+        <a class="text-info theme-selector dropdown-toggle" 
+           title="انتخاب تم رنگی" 
+           href="#" 
+           role="button"
+           data-toggle="dropdown" 
+           aria-haspopup="true" 
+           aria-expanded="false">
+            <span class="title-text" style="font-weight:400; flex: 1;" id="current-theme-name">در حال بارگذاری...</span>
+            <i class="fa fa-paint-brush theme-selector-icon" style="font-size: 18px; margin-right: 8px; flex-shrink: 0;"></i>
+        </a>
+        <div class="dropdown-menu" style="min-width: 100%;" id="theme-options-container">
+            <!-- Themes will be loaded dynamically via JavaScript -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // Load current theme from API on page load
+    (function() {
+        // Set initial fallback theme name
+        var currentThemeName = '@currentTheme';
+       
+        var themeNames = {
+            'Simotek': 'سیموتک',
+            'Purple': 'بنفش',
+            'Orange': 'نارنجی',
+            'Red': 'قرمز',
+            'Teal': 'مغزپسته‌ای',
+            'Indigo': 'نیلی',
+            'Emerald': 'زمردی',
+            'Cyan': 'فیروزه‌ای'
+        };
+        
+        // Set initial theme name immediately
+        var themeNameEl = document.getElementById('current-theme-name');
+        
+        if (themeNameEl) {
+            var initialName = themeNames[currentThemeName] || currentThemeName || 'سیموتک';
+            themeNameEl.textContent = initialName;
+        } else {
+            console.error('[ThemeSelector] Theme name element not found on initialization!');
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load all themes first
+            var themesUrl = '@Url.Action("GetAllThemes", "Theme")';
+            
+            // Create AbortController for timeout
+            var controller = new AbortController();
+            var timeoutId = setTimeout(function() {
+                console.warn('[ThemeSelector] Request timeout after 10 seconds');
+                controller.abort();
+            }, 10000); // 10 second timeout
+            
+            fetch(themesUrl, {
+                signal: controller.signal,
+                credentials: 'include', // Include cookies for authentication
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => {
+                    clearTimeout(timeoutId);
+                    
+                    // Check if response is redirect (status 302, 301, etc.)
+                    if (response.redirected || response.status === 302 || response.status === 301) {
+                        console.warn('[ThemeSelector] Theme API redirected - user may not be authenticated');
+                        return null;
+                    }
+                    
+                    const contentType = response.headers.get('content-type');
+                    if (!response.ok) {
+                        console.warn('[ThemeSelector] Theme API returned non-OK status:', response.status, response.statusText);
+                        return null;
+                    }
+                    
+                    if (!contentType || !contentType.includes('application/json')) {
+                        console.warn('[ThemeSelector] Theme API returned non-JSON content type:', contentType);
+                        return null;
+                    }
+                    
+                    return response.json();
+                })
+                .then(themesData => {
+                    
+                    if (themesData && themesData.success && themesData.themes && Array.isArray(themesData.themes)) {
+                        // Populate theme options
+                        var container = document.getElementById('theme-options-container');
+                       
+                        if (container) {
+                            container.innerHTML = '';
+                            themesData.themes.forEach(function(theme) {
+                                var isActive = theme.preference === currentThemeName;
+                                var option = document.createElement('a');
+                                option.className = 'dropdown-item theme-option' + (isActive ? ' active' : '');
+                                option.href = '#';
+                                option.setAttribute('data-theme', theme.preference);
+                                option.addEventListener('click', function(e) {
+                                    e.preventDefault();
+                                    changeTheme(theme.preference);
+                                    return false;
+                                });
+                                option.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+                                
+                                var colorPreview = document.createElement('span');
+                                colorPreview.className = 'theme-color-preview';
+                                colorPreview.setAttribute('data-theme-color', theme.primary || '');
+                                var bgColor = theme.primary || '#c2ef03';
+                                colorPreview.style.cssText = 'display: inline-block; width: 20px; height: 20px; background: ' + bgColor + '; border-radius: 4px; flex-shrink: 0;';
+                                
+                                var nameSpan = document.createElement('span');
+                                nameSpan.textContent = theme.name || theme.preference || 'سیموتک';
+                                
+                                option.appendChild(colorPreview);
+                                option.appendChild(nameSpan);
+                                container.appendChild(option);
+                            });
+                            
+                            // Apply theme colors to active dropdown item
+                            applyThemeColorsToActiveItem();
+                        } else {
+                            console.error('[ThemeSelector] Container element not found - cannot populate themes');
+                        }
+                    } else {
+                        // If themes data is invalid, use fallback
+                        console.warn('[ThemeSelector] Invalid themes data received:', {
+                            themesData: themesData,
+                            hasSuccess: themesData && themesData.success,
+                            hasThemes: themesData && themesData.themes,
+                            isArray: themesData && themesData.themes && Array.isArray(themesData.themes)
+                        });
+                        useFallbackThemes();
+                    }
+                })
+                .catch(err => {
+                    clearTimeout(timeoutId);
+                    
+                    console.error('[ThemeSelector] Error in themes fetch:', {
+                        name: err.name,
+                        message: err.message,
+                        stack: err.stack
+                    });
+                    
+                    if (err.name === 'AbortError') {
+                        console.warn('[ThemeSelector] Theme API request timed out');
+                    } else if (err.message && !err.message.includes('JSON')) {
+                        console.error('[ThemeSelector] Error loading themes:', err);
+                    }
+                    
+                    // Fallback: use hardcoded themes
+                    console.error('[ThemeSelector] Calling useFallbackThemes due to error');
+                    useFallbackThemes();
+                });
+            
+            // Fallback function to use hardcoded themes
+            function useFallbackThemes() {
+                
+                var themeNameEl = document.getElementById('current-theme-name');
+                if (themeNameEl) {
+                    var currentText = themeNameEl.textContent;
+                    
+                    if (currentText === 'در حال بارگذاری...') {
+                        var newText = themeNames[currentThemeName] || currentThemeName || 'سیموتک';
+                        themeNameEl.textContent = newText;
+                    } else {
+                        console.log('[ThemeSelector] Theme name text is not "در حال بارگذاری..." - keeping:', currentText);
+                    }
+                } else {
+                    console.error('[ThemeSelector] Theme name element not found!');
+                }
+                
+                // Create fallback theme options
+                var container = document.getElementById('theme-options-container');
+                if (container) {
+                    var childrenCount = container.children.length;
+                    
+                    if (childrenCount === 0) {
+                        var fallbackThemes = [
+                            { preference: 'Simotek', name: 'سیموتک', primary: '#c2ef03' },
+                            { preference: 'Purple', name: 'بنفش', primary: '#a855f7' },
+                            { preference: 'Orange', name: 'نارنجی', primary: '#f97316' },
+                            { preference: 'Red', name: 'قرمز', primary: '#ef4444' },
+                            { preference: 'Teal', name: 'مغزپسته‌ای', primary: '#14b8a6' },
+                            { preference: 'Indigo', name: 'نیلی', primary: '#6366f1' },
+                            { preference: 'Emerald', name: 'زمردی', primary: '#10b981' },
+                            { preference: 'Cyan', name: 'فیروزه‌ای', primary: '#06b6d4' }
+                        ];
+                        
+                        fallbackThemes.forEach(function(theme, index) {
+                            var isActive = theme.preference === currentThemeName;
+                            var option = document.createElement('a');
+                            option.className = 'dropdown-item theme-option' + (isActive ? ' active' : '');
+                            option.href = '#';
+                            option.setAttribute('data-theme', theme.preference);
+                            option.addEventListener('click', function(e) {
+                                e.preventDefault();
+                                changeTheme(theme.preference);
+                                return false;
+                            });
+                            option.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+                            
+                            var colorPreview = document.createElement('span');
+                            colorPreview.className = 'theme-color-preview';
+                            colorPreview.setAttribute('data-theme-color', theme.primary);
+                            colorPreview.style.cssText = 'display: inline-block; width: 20px; height: 20px; background: ' + theme.primary + '; border-radius: 4px; flex-shrink: 0;';
+                            
+                            var nameSpan = document.createElement('span');
+                            nameSpan.textContent = theme.name;
+                            
+                            option.appendChild(colorPreview);
+                            option.appendChild(nameSpan);
+                            container.appendChild(option);
+                        });
+                        
+                        // Apply theme colors to active dropdown item
+                        applyThemeColorsToActiveItem();
+                    } else {
+                        console.log('[ThemeSelector] Container already has', childrenCount, 'children - skipping fallback themes creation');
+                    }
+                } else {
+                    console.error('[ThemeSelector] Container element not found - cannot create fallback themes');
+                }
+            }
+            
+            // Load current theme variables
+            var themeVariablesUrl = '@Url.Action("GetThemeVariables", "Theme")';
+            
+            // Create AbortController for timeout
+            var variablesController = new AbortController();
+            var variablesTimeoutId = setTimeout(function() {
+                variablesController.abort();
+            }, 10000); // 10 second timeout
+            
+            fetch(themeVariablesUrl, {
+                signal: variablesController.signal,
+                credentials: 'include', // Include cookies for authentication
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => {
+                    clearTimeout(variablesTimeoutId);
+                    
+                    // Check if response is redirect (status 302, 301, etc.)
+                    if (response.redirected || response.status === 302 || response.status === 301) {
+                        console.warn('[ThemeSelector] Theme Variables API redirected - user may not be authenticated');
+                        return null;
+                    }
+                    
+                    // Check if response is actually JSON (not HTML redirect)
+                    const contentType = response.headers.get('content-type');
+                    if (!response.ok) {
+                        console.warn('[ThemeSelector] Theme Variables API returned non-OK status:', response.status, response.statusText);
+                        return null;
+                    }
+                    
+                    if (!contentType || !contentType.includes('application/json')) {
+                        console.warn('[ThemeSelector] Theme Variables API returned non-JSON content type:', contentType);
+                        return null;
+                    }
+                    
+                    return response.json();
+                })
+                .then(data => {
+                    
+                    if (data && data.success && data.variables) {
+                        // Update CSS variables for theme
+                        var root = document.documentElement;
+                        var vars = data.variables;
+                        
+                        // Primary Colors
+                        root.style.setProperty('--neo-menu-primary', vars.primary);
+                        root.style.setProperty('--neo-menu-primary-hover', vars.primaryHover);
+                        root.style.setProperty('--neo-menu-primary-active', vars.primaryActive);
+                        root.style.setProperty('--neo-menu-primary-light', vars.primaryLight);
+                        root.style.setProperty('--neo-dashboard-primary', vars.primary);
+                        root.style.setProperty('--neo-dashboard-primary-hover', vars.primaryHover);
+                        root.style.setProperty('--neo-dashboard-primary-active', vars.primaryActive);
+                        
+                        // Secondary Colors
+                        if (vars.secondary) {
+                            root.style.setProperty('--neo-menu-secondary', vars.secondary);
+                            root.style.setProperty('--neo-menu-secondary-hover', vars.secondaryHover);
+                            root.style.setProperty('--neo-menu-secondary-active', vars.secondaryActive);
+                            root.style.setProperty('--neo-dashboard-secondary', vars.secondary);
+                        }
+                        
+                        // Semantic Colors
+                        if (vars.success) root.style.setProperty('--neo-dashboard-success', vars.success);
+                        if (vars.warning) root.style.setProperty('--neo-dashboard-warning', vars.warning);
+                        if (vars.danger) root.style.setProperty('--neo-dashboard-danger', vars.danger);
+                        if (vars.info) root.style.setProperty('--neo-dashboard-info', vars.info);
+                        
+                        // Background Colors
+                        if (vars.backgroundPrimary) {
+                            root.style.setProperty('--neo-menu-bg-primary', vars.backgroundPrimary);
+                            root.style.setProperty('--neo-menu-bg-hover', vars.backgroundHover);
+                            root.style.setProperty('--neo-menu-bg-active', vars.backgroundActive);
+                            root.style.setProperty('--neo-menu-bg-light', vars.backgroundLight);
+                            if (vars.backgroundSecondary) root.style.setProperty('--neo-dashboard-bg-secondary', vars.backgroundSecondary);
+                            if (vars.backgroundTertiary) root.style.setProperty('--neo-dashboard-bg-tertiary', vars.backgroundTertiary);
+                            if (vars.backgroundCard) root.style.setProperty('--neo-dashboard-bg-card', vars.backgroundCard);
+                        }
+                        
+                        // Text Colors
+                        if (vars.textPrimary) {
+                            root.style.setProperty('--neo-text-primary', vars.textPrimary);
+                            root.style.setProperty('--neo-dashboard-text-primary', vars.textPrimary);
+                        } else {
+                            console.warn('[ThemeSelector] textPrimary not found in variables');
+                        }
+                        if (vars.textSecondary) {
+                            root.style.setProperty('--neo-text-secondary', vars.textSecondary);
+                            root.style.setProperty('--neo-dashboard-text-secondary', vars.textSecondary);
+                        } else {
+                            console.warn('[ThemeSelector] textSecondary not found in variables');
+                        }
+                        if (vars.textMuted) root.style.setProperty('--neo-text-muted', vars.textMuted);
+                        if (vars.textOnDark) root.style.setProperty('--neo-text-on-dark', vars.textOnDark);
+                        
+                        // Border Colors
+                        if (vars.borderLight) root.style.setProperty('--neo-dashboard-border-light', vars.borderLight);
+                        if (vars.borderMedium) root.style.setProperty('--neo-dashboard-border-medium', vars.borderMedium);
+                        if (vars.borderDark) root.style.setProperty('--neo-dashboard-border-dark', vars.borderDark);
+                        
+                        // Header & Dashboard & Form
+                        if (vars.headerBackground) root.style.setProperty('--neo-header-background', vars.headerBackground);
+                        if (vars.headerText) root.style.setProperty('--neo-header-text', vars.headerText);
+                        if (vars.headerUserBackground) root.style.setProperty('--neo-header-user-background', vars.headerUserBackground);
+                        if (vars.headerUserText) root.style.setProperty('--neo-header-user-text', vars.headerUserText);
+                        if (vars.dashboardTabBackground) root.style.setProperty('--neo-dashboard-tab-background', vars.dashboardTabBackground);
+                        if (vars.dashboardTabText) root.style.setProperty('--neo-dashboard-tab-text', vars.dashboardTabText);
+                        if (vars.dashboardWidgetBackground) root.style.setProperty('--neo-dashboard-widget-background', vars.dashboardWidgetBackground);
+                        if (vars.dashboardWidgetBorder) root.style.setProperty('--neo-dashboard-widget-border', vars.dashboardWidgetBorder);
+                        if (vars.dashboardWidgetTitleText) root.style.setProperty('--neo-dashboard-widget-title-text', vars.dashboardWidgetTitleText);
+                        if (vars.formBackground) root.style.setProperty('--neo-form-background', vars.formBackground);
+                        if (vars.formInputBackground) root.style.setProperty('--neo-form-input-background', vars.formInputBackground);
+                        if (vars.formInputText) root.style.setProperty('--neo-form-input-text', vars.formInputText);
+                        if (vars.formInputBorder) root.style.setProperty('--neo-form-input-border', vars.formInputBorder);
+                        if (vars.formInputBorderFocus) root.style.setProperty('--neo-form-input-border-focus', vars.formInputBorderFocus);
+                        if (vars.formButtonBackground) root.style.setProperty('--neo-form-button-background', vars.formButtonBackground);
+                        if (vars.formButtonText) root.style.setProperty('--neo-form-button-text', vars.formButtonText);
+                        
+                        // Update theme selector appearance
+                        var themeSelector = document.querySelector('.theme-selector');
+                        if (themeSelector) {
+                            themeSelector.style.background = vars.primaryLight || 'rgba(194, 239, 3, 0.2)';
+                            themeSelector.style.borderColor = vars.primary;
+                            themeSelector.style.color = vars.primary;
+                        } else {
+                            console.warn('[ThemeSelector] Theme selector element not found');
+                        }
+                        
+                        // Update icon color
+                        var icon = document.querySelector('.theme-selector-icon');
+                        if (icon) {
+                            icon.style.color = vars.primary;
+                        } else {
+                            console.warn('[ThemeSelector] Theme selector icon not found');
+                        }
+                        
+                        // Apply theme colors to active dropdown item
+                        applyThemeColorsToActiveItem();
+                        
+                    } else {
+                        console.warn('[ThemeSelector] Invalid theme variables data:', {
+                            data: data,
+                            hasSuccess: data && data.success,
+                            hasVariables: data && data.variables
+                        });
+                    }
+                    
+                    // Get theme name
+                    var themeNameElement = document.getElementById('current-theme-name');
+                    
+                    if (data && data.themeName && themeNameElement) {
+                        themeNameElement.textContent = data.themeName;
+                    } else if (data && data.theme && themeNameElement) {
+                        // Fallback: use theme enum name and map to Persian
+                        var themeNames = {
+                            'Simotek': 'سیموتک',
+                            'Purple': 'بنفش',
+                            'Orange': 'نارنجی',
+                            'Red': 'قرمز',
+                            'Teal': 'مغزپسته‌ای',
+                            'Indigo': 'نیلی',
+                            'Emerald': 'زمردی',
+                            'Cyan': 'فیروزه‌ای'
+                        };
+                        var mappedName = themeNames[data.theme] || data.theme || 'سیموتک';
+                        themeNameElement.textContent = mappedName;
+                    } else if (themeNameElement) {
+                        // Final fallback: get theme name from another API call
+                        var getThemeUrl = '@Url.Action("GetTheme", "Theme")';
+                        
+                        // Create AbortController for timeout
+                        var getThemeController = new AbortController();
+                        var getThemeTimeoutId = setTimeout(function() {
+                            console.warn('[ThemeSelector] Get Theme request timeout after 10 seconds');
+                            getThemeController.abort();
+                        }, 10000); // 10 second timeout
+                        
+                        fetch(getThemeUrl, {
+                            signal: getThemeController.signal,
+                            credentials: 'include', // Include cookies for authentication
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                            .then(response => {
+                                clearTimeout(getThemeTimeoutId);
+                                
+                                // Check if response is redirect
+                                if (response.redirected || response.status === 302 || response.status === 301) {
+                                    console.warn('[ThemeSelector] Get Theme API redirected - user may not be authenticated');
+                                    return null;
+                                }
+                                
+                                const contentType = response.headers.get('content-type');
+                                if (!response.ok) {
+                                    console.warn('[ThemeSelector] Get Theme API returned non-OK status:', response.status, response.statusText);
+                                    return null;
+                                }
+                                
+                                if (!contentType || !contentType.includes('application/json')) {
+                                    console.warn('[ThemeSelector] Get Theme API returned non-JSON content type:', contentType);
+                                    return null;
+                                }
+                                
+                                return response.json();
+                            })
+                            .then(themeData => {
+                                if (themeData && themeData.success) {
+                                    var themeNameEl = document.getElementById('current-theme-name');
+                                    if (themeNameEl) {
+                                        var themeName = themeData.themeName || themeData.theme || 'سیموتک';
+                                        themeNameEl.textContent = themeName;
+                                    } else {
+                                        console.error('[ThemeSelector] Theme name element not found in GetTheme callback');
+                                    }
+                                    
+                                    // Update active state
+                                    document.querySelectorAll('.theme-option').forEach(item => {
+                                        item.classList.remove('active');
+                                    });
+                                    var activeOption = document.querySelector(`.theme-option[data-theme="${themeData.theme}"]`);
+                                    if (activeOption) {
+                                        activeOption.classList.add('active');
+                                    } else {
+                                        console.warn('[ThemeSelector] Active theme option not found for:', themeData.theme);
+                                    }
+                                    
+                                    // Apply theme colors to active dropdown item
+                                    applyThemeColorsToActiveItem();
+                                } else {
+                                    // Ultimate fallback
+                                    console.warn('[ThemeSelector] Invalid Get Theme data - using ultimate fallback');
+                                    var themeNameEl = document.getElementById('current-theme-name');
+                                    if (themeNameEl) {
+                                        var fallbackName = themeNames[currentThemeName] || currentThemeName || 'سیموتک';
+                                        themeNameEl.textContent = fallbackName;
+                                    }
+                                }
+                            })
+                            .catch(err => {
+                                clearTimeout(getThemeTimeoutId);
+                                console.error('[ThemeSelector] Error in Get Theme fetch:', {
+                                    name: err.name,
+                                    message: err.message,
+                                    stack: err.stack
+                                });
+                                
+                                // Ultimate fallback on error
+                                var themeNameEl = document.getElementById('current-theme-name');
+                                if (themeNameEl) {
+                                    var fallbackName = themeNames[currentThemeName] || currentThemeName || 'سیموتک';
+                                    themeNameEl.textContent = fallbackName;
+                                }
+                                
+                                if (err.name === 'AbortError') {
+                                    console.warn('[ThemeSelector] Get Theme API request timed out');
+                                } else if (err.message && !err.message.includes('JSON')) {
+                                    console.error('[ThemeSelector] Error loading theme name:', err);
+                                }
+                            });
+                    } else {
+                        console.error('[ThemeSelector] Theme name element not found - cannot set theme name');
+                    }
+                })
+                .catch(err => {
+                    clearTimeout(variablesTimeoutId);
+                    console.error('[ThemeSelector] Error in Theme Variables fetch:', {
+                        name: err.name,
+                        message: err.message,
+                        stack: err.stack
+                    });
+                    
+                    if (err.name === 'AbortError') {
+                        console.warn('[ThemeSelector] Theme Variables API request timed out');
+                    } else if (err.message && !err.message.includes('JSON')) {
+                        console.error('[ThemeSelector] Error loading theme variables:', err);
+                    }
+                    
+                    // Fallback: set default theme name and use default colors
+                    var themeNameEl = document.getElementById('current-theme-name');
+                    
+                    if (themeNameEl) {
+                        var currentText = themeNameEl.textContent;
+                        
+                        if (currentText === 'در حال بارگذاری...' || !currentText) {
+                            var fallbackName = themeNames[currentThemeName] || currentThemeName || 'سیموتک';
+                            themeNameEl.textContent = fallbackName;
+                        } else {
+                            console.log('[ThemeSelector] Theme name already set, keeping:', currentText);
+                        }
+                    } else {
+                        console.error('[ThemeSelector] Theme name element not found in catch');
+                    }
+                    
+                    // Use default Simotek theme colors as fallback
+                    var root = document.documentElement;
+                    root.style.setProperty('--neo-menu-primary', '#c2ef03');
+                    root.style.setProperty('--neo-dashboard-primary', '#c2ef03');
+                    root.style.setProperty('--neo-text-primary', '#1e293b');
+                    root.style.setProperty('--neo-dashboard-text-primary', '#1e293b');
+                    root.style.setProperty('--neo-text-secondary', '#64748b');
+                    root.style.setProperty('--neo-dashboard-text-secondary', '#64748b');
+                    
+                    var themeSelector = document.querySelector('.theme-selector');
+                    if (themeSelector) {
+                        themeSelector.style.background = 'rgba(194, 239, 3, 0.2)';
+                        themeSelector.style.borderColor = '#c2ef03';
+                        themeSelector.style.color = '#c2ef03';
+                    } else {
+                        console.warn('[ThemeSelector] Theme selector not found in catch');
+                    }
+                    
+                    var icon = document.querySelector('.theme-selector-icon');
+                    if (icon) {
+                        icon.style.color = '#c2ef03';
+                        console.log('[ThemeSelector] Updated icon with fallback color');
+                    } else {
+                        console.warn('[ThemeSelector] Theme selector icon not found in catch');
+                    }
+                });
+            
+            // Setup dropdown functionality
+            var themeSelectors = document.querySelectorAll('.theme-selector');
+            themeSelectors.forEach(function(selector) {
+                selector.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var dropdown = this.closest('.dropdown');
+                    if (dropdown) {
+                        dropdown.classList.toggle('show');
+                    }
+                });
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.theme-selection')) {
+                    document.querySelectorAll('.theme-selection .dropdown').forEach(function(dropdown) {
+                        dropdown.classList.remove('show');
+                    });
+                }
+            });
+        });
+    })();
+
+    // Helper function to apply theme colors to active dropdown item
+    function applyThemeColorsToActiveItem() {
+        var activeItem = document.querySelector('.theme-selection .dropdown-item.active');
+        if (activeItem) {
+            var root = document.documentElement;
+            var primary = getComputedStyle(root).getPropertyValue('--neo-menu-primary').trim() || '#c2ef03';
+            var primaryLight = getComputedStyle(root).getPropertyValue('--neo-menu-primary-light').trim() || 'rgba(194, 239, 3, 0.2)';
+            var primaryHover = getComputedStyle(root).getPropertyValue('--neo-menu-primary-hover').trim() || '#d4f55a';
+            
+            // Apply theme colors as inline styles (CSS variables in CSS file will also work)
+            // This ensures colors are applied even if CSS variables aren't loaded yet
+            activeItem.style.background = primaryLight;
+            activeItem.style.color = primary;
+            
+            // Store theme colors in data attributes for reference
+            activeItem.setAttribute('data-theme-primary', primary);
+            activeItem.setAttribute('data-theme-primary-light', primaryLight);
+            activeItem.setAttribute('data-theme-primary-hover', primaryHover);
+        }
+    }
+
+    function changeTheme(theme) {
+        // Close dropdown
+        document.querySelectorAll('.theme-selection .dropdown').forEach(function(dropdown) {
+            dropdown.classList.remove('show');
+        });
+
+        // Show loading state
+        var themeSelector = document.querySelector('.theme-selector');
+        if (!themeSelector) return;
+        
+        var originalText = themeSelector.querySelector('.title-text').textContent;
+        themeSelector.querySelector('.title-text').textContent = 'در حال تغییر...';
+        themeSelector.style.opacity = '0.6';
+        themeSelector.style.pointerEvents = 'none';
+
+        // Update theme via API
+        var updateThemeUrl = '@Url.Action("UpdateTheme", "Theme")';
+        
+        // Create AbortController for timeout
+        var updateController = new AbortController();
+        var updateTimeoutId = setTimeout(function() {
+            updateController.abort();
+        }, 15000); // 15 second timeout for update
+        
+        fetch(updateThemeUrl, {
+            method: 'POST',
+            signal: updateController.signal,
+            credentials: 'include', // Include cookies for authentication
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ theme: theme })
+        })
+        .then(response => {
+            clearTimeout(updateTimeoutId);
+            
+            // Check if response is redirect
+            if (response.redirected || response.status === 302 || response.status === 301) {
+                throw new Error('User may not be authenticated');
+            }
+            
+            if (!response.ok) {
+                // Try to get error message from response
+                return response.text().then(text => {
+                    try {
+                        var errorData = JSON.parse(text);
+                        throw new Error(errorData.message || 'Network response was not ok');
+                    } catch (e) {
+                        throw new Error('Network response was not ok: ' + response.status + ' ' + response.statusText);
+                    }
+                });
+            }
+            
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Response is not JSON');
+            }
+            
+            return response.json();
+        })
+        .then(data => {
+            if (data && data.success) {
+                // Update active state
+                document.querySelectorAll('.theme-option').forEach(item => {
+                    item.classList.remove('active');
+                });
+                var activeOption = document.querySelector(`.theme-option[data-theme="${theme}"]`);
+                if (activeOption) {
+                    activeOption.classList.add('active');
+                }
+                
+                // Update current theme name
+                var themeNameElement = document.getElementById('current-theme-name');
+                if (themeNameElement && data.themeName) {
+                    themeNameElement.textContent = data.themeName;
+                } else if (themeNameElement) {
+                    // Fallback if themeName is not in response
+                    themeNameElement.textContent = theme;
+                }
+                
+                // Update CSS variables
+                if (data.variables) {
+                    var root = document.documentElement;
+                    var vars = data.variables;
+                    
+                    // Primary Colors
+                    root.style.setProperty('--neo-menu-primary', vars.primary);
+                    root.style.setProperty('--neo-menu-primary-hover', vars.primaryHover);
+                    root.style.setProperty('--neo-menu-primary-active', vars.primaryActive);
+                    root.style.setProperty('--neo-menu-primary-light', vars.primaryLight);
+                    root.style.setProperty('--neo-dashboard-primary', vars.primary);
+                    root.style.setProperty('--neo-dashboard-primary-hover', vars.primaryHover);
+                    root.style.setProperty('--neo-dashboard-primary-active', vars.primaryActive);
+                    
+                    // Secondary Colors
+                    if (vars.secondary) {
+                        root.style.setProperty('--neo-menu-secondary', vars.secondary);
+                        root.style.setProperty('--neo-menu-secondary-hover', vars.secondaryHover);
+                        root.style.setProperty('--neo-menu-secondary-active', vars.secondaryActive);
+                        root.style.setProperty('--neo-dashboard-secondary', vars.secondary);
+                    }
+                    
+                    // Semantic Colors
+                    if (vars.success) root.style.setProperty('--neo-dashboard-success', vars.success);
+                    if (vars.warning) root.style.setProperty('--neo-dashboard-warning', vars.warning);
+                    if (vars.danger) root.style.setProperty('--neo-dashboard-danger', vars.danger);
+                    if (vars.info) root.style.setProperty('--neo-dashboard-info', vars.info);
+                    
+                    // Background Colors
+                    if (vars.backgroundPrimary) {
+                        root.style.setProperty('--neo-menu-bg-primary', vars.backgroundPrimary);
+                        root.style.setProperty('--neo-menu-bg-hover', vars.backgroundHover);
+                        root.style.setProperty('--neo-menu-bg-active', vars.backgroundActive);
+                        root.style.setProperty('--neo-menu-bg-light', vars.backgroundLight);
+                        if (vars.backgroundSecondary) root.style.setProperty('--neo-dashboard-bg-secondary', vars.backgroundSecondary);
+                        if (vars.backgroundTertiary) root.style.setProperty('--neo-dashboard-bg-tertiary', vars.backgroundTertiary);
+                        if (vars.backgroundCard) root.style.setProperty('--neo-dashboard-bg-card', vars.backgroundCard);
+                    }
+                    
+                    // Text Colors
+                    if (vars.textPrimary) {
+                        root.style.setProperty('--neo-text-primary', vars.textPrimary);
+                        root.style.setProperty('--neo-dashboard-text-primary', vars.textPrimary);
+                    }
+                    if (vars.textSecondary) {
+                        root.style.setProperty('--neo-text-secondary', vars.textSecondary);
+                        root.style.setProperty('--neo-dashboard-text-secondary', vars.textSecondary);
+                    }
+                    if (vars.textMuted) root.style.setProperty('--neo-text-muted', vars.textMuted);
+                    if (vars.textOnDark) root.style.setProperty('--neo-text-on-dark', vars.textOnDark);
+                    
+                    // Border Colors
+                    if (vars.borderLight) root.style.setProperty('--neo-dashboard-border-light', vars.borderLight);
+                    if (vars.borderMedium) root.style.setProperty('--neo-dashboard-border-medium', vars.borderMedium);
+                    if (vars.borderDark) root.style.setProperty('--neo-dashboard-border-dark', vars.borderDark);
+                    
+                    // Header & Dashboard & Form
+                    if (vars.headerBackground) root.style.setProperty('--neo-header-background', vars.headerBackground);
+                    if (vars.headerText) root.style.setProperty('--neo-header-text', vars.headerText);
+                    if (vars.headerUserBackground) root.style.setProperty('--neo-header-user-background', vars.headerUserBackground);
+                    if (vars.headerUserText) root.style.setProperty('--neo-header-user-text', vars.headerUserText);
+                    if (vars.dashboardTabBackground) root.style.setProperty('--neo-dashboard-tab-background', vars.dashboardTabBackground);
+                    if (vars.dashboardTabText) root.style.setProperty('--neo-dashboard-tab-text', vars.dashboardTabText);
+                    if (vars.dashboardWidgetBackground) root.style.setProperty('--neo-dashboard-widget-background', vars.dashboardWidgetBackground);
+                    if (vars.dashboardWidgetBorder) root.style.setProperty('--neo-dashboard-widget-border', vars.dashboardWidgetBorder);
+                    if (vars.dashboardWidgetTitleText) root.style.setProperty('--neo-dashboard-widget-title-text', vars.dashboardWidgetTitleText);
+                    if (vars.formBackground) root.style.setProperty('--neo-form-background', vars.formBackground);
+                    if (vars.formInputBackground) root.style.setProperty('--neo-form-input-background', vars.formInputBackground);
+                    if (vars.formInputText) root.style.setProperty('--neo-form-input-text', vars.formInputText);
+                    if (vars.formInputBorder) root.style.setProperty('--neo-form-input-border', vars.formInputBorder);
+                    if (vars.formInputBorderFocus) root.style.setProperty('--neo-form-input-border-focus', vars.formInputBorderFocus);
+                    if (vars.formButtonBackground) root.style.setProperty('--neo-form-button-background', vars.formButtonBackground);
+                    if (vars.formButtonText) root.style.setProperty('--neo-form-button-text', vars.formButtonText);
+                    
+                    // Chart Colors
+                    if (vars.chartText) root.style.setProperty('--neo-chart-text', vars.chartText);
+                    if (vars.chartTextSecondary) root.style.setProperty('--neo-chart-text-secondary', vars.chartTextSecondary);
+                    if (vars.chartBackground) root.style.setProperty('--neo-chart-background', vars.chartBackground);
+                    if (vars.chartPlotBackground) root.style.setProperty('--neo-chart-plot-background', vars.chartPlotBackground);
+                    if (vars.chartGridLine) root.style.setProperty('--neo-chart-grid-line', vars.chartGridLine);
+                    if (vars.chartAxisLine) root.style.setProperty('--neo-chart-axis-line', vars.chartAxisLine);
+                    
+                    // Report Colors
+                    if (vars.reportText) root.style.setProperty('--neo-report-text', vars.reportText);
+                    if (vars.reportTextSecondary) root.style.setProperty('--neo-report-text-secondary', vars.reportTextSecondary);
+                    if (vars.reportBackground) root.style.setProperty('--neo-report-background', vars.reportBackground);
+                    if (vars.reportHeaderBackground) root.style.setProperty('--neo-report-header-background', vars.reportHeaderBackground);
+                    if (vars.reportTableBorder) root.style.setProperty('--neo-report-table-border', vars.reportTableBorder);
+                    if (vars.reportTableRowAlternate) root.style.setProperty('--neo-report-table-row-alternate', vars.reportTableRowAlternate);
+                    
+                    // Update theme selector background to show selected theme color
+                    var themeSelector = document.querySelector('.theme-selector');
+                    if (themeSelector) {
+                        themeSelector.style.background = vars.primaryLight || 'rgba(194, 239, 3, 0.2)';
+                        themeSelector.style.borderColor = vars.primary;
+                        themeSelector.style.color = vars.primary;
+                    }
+                    
+                    // Update icon color
+                    var icon = document.querySelector('.theme-selector-icon');
+                    if (icon) {
+                        icon.style.color = vars.primary;
+                    }
+                    
+                    // Apply theme colors to active dropdown item
+                    applyThemeColorsToActiveItem();
+                }
+                
+                // Reload page to apply theme to all elements
+                setTimeout(function() {
+                    window.location.reload();
+                }, 300);
+            } else {
+                alert('خطا در تغییر تم: ' + (data.message || 'خطای نامشخص'));
+                if (themeSelector && themeSelector.querySelector('.title-text')) {
+                    themeSelector.querySelector('.title-text').textContent = originalText;
+                }
+                themeSelector.style.opacity = '1';
+                themeSelector.style.pointerEvents = 'auto';
+            }
+        })
+        .catch(error => {
+            clearTimeout(updateTimeoutId);
+            
+            console.error('Error updating theme:', error);
+            
+            var errorMessage = 'خطا در تغییر تم';
+            if (error.name === 'AbortError') {
+                errorMessage = 'زمان درخواست به پایان رسید. لطفاً دوباره تلاش کنید.';
+            } else if (error.message) {
+                if (error.message.includes('authenticated')) {
+                    errorMessage = 'لطفاً دوباره وارد شوید.';
+                } else if (error.message.includes('Network')) {
+                    errorMessage = 'خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.';
+                }
+            }
+            
+            alert(errorMessage);
+            if (themeSelector && themeSelector.querySelector('.title-text')) {
+                themeSelector.querySelector('.title-text').textContent = originalText;
+            }
+            themeSelector.style.opacity = '1';
+            themeSelector.style.pointerEvents = 'auto';
+        });
+    }
+</script>
+

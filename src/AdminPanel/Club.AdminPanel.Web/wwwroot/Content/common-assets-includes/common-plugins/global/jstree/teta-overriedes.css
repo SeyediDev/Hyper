@@ -1,0 +1,26 @@
+﻿.jstree-default .jstree-anchor {
+	line-height: 24px;
+	height: 24px;
+	padding-bottom: 28px;
+}
+
+.jstree-contextmenu {
+	z-index: 1031;
+}
+
+.jstree-container-ul {
+	margin: 0;
+}
+
+.jstree-contextmenu > li > a > i, .jstree-contextmenu > li > ul > li > a > i {
+	background-size: 20px !important;
+}
+
+.jstree-node {
+	position: relative;
+	width: 100%;
+}
+
+.jstree-wholerow {
+	top: 0;
+}

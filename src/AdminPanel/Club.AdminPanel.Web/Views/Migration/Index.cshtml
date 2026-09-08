@@ -1,0 +1,231 @@
+@using Neo.Bpms.Domain.Features.MetaDefinitions.ProjectDefinitions
+@using Neo.Bpms.Domain.Model.Project
+@using Neo.Bpms.Domain.Models.Cmmn.Data
+@using Neo.Bpms.UI.MVC.Controls
+@using Neo.Bpms.UI.MVC.Helpers
+@using Neo.Bpms.UI.MVC.PartialModels
+@using Neo.Bpms.UI.MVC.PartialModels.Common
+@using Neo.Bpms.UI.Resources.Resources
+@model MigrationOptions
+
+@{
+	ViewBag.Title = ViewTexts.DatabaseSynchronization;
+	Layout = "~/Views/Shared/_Layout.cshtml";
+
+	var pageName = ViewBag.PagePackId as string;
+	var pageIcon = PageIconHelper.GetPageMenuIcon(pageName);
+	var topBarModel = new TopBarModel
+	{
+		Title = ViewTexts.DatabaseSynchronization,
+		PageIcon = pageIcon
+	};
+}
+<style>
+    .copy-btn {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        padding: 10px 18px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .copy-btn:hover {
+        background-color: #2980b9;
+    }
+
+    .copy-btn:active {
+        transform: scale(0.97);
+    }
+
+    .notification {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 15px 25px;
+        border-radius: 8px;
+        background-color: #2ecc71;
+        color: white;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        opacity: 0;
+        transition: opacity 0.3s;
+        z-index: 1000;
+        text-align: center;
+    }
+    .copy-btn {
+        align-self: flex-end;
+        margin-top: 10px;
+    }
+</style>
+
+<link rel="stylesheet" href="~/Content/common-assets-includes/common-plugins/global/ladda/ladda-themeless.min.css"/>
+
+
+<partial name="Common/TopBar" model="topBarModel"/>
+
+<div class="row noPadding" style="margin: auto 0;">
+	<div class="col-md-12 col-sm-12 customDiv noPadding">
+        <form role="form" id="options-form">
+            @Html.AntiForgeryToken()
+            <div class="form-controls container">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-check mb-3">
+                            @Html.CheckBoxFor(m => m.DoRenameUndefinedTables, new {onchange = "disableCheckBox()", @class = "form-check-input"})
+                            @Html.LabelFor(m => m.DoRenameUndefinedTables, new {@class = "form-check-label"})
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-check mb-3">
+                            @Html.CheckBoxFor(m => m.DoDropUndefinedTables, new {@class = "form-check-input"})
+                            @Html.LabelFor(m => m.DoDropUndefinedTables, new {@class = "form-check-label"})
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-check mb-3">
+                            @Html.CheckBoxFor(m => m.RenameUndefinedViews, new {onchange = "disableCheckBox()", @class = "form-check-input"})
+                            @Html.LabelFor(m => m.RenameUndefinedViews, new {@class = "form-check-label"})
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-check mb-3">
+                            @Html.CheckBoxFor(m => m.DropUndefinedViews, new {@class = "form-check-input"})
+                            @Html.LabelFor(m => m.DropUndefinedViews, new {@class = "form-check-label"})
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-check mb-3">
+                            @Html.CheckBoxFor(m => m.RenameUndefinedField, new {onchange = "disableCheckBox()", @class = "form-check-input"})
+                            @Html.LabelFor(m => m.RenameUndefinedField, new {@class = "form-check-label"})
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-check mb-3">
+                            @Html.CheckBoxFor(m => m.DropUndefinedField, new {@class = "form-check-input"})
+                            @Html.LabelFor(m => m.DropUndefinedField, new {@class = "form-check-label"})
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-check mb-3">
+                            @Html.CheckBoxFor(m => m.CheckCollation, new {@class = "form-check-input"})
+                            @Html.LabelFor(m => m.CheckCollation, new {@class = "form-check-label"})
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-check mb-3">
+                            @Html.CheckBoxFor(m => m.CheckForeignKey, new {@class = "form-check-input"})
+                            @Html.LabelFor(m => m.CheckForeignKey, new {@class = "form-check-label"})
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-check mb-3">
+                            @Html.CheckBoxFor(m => m.CheckIndexes, new {onchange = "disableCheckBox()", @class = "form-check-input"})
+                            @Html.LabelFor(m => m.CheckIndexes, new {@class = "form-check-label"})
+                        </div>
+                    </div>
+
+                    @* <div class="col-md-3"> *@
+                    @* 	<div class="form-check mb-3"> *@
+                    @* 		@Html.CheckBoxFor(m => m.CreateForeignKeyIndex, new { onchange = "uncheckDropForeignKeyIndex()" }) *@
+                    @* 		@Html.LabelFor(m => m.CreateForeignKeyIndex) *@
+                    @* 	</div> *@
+                    @* </div> *@
+                    @* <div class="col-md-3"> *@
+                    @* 	<div class="form-check mb-3"> *@
+                    @* 		@Html.CheckBoxFor(m => m.DropForeignKeyIndex, new { onchange = "uncheckCreateForeignKeyIndex()" }) *@
+                    @* 		@Html.LabelFor(m => m.DropForeignKeyIndex) *@
+                    @* 	</div> *@
+                    @* </div> *@
+
+
+                    <div class="col-md-3">
+                        <div class="form-check mb-3">
+                            @Html.CheckBoxFor(m => m.DropExtraIndex, new {@class = "form-check-input"})
+                            @Html.LabelFor(m => m.DropExtraIndex, new {@class = "form-check-label"})
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-check mb-3">
+                            @Html.CheckBoxFor(m => m.SyncFileGroups, new { @class = "form-check-input" })
+                            @Html.LabelFor(m => m.SyncFileGroups, new { @class = "form-check-label" })
+                        </div>
+                    </div>
+                    @* </div> *@
+                    @* <div class="form-controls container"> *@
+                    <div class="col-md-6">
+                        <div class="form-check mb-3">
+                            @Html.CheckBoxFor(m => m.SetEnumerationItems, new {@class = "form-check-input"})
+                            @Html.LabelFor(m => m.SetEnumerationItems, new {@class = "form-check-label"})
+                        </div>
+                    </div>
+                    @* <div class="col-md-3"> *@
+                    @* 	<div class="form-check mb-3"> *@
+                    @* 		@Html.CheckBoxFor(m => m.RebuildIndex) *@
+                    @* 		@Html.LabelFor(m => m.RebuildIndex) *@
+                    @* 	</div> *@
+                    @* </div> *@
+                    <div class="col-md-3 @(!ProjectDefinition.Project.HasDesignFeatures ? "hidden" : "")">
+                        <div class="form-check mb-3">
+                            @Html.CheckBoxFor(m => m.SyncMetaData, new {@class = "form-check-input"})
+                            @Html.LabelFor(m => m.SyncMetaData, new {@class = "form-check-label"})
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+		<div class="col-lg-12">
+            <button id="migration-start-btn" data-style="zoom-in" class="btn btn-primary btn-block" onclick="ShowStopbtn(), startMigration()">
+				@ViewTexts.DatabaseSynchronizationStart
+			</button>
+			<button id="migration-stop-btn" data-style="zoom-in" class="btn btn-danger col-sm-2 col-lg-2" style="display: none; margin-right: 40px" onclick="Stop()">
+				@ViewTexts.DatabaseSynchronizationStop
+			</button>
+		</div>
+
+		<div class="col-lg-12">
+			<div id="migration-status" class="pre-scrollable">
+			</div>
+		</div>
+
+		<div class="col-lg-12">
+			<div id="migration-commands" class="text-info">
+			</div>
+		</div>
+
+		<div class="col-lg-12">
+			<div id="migration-errors">
+			</div>
+		</div>
+
+	</div>
+</div>
+<script src="~/Scripts/common-assets-includes/common-plugins/global/ladda/spin.min.js"></script>
+<script src="~/Scripts/common-assets-includes/common-plugins/global/ladda/ladda.min.js"></script>
+<script src="~/Scripts/common-assets-includes/common-plugins/global/ladda/ladda.jquery.min.js"></script>
+
+<script src="@CommonBundles.DatabaseMigrationJsBundle" asp-append-version="true"></script>
+
+<partial name="Utility/I18NAwareBundle" model="CommonBundles.DatabaseMigrationTextsBundle"/>
+
+
+
+
+
+
+
+
+

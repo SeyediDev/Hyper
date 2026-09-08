@@ -1,0 +1,412 @@
+/**
+ * Report Menu & Dropdown Styling
+ * استایل Menu ها و Dropdown های صفحه Report
+ * 
+ * شامل:
+ * - Admin Tools Dropdown
+ * - Top Bar Icons & Tools
+ * - Side Navigation Tabs
+ * - Config Tree Actions
+ * - Modern Top Page Header
+ */
+
+/* ===== Modern Report Top Page Header ===== */
+.top-page {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.4) !important;
+  /* همسان‌سازی margin چپ و راست با هدر فرم ایندکس (1.5rem = 24px) */
+  margin: 0 1.5rem 1rem 1.5rem !important;
+  padding: 20px 24px !important;
+  border: none !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.top-page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  pointer-events: none;
+}
+
+.top-page h5 {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  font-size: 18px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.top-page .page-icon {
+  width: 20px !important;
+  height: 20px !important;
+  margin-right: 8px !important;
+  vertical-align: middle !important;
+  fill: #ffffff !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3)) !important;
+}
+
+.top-page .filtered-by {
+  color: #cbd5e1 !important;
+  font-weight: 400 !important;
+  font-size: 14px !important;
+  margin-left: 8px !important;
+  opacity: 0.9 !important;
+}
+
+.top-page .icons {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.top-page .icons svg {
+  fill: #ffffff !important;
+  transition: all 0.2s ease !important;
+}
+
+.top-page .icons a:hover svg {
+  fill: #cbd5e1 !important;
+  transform: scale(1.1) !important;
+}
+
+.top-page .icons a {
+  color: #ffffff !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.top-page .icons a:hover {
+  color: #cbd5e1 !important;
+}
+
+/* ===== Report Dropdown Menu ===== */
+.report-design-dropdown {
+    min-width: 200px !important;
+    padding: 8px 0 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
+    border: 1px solid #e5e7eb !important;
+    background: #ffffff !important;
+    margin-top: 8px !important;
+    z-index: 999999 !important;
+    position: fixed !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
+}
+
+.report-design-dropdown .dropdown-item {
+    padding: 10px 20px !important;
+    font-size: 14px !important;
+    color: #374151 !important;
+    transition: all 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+}
+
+.report-design-dropdown .dropdown-item:hover {
+    background-color: #f3f4f6 !important;
+    color: #1f2937 !important;
+    padding-right: 24px !important;
+}
+
+.report-design-dropdown .dropdown-item i {
+    font-size: 16px !important;
+    color: #6b7280 !important;
+    transition: color 0.2s ease !important;
+}
+
+.report-design-dropdown .dropdown-item:hover i {
+    color: #2563eb !important;
+}
+
+/* ===== Inline Dropdown Fix ===== */
+.inline-dropdown {
+    display: inline-block !important;
+    position: relative !important;
+    z-index: 999999 !important;
+}
+
+.inline-dropdown .dropdown-menu {
+    position: fixed !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    z-index: 10050 !important;
+    transform: none !important;
+}
+
+/* ===== Top Bar Icons for Report ===== */
+.icons-tables {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+    margin: 0 4px !important;
+}
+
+.icons-tables:hover {
+    background-color: rgba(59, 130, 246, 0.1) !important;
+    transform: translateY(-2px) !important;
+}
+
+.icons-tables svg {
+    width: 18px !important;
+    height: 18px !important;
+}
+
+/* ===== Report Side Navigation ===== */
+.sideNavi-top-bar {
+    padding: 12px 15px !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+}
+
+.sideNavi-top-bar .icons-tables {
+    width: 32px !important;
+    height: 32px !important;
+}
+
+.sideNavi-top-bar .input-group {
+    flex: 1 !important;
+}
+
+.sideNavi-top-bar .input-group .form-control {
+    height: 34px !important;
+    font-size: 13px !important;
+    border-radius: 6px 0 0 6px !important;
+    border: 1px solid #d1d5db !important;
+}
+
+.sideNavi-top-bar .input-group-text {
+    background: #f9fafb !important;
+    border: 1px solid #d1d5db !important;
+    border-right: none !important;
+    color: #6b7280 !important;
+}
+
+/* ===== Side Navi Body ===== */
+.side-navi-body {
+    padding: 10px !important;
+    overflow-y: auto !important;
+    max-height: calc(100vh - 200px) !important;
+}
+
+/* ===== Config Tree in Side Nav ===== */
+#configs-tree,
+#scheduledReport-tree,
+#configs-tree-modal {
+    font-size: 14px !important;
+}
+
+#configs-tree .jstree-anchor,
+#scheduledReport-tree .jstree-anchor,
+#configs-tree-modal .jstree-anchor {
+    padding: 8px 12px !important;
+    font-size: 14px !important;
+    color: #1f2937 !important;
+    border-radius: 6px !important;
+    transition: all 0.15s ease !important;
+}
+
+#configs-tree .jstree-anchor:hover,
+#scheduledReport-tree .jstree-anchor:hover,
+#configs-tree-modal .jstree-anchor:hover {
+    background-color: #e0f2fe !important;
+    color: #0369a1 !important;
+}
+
+#configs-tree .jstree-clicked,
+#scheduledReport-tree .jstree-clicked,
+#configs-tree-modal .jstree-clicked {
+    background-color: #0ea5e9 !important;
+    color: #ffffff !important;
+    font-weight: 500 !important;
+}
+
+/* آیکن پوشه‌ها - رنگ زرد/نارنجی */
+#configs-tree .jstree-icon.jstree-themeicon,
+#scheduledReport-tree .jstree-icon.jstree-themeicon,
+#configs-tree-modal .jstree-icon.jstree-themeicon {
+    color: #f59e0b !important;
+}
+
+/* آیکن گزارش‌ها/چارت‌ها - رنگ سبز */
+#configs-tree .jstree-leaf > .jstree-anchor > .jstree-icon,
+#scheduledReport-tree .jstree-leaf > .jstree-anchor > .jstree-icon,
+#configs-tree-modal .jstree-leaf > .jstree-anchor > .jstree-icon {
+    color: #10b981 !important;
+}
+
+/* آیکن در حالت انتخاب شده - سفید */
+#configs-tree .jstree-clicked > .jstree-icon,
+#scheduledReport-tree .jstree-clicked > .jstree-icon,
+#configs-tree-modal .jstree-clicked > .jstree-icon {
+    color: #ffffff !important;
+}
+
+/* ===== Mouse Pointer Class ===== */
+.mouse-pointer {
+    cursor: pointer !important;
+}
+
+/* ===== Responsive Menu ===== */
+@media (max-width: 768px) {
+    .report-design-dropdown {
+        min-width: 180px !important;
+    }
+    
+    .icons-tables {
+        width: 32px !important;
+        height: 32px !important;
+    }
+    
+    .icons-tables svg {
+        width: 16px !important;
+        height: 16px !important;
+    }
+}
+
+/* ===== Z-index Management ===== */
+.report-design-dropdown {
+    z-index: 10000 !important;
+}
+
+.inline-dropdown {
+    z-index: 10000 !important;
+}
+
+.inline-dropdown .dropdown-menu.show {
+    display: block !important;
+}
+
+/* ===== jstree RTL Fix (فلش‌ها برای فارسی) ===== */
+/* جهت فلش‌ها برای RTL درست میشه */
+#configs-tree.jstree-rtl .jstree-closed > .jstree-ocl,
+#scheduledReport-tree.jstree-rtl .jstree-closed > .jstree-ocl {
+    background-position: -4px -4px !important; /* فلش چپ برای بسته */
+}
+
+#configs-tree.jstree-rtl .jstree-open > .jstree-ocl,
+#scheduledReport-tree.jstree-rtl .jstree-open > .jstree-ocl {
+    background-position: -36px -4px !important; /* فلش پایین برای باز */
+}
+
+/* برای درخت‌های بدون نقطه (no-dots) */
+#configs-tree.jstree-rtl.jstree-no-dots .jstree-closed > .jstree-ocl,
+#scheduledReport-tree.jstree-rtl.jstree-no-dots .jstree-closed > .jstree-ocl {
+    background-position: -4px -4px !important;
+}
+
+#configs-tree.jstree-rtl.jstree-no-dots .jstree-open > .jstree-ocl,
+#scheduledReport-tree.jstree-rtl.jstree-no-dots .jstree-open > .jstree-ocl {
+    background-position: -36px -4px !important;
+}
+
+/* ===== مخفی کردن اعداد Count و نمایش آیکن ===== */
+/* حذف اعداد مزاحم از متن node ها */
+#configs-tree .jstree-anchor,
+#scheduledReport-tree .jstree-anchor {
+    position: relative !important;
+}
+
+/* پنهان کردن اعداد داخل پرانتز مثل (5) */
+#configs-tree .jstree-anchor::after,
+#scheduledReport-tree .jstree-anchor::after {
+    content: '' !important;
+    /* اعداد با regex یا JS حذف میشن، اینجا فقط آیکن اضافه میکنیم */
+}
+
+/* نمایش آیکن folder برای node هایی که children دارند */
+#configs-tree .jstree-closed > .jstree-anchor,
+#configs-tree .jstree-open > .jstree-anchor,
+#scheduledReport-tree .jstree-closed > .jstree-anchor,
+#scheduledReport-tree .jstree-open > .jstree-anchor {
+    /* آیکن folder از قبل توسط jstree نمایش داده میشه */
+}
+
+/* جلوگیری از نمایش badge/count numbers */
+#configs-tree .jstree-node .badge,
+#configs-tree .jstree-anchor .badge,
+#configs-tree .jstree-anchor > span.badge,
+#scheduledReport-tree .jstree-node .badge,
+#scheduledReport-tree .jstree-anchor .badge,
+#scheduledReport-tree .jstree-anchor > span.badge {
+    display: none !important;
+}
+
+/* حذف هرگونه عدد در پرانتز از text */
+#configs-tree .jstree-anchor,
+#scheduledReport-tree .jstree-anchor {
+    /* این قسمت با JavaScript کامل میشه */
+}
+
+/* ===== Report Header Wrapper ===== */
+.reportHeader {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.reportHeader .top-page {
+    /* استفاده از استایل‌های .top-page */
+}
+
+.reportHeader .icons {
+    margin: 0 !important;
+}
+
+.reportHeader .icons a,
+.reportHeader .icons .top-bar-anchor-icon {
+    position: relative !important;
+    z-index: 10 !important;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* ===== Responsive Design for Report Header ===== */
+@media (max-width: 768px) {
+    .top-page {
+        margin: 0 0.75rem 0.75rem 0.75rem !important;
+        padding: 16px 18px !important;
+    }
+    
+    .top-page h5 {
+        font-size: 16px !important;
+    }
+}
+
+/* ===== Active Config Visual Difference ===== */
+/* کانفیگ فعال تفاوت دیداری دارد */
+#configs-tree .jstree-node.jstree-active-config > .jstree-anchor,
+#configs-tree .jstree-node.jstree-active-config.jstree-selected > .jstree-anchor,
+#configs-tree-modal .jstree-node.jstree-active-config > .jstree-anchor {
+    background-color: #0ea5e9 !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}
+
+#configs-tree .jstree-node.jstree-active-config > .jstree-anchor:hover,
+#configs-tree-modal .jstree-node.jstree-active-config > .jstree-anchor:hover {
+    background-color: #38bdf8 !important;
+}
+
+
+/* ===== Prevent Conflicts ===== */
+/* این CSS ها فقط برای Report هستند و با .modern-form تداخلی ندارند */
+

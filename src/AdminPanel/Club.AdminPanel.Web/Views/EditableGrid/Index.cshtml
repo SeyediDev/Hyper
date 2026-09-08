@@ -1,0 +1,679 @@
+@{
+    ViewData["Title"] = "جدول قابل ویرایش";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .editable-grid-container {
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        direction: rtl;
+    }
+    
+    .editable-grid-iframe {
+        width: 100%;
+        height: calc(100vh - 200px);
+        min-height: 600px;
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        background: #f8f9fa;
+    }
+    
+    .editable-grid-iframe.loading {
+        opacity: 0.7;
+    }
+    
+    .editable-grid-container .alert {
+        margin-top: 15px;
+    }
+    
+    .iframe-loading-overlay {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+    }
+    
+    .iframe-loading-spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .iframe-loading-spinner.hidden {
+        display: none;
+    }
+    
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+        border: 0.25em solid currentColor;
+        border-right-color: transparent;
+        border-radius: 50%;
+        animation: spinner-border 0.75s linear infinite;
+    }
+    
+    @@keyframes spinner-border {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+<div class="editable-grid-container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2>جدول قابل ویرایش</h2>
+            @if (!string.IsNullOrEmpty(ViewBag.NamespaceId as string))
+            {
+                <small class="text-muted">
+                    Namespace: @ViewBag.NamespaceId | Entity: @ViewBag.EntityId | Form: @ViewBag.FormId
+                </small>
+            }
+        </div>
+        <div>
+            @if (string.IsNullOrEmpty(ViewBag.NamespaceId as string))
+            {
+                <label for="endpoint-select">انتخاب منبع داده:</label>
+                <select id="endpoint-select" class="form-control d-inline-block" style="width: 200px; margin-right: 10px;">
+                    <option value="sample">نمونه</option>
+                    <!-- Add more endpoints as needed -->
+                </select>
+            }
+            @if (!string.IsNullOrEmpty(ViewBag.NamespaceId as string))
+            {
+                <a href="/Form/Index?NamespaceId=@ViewBag.NamespaceId&EntityId=@ViewBag.EntityId&FormId=@ViewBag.FormId" 
+                class="btn btn-secondary" style="margin-right: 10px;">
+                    ← بازگشت به فرم ایندکس
+                </a>
+            }
+            <button id="refresh-btn" class="btn btn-primary">بروزرسانی</button>
+        </div>
+    </div>
+    
+    <div class="iframe-loading-overlay">
+        <div id="iframe-loading-spinner" class="iframe-loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">در حال بارگذاری...</span>
+            </div>
+            <p class="text-muted">در حال بارگذاری جدول قابل ویرایش...</p>
+        </div>
+    <iframe 
+        id="grid-iframe"
+            class="editable-grid-iframe loading"
+        src="/editable-grid/?endpoint=@(ViewBag.Endpoint ?? "sample")@(!string.IsNullOrEmpty(ViewBag.NamespaceId as string) ? $"&namespaceId={ViewBag.NamespaceId}&entityId={ViewBag.EntityId}&formSubjectId={ViewBag.FormId}" : "")"
+            title="Editable Grid"
+            allow="clipboard-read; clipboard-write"
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-modals"
+            onload="console.log('🔵 [EditableGrid] Iframe onload event fired');"
+            onerror="console.error('🔴 [EditableGrid] Iframe onerror event fired');">
+    </iframe>
+    </div>
+    
+    <script>
+        // Immediate check - before DOMContentLoaded
+        (function() {
+            console.log('🔵 [EditableGrid] Immediate check - looking for iframe...');
+            const iframe = document.getElementById('grid-iframe');
+            if (iframe) {
+                console.log('🔵 [EditableGrid] ✅ Iframe found immediately', {
+                    src: iframe.src,
+                    id: iframe.id
+                });
+            } else {
+                console.error('🔴 [EditableGrid] ❌ Iframe NOT found immediately!');
+            }
+        })();
+    </script>
+</div>
+
+<script>
+    // ============================================
+    // EDITABLE GRID INITIALIZATION - START
+    // ============================================
+    console.log('🔵 [EditableGrid] Script started loading...');
+    
+    // Logging utility
+    const EditableGridLogger = {
+        log: function(message, data) {
+            const timestamp = new Date().toISOString();
+            console.log(`[EditableGrid ${timestamp}] ${message}`, data || '');
+        },
+        error: function(message, error) {
+            const timestamp = new Date().toISOString();
+            console.error(`[EditableGrid ${timestamp}] ❌ ERROR: ${message}`, error || '');
+        },
+        warn: function(message, data) {
+            const timestamp = new Date().toISOString();
+            console.warn(`[EditableGrid ${timestamp}] ⚠️ WARNING: ${message}`, data || '');
+        }
+    };
+    
+    console.log('🔵 [EditableGrid] Logger initialized');
+    
+    // Check if DOM is already loaded
+    if (document.readyState === 'loading') {
+        console.log('🔵 [EditableGrid] DOM is still loading, waiting for DOMContentLoaded...');
+    } else {
+        console.log('🔵 [EditableGrid] DOM already loaded, readyState:', document.readyState);
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('🔵 [EditableGrid] ✅ DOM Content Loaded event fired');
+        EditableGridLogger.log('DOM Content Loaded - Initializing Editable Grid');
+        
+        const iframe = document.getElementById('grid-iframe');
+        const endpointSelect = document.getElementById('endpoint-select');
+        const refreshBtn = document.getElementById('refresh-btn');
+        
+        if (!iframe) {
+            EditableGridLogger.error('Iframe element not found!');
+            return;
+        }
+        
+        EditableGridLogger.log('Iframe found', {
+            src: iframe.src,
+            id: iframe.id,
+            className: iframe.className
+        });
+        
+        // Set initial endpoint from ViewBag (only if select exists)
+        @if (ViewBag.Endpoint != null)
+        {
+            <text>
+            if (endpointSelect) {
+            endpointSelect.value = '@ViewBag.Endpoint';
+                EditableGridLogger.log('Endpoint select initialized', { value: '@ViewBag.Endpoint' });
+            } else {
+                EditableGridLogger.warn('Endpoint select element not found (this is OK if namespaceId is provided)');
+            }
+            </text>
+        }
+        
+        // Handle endpoint change (only if select exists)
+        if (endpointSelect) {
+        endpointSelect.addEventListener('change', function() {
+            const endpoint = this.value;
+            @if (!string.IsNullOrEmpty(ViewBag.NamespaceId as string))
+            {
+                <text>
+                const namespaceId = '@ViewBag.NamespaceId';
+                const entityId = '@ViewBag.EntityId';
+                const formSubjectId = '@ViewBag.FormId';
+                iframe.src = `/editable-grid/?endpoint=${encodeURIComponent(endpoint)}&namespaceId=${namespaceId}&entityId=${entityId}&formSubjectId=${formSubjectId}`;
+                </text>
+            }
+            else
+            {
+                <text>
+                iframe.src = `/editable-grid/?endpoint=${encodeURIComponent(endpoint)}`;
+                </text>
+            }
+        });
+        }
+        
+        // Handle refresh
+        if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+                EditableGridLogger.log('Refresh button clicked');
+                
+                // Show loading spinner
+                const spinner = document.getElementById('iframe-loading-spinner');
+                if (spinner) {
+                    spinner.classList.remove('hidden');
+                }
+                iframe.classList.add('loading');
+                
+                // Remove any existing error messages
+                const container = iframe.closest('.editable-grid-container');
+                if (container) {
+                    const alerts = container.querySelectorAll('.alert');
+                    alerts.forEach(alert => alert.remove());
+                }
+                
+                // Force reload iframe by adding timestamp to URL
+                const currentSrc = iframe.src.split('?')[0];
+                const urlParams = new URLSearchParams(iframe.src.split('?')[1] || '');
+                urlParams.set('_t', Date.now().toString());
+                const newSrc = currentSrc + '?' + urlParams.toString();
+                
+                EditableGridLogger.log('Reloading iframe', {
+                    oldSrc: iframe.src,
+                    newSrc: newSrc
+                });
+                
+                iframe.src = newSrc;
+            });
+        } else {
+            EditableGridLogger.warn('Refresh button not found');
+        }
+        
+        // Handle iframe load
+        iframe.addEventListener('load', function() {
+            EditableGridLogger.log('Iframe load event fired', {
+                src: iframe.src,
+                readyState: iframe.contentWindow ? iframe.contentWindow.document.readyState : 'unknown'
+            });
+            
+            // Remove loading class and hide spinner
+            iframe.classList.remove('loading');
+            const spinner = document.getElementById('iframe-loading-spinner');
+            if (spinner) {
+                spinner.classList.add('hidden');
+                EditableGridLogger.log('Loading spinner hidden');
+            }
+            
+            try {
+                // Check if iframe loaded successfully
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                if (!iframeDoc) {
+                    EditableGridLogger.warn('Unable to access iframe content (may be cross-origin)');
+                } else {
+                    EditableGridLogger.log('Iframe content accessible', {
+                        title: iframeDoc.title,
+                        readyState: iframeDoc.readyState,
+                        url: iframeDoc.URL
+                    });
+                }
+            } catch (e) {
+                // Cross-origin or other access issues - this is expected for microfrontends
+                EditableGridLogger.log('Iframe loaded (cross-origin check skipped - this is normal)', {
+                    error: e.message
+                });
+            }
+            
+            // Check if iframe actually has content after a short delay
+            setTimeout(function() {
+                try {
+                    const iframeWindow = iframe.contentWindow;
+                    if (iframeWindow) {
+                        const iframeDoc = iframeWindow.document;
+                        const bodyContent = iframeDoc.body ? iframeDoc.body.innerHTML.length : 0;
+                        const bodyText = iframeDoc.body ? iframeDoc.body.innerText : '';
+                        const bodyChildren = iframeDoc.body ? iframeDoc.body.children.length : 0;
+                        
+                        EditableGridLogger.log('Iframe content check', {
+                            bodyContentLength: bodyContent,
+                            bodyTextLength: bodyText.length,
+                            bodyChildrenCount: bodyChildren,
+                            hasBody: !!iframeDoc.body,
+                            documentTitle: iframeDoc.title,
+                            documentURL: iframeDoc.URL,
+                            readyState: iframeDoc.readyState
+                        });
+                        
+                        // Log first 200 chars of body text for debugging
+                        if (bodyText.length > 0) {
+                            EditableGridLogger.log('Iframe body text preview', {
+                                preview: bodyText.substring(0, 200)
+                            });
+                        }
+                        
+                        // Check for error messages in iframe
+                        if (iframeDoc.body) {
+                            const errorElements = iframeDoc.body.querySelectorAll('.error, .alert-danger, [role="alert"]');
+                            if (errorElements.length > 0) {
+                                EditableGridLogger.error('Error elements found in iframe', {
+                                    count: errorElements.length,
+                                    messages: Array.from(errorElements).map(el => el.textContent).slice(0, 3)
+                                });
+                            }
+                            
+                            // Check for loading spinner (Next.js apps show this while loading)
+                            const loadingSpinners = iframeDoc.body.querySelectorAll('[class*="spinner"], [class*="loading"], .animate-spin');
+                            if (loadingSpinners.length > 0) {
+                                EditableGridLogger.warn('Loading spinner still visible in iframe - microfrontend may be stuck loading', {
+                                    spinnerCount: loadingSpinners.length,
+                                    spinnerText: Array.from(loadingSpinners).map(el => el.textContent || el.parentElement?.textContent).slice(0, 2)
+                                });
+                            }
+                            
+                            // Check console errors in iframe (if accessible)
+                            try {
+                                const iframeConsole = iframeWindow.console;
+                                if (iframeConsole && iframeConsole.error) {
+                                    // Note: We can't intercept console.log in cross-origin iframes
+                                    // But we can check if there are any visible error messages
+                                }
+                            } catch (e) {
+                                // Can't access iframe console (cross-origin)
+                            }
+                        }
+                        
+                        // Check if Next.js hydration completed
+                        try {
+                            const nextData = iframeDoc.querySelector('#__NEXT_DATA__');
+                            if (nextData) {
+                                EditableGridLogger.log('Next.js data found', {
+                                    hasNextData: true
+                                });
+                            }
+                        } catch (e) {
+                            // Can't access
+                        }
+                        
+                        if (bodyContent === 0 || !iframeDoc.body || bodyChildren === 0) {
+                            EditableGridLogger.warn('Iframe appears to be empty or still loading', {
+                                bodyContentLength: bodyContent,
+                                bodyChildrenCount: bodyChildren,
+                                hasBody: !!iframeDoc.body,
+                                bodyHTML: iframeDoc.body ? iframeDoc.body.innerHTML.substring(0, 500) : 'no body'
+                            });
+                            
+                            // Check if it's a Next.js app that's still loading
+                            const nextScripts = iframeDoc.querySelectorAll('script[src*="_next"]');
+                            const loadingElements = iframeDoc.querySelectorAll('[class*="loading"], [class*="spinner"], .animate-spin');
+                            const loadingText = iframeDoc.body ? iframeDoc.body.innerText : '';
+                            
+                            EditableGridLogger.log('Iframe loading indicators', {
+                                nextScriptsCount: nextScripts.length,
+                                loadingElementsCount: loadingElements.length,
+                                isNextJS: nextScripts.length > 0,
+                                loadingText: loadingText.substring(0, 100),
+                                hasLoadingText: loadingText.includes('بارگذاری') || loadingText.includes('loading')
+                            });
+                            
+                            // Check for Next.js hydration
+                            const nextData = iframeDoc.querySelector('#__NEXT_DATA__');
+                            if (nextData) {
+                                try {
+                                    const nextDataContent = JSON.parse(nextData.textContent);
+                                    EditableGridLogger.log('Next.js data found', {
+                                        buildId: nextDataContent.buildId,
+                                        page: nextDataContent.page,
+                                        query: nextDataContent.query,
+                                        props: nextDataContent.props ? Object.keys(nextDataContent.props) : []
+                                    });
+                                    
+                                    // Check if query parameters are in Next.js data
+                                    if (nextDataContent.query) {
+                                        EditableGridLogger.log('Next.js query parameters', nextDataContent.query);
+                                    } else {
+                                        EditableGridLogger.warn('⚠️ Next.js query is empty - parameters may not be passed correctly');
+                                    }
+                                } catch (e) {
+                                    EditableGridLogger.warn('Could not parse Next.js data', { error: e.message });
+                                }
+                            } else {
+                                EditableGridLogger.warn('⚠️ Next.js data element (#__NEXT_DATA__) not found');
+                            }
+                            
+                            // Check for React error boundaries or error messages
+                            const errorBoundaries = iframeDoc.querySelectorAll('[class*="error"], [class*="Error"], [data-error]');
+                            if (errorBoundaries.length > 0) {
+                                EditableGridLogger.error('❌ Error boundaries found in iframe', {
+                                    count: errorBoundaries.length,
+                                    messages: Array.from(errorBoundaries).map(el => el.textContent).slice(0, 3)
+                                });
+                            }
+                            
+                            // Check network requests in iframe (if accessible)
+                            try {
+                                const iframePerformance = iframeWindow.performance;
+                                if (iframePerformance && iframePerformance.getEntriesByType) {
+                                    const networkEntries = iframePerformance.getEntriesByType('resource');
+                                    const apiCalls = networkEntries.filter(entry => 
+                                        entry.name.includes('/api/') || 
+                                        entry.name.includes('/config')
+                                    );
+                                    
+                                    if (apiCalls.length > 0) {
+                                        EditableGridLogger.log('API calls detected in iframe', {
+                                            count: apiCalls.length,
+                                            calls: apiCalls.map(entry => ({
+                                                url: entry.name,
+                                                status: entry.responseStatus || 'unknown',
+                                                duration: entry.duration
+                                            }))
+                                        });
+                                        
+                                        // Check for failed API calls
+                                        const failedCalls = apiCalls.filter(entry => 
+                                            entry.responseStatus && entry.responseStatus >= 400
+                                        );
+                                        if (failedCalls.length > 0) {
+                                            EditableGridLogger.error('❌ Failed API calls in iframe', {
+                                                count: failedCalls.length,
+                                                failed: failedCalls.map(entry => ({
+                                                    url: entry.name,
+                                                    status: entry.responseStatus
+                                                }))
+                                            });
+                                        }
+                                    } else {
+                                        EditableGridLogger.warn('⚠️ No API calls detected - microfrontend may not be making requests');
+                                    }
+                                }
+                            } catch (e) {
+                                // Can't access performance API (cross-origin)
+                                EditableGridLogger.log('Cannot access iframe performance API (cross-origin)');
+                            }
+                        } else {
+                            EditableGridLogger.log('✅ Iframe has content', {
+                                bodyContentLength: bodyContent,
+                                bodyChildrenCount: bodyChildren
+                            });
+                        }
+                    }
+                } catch (e) {
+                    EditableGridLogger.log('Cannot check iframe content (cross-origin - this is normal for microfrontends)', {
+                        error: e.message,
+                        errorName: e.name
+                    });
+                    
+                    // Try to check iframe URL instead
+                    EditableGridLogger.log('Checking iframe URL instead', {
+                        iframeSrc: iframe.src,
+                        iframeCurrentSrc: iframe.contentWindow ? iframe.contentWindow.location.href : 'unknown'
+                    });
+                }
+            }, 1000);
+            
+            // Additional check after 3 seconds
+            setTimeout(function() {
+                try {
+                    const iframeWindow = iframe.contentWindow;
+                    if (iframeWindow) {
+                        const iframeDoc = iframeWindow.document;
+                        const bodyChildren = iframeDoc.body ? iframeDoc.body.children.length : 0;
+                        
+                        if (bodyChildren === 0) {
+                            EditableGridLogger.error('❌ Iframe still empty after 3 seconds - microfrontend may have failed to load', {
+                                src: iframe.src,
+                                readyState: iframeDoc.readyState,
+                                title: iframeDoc.title
+                            });
+                            
+                            // Show user-friendly error
+                            const container = iframe.closest('.editable-grid-container');
+                            if (container && !container.querySelector('.alert-warning')) {
+                                const errorDiv = document.createElement('div');
+                                errorDiv.className = 'alert alert-warning mt-3';
+                                errorDiv.innerHTML = '<strong>هشدار:</strong> جدول قابل ویرایش در حال بارگذاری است. اگر بعد از چند ثانیه نمایش داده نشد، لطفاً صفحه را رفرش کنید.<br><small>URL: ' + iframe.src + '</small>';
+                                container.appendChild(errorDiv);
+                            }
+                        } else {
+                            EditableGridLogger.log('✅ Iframe has content after 3 seconds', {
+                                bodyChildrenCount: bodyChildren
+                            });
+                        }
+                    }
+                } catch (e) {
+                    // Cross-origin - can't check
+                }
+            }, 3000);
+        });
+        
+        iframe.addEventListener('error', function(e) {
+            EditableGridLogger.error('Iframe error event fired', {
+                src: iframe.src,
+                error: e
+            });
+            
+            // Hide spinner
+            const spinner = document.getElementById('iframe-loading-spinner');
+            if (spinner) {
+                spinner.classList.add('hidden');
+            }
+            
+            // Show error message
+            const container = iframe.closest('.editable-grid-container');
+            if (container) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'alert alert-danger mt-3';
+                errorDiv.innerHTML = '<strong>خطا:</strong> بارگذاری جدول قابل ویرایش با مشکل مواجه شد. لطفاً صفحه را رفرش کنید یا با پشتیبانی تماس بگیرید.<br><small>URL: ' + iframe.src + '</small>';
+                container.appendChild(errorDiv);
+                EditableGridLogger.error('Error message displayed to user');
+            }
+        });
+        
+        // Log initial iframe state
+        // Parse and log query parameters
+        const iframeUrl = new URL(iframe.src);
+        const queryParams = {};
+        iframeUrl.searchParams.forEach((value, key) => {
+            queryParams[key] = value;
+        });
+        
+        EditableGridLogger.log('Initial iframe state', {
+            src: iframe.src,
+            complete: iframe.complete,
+            readyState: iframe.contentWindow ? iframe.contentWindow.document.readyState : 'unknown',
+            queryParams: queryParams,
+            endpoint: queryParams.endpoint,
+            namespaceId: queryParams.namespaceId,
+            entityId: queryParams.entityId,
+            formSubjectId: queryParams.formSubjectId
+        });
+        
+        // Verify query parameters are correct
+        if (!queryParams.endpoint) {
+            EditableGridLogger.error('❌ Missing endpoint parameter in iframe URL!');
+        } else {
+            EditableGridLogger.log('✅ Endpoint parameter found', { endpoint: queryParams.endpoint });
+        }
+        if (queryParams.namespaceId && !queryParams.entityId) {
+            EditableGridLogger.warn('⚠️ namespaceId provided but entityId is missing');
+        }
+        if (queryParams.entityId && !queryParams.formSubjectId) {
+            EditableGridLogger.warn('⚠️ entityId provided but formSubjectId is missing');
+        }
+        
+        // Log full URL for debugging
+        EditableGridLogger.log('Full iframe URL breakdown', {
+            href: iframe.src,
+            origin: iframeUrl.origin,
+            pathname: iframeUrl.pathname,
+            search: iframeUrl.search,
+            hash: iframeUrl.hash,
+            allParams: Object.keys(queryParams).length + ' parameters'
+        });
+        
+        // Verify iframe URL is accessible
+        EditableGridLogger.log('Checking iframe URL accessibility', {
+            url: iframe.src,
+            protocol: new URL(iframe.src).protocol,
+            hostname: new URL(iframe.src).hostname,
+            pathname: new URL(iframe.src).pathname
+        });
+        
+        fetch(iframe.src, { method: 'HEAD', mode: 'no-cors' })
+            .then(() => {
+                EditableGridLogger.log('✅ Iframe URL is accessible (HEAD request succeeded)');
+            })
+            .catch(err => {
+                EditableGridLogger.warn('⚠️ Iframe URL HEAD request failed (may be normal for CORS)', {
+                    error: err.message
+                });
+            });
+        
+        // Try to fetch the actual page to see if it exists
+        fetch(iframe.src, { method: 'GET', mode: 'no-cors' })
+            .then(response => {
+                EditableGridLogger.log('✅ Iframe URL GET request succeeded', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    type: response.type
+                });
+            })
+            .catch(err => {
+                EditableGridLogger.warn('⚠️ Iframe URL GET request failed', {
+                    error: err.message
+                });
+            });
+        
+        // Check if iframe is already loaded
+        if (iframe.complete) {
+            EditableGridLogger.log('Iframe already complete, triggering load handler');
+            // Use setTimeout to ensure DOM is ready
+            setTimeout(function() {
+                iframe.dispatchEvent(new Event('load'));
+            }, 100);
+        } else {
+            EditableGridLogger.log('Iframe not yet complete, waiting for load event');
+        }
+        
+        // Timeout fallback - if iframe doesn't load within 30 seconds, show error
+        const timeoutId = setTimeout(function() {
+            if (iframe.classList.contains('loading')) {
+                EditableGridLogger.warn('Loading timeout after 30 seconds', {
+                    src: iframe.src,
+                    stillLoading: true
+                });
+                
+                const spinner = document.getElementById('iframe-loading-spinner');
+                if (spinner) {
+                    spinner.classList.add('hidden');
+                }
+                const container = iframe.closest('.editable-grid-container');
+                if (container && !container.querySelector('.alert-danger')) {
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'alert alert-warning mt-3';
+                    errorDiv.innerHTML = '<strong>هشدار:</strong> بارگذاری جدول قابل ویرایش زمان زیادی طول کشید. لطفاً صفحه را رفرش کنید.<br><small>URL: ' + iframe.src + '</small>';
+                    container.appendChild(errorDiv);
+                }
+            }
+        }, 30000); // 30 seconds timeout
+        
+        // Log periodic status (every 5 seconds for debugging)
+        let statusCheckCount = 0;
+        const statusInterval = setInterval(function() {
+            statusCheckCount++;
+            if (statusCheckCount > 6) { // Stop after 30 seconds
+                clearInterval(statusInterval);
+                return;
+            }
+            
+            EditableGridLogger.log(`Status check #${statusCheckCount}`, {
+                isLoading: iframe.classList.contains('loading'),
+                src: iframe.src,
+                complete: iframe.complete,
+                readyState: iframe.contentWindow ? iframe.contentWindow.document.readyState : 'unknown'
+            });
+        }, 5000);
+        
+        console.log('🔵 [EditableGrid] ✅ Initialization complete');
+    });
+    
+    // Also try to initialize immediately if DOM is already ready
+    if (document.readyState !== 'loading') {
+        console.log('🔵 [EditableGrid] DOM already ready, initializing immediately...');
+        setTimeout(function() {
+            const event = new Event('DOMContentLoaded');
+            document.dispatchEvent(event);
+        }, 100);
+    }
+    
+    console.log('🔵 [EditableGrid] Script execution finished');
+    // ============================================
+    // EDITABLE GRID INITIALIZATION - END
+    // ============================================
+</script>
+

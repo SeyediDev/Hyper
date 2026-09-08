@@ -1,0 +1,862 @@
+/* SBVR Business Rules - Modern UI/UX Design with Multiple Rules Support */
+
+/* Icon Container with Count Badge */
+.sbvr-icon-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 6px;
+    margin-right: 6px;
+    vertical-align: middle;
+    position: relative;
+}
+
+/* Unified Shield Icon - Color coded by highest priority modality */
+.sbvr-icon {
+    cursor: help;
+    font-size: 16px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+    position: relative;
+}
+
+/* Icon hover effect */
+.sbvr-icon:hover {
+    transform: scale(1.2) translateY(-1px);
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.2));
+}
+
+/* Count Badge - Shows number of rules */
+.sbvr-count-badge {
+    position: absolute;
+    top: -6px;
+    right: -8px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 5px;
+    border-radius: 10px;
+    line-height: 1;
+    min-width: 16px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+/* Modality-based Icon Colors */
+.sbvr-icon.sbvr-obligatory {
+    color: #dc3545;
+}
+
+.sbvr-icon.sbvr-prohibited {
+    color: #c82333;
+}
+
+.sbvr-icon.sbvr-necessary {
+    color: #fd7e14;
+}
+
+.sbvr-icon.sbvr-permitted {
+    color: #28a745;
+}
+
+.sbvr-icon.sbvr-recommended {
+    color: #17a2b8;
+}
+
+.sbvr-icon.sbvr-calculated {
+    color: #6f42c1;
+}
+
+.sbvr-icon.sbvr-predicted {
+    color: #fd7e14;
+}
+
+.sbvr-icon.sbvr-default {
+    color: #6c757d;
+}
+
+/* Override Bootstrap tooltip for SBVR */
+.tooltip.show {
+    opacity: 1 !important;
+}
+
+.tooltip-inner {
+    max-width: 650px !important; /* Match sbvr-tooltip-content max-width */
+    padding: 0 !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    text-align: right !important;
+    direction: rtl !important;
+}
+
+/* Remove default Bootstrap tooltip arrow background */
+.tooltip .arrow::before {
+    display: none !important;
+}
+
+/* Custom arrow */
+.bs-tooltip-top .arrow::after,
+.bs-tooltip-auto[x-placement^="top"] .arrow::after {
+    content: "";
+    position: absolute;
+    border-width: 8px 8px 0;
+    border-style: solid;
+    border-color: #ffffff transparent transparent transparent;
+    filter: drop-shadow(0 -2px 4px rgba(0, 0, 0, 0.08));
+}
+
+/* SBVR Tooltip Content - Clean White Design with List Support */
+.sbvr-tooltip-content {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 5px 15px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-width: 320px;
+    max-width: 650px; /* Increased from 400px for better content display */
+    max-height: 500px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    direction: rtl; /* RTL for Persian text */
+    text-align: right;
+    font-size: 12px; /* Better readability */
+}
+
+/* Custom scrollbar for tooltip */
+.sbvr-tooltip-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sbvr-tooltip-content::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.sbvr-tooltip-content::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.sbvr-tooltip-content::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Rule Group Container (grouped by modality) */
+.sbvr-group {
+    margin-bottom: 16px;
+}
+
+.sbvr-group:last-child {
+    margin-bottom: 0;
+}
+
+/* Individual Rule Item */
+.sbvr-rule-item {
+    padding: 12px;
+    margin-bottom: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-right: 4px solid #e9ecef;
+    transition: all 0.2s ease;
+}
+
+.sbvr-rule-item:last-child {
+    margin-bottom: 0;
+}
+
+.sbvr-rule-item:hover {
+    background: #f1f3f5;
+    transform: translateX(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Rule item border colors by modality */
+.sbvr-group[data-modality='Obligatory'] .sbvr-rule-item {
+    border-right-color: #dc3545;
+    background: linear-gradient(to left, #fff5f5, #f8f9fa);
+}
+
+.sbvr-group[data-modality='Prohibited'] .sbvr-rule-item {
+    border-right-color: #c82333;
+    background: linear-gradient(to left, #fff5f5, #f8f9fa);
+}
+
+.sbvr-group[data-modality='Necessary'] .sbvr-rule-item {
+    border-right-color: #fd7e14;
+    background: linear-gradient(to left, #fff8f0, #f8f9fa);
+}
+
+.sbvr-group[data-modality='Permitted'] .sbvr-rule-item {
+    border-right-color: #28a745;
+    background: linear-gradient(to left, #f0fff4, #f8f9fa);
+}
+
+.sbvr-group[data-modality='Recommended'] .sbvr-rule-item {
+    border-right-color: #17a2b8;
+    background: linear-gradient(to left, #e6f7ff, #f8f9fa);
+}
+
+.sbvr-group[data-modality='Calculated'] .sbvr-rule-item {
+    border-right-color: #6f42c1;
+    background: linear-gradient(to left, #f3e8ff, #f8f9fa);
+}
+
+.sbvr-group[data-modality='Predicted'] .sbvr-rule-item {
+    border-right-color: #fd7e14;
+    background: linear-gradient(to left, #fff3cd, #f8f9fa);
+}
+
+/* Rule Header (contains icon, modality badge and subject) */
+.sbvr-rule-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+/* Modality Icon in Rule Item */
+.sbvr-item-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+/* Specific color classes for each modality - with !important to override any Bootstrap styles */
+.sbvr-icon-obligatory {
+    color: #dc3545 !important;
+}
+
+.sbvr-icon-prohibited {
+    color: #c82333 !important;
+}
+
+.sbvr-icon-necessary {
+    color: #fd7e14 !important;
+}
+
+.sbvr-icon-permitted {
+    color: #28a745 !important;
+}
+
+.sbvr-icon-recommended {
+    color: #17a2b8 !important;
+}
+
+.sbvr-icon-calculated {
+    color: #6f42c1 !important;
+}
+
+.sbvr-icon-predicted {
+    color: #fd7e14 !important;
+}
+
+.sbvr-icon-default {
+    color: #6c757d !important;
+}
+
+/* Fallback: attribute selectors (in case classes don't work) */
+.sbvr-item-icon[data-modality='Obligatory'] {
+    color: #dc3545;
+}
+
+.sbvr-item-icon[data-modality='Prohibited'] {
+    color: #c82333;
+}
+
+.sbvr-item-icon[data-modality='Necessary'] {
+    color: #fd7e14;
+}
+
+.sbvr-item-icon[data-modality='Permitted'] {
+    color: #28a745;
+}
+
+.sbvr-item-icon[data-modality='Recommended'] {
+    color: #17a2b8;
+}
+
+.sbvr-item-icon[data-modality='Calculated'] {
+    color: #6f42c1;
+}
+
+.sbvr-item-icon[data-modality='Predicted'] {
+    color: #fd7e14;
+}
+
+/* Modality Badge - Compact design */
+.sbvr-modality-badge {
+    display: inline-block;
+    font-weight: 600;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Modality badge colors */
+.sbvr-group[data-modality='Obligatory'] .sbvr-modality-badge {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: #ffffff;
+}
+
+.sbvr-group[data-modality='Prohibited'] .sbvr-modality-badge {
+    background: linear-gradient(135deg, #c82333, #bd2130);
+    color: #ffffff;
+}
+
+.sbvr-group[data-modality='Necessary'] .sbvr-modality-badge {
+    background: linear-gradient(135deg, #fd7e14, #e67700);
+    color: #ffffff;
+}
+
+.sbvr-group[data-modality='Permitted'] .sbvr-modality-badge {
+    background: linear-gradient(135deg, #28a745, #218838);
+    color: #ffffff;
+}
+
+.sbvr-group[data-modality='Recommended'] .sbvr-modality-badge {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    color: #ffffff;
+}
+
+.sbvr-group[data-modality='Calculated'] .sbvr-modality-badge {
+    background: linear-gradient(135deg, #6f42c1, #5a32a3);
+    color: #ffffff;
+}
+
+.sbvr-group[data-modality='Predicted'] .sbvr-modality-badge {
+    background: linear-gradient(135deg, #fd7e14, #e67700);
+    color: #ffffff;
+}
+
+/* Subject in header */
+.sbvr-rule-header .sbvr-subject {
+    font-weight: 600;
+    font-size: 13px;
+    color: #2c3e50;
+    line-height: 1.3;
+    flex: 1;
+    margin: 0;
+}
+
+/* Verb Phrase - supports multi-line text and Markdown */
+.sbvr-verb {
+    font-size: 12px;
+    color: #495057;
+    line-height: 1.6;
+    margin-bottom: 8px;
+    word-wrap: break-word; /* Break long words if needed */
+}
+
+/* Remove default margins from Markdown paragraphs inside verb */
+.sbvr-verb p {
+    margin: 0 0 8px 0;
+}
+
+.sbvr-verb p:last-child {
+    margin-bottom: 0;
+}
+
+/* Markdown Headings */
+.sbvr-verb h3,
+.sbvr-condition h3 {
+    font-size: 13px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 12px 0 6px 0;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 4px;
+}
+
+.sbvr-verb h3:first-child,
+.sbvr-condition h3:first-child {
+    margin-top: 0;
+}
+
+.sbvr-verb h4,
+.sbvr-condition h4 {
+    font-size: 12px;
+    font-weight: 600;
+    color: #495057;
+    margin: 10px 0 4px 0;
+}
+
+/* Markdown Bold and Italic */
+.sbvr-verb strong,
+.sbvr-condition strong {
+    font-weight: 600;
+    color: #212529;
+}
+
+.sbvr-verb em,
+.sbvr-condition em {
+    font-style: italic;
+    color: #495057;
+}
+
+/* Markdown Inline Code */
+.sbvr-verb code,
+.sbvr-condition code {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: #c7254e;
+    direction: ltr;
+    display: inline-block;
+}
+
+/* Markdown Code Blocks (pre + code) */
+.sbvr-verb pre,
+.sbvr-condition pre {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 12px;
+    margin: 10px 0;
+    overflow-x: auto;
+    max-width: 100%;
+    direction: rtl; /* RTL for Persian text */
+    text-align: right;
+    white-space: pre-wrap; /* Wrap long lines */
+    word-wrap: break-word;
+}
+
+.sbvr-verb pre code,
+.sbvr-condition pre code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    font-size: 12px;
+    color: #495057;
+    direction: rtl; /* RTL for Persian text */
+    display: block;
+    white-space: pre-wrap; /* Wrap long lines */
+}
+
+/* Markdown Lists */
+.sbvr-verb ul,
+.sbvr-verb ol,
+.sbvr-condition ul,
+.sbvr-condition ol {
+    margin: 8px 0;
+    padding-right: 20px;
+    padding-left: 0;
+}
+
+.sbvr-verb li,
+.sbvr-condition li {
+    margin: 4px 0;
+    line-height: 1.5;
+}
+
+/* Markdown Tables */
+.sbvr-verb table,
+.sbvr-condition table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    font-size: 13px !important; /* Increased from 11px for better readability */
+    background: #fff !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    overflow: visible; /* Changed from hidden to visible */
+    direction: ltr !important; /* Tables are usually LTR for better alignment */
+}
+
+.sbvr-verb table thead,
+.sbvr-condition table thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.sbvr-verb table th,
+.sbvr-condition table th {
+    padding: 10px 12px !important;
+    text-align: left !important; /* Left align for English tables */
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    border-bottom: 2px solid #5a67d8 !important;
+    white-space: nowrap !important; /* Prevent header wrapping */
+}
+
+.sbvr-verb table td,
+.sbvr-condition table td {
+    padding: 10px 12px !important;
+    text-align: left !important; /* Left align for English tables */
+    font-size: 13px !important;
+    border-bottom: 1px solid #e9ecef !important;
+    color: #495057 !important;
+    background: #ffffff !important;
+    vertical-align: top !important;
+}
+
+.sbvr-verb table tbody tr:hover,
+.sbvr-condition table tbody tr:hover {
+    background: #f8f9fa !important;
+}
+
+.sbvr-verb table tbody tr:hover td,
+.sbvr-condition table tbody tr:hover td {
+    background: #f8f9fa !important;
+}
+
+.sbvr-verb table tbody tr:last-child td,
+.sbvr-condition table tbody tr:last-child td {
+    border-bottom: none !important;
+}
+
+/* Code inside table cells should be inline and compact */
+.sbvr-verb table td code,
+.sbvr-condition table td code {
+    font-size: 12px !important; /* Increased from 10px for better readability */
+    padding: 2px 6px !important;
+    white-space: nowrap !important;
+    background: #f8f9fa !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 3px !important;
+    color: #c7254e !important;
+}
+
+/* Markdown Blockquote */
+.sbvr-verb blockquote,
+.sbvr-condition blockquote {
+    margin: 10px 0;
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-right: 4px solid #667eea;
+    border-radius: 4px;
+    color: #495057;
+    font-style: italic;
+}
+
+.sbvr-verb blockquote p,
+.sbvr-condition blockquote p {
+    margin: 0;
+}
+
+/* Condition Section - supports multi-line text */
+.sbvr-condition {
+    font-size: 11px;
+    color: #6c757d;
+    background: linear-gradient(135deg, #e3f2fd, #f8f9fa);
+    padding: 8px 10px;
+    border-radius: 6px;
+    margin-top: 8px;
+    border-right: 3px solid #90caf9;
+    line-height: 1.5;
+    white-space: pre-wrap; /* Preserve whitespace and newlines as fallback */
+    word-wrap: break-word; /* Break long words if needed */
+}
+
+.sbvr-condition strong {
+    color: #1976d2;
+    font-weight: 600;
+}
+
+/* Divider between rule groups */
+.sbvr-group + .sbvr-group::before {
+    content: "";
+    display: block;
+    height: 1px;
+    background: linear-gradient(to left, #e9ecef, transparent);
+    margin-bottom: 16px;
+}
+
+/* Smooth Fade-in Animation */
+.tooltip.show .sbvr-tooltip-content {
+    animation: sbvrFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes sbvrFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Pulse animation on hover */
+.sbvr-icon-container:hover .sbvr-icon {
+    animation: sbvrPulse 0.6s ease-in-out;
+}
+
+@keyframes sbvrPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.15);
+    }
+}
+
+/* Badge pulse animation */
+.sbvr-count-badge {
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    50% {
+        transform: scale(1.1);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .sbvr-tooltip-content {
+        min-width: 280px;
+        max-width: 320px;
+        padding: 14px;
+    }
+    
+    .sbvr-icon {
+        font-size: 14px;
+    }
+    
+    .sbvr-count-badge {
+        font-size: 8px;
+        padding: 1px 4px;
+        min-width: 14px;
+    }
+    
+    .sbvr-rule-item {
+        padding: 10px;
+    }
+    
+    .sbvr-rule-header .sbvr-subject {
+        font-size: 12px;
+    }
+    
+    .sbvr-verb {
+        font-size: 11px;
+    }
+}
+
+/* Dark mode support (optional) */
+@media (prefers-color-scheme: dark) {
+    .sbvr-tooltip-content {
+        background: #2c3e50;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .sbvr-rule-item {
+        background: #34495e;
+        border-right-color: #4a5f7f;
+    }
+    
+    .sbvr-rule-item:hover {
+        background: #3d566e;
+    }
+    
+    .sbvr-rule-header .sbvr-subject {
+        color: #ecf0f1;
+    }
+    
+    .sbvr-verb {
+        color: #bdc3c7;
+    }
+    
+    .sbvr-condition {
+        color: #95a5a6;
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        border-right-color: #5dade2;
+    }
+}
+
+/* =====================================================
+   SBVR Modal Styles - Beautiful and Consistent
+   ===================================================== */
+
+/* Modal - Fixed to viewport to prevent jumping between windows */
+.sbvr-modal {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 1050 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    outline: 0 !important;
+}
+
+.sbvr-modal .modal-backdrop {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 1040 !important;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Modal Dialog - centered and stable */
+.sbvr-modal .modal-dialog {
+    max-width: 1000px; /* Increased from 800px for better table display */
+    width: 92%;
+    margin: 30px auto;
+    position: relative;
+    z-index: 1050;
+    transform: none !important;
+    -webkit-transform: none !important;
+    pointer-events: auto;
+}
+
+/* Modal Content */
+.sbvr-modal .modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    position: relative;
+}
+
+/* Modal Header - with gradient matching SBVR theme */
+.sbvr-modal .modal-header.sbvr-modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+    padding: 20px 25px;
+    border-bottom: none;
+}
+
+.sbvr-modal .modal-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.sbvr-modal .modal-title i {
+    font-size: 20px;
+    margin-left: 10px;
+}
+
+/* Close button in header */
+.sbvr-modal .modal-header .close {
+    color: #ffffff;
+    opacity: 0.8;
+    text-shadow: none;
+    font-size: 28px;
+    font-weight: 300;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    left: 20px;
+    top: 20px;
+}
+
+.sbvr-modal .modal-header .close:hover {
+    opacity: 1;
+    color: #ffffff;
+}
+
+/* Modal Body */
+.sbvr-modal .modal-body.sbvr-modal-body {
+    padding: 0;
+    max-height: calc(100vh - 250px);
+    overflow-y: auto;
+    background: #f8f9fa;
+    direction: rtl; /* RTL for Persian text */
+    text-align: right;
+}
+
+/* Scrollbar styling for modal body */
+.sbvr-modal .modal-body.sbvr-modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.sbvr-modal .modal-body.sbvr-modal-body::-webkit-scrollbar-track {
+    background: #e9ecef;
+}
+
+.sbvr-modal .modal-body.sbvr-modal-body::-webkit-scrollbar-thumb {
+    background: #ced4da;
+    border-radius: 10px;
+}
+
+.sbvr-modal .modal-body.sbvr-modal-body::-webkit-scrollbar-thumb:hover {
+    background: #adb5bd;
+}
+
+/* SBVR content inside modal - no max-height, no scroll, no shadow */
+.sbvr-modal .sbvr-tooltip-content {
+    max-height: none !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    padding: 25px !important;
+}
+
+/* Modal Footer */
+.sbvr-modal .modal-footer {
+    background: #f8f9fa;
+    border-top: 1px solid #dee2e6;
+    padding: 15px 25px;
+    text-align: left;
+}
+
+.sbvr-modal .modal-footer .btn {
+    min-width: 100px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .sbvr-modal .modal-dialog {
+        margin: 10px;
+        max-width: calc(100% - 20px);
+    }
+    
+    .sbvr-modal .modal-body.sbvr-modal-body {
+        max-height: calc(100vh - 200px);
+    }
+    
+    .sbvr-modal .sbvr-tooltip-content {
+        padding: 15px !important;
+    }
+}
+
+/* Animation for modal - simplified to prevent flickering */
+.sbvr-modal .modal-dialog {
+    opacity: 1;
+    transition: opacity 0.15s linear;
+}
+
+.sbvr-modal.fade .modal-dialog {
+    opacity: 0;
+}
+
+.sbvr-modal.fade.in .modal-dialog,
+.sbvr-modal.show .modal-dialog {
+    opacity: 1;
+}
+
+/* Make cursor pointer for clickable SBVR icons */
+.sbvr-icon[data-toggle="modal"] {
+    cursor: pointer !important;
+}
+
+.sbvr-icon[data-toggle="modal"]:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}

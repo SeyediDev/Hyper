@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Entities\Events\EventChannel.cs" />
+    <Compile Remove="Entities\Events\EventChannelValidEvent.cs" />
+    <Compile Remove="Entities\Events\EventChannelValidIp.cs" />
+    <Compile Remove="Entities\Customers\Tenant.cs" />
+    <Compile Remove="Features\AssetInternalService.cs" />
+    <Compile Remove="Features\AssetService.cs" />
+    <Compile Remove="Features\CustomerSegmentService.cs" />
+    <Compile Remove="Features\CustomerService.cs" />
+    <Compile Remove="Features\EvaluateFormulaService.cs" />
+    <Compile Remove="Features\EventService.cs" />
+    <Compile Remove="Features\LotteryService.cs" />
+    <Compile Remove="Features\PointBudgetService.cs" />
+    <Compile Remove="Features\PointLevelService.cs" />
+    <Compile Remove="Features\PointTransferService.cs" />
+    <Compile Remove="Features\ProductService.cs" />
+    <Compile Remove="Features\PromotionService.cs" />
+    <Compile Remove="Features\ReferrerCodeValidationService.cs" />
+    <Compile Remove="Features\ReferrerRuleProcessingService.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>Hyper.Domain.Tests</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CoreCLR-NCalc" />
+    <PackageReference Include="Mapster" />
+    <PackageReference Include="MediatR" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\Neo\src\Neo.Common\Neo.Common.csproj" />
+    <ProjectReference Include="..\..\..\..\..\Neo\src\Neo.Domain\Neo.Domain.csproj" />
+    <ProjectReference Include="..\..\..\..\..\Neo-Bpms\src\Neo.Bpms.Domain\Neo.Bpms.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
+

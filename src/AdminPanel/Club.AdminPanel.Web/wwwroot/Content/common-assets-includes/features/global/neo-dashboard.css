@@ -1,0 +1,814 @@
+/* ===== CANDO DASHBOARD STYLES ===== */
+
+/* ===== CSS VARIABLES ===== */
+:root {
+  /* Dashboard Colors */
+  --neo-dashboard-primary: #3b82f6;
+  --neo-dashboard-primary-hover: #2563eb;
+  --neo-dashboard-primary-active: #1d4ed8;
+  --neo-dashboard-secondary: #64748b;
+  --neo-dashboard-success: #10b981;
+  --neo-dashboard-warning: #f59e0b;
+  --neo-dashboard-danger: #ef4444;
+  
+  /* Dashboard Backgrounds */
+  --neo-dashboard-bg-primary: #ffffff;
+  --neo-dashboard-bg-secondary: #f8fafc;
+  --neo-dashboard-bg-tertiary: #f1f5f9;
+  --neo-dashboard-bg-dark: #1e293b;
+  --neo-dashboard-bg-card: #ffffff;
+  
+  /* Dashboard Borders */
+  --neo-dashboard-border-light: #e2e8f0;
+  --neo-dashboard-border-medium: #cbd5e1;
+  --neo-dashboard-border-dark: #94a3b8;
+  
+  /* Dashboard Shadows */
+  --neo-dashboard-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --neo-dashboard-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --neo-dashboard-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --neo-dashboard-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* Dashboard Spacing */
+  --neo-dashboard-spacing-xs: 0.25rem;
+  --neo-dashboard-spacing-sm: 0.5rem;
+  --neo-dashboard-spacing-md: 1rem;
+  --neo-dashboard-spacing-lg: 1.5rem;
+  --neo-dashboard-spacing-xl: 2rem;
+  --neo-dashboard-spacing-2xl: 3rem;
+  
+  /* Dashboard Border Radius */
+  --neo-dashboard-radius-sm: 0.375rem;
+  --neo-dashboard-radius-md: 0.5rem;
+  --neo-dashboard-radius-lg: 0.75rem;
+  --neo-dashboard-radius-xl: 1rem;
+  
+  /* Dashboard Transitions */
+  --neo-dashboard-transition-fast: 0.15s ease-in-out;
+  --neo-dashboard-transition-normal: 0.3s ease-in-out;
+  --neo-dashboard-transition-slow: 0.5s ease-in-out;
+}
+
+/* ===== DARK MODE SUPPORT ===== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --neo-dashboard-bg-primary: #0f172a;
+    --neo-dashboard-bg-secondary: #1e293b;
+    --neo-dashboard-bg-tertiary: #334155;
+    --neo-dashboard-bg-card: #1e293b;
+    --neo-dashboard-border-light: #334155;
+    --neo-dashboard-border-medium: #475569;
+    --neo-dashboard-border-dark: #64748b;
+  }
+}
+
+/* ===== DASHBOARD HEADER STYLES ===== */
+.neo-dashboard-header {
+  background: var(--neo-dashboard-bg-primary);
+  border-bottom: 1px solid var(--neo-dashboard-border-light);
+  box-shadow: var(--neo-dashboard-shadow-sm);
+  padding: var(--neo-dashboard-spacing-md) 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.neo-dashboard-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--neo-dashboard-spacing-md);
+}
+
+.neo-dashboard-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--neo-dashboard-spacing-md);
+}
+
+.neo-dashboard-brand-logo {
+  height: 32px;
+  width: auto;
+}
+
+.neo-dashboard-brand-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--neo-dashboard-primary);
+  margin: 0;
+}
+
+.neo-dashboard-page-title {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--neo-dashboard-secondary);
+  margin: 0;
+  text-align: center;
+  flex: 1;
+}
+
+.neo-dashboard-user-menu {
+  display: flex;
+  align-items: center;
+  gap: var(--neo-dashboard-spacing-sm);
+}
+
+.neo-dashboard-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--neo-dashboard-border-light);
+  transition: var(--neo-dashboard-transition-normal);
+}
+
+.neo-dashboard-user-avatar:hover {
+  border-color: var(--neo-dashboard-primary);
+  transform: scale(1.05);
+}
+
+.neo-dashboard-user-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--neo-dashboard-secondary);
+  margin: 0;
+}
+
+/* ===== DASHBOARD TOOLBAR STYLES ===== */
+.neo-dashboard-toolbar {
+  background: var(--neo-dashboard-bg-secondary);
+  border-bottom: 1px solid var(--neo-dashboard-border-light);
+  padding: var(--neo-dashboard-spacing-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--neo-dashboard-spacing-md);
+}
+
+.neo-dashboard-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: var(--neo-dashboard-spacing-md);
+}
+
+.neo-dashboard-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--neo-dashboard-spacing-sm);
+}
+
+.neo-dashboard-page-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--neo-dashboard-primary);
+}
+
+.neo-dashboard-page-title-section {
+  display: flex;
+  align-items: center;
+  gap: var(--neo-dashboard-spacing-sm);
+}
+
+.neo-dashboard-page-title-text {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--neo-dashboard-secondary);
+  margin: 0;
+}
+
+/* ===== DASHBOARD BUTTONS ===== */
+.neo-dashboard-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--neo-dashboard-spacing-xs);
+  padding: var(--neo-dashboard-spacing-sm) var(--neo-dashboard-spacing-md);
+  border: 1px solid transparent;
+  border-radius: var(--neo-dashboard-radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--neo-dashboard-transition-normal);
+  background: transparent;
+}
+
+.neo-dashboard-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--neo-dashboard-shadow-md);
+}
+
+.neo-dashboard-btn:active {
+  transform: translateY(0);
+}
+
+.neo-dashboard-btn-primary {
+  background: var(--neo-dashboard-primary);
+  color: white;
+  border-color: var(--neo-dashboard-primary);
+}
+
+.neo-dashboard-btn-primary:hover {
+  background: var(--neo-dashboard-primary-hover);
+  border-color: var(--neo-dashboard-primary-hover);
+}
+
+.neo-dashboard-btn-secondary {
+  background: var(--neo-dashboard-bg-primary);
+  color: var(--neo-dashboard-secondary);
+  border-color: var(--neo-dashboard-border-medium);
+}
+
+.neo-dashboard-btn-secondary:hover {
+  background: var(--neo-dashboard-bg-secondary);
+  border-color: var(--neo-dashboard-border-dark);
+}
+
+.neo-dashboard-btn-success {
+  background: var(--neo-dashboard-success);
+  color: white;
+  border-color: var(--neo-dashboard-success);
+}
+
+.neo-dashboard-btn-success:hover {
+  background: #059669;
+  border-color: #059669;
+}
+
+.neo-dashboard-btn-icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* ===== DASHBOARD WIDGETS ===== */
+.neo-dashboard-widget {
+  background: var(--neo-dashboard-bg-card);
+  border: 1px solid var(--neo-dashboard-border-light);
+  border-radius: var(--neo-dashboard-radius-lg);
+  box-shadow: var(--neo-dashboard-shadow-sm);
+  padding: var(--neo-dashboard-spacing-lg);
+  margin-bottom: var(--neo-dashboard-spacing-lg);
+  transition: var(--neo-dashboard-transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.neo-dashboard-widget:hover {
+  box-shadow: var(--neo-dashboard-shadow-md);
+  transform: translateY(-2px);
+}
+
+.neo-dashboard-widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--neo-dashboard-spacing-md);
+  padding-bottom: var(--neo-dashboard-spacing-sm);
+  border-bottom: 1px solid var(--neo-dashboard-border-light);
+}
+
+.neo-dashboard-widget-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--neo-dashboard-secondary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--neo-dashboard-spacing-sm);
+}
+
+.neo-dashboard-widget-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--neo-dashboard-primary);
+}
+
+.neo-dashboard-widget-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--neo-dashboard-spacing-xs);
+}
+
+.neo-dashboard-widget-content {
+  min-height: 200px;
+}
+
+/* ===== DASHBOARD REPORTS ===== */
+.neo-dashboard-report {
+  background: var(--neo-dashboard-bg-card);
+  border: 1px solid var(--neo-dashboard-border-light);
+  border-radius: var(--neo-dashboard-radius-lg);
+  box-shadow: var(--neo-dashboard-shadow-sm);
+  overflow: hidden;
+  transition: var(--neo-dashboard-transition-normal);
+}
+
+.neo-dashboard-report:hover {
+  box-shadow: var(--neo-dashboard-shadow-md);
+}
+
+.neo-dashboard-report-header {
+  background: var(--neo-dashboard-bg-secondary);
+  padding: var(--neo-dashboard-spacing-md);
+  border-bottom: 1px solid var(--neo-dashboard-border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.neo-dashboard-report-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--neo-dashboard-secondary);
+  margin: 0;
+}
+
+.neo-dashboard-report-body {
+  padding: var(--neo-dashboard-spacing-md);
+  min-height: 150px;
+}
+
+/* ===== DASHBOARD GRID ===== */
+.neo-dashboard-grid {
+  display: grid;
+  gap: var(--neo-dashboard-spacing-lg);
+  padding: var(--neo-dashboard-spacing-lg);
+}
+
+.neo-dashboard-grid-1 {
+  grid-template-columns: 1fr;
+}
+
+.neo-dashboard-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.neo-dashboard-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.neo-dashboard-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* ===== DASHBOARD RESPONSIVE ===== */
+@media (max-width: 1200px) {
+  .neo-dashboard-grid-4 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .neo-dashboard-grid-3,
+  .neo-dashboard-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .neo-dashboard-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .neo-dashboard-toolbar-left,
+  .neo-dashboard-toolbar-right {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .neo-dashboard-grid-2,
+  .neo-dashboard-grid-3,
+  .neo-dashboard-grid-4 {
+    grid-template-columns: 1fr;
+  }
+  
+  .neo-dashboard-header-content {
+    flex-direction: column;
+    gap: var(--neo-dashboard-spacing-md);
+  }
+  
+  .neo-dashboard-page-title {
+    order: -1;
+  }
+}
+
+/* ===== DASHBOARD LOADING STATES ===== */
+.neo-dashboard-loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.neo-dashboard-loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.neo-dashboard-loading::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 32px;
+  height: 32px;
+  margin: -16px 0 0 -16px;
+  border: 3px solid var(--neo-dashboard-border-light);
+  border-top: 3px solid var(--neo-dashboard-primary);
+  border-radius: 50%;
+  animation: neo-dashboard-spin 1s linear infinite;
+  z-index: 11;
+}
+
+@keyframes neo-dashboard-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ===== DASHBOARD ANIMATIONS ===== */
+.neo-dashboard-fade-in {
+  animation: neo-dashboard-fadeIn 0.5s ease-in-out;
+}
+
+@keyframes neo-dashboard-fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.neo-dashboard-slide-in {
+  animation: neo-dashboard-slideIn 0.3s ease-out;
+}
+
+@keyframes neo-dashboard-slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* ===== DASHBOARD UTILITIES ===== */
+.neo-dashboard-text-center {
+  text-align: center;
+}
+
+.neo-dashboard-text-right {
+  text-align: right;
+}
+
+.neo-dashboard-text-left {
+  text-align: left;
+}
+
+.neo-dashboard-hidden {
+  display: none !important;
+}
+
+.neo-dashboard-visible {
+  display: block !important;
+}
+
+.neo-dashboard-flex {
+  display: flex;
+}
+
+.neo-dashboard-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.neo-dashboard-flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.neo-dashboard-flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.neo-dashboard-gap-sm {
+  gap: var(--neo-dashboard-spacing-sm);
+}
+
+.neo-dashboard-gap-md {
+  gap: var(--neo-dashboard-spacing-md);
+}
+
+.neo-dashboard-gap-lg {
+  gap: var(--neo-dashboard-spacing-lg);
+}
+
+.neo-dashboard-p-sm {
+  padding: var(--neo-dashboard-spacing-sm);
+}
+
+.neo-dashboard-p-md {
+  padding: var(--neo-dashboard-spacing-md);
+}
+
+.neo-dashboard-p-lg {
+  padding: var(--neo-dashboard-spacing-lg);
+}
+
+.neo-dashboard-m-sm {
+  margin: var(--neo-dashboard-spacing-sm);
+}
+
+.neo-dashboard-m-md {
+  margin: var(--neo-dashboard-spacing-md);
+}
+
+.neo-dashboard-m-lg {
+  margin: var(--neo-dashboard-spacing-lg);
+}
+
+.neo-dashboard-rounded {
+  border-radius: var(--neo-dashboard-radius-md);
+}
+
+.neo-dashboard-rounded-lg {
+  border-radius: var(--neo-dashboard-radius-lg);
+}
+
+.neo-dashboard-shadow {
+  box-shadow: var(--neo-dashboard-shadow-md);
+}
+
+.neo-dashboard-shadow-lg {
+  box-shadow: var(--neo-dashboard-shadow-lg);
+}
+
+/* ===== DASHBOARD SPECIFIC OVERRIDES ===== */
+#neo-header {
+  background: var(--neo-dashboard-bg-primary) !important;
+  border-bottom: 1px solid var(--neo-dashboard-border-light) !important;
+  box-shadow: var(--neo-dashboard-shadow-sm) !important;
+}
+
+.top-page {
+  background: var(--neo-dashboard-bg-secondary) !important;
+  border-radius: var(--neo-dashboard-radius-lg) !important;
+  box-shadow: var(--neo-dashboard-shadow-sm) !important;
+  margin: var(--neo-dashboard-spacing-md) !important;
+  padding: var(--neo-dashboard-spacing-lg) !important;
+}
+
+#dashbord-main {
+  background: transparent !important;
+}
+
+#ReportBody {
+  background: transparent !important;
+}
+
+.dashboard-button {
+  background: var(--neo-dashboard-primary) !important;
+  border-radius: var(--neo-dashboard-radius-md) !important;
+  padding: var(--neo-dashboard-spacing-sm) var(--neo-dashboard-spacing-md) !important;
+  transition: var(--neo-dashboard-transition-normal) !important;
+}
+
+.dashboard-button:hover {
+  background: var(--neo-dashboard-primary-hover) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: var(--neo-dashboard-shadow-md) !important;
+}
+
+.dashboard-button:active {
+  background: var(--neo-dashboard-primary-active) !important;
+  transform: translateY(0) !important;
+}
+
+/* ===== DASHBOARD DROPDOWN IMPROVEMENTS ===== */
+.dropdown-menu {
+  border: 1px solid var(--neo-dashboard-border-light) !important;
+  border-radius: var(--neo-dashboard-radius-md) !important;
+  box-shadow: var(--neo-dashboard-shadow-lg) !important;
+  background: var(--neo-dashboard-bg-card) !important;
+}
+
+.dropdown-item {
+  padding: var(--neo-dashboard-spacing-sm) var(--neo-dashboard-spacing-md) !important;
+  transition: var(--neo-dashboard-transition-fast) !important;
+}
+
+.dropdown-item:hover {
+  background: var(--neo-dashboard-bg-secondary) !important;
+  color: var(--neo-dashboard-primary) !important;
+}
+
+/* ===== DASHBOARD ICONS ===== */
+.page-icon {
+  width: 24px !important;
+  height: 24px !important;
+  color: var(--neo-dashboard-primary) !important;
+}
+
+.sidemenu-icon {
+  width: 20px !important;
+  height: 20px !important;
+  color: var(--neo-dashboard-secondary) !important;
+}
+
+/* ===== DASHBOARD FORMS ===== */
+.neo-dashboard-form {
+  background: var(--neo-dashboard-bg-card);
+  border: 1px solid var(--neo-dashboard-border-light);
+  border-radius: var(--neo-dashboard-radius-lg);
+  padding: var(--neo-dashboard-spacing-lg);
+  box-shadow: var(--neo-dashboard-shadow-sm);
+}
+
+.neo-dashboard-form-group {
+  margin-bottom: var(--neo-dashboard-spacing-md);
+}
+
+.neo-dashboard-form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--neo-dashboard-secondary);
+  margin-bottom: var(--neo-dashboard-spacing-xs);
+}
+
+.neo-dashboard-form-input {
+  width: 100%;
+  padding: var(--neo-dashboard-spacing-sm) var(--neo-dashboard-spacing-md);
+  border: 1px solid var(--neo-dashboard-border-medium);
+  border-radius: var(--neo-dashboard-radius-md);
+  font-size: 0.875rem;
+  transition: var(--neo-dashboard-transition-normal);
+  background: var(--neo-dashboard-bg-primary);
+  color: var(--neo-dashboard-secondary);
+}
+
+.neo-dashboard-form-input:focus {
+  outline: none;
+  border-color: var(--neo-dashboard-primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.neo-dashboard-form-input::placeholder {
+  color: var(--neo-dashboard-border-dark);
+}
+
+/* ===== DASHBOARD TABLES ===== */
+.neo-dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--neo-dashboard-bg-card);
+  border-radius: var(--neo-dashboard-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--neo-dashboard-shadow-sm);
+}
+
+.neo-dashboard-table th,
+.neo-dashboard-table td {
+  padding: var(--neo-dashboard-spacing-md);
+  text-align: right;
+  border-bottom: 1px solid var(--neo-dashboard-border-light);
+}
+
+.neo-dashboard-table th {
+  background: var(--neo-dashboard-bg-secondary);
+  font-weight: 600;
+  color: var(--neo-dashboard-secondary);
+  font-size: 0.875rem;
+}
+
+.neo-dashboard-table td {
+  color: var(--neo-dashboard-secondary);
+  font-size: 0.875rem;
+}
+
+.neo-dashboard-table tbody tr:hover {
+  background: var(--neo-dashboard-bg-secondary);
+}
+
+.neo-dashboard-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ===== DASHBOARD CHARTS ===== */
+.neo-dashboard-chart {
+  background: var(--neo-dashboard-bg-card);
+  border: 1px solid var(--neo-dashboard-border-light);
+  border-radius: var(--neo-dashboard-radius-lg);
+  padding: var(--neo-dashboard-spacing-lg);
+  box-shadow: var(--neo-dashboard-shadow-sm);
+  min-height: 300px;
+}
+
+.neo-dashboard-chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--neo-dashboard-spacing-md);
+  padding-bottom: var(--neo-dashboard-spacing-sm);
+  border-bottom: 1px solid var(--neo-dashboard-border-light);
+}
+
+.neo-dashboard-chart-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--neo-dashboard-secondary);
+  margin: 0;
+}
+
+.neo-dashboard-chart-content {
+  height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== DASHBOARD STATS CARDS ===== */
+.neo-dashboard-stats-card {
+  background: var(--neo-dashboard-bg-card);
+  border: 1px solid var(--neo-dashboard-border-light);
+  border-radius: var(--neo-dashboard-radius-lg);
+  padding: var(--neo-dashboard-spacing-lg);
+  box-shadow: var(--neo-dashboard-shadow-sm);
+  transition: var(--neo-dashboard-transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.neo-dashboard-stats-card:hover {
+  box-shadow: var(--neo-dashboard-shadow-md);
+  transform: translateY(-2px);
+}
+
+.neo-dashboard-stats-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--neo-dashboard-primary), var(--neo-dashboard-success));
+}
+
+.neo-dashboard-stats-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--neo-dashboard-spacing-md);
+}
+
+.neo-dashboard-stats-card-title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--neo-dashboard-border-dark);
+  margin: 0;
+}
+
+.neo-dashboard-stats-card-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--neo-dashboard-primary);
+}
+
+.neo-dashboard-stats-card-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--neo-dashboard-secondary);
+  margin: 0;
+  line-height: 1;
+}
+
+.neo-dashboard-stats-card-change {
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-top: var(--neo-dashboard-spacing-xs);
+}
+
+.neo-dashboard-stats-card-change.positive {
+  color: var(--neo-dashboard-success);
+}
+
+.neo-dashboard-stats-card-change.negative {
+  color: var(--neo-dashboard-danger);
+}
+
+.neo-dashboard-stats-card-change.neutral {
+  color: var(--neo-dashboard-border-dark);
+}

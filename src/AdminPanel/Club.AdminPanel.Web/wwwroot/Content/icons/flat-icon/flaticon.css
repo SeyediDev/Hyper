@@ -1,0 +1,113 @@
+	/*
+  	Flaticon icon font: Flaticon
+  	Creation date: 27/05/2018 08:49
+  	*/
+
+@font-face {
+  font-family: "Flaticon";
+  src: url("./Flaticon.eot?v2");
+  src: url("./Flaticon.eot?#iefix") format("embedded-opentype"),
+       url("./Flaticon.woff?v2") format("woff"),
+       url("./Flaticon.ttf?v2") format("truetype"),
+       url("./Flaticon.svg?v2#Flaticon") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@media screen and (-webkit-min-device-Hyperel-ratio:0) {
+  @font-face {
+    font-family: "Flaticon";
+    src: url("./Flaticon.svg?v2#Flaticon") format("svg");
+  }
+}
+
+[class^="flaticon-"]:before, [class*=" flaticon-"]:before,
+[class^="flaticon-"]:after, [class*=" flaticon-"]:after {   
+  font-family: Flaticon;
+font-style: normal;
+}
+
+.flaticon-bpms-high-design:before { content: "\f100"; }
+.flaticon-bpms-flow-chart:before { content: "\f101"; }
+.flaticon-bpms-engineering:before { content: "\f102"; }
+.flaticon-time-planning:before { content: "\f103"; }
+.flaticon-bpms-filter-design:before { content: "\f104"; }
+.flaticon-superman-flying:before { content: "\f105"; }
+.flaticon-bpms-dashboard:before { content: "\f106"; }
+.flaticon-bpms-dashboard-1:before { content: "\f107"; }
+.flaticon-man-holding-the-vote-paper-on-the-box:before { content: "\f108"; }
+.flaticon-radar-sweep:before { content: "\f109"; }
+.flaticon-bar-dotted-stats:before { content: "\f10a"; }
+.flaticon-servey:before { content: "\f10b"; }
+.flaticon-archive:before { content: "\f10c"; }
+.flaticon-festival:before { content: "\f10d"; }
+.flaticon-newsclassi:before { content: "\f10e"; }
+.flaticon-bakshfestival:before { content: "\f10f"; }
+.flaticon-festival-title:before { content: "\f110"; }
+.flaticon-width:before { content: "\f111"; }
+.flaticon-official-topic:before { content: "\f112"; }
+.flaticon-computer-data-2:before { content: "\f113"; }
+.flaticon-place:before { content: "\f114"; }
+.flaticon-placeholder-point:before { content: "\f115"; }
+.flaticon-tabaghe-bandi2:before { content: "\f116"; }
+.flaticon-release:before { content: "\f117"; }
+.flaticon-prize:before { content: "\f118"; }
+.flaticon-hd-symbol:before { content: "\f119"; }
+.flaticon-resolution-high-quality:before { content: "\f11a"; }
+.flaticon-accent:before { content: "\f11b"; }
+.flaticon-rytme:before { content: "\f11c"; }
+.flaticon-register-book:before { content: "\f11d"; }
+.flaticon-title:before { content: "\f11e"; }
+.flaticon-bpms-hanging-over-the-key:before { content: "\f11f"; }
+.flaticon-computer-data3:before { content: "\f120"; }
+.flaticon-prizeresult:before { content: "\f121"; }
+.flaticon-age-category:before { content: "\f122"; }
+.flaticon-calendar-page:before { content: "\f123"; }
+.flaticon-parameter:before { content: "\f124"; }
+.flaticon-performance:before { content: "\f125"; }
+.flaticon-bpms-cartable-computer-work:before { content: "\f126"; }
+.flaticon-news:before { content: "\f127"; }
+.flaticon-news-calssification:before { content: "\f128"; }
+.flaticon-sahte-dastresi:before { content: "\f129"; }
+.flaticon-goyesh:before { content: "\f12a"; }
+.flaticon-iran:before { content: "\f12b"; }
+.flaticon-momayez:before { content: "\f12c"; }
+.flaticon-ghalebmohtava:before { content: "\f12d"; }
+.flaticon-paint-palette:before { content: "\f12e"; }
+.flaticon-review:before { content: "\f12f"; }
+.flaticon-event-poster:before { content: "\f130"; }
+.flaticon-hd-movie-logo:before { content: "\f131"; }
+.flaticon-genre-theater-masks:before { content: "\f132"; }
+.flaticon-bpms-admin-with-cogwheels:before { content: "\f133"; }
+.flaticon-identity-card:before { content: "\f134"; }
+.flaticon-filetype:before { content: "\f135"; }
+.flaticon-creator:before { content: "\f136"; }
+.flaticon-order:before { content: "\f137"; }
+.flaticon-link:before { content: "\f138"; }
+.flaticon-open-book:before { content: "\f139"; }
+.flaticon-bpms-traffic-light:before { content: "\f13a"; }
+.flaticon-property:before { content: "\f13b"; }
+.flaticon-tabaghe-bandi:before { content: "\f13c"; }
+.flaticon-production:before { content: "\f13d"; }
+.flaticon-microphone:before { content: "\f13e"; }
+.flaticon-password:before { content: "\f13f"; }
+.flaticon-language:before { content: "\f140"; }
+.flaticon-notes:before { content: "\f141"; }
+.flaticon-video-player:before { content: "\f142"; }
+.flaticon-order2:before { content: "\f143"; }
+.flaticon-content2:before { content: "\f144"; }
+.flaticon-computer-data-1:before { content: "\f145"; }
+.flaticon-nahve-taheeye:before { content: "\f146"; }
+.flaticon-vaziyattolid:before { content: "\f147"; }
+.flaticon-age-category-2:before { content: "\f148"; }
+.flaticon-video-camera:before { content: "\f149"; }
+.flaticon-soundtrack:before { content: "\f14a"; }
+.flaticon-avarande:before { content: "\f14b"; }
+.flaticon-artists-chaplin:before { content: "\f14c"; }
+.flaticon-synthesizer:before { content: "\f14d"; }
+.flaticon-bpms-people-1:before { content: "\f14e"; }
+.flaticon-bandwidth:before { content: "\f14f"; }
+.flaticon-tag:before { content: "\f150"; }
+.flaticon-network:before { content: "\f151"; }
+.flaticon-computer-data:before { content: "\f152"; }
+.flaticon-contenttype:before { content: "\f153"; }

@@ -1,0 +1,844 @@
+/* Neo Index Page Styles - Wide Layout */
+/* Version: 1.0.0 */
+
+/* ===== CSS Variables ===== */
+:root {
+  /* Index Page Specific Colors - Formal Navy Theme */
+  --index-primary: #1e3a8a;
+  --index-primary-hover: #1e40af;
+  --index-primary-light: #dbeafe;
+  --index-primary-dark: #1e1b4b;
+  
+  /* Index Page Background */
+  --index-bg-primary: #f8fafc;
+  --index-bg-secondary: #ffffff;
+  --index-bg-card: #ffffff;
+  
+  /* Index Page Text */
+  --index-text-primary: #1e293b;
+  --index-text-secondary: #64748b;
+  --index-text-muted: #94a3b8;
+  
+  /* Index Page Borders */
+  --index-border-light: #e2e8f0;
+  --index-border-medium: #cbd5e1;
+  --index-border-dark: #94a3b8;
+  
+  /* Index Page Shadows */
+  --index-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --index-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --index-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --index-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* Index Page Spacing */
+  --index-spacing-xs: 0.25rem;
+  --index-spacing-sm: 0.5rem;
+  --index-spacing-md: 1rem;
+  --index-spacing-lg: 1.5rem;
+  --index-spacing-xl: 2rem;
+  --index-spacing-2xl: 3rem;
+  
+  /* Index Page Border Radius */
+  --index-radius-sm: 0.375rem;
+  --index-radius-md: 0.5rem;
+  --index-radius-lg: 0.75rem;
+  --index-radius-xl: 1rem;
+  --index-radius-2xl: 1.5rem;
+  
+  /* Index Page Transitions */
+  --index-transition-fast: 150ms ease-in-out;
+  --index-transition-normal: 250ms ease-in-out;
+  --index-transition-slow: 350ms ease-in-out;
+}
+
+/* ===== Main Container - WIDE LAYOUT ===== */
+.modern-main-container {
+  background: linear-gradient(135deg, var(--index-bg-primary) 0%, #f1f5f9 100%);
+  min-height: 100vh;
+  padding: var(--index-spacing-lg);
+  font-family: 'IRANSansX-Medium', 'Vazir', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  /* WIDE: Remove max-width constraint */
+  width: 100%;
+  max-width: none;
+  /* Prevent horizontal scroll on main container - let table container handle it */
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.modern-body {
+  /* WIDE: Full width container */
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  /* Prevent horizontal scroll - let child containers handle it */
+  overflow-x: hidden;
+}
+
+.modern-container {
+  /* Remove container constraints - full width */
+  max-width: none;
+  margin: 0;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+  border: none;
+  /* Prevent horizontal scroll - let table container handle it */
+  overflow-x: hidden;
+}
+
+/* ===== Title Box Enhancement ===== */
+.modern-title-box {
+  background: linear-gradient(135deg, var(--index-primary-light) 0%, #e0f2fe 100%);
+  border-radius: var(--index-radius-xl);
+  padding: var(--index-spacing-xl) var(--index-spacing-2xl);
+  margin: var(--index-spacing-lg);
+  box-shadow: var(--index-shadow-md);
+  border: 1px solid var(--index-border-light);
+  position: relative;
+  overflow: visible;
+  /* Ensure 100% width with proper margin calculation */
+  width: calc(100% - var(--index-spacing-lg) * 2);
+  max-width: 100%;
+  box-sizing: border-box;
+  /* Prevent overflow from affecting layout */
+  min-width: 0;
+  /* Ensure content is always visible */
+  display: block;
+  /* Prevent horizontal scroll - header should always fit */
+  overflow-x: hidden;
+  overflow-y: visible;
+}
+
+.modern-title-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--index-primary), var(--index-primary-hover));
+}
+
+.modern-title-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--index-spacing-lg);
+  position: relative;
+  z-index: 1;
+  /* Ensure proper flex behavior */
+  min-width: 0;
+  width: 100%;
+  /* Allow wrapping on small screens */
+  flex-wrap: wrap;
+}
+
+.modern-title-text {
+  flex: 1;
+  /* Allow text to shrink but maintain minimum width */
+  min-width: 200px;
+  max-width: 100%;
+  overflow: hidden;
+  /* Ensure text is always visible */
+  display: flex;
+  flex-direction: column;
+}
+
+.modern-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--index-text-primary);
+  margin: 0;
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  /* Allow text to wrap on very small screens, truncate on medium */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  /* Ensure title is always visible */
+  display: block;
+  width: 100%;
+}
+
+.modern-title-subtitle {
+  font-size: 1rem;
+  color: var(--index-text-secondary);
+  margin: var(--index-spacing-xs) 0 0 0;
+  font-weight: 500;
+  /* Allow subtitle to truncate if too long */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.modern-title-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--index-spacing-md);
+  flex-wrap: nowrap;
+  /* Prevent actions from shrinking - keep icons always visible */
+  flex-shrink: 0;
+  /* Ensure icons stay on the right */
+  margin-right: 0;
+  margin-left: auto;
+  /* Ensure actions container doesn't overflow */
+  min-width: fit-content;
+  max-width: 100%;
+}
+
+.modern-settings-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, var(--index-primary), var(--index-primary-hover));
+  border-radius: var(--index-radius-lg);
+  color: white;
+  text-decoration: none;
+  transition: all var(--index-transition-normal);
+  box-shadow: var(--index-shadow-md);
+  border: none;
+  cursor: pointer;
+}
+
+.modern-settings-btn:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: var(--index-shadow-lg);
+  color: white;
+}
+
+.modern-settings-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.modern-settings-btn svg {
+  width: 22px;
+  height: 22px;
+  fill: currentColor;
+}
+
+/* ===== Table Container - WIDE LAYOUT ===== */
+.modern-table-container {
+  /* WIDE: Full width table container */
+  width: calc(100% - var(--index-spacing-lg) * 2);
+  max-width: 100%;
+  padding: var(--index-spacing-xl);
+  background: var(--index-bg-card);
+  border-radius: var(--index-radius-xl);
+  margin: var(--index-spacing-lg);
+  box-shadow: var(--index-shadow-sm);
+  border: 1px solid var(--index-border-light);
+  /* Enable horizontal scroll when table has many columns */
+  overflow-x: auto;
+  overflow-y: visible;
+  position: relative;
+  /* Smooth scrolling */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--index-primary-light) var(--index-border-light);
+}
+
+/* Custom scrollbar styling for webkit browsers */
+.modern-table-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.modern-table-container::-webkit-scrollbar-track {
+  background: var(--index-bg-primary);
+  border-radius: 4px;
+}
+
+.modern-table-container::-webkit-scrollbar-thumb {
+  background: var(--index-primary);
+  border-radius: 4px;
+}
+
+.modern-table-container::-webkit-scrollbar-thumb:hover {
+  background: var(--index-primary-hover);
+}
+
+/* بهبود نمایش جدول برای ستون‌های زیاد */
+.modern-table-container table {
+  /* استفاده از auto layout برای اندازه‌گیری خودکار */
+  table-layout: auto;
+  /* اجازه wrap شدن متن */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  /* Ensure table can expand beyond container width for horizontal scroll */
+  min-width: 100%;
+  width: auto;
+}
+
+/* محدود کردن عرض ستون‌ها - اما اجازه گسترش برای اسکرول افقی */
+.modern-table-container th,
+.modern-table-container td {
+  /* حداقل عرض ستون - اما اجازه گسترش */
+  min-width: 80px;
+  /* اجازه wrap شدن متن */
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  /* متن را در چند خط نمایش بده */
+  line-height: 1.5;
+  /* اجازه گسترش ستون‌ها برای محتوای بیشتر - حذف max-width */
+  max-width: none;
+}
+
+/* برای ستون‌های مهم، حداقل عرض بیشتری بده */
+.modern-table-container th:first-child,
+.modern-table-container td:first-child,
+.modern-table-container th:last-child,
+.modern-table-container td:last-child {
+  min-width: 100px;
+}
+
+/* ===== Table Styling ===== */
+.modern-table-container table {
+  /* Allow table to expand beyond container width for horizontal scroll */
+  width: auto;
+  min-width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  background: white;
+  border-radius: var(--index-radius-lg);
+  overflow: visible;
+  box-shadow: var(--index-shadow-sm);
+}
+
+.modern-table-container th {
+  background: linear-gradient(135deg, var(--index-primary-light) 0%, #e0f2fe 100%);
+  color: var(--index-text-primary);
+  font-weight: 600;
+  padding: var(--index-spacing-md) var(--index-spacing-lg);
+  text-align: right;
+  border-bottom: 2px solid var(--index-border-light);
+  font-size: 15px;
+  letter-spacing: 0.025em;
+}
+
+.modern-table-container td {
+  padding: var(--index-spacing-md) var(--index-spacing-lg);
+  border-bottom: 1px solid var(--index-border-light);
+  color: var(--index-text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.modern-table-container tr:hover {
+  background-color: var(--index-bg-primary);
+  transition: background-color var(--index-transition-fast);
+}
+
+.modern-table-container tr:nth-child(even) {
+  background-color: #fafbfc;
+}
+
+.modern-table-container tr:nth-child(even):hover {
+  background-color: var(--index-bg-primary);
+}
+
+/* ===== Filter Section ===== */
+.modern-filter-container {
+  background: var(--index-bg-card);
+  border-radius: var(--index-radius-xl);
+  padding: var(--index-spacing-xl);
+  margin: var(--index-spacing-lg);
+  box-shadow: var(--index-shadow-sm);
+  border: 1px solid var(--index-border-light);
+  margin-bottom: var(--index-spacing-lg);
+}
+
+.modern-filter-container .form-group {
+  margin-bottom: var(--index-spacing-lg);
+}
+
+.modern-filter-container label {
+  font-weight: 600;
+  color: var(--index-text-primary);
+  margin-bottom: var(--index-spacing-sm);
+  font-size: 15px;
+}
+
+.modern-filter-container input,
+.modern-filter-container select,
+.modern-filter-container textarea {
+  width: 100%;
+  padding: var(--index-spacing-sm) var(--index-spacing-md);
+  border: 2px solid var(--index-border-light);
+  border-radius: var(--index-radius-md);
+  font-size: 14px;
+  font-family: 'IRANSansX-Medium', 'Vazir', system-ui, sans-serif;
+  color: var(--index-text-primary);
+  transition: all var(--index-transition-normal);
+  background: white;
+}
+
+.modern-filter-container input:focus,
+.modern-filter-container select:focus,
+.modern-filter-container textarea:focus {
+  outline: none;
+  border-color: var(--index-primary);
+  box-shadow: 0 0 0 3px var(--index-primary-light);
+}
+
+/* ===== Pagination ===== */
+.modern-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--index-spacing-sm);
+  margin: var(--index-spacing-xl) 0;
+  padding: var(--index-spacing-lg);
+  background: var(--index-bg-primary);
+  border-radius: var(--index-radius-lg);
+}
+
+.modern-pagination a,
+.modern-pagination span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+  padding: var(--index-spacing-sm);
+  border-radius: var(--index-radius-md);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all var(--index-transition-fast);
+  color: var(--index-text-primary);
+  background: white;
+  border: 1px solid var(--index-border-light);
+}
+
+.modern-pagination a:hover {
+  background: var(--index-primary);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: var(--index-shadow-md);
+}
+
+.modern-pagination .active {
+  background: var(--index-primary);
+  color: white;
+  border-color: var(--index-primary);
+}
+
+/* ===== Dropdown Menus ===== */
+.modern-dropdown-menu {
+  background: white;
+  border: 1px solid var(--index-border-light);
+  border-radius: var(--index-radius-lg);
+  box-shadow: var(--index-shadow-lg);
+  padding: var(--index-spacing-sm);
+  min-width: 200px;
+}
+
+.modern-dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: var(--index-spacing-sm) var(--index-spacing-md);
+  border-radius: var(--index-radius-md);
+  color: var(--index-text-primary);
+  text-decoration: none;
+  transition: all var(--index-transition-fast);
+  font-weight: 500;
+}
+
+.modern-dropdown-item:hover {
+  background: var(--index-primary-light);
+  color: var(--index-primary);
+}
+
+.modern-dropdown-item svg {
+  margin-left: var(--index-spacing-sm);
+}
+
+/* ===== Responsive Design - WIDE FOCUS ===== */
+@media (min-width: 1200px) {
+  /* Extra wide screens - maximize width */
+  .modern-main-container {
+    padding: var(--index-spacing-md);
+  }
+  
+  .modern-container {
+    margin: 0;
+  }
+  
+  .modern-table-container {
+    margin: var(--index-spacing-md);
+  }
+  
+  .modern-filter-container {
+    margin: var(--index-spacing-md);
+  }
+}
+
+@media (min-width: 1400px) {
+  /* Ultra wide screens */
+  .modern-main-container {
+    padding: var(--index-spacing-sm);
+  }
+  
+  .modern-table-container {
+    margin: var(--index-spacing-sm);
+  }
+  
+  .modern-filter-container {
+    margin: var(--index-spacing-sm);
+  }
+}
+
+@media (max-width: 1199px) {
+  /* Large screens - still wide but with some margins */
+  .modern-main-container {
+    padding: var(--index-spacing-lg);
+  }
+  
+  .modern-table-container {
+    margin: var(--index-spacing-lg);
+  }
+  
+  .modern-filter-container {
+    margin: var(--index-spacing-lg);
+  }
+}
+
+@media (max-width: 1200px) {
+  /* Medium screens - adjust layout */
+  .modern-title-box {
+    padding: var(--index-spacing-lg) var(--index-spacing-xl);
+  }
+  
+  .modern-title {
+    font-size: 1.5rem;
+  }
+  
+  .modern-title-content {
+    gap: var(--index-spacing-md);
+  }
+  
+  .modern-title-actions {
+    gap: var(--index-spacing-sm);
+  }
+  
+  .modern-settings-btn {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .modern-settings-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+@media (max-width: 992px) {
+  /* Tablet - more compact */
+  .modern-title-box {
+    padding: var(--index-spacing-md) var(--index-spacing-lg);
+  }
+  
+  .modern-title {
+    font-size: 1.35rem;
+  }
+  
+  .modern-title-text {
+    min-width: 150px;
+  }
+  
+  .modern-title-actions {
+    gap: var(--index-spacing-xs);
+  }
+  
+  .modern-settings-btn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .modern-settings-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Tablet and mobile - standard responsive */
+  .modern-main-container {
+    padding: var(--index-spacing-sm);
+  }
+  
+  .modern-container {
+    border-radius: var(--index-radius-lg);
+  }
+  
+  .modern-title-box {
+    margin: var(--index-spacing-sm);
+    padding: var(--index-spacing-md);
+    width: calc(100% - var(--index-spacing-sm) * 2);
+  }
+  
+  .modern-title {
+    font-size: 1.25rem;
+    /* Allow text to wrap on very small screens */
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.4;
+  }
+  
+  .modern-title-content {
+    /* Stack vertically on small screens if needed */
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--index-spacing-sm);
+    flex-wrap: wrap;
+  }
+  
+  .modern-title-text {
+    min-width: 0;
+    flex: 1 1 auto;
+    order: 1;
+  }
+  
+  .modern-title-actions {
+    /* Ensure icons stay visible and wrap if needed */
+    flex-shrink: 0;
+    flex-wrap: wrap;
+    order: 2;
+    margin-left: 0;
+    margin-top: var(--index-spacing-xs);
+    width: 100%;
+    justify-content: flex-end;
+  }
+  
+  .modern-settings-btn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .modern-settings-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .modern-table-container {
+    margin: var(--index-spacing-sm);
+    padding: var(--index-spacing-lg);
+    /* Ensure horizontal scroll is enabled */
+    overflow-x: auto;
+    overflow-y: visible;
+    width: calc(100% - var(--index-spacing-sm) * 2);
+  }
+  
+  .modern-filter-container {
+    margin: var(--index-spacing-sm);
+    padding: var(--index-spacing-lg);
+  }
+  
+  .modern-table-container table {
+    min-width: 600px; /* Ensure table doesn't get too cramped */
+    width: auto; /* Allow table to expand for horizontal scroll */
+  }
+  
+  /* Ensure horizontal scroll works on mobile */
+  .modern-table-container {
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 576px) {
+  /* Small mobile - vertical layout */
+  .modern-title-box {
+    margin: var(--index-spacing-xs);
+    padding: var(--index-spacing-md) var(--index-spacing-sm);
+    width: calc(100% - var(--index-spacing-xs) * 2);
+  }
+  
+  .modern-title {
+    font-size: 1.1rem;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+  
+  .modern-title-content {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--index-spacing-sm);
+  }
+  
+  .modern-title-text {
+    width: 100%;
+    order: 1;
+  }
+  
+  .modern-title-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    gap: var(--index-spacing-xs);
+    order: 2;
+    margin-top: var(--index-spacing-sm);
+  }
+  
+  .modern-settings-btn {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+  }
+  
+  .modern-title-subtitle {
+    font-size: 0.9rem;
+    white-space: normal;
+    word-wrap: break-word;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Small mobile */
+  .modern-title {
+    font-size: 1.25rem;
+  }
+  
+  .modern-table-container {
+    padding: var(--index-spacing-md);
+  }
+  
+  .modern-filter-container {
+    padding: var(--index-spacing-md);
+  }
+  
+  .modern-table-container table {
+    min-width: 500px;
+  }
+}
+
+/* ===== Dark Mode Support ===== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --index-bg-primary: #0f172a;
+    --index-bg-secondary: #1e293b;
+    --index-bg-card: #334155;
+    --index-text-primary: #f1f5f9;
+    --index-text-secondary: #cbd5e1;
+    --index-text-muted: #94a3b8;
+    --index-border-light: #475569;
+    --index-border-medium: #64748b;
+    --index-border-dark: #94a3b8;
+  }
+  
+  .modern-main-container {
+    background: linear-gradient(135deg, var(--index-bg-primary) 0%, #1e293b 100%);
+  }
+  
+  .modern-title-box {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+  }
+  
+  .modern-table-container table {
+    background: var(--index-bg-card);
+  }
+  
+  .modern-table-container th {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+  }
+  
+  .modern-table-container tr:nth-child(even) {
+    background-color: #475569;
+  }
+  
+  .modern-filter-container input,
+  .modern-filter-container select,
+  .modern-filter-container textarea {
+    background: var(--index-bg-card);
+    border-color: var(--index-border-light);
+    color: var(--index-text-primary);
+  }
+}
+
+/* ===== Animation Classes ===== */
+.fade-in {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+.slide-in-right {
+  animation: slideInRight 0.4s ease-in-out;
+}
+
+@keyframes slideInRight {
+  from { 
+    opacity: 0; 
+    transform: translateX(30px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateX(0); 
+  }
+}
+
+/* ===== Utility Classes ===== */
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: var(--index-spacing-xs); }
+.mb-2 { margin-bottom: var(--index-spacing-sm); }
+.mb-3 { margin-bottom: var(--index-spacing-md); }
+.mb-4 { margin-bottom: var(--index-spacing-lg); }
+.mb-5 { margin-bottom: var(--index-spacing-xl); }
+
+.mt-0 { margin-top: 0; }
+.mt-1 { margin-top: var(--index-spacing-xs); }
+.mt-2 { margin-top: var(--index-spacing-sm); }
+.mt-3 { margin-top: var(--index-spacing-md); }
+.mt-4 { margin-top: var(--index-spacing-lg); }
+.mt-5 { margin-top: var(--index-spacing-xl); }
+
+.hidden { display: none; }
+.visible { display: block; }
+
+.w-full { width: 100%; }
+.h-full { height: 100%; }
+
+/* ===== Print Styles ===== */
+@media print {
+  .modern-main-container {
+    background: white !important;
+    padding: 0 !important;
+  }
+  
+  .modern-container {
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+  
+  .modern-title-box {
+    background: white !important;
+    box-shadow: none !important;
+    border: 1px solid #000 !important;
+  }
+  
+  .modern-title-actions {
+    display: none !important;
+  }
+}

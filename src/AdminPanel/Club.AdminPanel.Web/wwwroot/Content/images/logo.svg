@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 301">
+  <defs>
+    <style>
+      .word { fill: none; stroke: #ffffff; stroke-width: 12; stroke-linecap: round; stroke-linejoin: round; }
+      .font { font-family: "Rajdhani", "Orbitron", "Segoe UI", "Arial", sans-serif; font-weight: 600; font-size: 180px; letter-spacing: 18px; }
+      .accent { stroke: #c3f20a; stroke-width: 18; stroke-linecap: round; }
+    </style>
+  </defs>
+
+  <!-- گروه متن: دو بخش برای جا دادن E به شکل سه خط -->
+  <g class="word">
+    <text class="font" x="420" y="210">SIMOT</text>
+    <text class="font" x="1450" y="210">CH</text>
+  </g>
+
+  <!-- E به صورت سه خط نئونی (قابل ویرایش با تغییر مختصات/طول) -->
+  <g>
+    <!-- تنظیم موقعیت کلی E -->
+    <g transform="translate(1280, 0)">
+      <line class="accent" x1="0" y1="90"  x2="300" y2="90"  />
+      <line class="accent" x1="90" y1="150" x2="300" y2="150" />
+      <line class="accent" x1="0" y1="210" x2="280" y2="210" />
+    </g>
+  </g>
+</svg>

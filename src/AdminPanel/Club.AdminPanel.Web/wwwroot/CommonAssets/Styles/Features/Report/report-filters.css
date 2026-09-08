@@ -1,0 +1,32 @@
+/**
+ * Report Filters Styling
+ * استایل فیلترهای صفحه Report - سبک، سریع، و compact
+ * 
+ * اصول طراحی:
+ * - Compact: فضای کم برای فیلترها، فوکوس روی داده‌ها
+ * - Fast: بدون انیمیشن سنگین، سرعت بالا
+ * - Clean: Professional look برای گزارش‌ها
+ * - No conflict: هیچ تداخلی با .modern-form
+ */
+
+/* ===== Variables for Report ===== */
+
+/* ===== Refresh Settings ===== */
+#refreshSettingsDiv {
+    display: none;
+    padding: 15px;
+    background: #f9fafb;
+    border-radius: 6px;
+    margin-top: 10px;
+}
+
+#refreshSettingsDiv label {
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 8px;
+}
+
+#refreshSettingsDiv select {
+    width: 100%;
+    max-width: 300px;
+}

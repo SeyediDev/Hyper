@@ -1,0 +1,4443 @@
+/* Menu */
+
+@font-face {
+    font-family: 'IRANSansX-Regular';
+    src: url('fonts/IRANSansX-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'IRANSansX-Medium';
+    src: url('fonts/IRANSansX-Medium.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'IRANSansX-Bold';
+    src: url('fonts/IRANSansX-Bold.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    font-family: 'IRANSansX-Medium';
+}
+/*h1 {
+    font-family: 'IRANSansX-Bold';
+}
+
+p {
+    font-family: 'IRANSansX-Regular';
+}
+
+button {
+    font-family: 'IRANSansX-Medium';
+}*/
+
+/* Bootstrap Dialog Modal - Theme Styling */
+/* Override ALL bootstrap-dialog types to use theme colors */
+.bootstrap-dialog .modal-header,
+.bootstrap-dialog.type-default .modal-header,
+.bootstrap-dialog.type-info .modal-header,
+.bootstrap-dialog.type-primary .modal-header,
+.bootstrap-dialog.type-success .modal-header,
+.bootstrap-dialog.type-warning .modal-header,
+.bootstrap-dialog.type-danger .modal-header {
+    background: var(--neo-menu-bg-primary, #333333) !important;
+    border-bottom: 2px solid var(--neo-menu-primary, #c2ef03) !important;
+}
+
+.bootstrap-dialog .bootstrap-dialog-title,
+.bootstrap-dialog.type-default .bootstrap-dialog-title,
+.bootstrap-dialog.type-info .bootstrap-dialog-title,
+.bootstrap-dialog.type-primary .bootstrap-dialog-title {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    font-weight: 600 !important;
+}
+
+.bootstrap-dialog .bootstrap-dialog-close-button .close {
+    color: #ffffff !important;
+    opacity: 0.8 !important;
+}
+
+.bootstrap-dialog .bootstrap-dialog-close-button .close:hover {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    opacity: 1 !important;
+}
+
+.bootstrap-dialog .modal-body {
+    padding: 0 !important;
+}
+
+.bootstrap-dialog .modal-content {
+    border: none !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* ===== CANDO MENU THEME - UI/UX OPTIMIZED ===== */
+
+/* CSS Variables for consistent theming */
+:root {
+  /* Primary Colors - Lime Green Accent */
+  --neo-menu-primary: #c2ef03;
+  --neo-menu-primary-hover: #d4f55a;
+  --neo-menu-primary-active: #a8d400;
+  --neo-menu-primary-light: rgba(194, 239, 3, 0.2);
+  
+  /* Background Colors - Dark Theme */
+  --neo-menu-bg-primary: #333333;
+  --neo-menu-bg-secondary: #2a2a2a;
+  --neo-menu-bg-tertiary: #3a3a3a;
+  --neo-menu-bg-hover: #444444;
+  --neo-menu-bg-active: #333333;
+  
+  /* Text Colors */
+  --neo-menu-text-primary: #ffffff;
+  --neo-menu-text-secondary: #e0e0e0;
+  --neo-menu-text-muted: #aaaaaa;
+  --neo-menu-text-hover: var(--neo-menu-primary, #c2ef03);
+  
+  /* Border Colors */
+  --neo-menu-border-light: #444444;
+  --neo-menu-border-medium: #555555;
+  --neo-menu-border-dark: #666666;
+  
+  /* Status Colors */
+  --neo-menu-success: var(--neo-menu-primary, #c2ef03);
+  --neo-menu-warning: #f59e0b;
+  --neo-menu-danger: #ef4444;
+  
+  /* Dashboard Theme Overrides - Dynamic based on user theme */
+  --neo-dashboard-primary: var(--neo-menu-primary, #c2ef03);
+  --neo-dashboard-primary-hover: var(--neo-menu-primary-hover, #d4f55a);
+  --neo-dashboard-primary-active: var(--neo-menu-primary-active, #a8d400);
+  
+  /* Spacing */
+  --neo-menu-spacing-xs: 0.25rem;
+  --neo-menu-spacing-sm: 0.5rem;
+  --neo-menu-spacing-md: 1rem;
+  --neo-menu-spacing-lg: 1.5rem;
+  
+  /* Border Radius */
+  --neo-menu-radius-sm: 0.375rem;
+  --neo-menu-radius-md: 0.5rem;
+  --neo-menu-radius-lg: 0.75rem;
+  
+  /* Shadows */
+  --neo-menu-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+  --neo-menu-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.15), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+  --neo-menu-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+  
+  /* Transitions */
+  --neo-menu-transition-fast: 0.15s ease-in-out;
+  --neo-menu-transition-normal: 0.3s ease-in-out;
+  --neo-menu-transition-slow: 0.5s ease-in-out;
+
+  --admin-header-gradient: var(--neo-header-background, #333333);
+  --admin-header-border: var(--neo-dashboard-widget-border, #444444);
+}
+
+/* ===== MAIN MENU CONTAINER ===== */
+.mm-menu {
+  background: var(--neo-menu-bg-primary) !important;
+  border: none !important;
+  box-shadow: var(--neo-menu-shadow-lg) !important;
+}
+
+.mm-panel {
+  background: var(--neo-menu-bg-primary) !important;
+}
+
+.mm-listview, .mm-navbar {
+  background: var(--neo-menu-bg-primary) !important;
+}
+
+/* ===== NAVBAR IMPROVEMENTS ===== */
+.mm-navbar {
+  background: var(--neo-menu-bg-secondary) !important;
+  border-bottom: 1px solid var(--neo-menu-border-light) !important;
+  padding: var(--neo-menu-spacing-lg) !important;
+  box-shadow: var(--neo-menu-shadow-sm) !important;
+}
+
+.mm-navbar__title {
+  color: var(--neo-menu-primary) !important;
+  font-weight: 700 !important;
+  font-size: 1.125rem !important;
+  font-family: 'IRANSansX-Bold', 'IRANSansX-Medium', system-ui, -apple-system, sans-serif !important;
+  text-align: center !important;
+  margin: 0 !important;
+  padding: var(--neo-menu-spacing-sm) 0 !important;
+  letter-spacing: 0.025em !important;
+  line-height: 1.4 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+.mm-navbar__title > span {
+  color: var(--neo-menu-primary) !important;
+  font-weight: 700 !important;
+  font-size: 1.125rem !important;
+  font-family: 'IRANSansX-Bold', 'IRANSansX-Medium', system-ui, -apple-system, sans-serif !important;
+  direction: rtl !important;
+  text-align: center !important;
+  letter-spacing: 0.025em !important;
+  line-height: 1.4 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ===== MENU ITEMS IMPROVEMENTS ===== */
+.mm-listitem {
+  margin: var(--neo-menu-spacing-xs) var(--neo-menu-spacing-sm) !important;
+  border-radius: var(--neo-menu-radius-md) !important;
+  transition: var(--neo-menu-transition-normal) !important;
+  overflow: hidden !important;
+}
+
+.mm-listitem:hover {
+  background: var(--neo-menu-bg-hover) !important;
+  transform: translateX(-2px) !important;
+  box-shadow: var(--neo-menu-shadow-sm) !important;
+}
+
+.mm-listitem:active,
+.mm-listitem_selected > .mm-listitem__text {
+  background: var(--neo-menu-bg-active) !important;
+  color: var(--neo-menu-text-hover) !important;
+  box-shadow: var(--neo-menu-shadow-md) !important;
+}
+
+.mm-listitem__text {
+  color: var(--neo-menu-text-secondary) !important;
+  text-decoration: none !important;
+  padding: var(--neo-menu-spacing-md) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  transition: var(--neo-menu-transition-normal) !important;
+  border-radius: var(--neo-menu-radius-md) !important;
+  direction: rtl !important;
+  font-family: 'IRANSansX-Medium', system-ui, -apple-system, sans-serif !important;
+}
+
+.mm-listitem__text:hover {
+  color: var(--neo-menu-text-hover) !important;
+  background: transparent !important;
+}
+
+.mm-listitem__text:active {
+  color: var(--neo-menu-text-hover) !important;
+}
+
+/* ===== MENU LINKS ===== */
+.mm-menu a, .mm-menu a:active, .mm-menu a:link, .mm-menu a:visited {
+  color: var(--neo-menu-text-secondary) !important;
+  text-decoration: none !important;
+  transition: var(--neo-menu-transition-normal) !important;
+}
+
+    .mm-menu a:hover {
+  color: var(--neo-menu-text-hover) !important;
+  text-decoration: none !important;
+    }
+
+.mm-listitem > a {
+    direction: rtl !important;
+}
+
+/* ===== MENU ICONS ===== */
+.sidemenu-icon {
+  width: 20px !important;
+  height: 20px !important;
+  color: var(--neo-menu-text-muted) !important;
+  transition: var(--neo-menu-transition-normal) !important;
+  flex-shrink: 0 !important;
+  order: 1 !important;
+}
+
+.mm-listitem:hover .sidemenu-icon {
+  color: var(--neo-menu-primary) !important;
+}
+
+.mm-listitem:active .sidemenu-icon,
+.mm-listitem_selected .sidemenu-icon {
+  color: var(--neo-menu-text-hover) !important;
+}
+
+/* ===== MENU COUNTERS ===== */
+.mm-counter {
+  background: var(--neo-menu-primary) !important;
+  color: #333333 !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  padding: 2px 6px !important;
+  border-radius: 10px !important;
+  min-width: 20px !important;
+  text-align: center !important;
+  margin-left: var(--neo-menu-spacing-sm) !important;
+  transition: var(--neo-menu-transition-normal) !important;
+  font-family: 'IRANSansX-Medium', system-ui, -apple-system, sans-serif !important;
+  flex-shrink: 0 !important;
+  order: -1 !important;
+}
+
+/* Ensure proper alignment for menu items with counters */
+.mm-listitem__text {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.mm-listitem__text > span:not(.mm-counter):not(.sidemenu-icon) {
+  flex: 1 !important;
+  text-align: right !important;
+}
+
+.mm-listitem:hover .mm-counter {
+  background: var(--neo-menu-primary-hover) !important;
+  transform: scale(1.05) !important;
+}
+
+.mm-listitem:active .mm-counter,
+.mm-listitem_selected .mm-counter {
+  background: #ffffff !important;
+  color: #333333 !important;
+}
+
+/* ===== MENU BUTTONS ===== */
+.mm-btn {
+  background: transparent !important;
+  border: none !important;
+  color: var(--neo-menu-text-secondary) !important;
+  padding: var(--neo-menu-spacing-sm) !important;
+  border-radius: var(--neo-menu-radius-md) !important;
+  transition: var(--neo-menu-transition-normal) !important;
+  cursor: pointer !important;
+}
+
+.mm-btn:hover {
+  background: var(--neo-menu-bg-secondary) !important;
+  color: var(--neo-menu-primary) !important;
+}
+
+.mm-btn:active {
+  background: var(--neo-menu-bg-tertiary) !important;
+  transform: scale(0.95) !important;
+}
+
+.mm-btn--next {
+  position: relative !important;
+}
+
+.mm-btn--next::after {
+  content: '' !important;
+  position: absolute !important;
+  left: var(--neo-menu-spacing-sm) !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 16px !important;
+  height: 16px !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E") !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  transition: var(--neo-menu-transition-normal) !important;
+}
+
+.mm-listitem:hover .mm-btn--next::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c2ef03' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E") !important;
+}
+
+.mm-listitem:active .mm-btn--next::after,
+.mm-listitem_selected .mm-btn--next::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E") !important;
+}
+
+.mm-btn--prev {
+  position: relative !important;
+}
+
+.mm-btn--prev::before {
+  content: '' !important;
+  position: absolute !important;
+  right: var(--neo-menu-spacing-sm) !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 16px !important;
+  height: 16px !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m15 18-6-6 6-6'/%3E%3C/svg%3E") !important;
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  transition: var(--neo-menu-transition-normal) !important;
+}
+
+.mm-btn--prev:hover::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23c2ef03' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m15 18-6-6 6-6'/%3E%3C/svg%3E") !important;
+}
+
+/* ===== MENU NAVIGATION ICONS - UNIFIED DESIGN ===== */
+.mm-btn--next::after,
+.mm-btn--prev::before {
+  /* Unified styling for all navigation icons */
+  opacity: 0.8 !important;
+  transition: all var(--neo-menu-transition-normal) !important;
+}
+
+.mm-listitem:hover .mm-btn--next::after,
+.mm-btn--prev:hover::before {
+  opacity: 1 !important;
+  transform: translateY(-50%) scale(1.1) !important;
+}
+
+.mm-listitem:active .mm-btn--next::after,
+.mm-listitem_selected .mm-btn--next::after,
+.mm-btn--prev:active::before {
+  opacity: 1 !important;
+  transform: translateY(-50%) scale(1.05) !important;
+}
+
+/* ===== SEARCH FIELD IMPROVEMENTS ===== */
+.mm-searchfield {
+  background: var(--neo-menu-bg-secondary) !important;
+  border-radius: var(--neo-menu-radius-lg) !important;
+  margin: var(--neo-menu-spacing-md) !important;
+  overflow: hidden !important;
+  box-shadow: var(--neo-menu-shadow-sm) !important;
+}
+
+.mm-searchfield__input {
+  background: var(--neo-menu-bg-secondary) !important;
+  border: 1px solid var(--neo-menu-border-light) !important;
+  border-radius: var(--neo-menu-radius-lg) !important;
+  padding: var(--neo-menu-spacing-sm) var(--neo-menu-spacing-md) !important;
+  color: var(--neo-menu-text-primary) !important;
+  font-size: 0.875rem !important;
+  direction: rtl !important;
+  text-align: right !important;
+  transition: var(--neo-menu-transition-normal) !important;
+  font-family: 'IRANSansX-Medium', system-ui, -apple-system, sans-serif !important;
+}
+
+.mm-searchfield__input:focus {
+  outline: none !important;
+  border-color: var(--neo-menu-primary) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+.mm-searchfield__input::placeholder {
+  color: var(--neo-menu-text-muted) !important;
+}
+
+.mm-searchfield__btn {
+  background: transparent !important;
+  border: none !important;
+  color: var(--neo-menu-text-muted) !important;
+  padding: var(--neo-menu-spacing-sm) !important;
+  cursor: pointer !important;
+  transition: var(--neo-menu-transition-normal) !important;
+}
+
+.mm-searchfield__btn:hover {
+  color: var(--neo-menu-primary) !important;
+}
+
+.mm-searchfield__cancel {
+  color: var(--neo-menu-text-muted) !important;
+  text-decoration: none !important;
+  padding: var(--neo-menu-spacing-sm) !important;
+  font-size: 0.75rem !important;
+  transition: var(--neo-menu-transition-normal) !important;
+}
+
+.mm-searchfield__cancel:hover {
+  color: var(--neo-menu-primary) !important;
+}
+
+/* ===== SCROLLBAR STYLING ===== */
+.mm-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.mm-panel::-webkit-scrollbar-track {
+  background: var(--neo-menu-bg-secondary);
+}
+
+.mm-panel::-webkit-scrollbar-thumb {
+  background: var(--neo-menu-border-medium);
+  border-radius: 3px;
+}
+
+.mm-panel::-webkit-scrollbar-thumb:hover {
+  background: var(--neo-menu-primary);
+}
+
+/* ===== RESPONSIVE IMPROVEMENTS ===== */
+@media (max-width: 768px) {
+  .mm-navbar {
+    padding: var(--neo-menu-spacing-md) !important;
+  }
+  
+  .mm-navbar__title {
+    font-size: 1rem !important;
+  }
+  
+  .mm-listitem__text {
+    padding: var(--neo-menu-spacing-sm) !important;
+    font-size: 0.8rem !important;
+  }
+  
+  .sidemenu-icon {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  
+  .mm-counter {
+    font-size: 0.7rem !important;
+    padding: 1px 4px !important;
+  }
+  
+  .mm-btn--next::after,
+  .mm-btn--prev::before {
+    width: 14px !important;
+    height: 14px !important;
+  }
+}
+
+/* ===== ACCESSIBILITY IMPROVEMENTS ===== */
+.mm-listitem:focus-within {
+  outline: 2px solid var(--neo-menu-primary) !important;
+  outline-offset: 2px !important;
+}
+
+.mm-btn:focus {
+  outline: 2px solid var(--neo-menu-primary) !important;
+  outline-offset: 2px !important;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes neo-menu-fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes neo-menu-slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.neo-menu-fade-in {
+  animation: neo-menu-fadeIn 0.3s ease-in-out;
+}
+
+.neo-menu-slide-in {
+  animation: neo-menu-slideIn 0.3s ease-out;
+}
+
+.mm-searchfield__input > input {
+    color: white;
+}
+
+.mm-searchfield__input > input[type=text] {
+    background: var(--neo-form-input-background, #f4f7fe) !important;
+    direction: rtl !important;
+    outline: none;
+}
+
+.mm-btn--next:after {
+    border-color: #484cab !important;
+}
+
+/*Report*/
+#ReportBody i {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    background-color: transparent !important;
+}
+
+#ReportBody i.fa-desktop,
+#ReportBody i.fa.fa-desktop,
+#ReportBody i.fa.fa-2x.fa-desktop {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    background-color: transparent !important;
+}
+
+#ReportBody .more {
+    width: 88px;
+    flex-grow: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    border-radius: 10px;
+    background-color: var(--neo-form-input-background, #f4f7fe);
+    margin: 5px;
+}
+
+
+#ReportBody .moref {
+    width: 106px;
+    flex-grow: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    border-radius: 10px;
+    background-color: #FFFFFF;
+    margin: 5px;
+}
+
+#ReportBody .more > a {
+    padding: 7px;
+}
+
+.mm-metrix-box span {
+    margin: 0 1px 2px 0;
+    font-size: 14px;
+    font-weight: 500;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: right;
+    color: #a3aed0;
+}
+
+.mm-metrix-box h2{
+    margin: 2px 0 0 29px;
+    font-family: IRANSansX;
+    font-size: 24px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: right;
+    color: #2b3674;
+}
+
+.report-main-box {
+    background-color: #fff;
+    border-radius: 20px;
+}
+
+.report-main-box-s {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px 0 rgba(58, 53, 65, 0.1);
+    padding: 24px 30px;
+    margin: 0 19px 20px 19px;
+}
+
+.report-ovh{
+    overflow: hidden;
+}
+
+.show-report-box > li {
+    color: var(--neo-menu-primary, #6366f1);
+}
+
+.show-report-box .more {
+    width: 54px;
+    flex-grow: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 0 8px;
+    border-radius: 10px;
+    background-color: var(--neo-form-input-background, #f4f7fe);
+}
+
+.show-report-box .parent {
+    font-size: 14px;
+    font-weight: 500;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: right;
+    color: var(--neo-menu-primary, #6366f1);
+}
+
+.show-report-box .child {
+    font-size: 14px;
+    font-weight: 500;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: right;
+    color: #6d6e71;
+}
+
+.table thead th{
+    border-top: none;
+}
+
+/*Verify*/
+.resend-container {
+    border: 1px solid #d1d5db;
+    border-radius: 9999px;
+    padding: 6px 16px;
+    display: inline-flex;
+    align-items: center;
+    background-color: #fff;
+    color: #6b7280;
+    font-size: 16px;
+    transition: all 0.3s ease-in-out;
+    cursor: default;
+}
+
+.resend-container.active {
+    cursor: pointer;
+    color: #2563eb;
+    border-color: #2563eb;
+}
+
+.resend-container .icon {
+    margin-left: 6px;
+    font-size: 18px;
+    transition: transform 0.3s ease;
+}
+
+.resend-container.active .icon {
+    transform: rotate(0deg);
+}
+
+.resend-container:hover.active .icon {
+    transform: rotate(90deg);
+}
+
+.resend-container .time {
+    font-weight: bold;
+    margin-right: 6px;
+    color: #000;
+}
+
+
+
+/*form*/
+
+.form-group label {
+    position: absolute;
+    top: -7px;
+    right: 40px;
+    background-color: #fff;
+    z-index: 2;
+}
+
+.dWrapper:has(select) label {
+    top: -12px !important;
+}
+
+.dWrapper:has(select:disabled,input:disabled) label {
+    background-color: transparent;
+}
+
+
+label.lable-normal {
+    position: relative !important;
+    background-color: inherit !important;
+    top: 0;
+    right: 0;
+}
+
+input[type=text], input[type=number], textarea {
+    font-size: 15px !important;
+    height: 56px;
+    border-radius: 3px;
+    outline: #6D6E71;
+    margin: 5px;
+}
+
+/* ===== FORM INPUT FONT SIZE - Larger Text ===== */
+.form-control,
+.tField,
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="url"],
+input[type="search"],
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+select,
+select.form-control,
+textarea,
+.neo-control input,
+.neo-control select,
+.modern-form input,
+.modern-form select,
+.modern-form textarea,
+.dWrapper input,
+.dWrapper select {
+    font-size: 15px !important;
+    line-height: 1.5 !important;
+}
+
+/* Select2 font size */
+.select2-container .select2-selection,
+.select2-container .select2-selection__rendered,
+.select2-results__option,
+.select2-search__field {
+    font-size: 15px !important;
+}
+
+/* ===== DATEPICKER - Preserve Original Size ===== */
+.datepicker-plot-area,
+.datepicker-plot-area *,
+.datepicker-container,
+.datepicker-container *,
+.pwt-datepicker-input-element,
+.datepicker-persian,
+.datepicker-persian *,
+.datepicker-gregorian,
+.datepicker-gregorian * {
+    font-size: 12px !important;
+    line-height: normal !important;
+}
+
+.datepicker-plot-area {
+    width: 229px !important;
+}
+
+.datepicker-plot-area .table-days td,
+.datepicker-plot-area .table-days span {
+    font-size: 12px !important;
+    padding: 4px !important;
+    width: auto !important;
+    height: auto !important;
+}
+
+.datepicker-persian .pwt-btn-switch,
+.datepicker-persian .header-row-cell,
+.datepicker-persian .pwt-btn-today,
+.datepicker-gregorian .pwt-btn-calendar {
+    font-size: 12px !important;
+}
+
+/* Date input field - keep form size but allow datepicker popup to be smaller */
+input.dateField,
+input[type="text"].dateField {
+    font-size: 15px !important;
+}
+
+/*.select2-selection__rendered {
+    line-height: 56px !important;
+}
+
+.select2-container .select2-selection--single {
+    height: 56px !important;
+}
+
+.select2-selection__arrow {
+    height: 56px !important;
+}*/
+.select2-container--bootstrap4 .select2-selection--single, .select2-container .select2-selection--multiple {
+    min-height: 38px !important;
+    border-radius: 3px !important;
+}
+.select2-container--bootstrap4 .select2-selection--single {
+    height: 56px !important;
+}
+/* Multi-select: allow height to grow with selected tags */
+.select2-container .select2-selection--multiple {
+    height: auto !important;
+    min-height: 38px !important;
+    padding: 6px 8px !important;
+}
+
+.main-box{
+    background: #ffffff !important;
+}
+
+.form-btn-add {
+    width: 131px;
+    height: 40px;
+    border-radius: 100px;
+    background-color: var(--neo-menu-primary, #3cb299);
+    /*    */
+    padding: 8px 20px;
+    overflow: hidden;
+    text-align: center;
+    display: inline-block;
+    margin: 5px;
+}
+
+/* Header */
+.top-bar {
+    border-radius: 30px;
+    box-shadow: 14px 17px 40px 4px rgba(112, 144, 176, 0.08);
+    background: var(--admin-header-gradient);
+    color: #ffffff;
+}
+.top-bar  .avatar {
+    width: 41px;
+    height: 41px;
+    margin: 0 10px 0 0;
+    border-radius: 200px;
+}
+.top-bar .title {
+    font-size: 14px;
+    font-weight: 500;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #e0e7ff;
+}
+
+.top-bar .dw-box {
+    border-radius: 8px;
+    box-shadow: rgba(0, 0, 0, 0.2) 0px 5px 5px -3px, rgba(0, 0, 0, 0.14) 0px 8px 10px 1px;
+    background-color: rgb(255, 255, 255);
+    background: #FFFFFF;
+}
+
+.top-bar .list-group-item{
+    width: 100% !important;
+}
+
+span.top-bar-title {
+    font-size: 14px;
+    font-weight: 500;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #8f9bba;
+}
+
+/*Main*/
+.top-page {
+    border-radius: 30px;
+    background: var(--admin-header-gradient);
+    color: #fff;
+    min-height: 3rem;
+    box-shadow: 0 10px 20px rgba(15, 32, 78, 0.35);
+}
+
+.modal {
+    background: #0000007a !important;
+}
+
+.page-link {
+    padding-top: 6px !important; 
+}
+
+.filterDiv{
+    box-shadow: none !important;
+}
+
+/*Tickets*/
+.ticket-head-title {
+    font-size: 18px;
+    font-weight: bold;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: 3.11;
+    letter-spacing: -0.36px;
+    text-align: right;
+    color: #1a2336;
+}
+
+.ticket-box {
+    align-self: stretch;
+    flex-grow: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 8px 16px;
+    border-radius: 14px;
+    border: solid 0.5px rgba(60, 60, 67, 0.36);
+    margin-bottom: 16px;
+}
+
+.ticket-box > div{
+    padding: 8px 0;
+}
+
+.ticket-subject-title {
+    font-size: 16px;
+    font-weight: 500;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: #232441;
+    border-bottom: solid 0.5px rgba(35, 36, 65, 0.26);
+}
+
+.tiket-date {
+    font-size: 14px;
+    font-weight: 500;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: rgba(60, 60, 67, 0.6);
+}
+
+.tiket-date-cb {
+    color: #000 !important;
+}
+
+.tiket-message {
+    font-size: 14px;
+    font-weight: 500;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    text-align: left;
+    color: #000;
+}
+
+.tiket-message-box {
+    padding: 6px 12px;
+    border-right: solid 3px var(--neo-menu-primary, #6366f1);
+}
+
+.tiket-uploaded-document {
+    width: 382px;
+    align-self: stretch;
+    flex-grow: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border-radius: 8px;
+    background-color: var(--neo-form-input-background, #f4f7fe);
+    color: #000000de;
+}
+
+.tiket-uploaded-document-a:hover{
+    text-decoration: none;
+    color: #000000de;
+}
+
+.tiket-uploaded-document span.size{
+    color: #00000099;
+    display: block;
+    font-size: 14px;
+    font-weight: normal;
+    font-stretch: normal;
+}
+
+.tiket-uploaded-document div.show-title{
+    direction: ltr !important;
+}
+
+
+.tiket-uploaded-document-frame {
+    width: 26px;
+    height: 26px;
+    flex-grow: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 4px;
+    border-radius: 9px;
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    background-color: rgba(99, 102, 241, 0.16);
+}
+
+.tiket-custom-uploader-container {
+    height: 146px;
+    flex-grow: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    padding: 24px 16px;
+    border-radius: 10px;
+    border: dashed 1px #c6c6c8;
+}
+
+/* ===== WHITE HEADER THEME ===== */
+/* White header background */
+#neo-header.neo-header-navy {
+    background: #ffffff !important;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Header title text - dark color on white */
+    #neo-header.neo-header-navy .header-title-text {
+        color: var(--neo-dashboard-primary) !important;
+        font-weight: 600;
+        font-size: 18px;
+    }
+
+/* Hamburger menu icon - dark color on white */
+    #neo-header.neo-header-navy .hamburger-icon {
+        color: var(--neo-dashboard-primary) !important;
+    }
+
+#neo-header.neo-header-navy .hamburger-link:hover .hamburger-icon {
+    color: var(--neo-menu-primary, #c2ef03);
+}
+
+/* User Account Box - white header theme */
+#neo-header.neo-header-navy .user-account-box {
+    background: transparent !important;
+}
+
+#neo-header.neo-header-navy .top-bar {
+    background-color: var(--neo-dashboard-bg-tertiary);
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+#neo-header.neo-header-navy .top-bar:hover {
+    background-color: var(--neo-dashboard-bg-tertiary) !important;
+}
+
+    #neo-header.neo-header-navy .top-bar .title,
+    #neo-header.neo-header-navy span.top-bar-title {
+        color: var(--neo-menu-primary, #c2ef03);
+    }
+
+    #neo-header.neo-header-navy .top-bar .user-info,
+    #neo-header.neo-header-navy .top-bar .user-info a,
+    #neo-header.neo-header-navy .top-bar .user-info span {
+        color: var(--neo-menu-primary, #c2ef03);
+    }
+
+#neo-header.neo-header-navy .top-bar .avatar {
+    border: 2px solid var(--neo-menu-primary-light, rgba(194, 239, 3, 0.6));
+}
+
+/* Dropdown menu in user box - keep white background */
+#neo-header.neo-header-navy .top-bar .dw-box,
+#neo-header.neo-header-navy .top-bar .dropdown-menu {
+    background-color: #ffffff !important;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+#neo-header.neo-header-navy .top-bar .dw-box a,
+#neo-header.neo-header-navy .top-bar .dropdown-menu a,
+#neo-header.neo-header-navy .top-bar .list-group-item {
+    color: #334155 !important;
+}
+
+    #neo-header.neo-header-navy .top-bar .dw-box a:hover,
+    #neo-header.neo-header-navy .top-bar .dropdown-menu a:hover,
+    #neo-header.neo-header-navy .top-bar .list-group-item:hover {
+        background-color: var(--neo-dashboard-bg-tertiary);
+        color: var(--neo-dashboard-primary) !important;
+    }
+
+/* Hyper header logo styles */
+.Hyper-header-logo {
+    transition: transform 0.2s ease;
+    object-fit: contain;
+}
+
+.Hyper-header-logo:hover {
+    transform: scale(1.05);
+}
+
+.header-Hyper-badge {
+    display: flex;
+    align-items: center;
+    overflow: visible;
+}
+
+/* Language selection dropdown on navy header */
+#neo-header.neo-header-navy .language-selection select,
+#neo-header.neo-header-navy .language-selection .form-select {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--neo-dashboard-primary) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#neo-header.neo-header-navy .language-selection select:hover,
+#neo-header.neo-header-navy .language-selection .form-select:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 991px) {
+    #neo-header.neo-header-navy .header-title-text {
+        font-size: 16px;
+    }
+    
+    .Hyper-header-logo {
+        width: 80px !important;
+        height: 80px !important;
+    }
+}
+
+/* ===== ADMIN HEADER MOBILE RESPONSIVE ===== */
+/* Tablet View (768px - 991px) */
+@media (max-width: 991px) {
+    /* Show hamburger menu on tablet */
+    #neo-header .d-none.d-lg-block {
+        display: block !important;
+    }
+    
+    /* Adjust header padding */
+    #neo-header.neo-header-navy {
+        padding: 8px 10px !important;
+    }
+    
+    /* Make columns more flexible */
+    #neo-header .col-4 {
+        flex: 0 0 auto !important;
+        width: auto !important;
+    }
+    
+    /* Hide title text on tablet to save space */
+    #neo-header .header-title-text {
+        display: none !important;
+    }
+    
+    /* Compact user account box */
+    #neo-header .top-bar {
+        padding: 6px 10px !important;
+    }
+    
+    #neo-header .top-bar .title,
+    #neo-header span.top-bar-title {
+        display: none !important;
+    }
+}
+
+/* Mobile View (< 768px) */
+@media (max-width: 767px) {
+    /* Show hamburger menu on mobile */
+    #neo-header .d-none.d-lg-block {
+        display: block !important;
+    }
+    
+    /* Adjust header layout for mobile */
+    #neo-header.neo-header-navy {
+        padding: 5px 8px !important;
+    }
+    
+    #neo-header .row {
+        margin: 5px 0 !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+    }
+    
+    /* Hamburger menu container */
+    #neo-header .col-4.float-start {
+        flex: 0 0 auto !important;
+        width: auto !important;
+        margin: 0 !important;
+    }
+    
+    /* Smaller logo on mobile */
+    #neo-header .header-Hyper-badge {
+        display: block !important;
+    }
+    
+    #neo-header .Hyper-header-logo {
+        width: 48px !important;
+        height: 48px !important;
+        margin: -8px 0 !important;
+    }
+    
+    /* Smaller hamburger icon */
+    #neo-header .hamburger-icon svg {
+        width: 28px !important;
+        height: 28px !important;
+    }
+    
+    /* Hide middle column completely */
+    #neo-header .col-4.col-sm-6.col-lg-6 {
+        display: none !important;
+    }
+    
+    /* User account box - right side */
+    #neo-header .col-4.col-sm-2.col-lg-2.float-end {
+        flex: 1 1 auto !important;
+        width: auto !important;
+        text-align: left !important;
+    }
+    
+    /* Compact top-bar on mobile */
+    #neo-header .top-bar {
+        padding: 5px 8px !important;
+        border-radius: 6px !important;
+    }
+    
+    /* Hide user name on mobile */
+    #neo-header .top-bar .user-info .title,
+    #neo-header .top-bar span.top-bar-title,
+    #neo-header .user-account-box .user-name {
+        display: none !important;
+    }
+    
+    /* Smaller avatar on mobile */
+    #neo-header .top-bar .avatar,
+    #neo-header .user-account-box .avatar {
+        width: 32px !important;
+        height: 32px !important;
+    }
+}
+
+/* Very Small Mobile (< 480px) */
+@media (max-width: 479px) {
+    #neo-header.neo-header-navy {
+        padding: 4px 6px !important;
+    }
+    
+    #neo-header .hamburger-icon svg {
+        width: 24px !important;
+        height: 24px !important;
+    }
+    
+    /* Smaller logo on very small screens */
+    #neo-header .Hyper-header-logo {
+        width: 36px !important;
+        height: 36px !important;
+        margin: -4px 0 !important;
+    }
+    
+    #neo-header .top-bar {
+        padding: 4px 6px !important;
+    }
+    
+    #neo-header .top-bar .avatar,
+    #neo-header .user-account-box .avatar {
+        width: 28px !important;
+        height: 28px !important;
+    }
+}
+
+/* ===== WIDGET & DASHBOARD COLOR THEME - از تم فعال ===== */
+
+/* Dashboard Widget Headers */
+.neo-dashboard-widget-header {
+    background: var(--neo-dashboard-widget-background, #333333) !important;
+    border-bottom: 1px solid var(--neo-dashboard-widget-border, #444444) !important;
+    border-radius: 8px 8px 0 0 !important;
+    padding: 12px 16px !important;
+}
+
+.neo-dashboard-widget-title {
+    color: var(--neo-dashboard-primary, #c2ef03) !important;
+}
+
+.neo-dashboard-widget-icon {
+    color: var(--neo-dashboard-primary, #c2ef03) !important;
+}
+
+/* Dashboard Report Headers */
+.neo-dashboard-report-header {
+    background: var(--neo-dashboard-widget-background, #333333) !important;
+    border-bottom: 1px solid var(--neo-dashboard-widget-border, #444444) !important;
+}
+
+.neo-dashboard-report-title {
+    color: var(--neo-header-text, #ffffff) !important;
+}
+
+/* Dashboard Chart Headers */
+.neo-dashboard-chart-header {
+    background: var(--neo-dashboard-widget-background, #333333) !important;
+    border-bottom: 1px solid var(--neo-dashboard-widget-border, #444444) !important;
+    border-radius: 8px 8px 0 0 !important;
+    padding: 12px 16px !important;
+}
+
+.neo-dashboard-chart-title {
+    color: var(--neo-header-text, #ffffff) !important;
+}
+
+/* Dashboard Button Icons - Theme Colors */
+.neo-dashboard-btn-icon,
+.neo-dashboard-btn .neo-dashboard-btn-icon,
+.neo-dashboard-btn svg,
+.neo-dashboard-btn i {
+    color: var(--neo-dashboard-primary, #c2ef03) !important;
+    fill: var(--neo-dashboard-primary, #c2ef03) !important;
+}
+
+/* Dashboard Primary Button - Dynamic Theme */
+.neo-dashboard-btn.neo-dashboard-btn-primary,
+.neo-dashboard-btn-primary {
+    background: var(--neo-dashboard-primary, #c2ef03) !important;
+    color: #1a1a1a !important;
+    border: 1px solid var(--neo-dashboard-primary, #c2ef03) !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 8px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.3)) !important;
+}
+
+.neo-dashboard-btn.neo-dashboard-btn-primary:hover {
+    background: var(--neo-dashboard-primary-hover, #d4f55a) !important;
+    border-color: var(--neo-dashboard-primary-hover, #d4f55a) !important;
+    box-shadow: 0 4px 12px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.4)) !important;
+    transform: translateY(-2px) !important;
+}
+
+.neo-dashboard-btn.neo-dashboard-btn-primary:active,
+.neo-dashboard-btn-primary:active {
+    background: var(--neo-dashboard-primary-active, #a8d400) !important;
+    transform: translateY(0) !important;
+}
+
+.neo-dashboard-btn-primary .neo-dashboard-btn-icon,
+.neo-dashboard-btn-primary svg,
+.neo-dashboard-btn-primary i {
+    color: #1a1a1a !important;
+    fill: #1a1a1a !important;
+}
+
+.neo-dashboard-btn-secondary .neo-dashboard-btn-icon,
+.neo-dashboard-btn-secondary svg,
+.neo-dashboard-btn-secondary i {
+    color: var(--neo-dashboard-primary, #c2ef03) !important;
+    fill: var(--neo-dashboard-primary, #c2ef03) !important;
+}
+
+/* Dashboard Tab Add Button - Theme Colors */
+.dashboard-tab-add-btn {
+    color: var(--neo-dashboard-primary, #c2ef03) !important;
+    border: 1px dashed var(--neo-dashboard-primary, #c2ef03) !important;
+    background: transparent !important;
+    border-radius: 8px !important;
+}
+
+.dashboard-tab-add-btn:hover {
+    background: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.15)) !important;
+    border-color: var(--neo-dashboard-primary, #c2ef03) !important;
+    border-style: solid !important;
+    color: var(--neo-dashboard-primary, #c2ef03) !important;
+    box-shadow: 0 2px 8px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.2)) !important;
+}
+
+.dashboard-tab-add-btn:active {
+    background: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.25)) !important;
+}
+
+/* Dashboard Widget Title Bar - Theme Colors */
+.neo-dashboard-widget-title-bar {
+    background: var(--neo-dashboard-widget-background, #333333) !important;
+    border-bottom: 2px solid var(--neo-dashboard-primary, #c2ef03) !important;
+}
+
+/* تضمین کنتراست: استفاده از متغیر تم - سفید روی تاریک، تیره روی روشن */
+.neo-dashboard-widget-title-text {
+    color: var(--neo-dashboard-widget-title-text, var(--neo-header-text, #1e293b)) !important;
+    text-shadow: none !important;
+}
+
+/* آیکون تیتر - برای تضمین کنتراست روی هر بک‌گراند */
+.neo-dashboard-widget-title-icon {
+    color: var(--neo-dashboard-widget-title-text, var(--neo-dashboard-primary, #c2ef03)) !important;
+    fill: var(--neo-dashboard-widget-title-text, var(--neo-dashboard-primary, #c2ef03)) !important;
+}
+
+.neo-dashboard-widget-title-icon svg {
+    color: var(--neo-dashboard-widget-title-text, var(--neo-dashboard-primary, #c2ef03)) !important;
+    fill: var(--neo-dashboard-widget-title-text, var(--neo-dashboard-primary, #c2ef03)) !important;
+}
+
+/* Widget Title Actions - Theme Colors */
+.neo-dashboard-widget-title-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+}
+
+.neo-dashboard-widget-title-action {
+    background: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.1)) !important;
+    border: 1px solid var(--neo-menu-primary-light, rgba(194, 239, 3, 0.3)) !important;
+    color: var(--neo-dashboard-primary, #c2ef03) !important;
+    border-radius: 6px !important;
+}
+
+.neo-dashboard-widget-title-action:hover {
+    background: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.25)) !important;
+    border-color: var(--neo-dashboard-primary, #c2ef03) !important;
+    transform: scale(1.1) !important;
+}
+
+.neo-dashboard-widget-title-action svg {
+    color: var(--neo-dashboard-primary, #c2ef03) !important;
+    fill: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+.neo-dashboard-widget-delete:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
+    border-color: #ef4444 !important;
+    color: #ef4444 !important;
+}
+
+.neo-dashboard-widget-delete:hover svg {
+    color: #ef4444 !important;
+    fill: #ef4444 !important;
+}
+
+/* Top Page Header */
+.top-page,
+#ReportBody .top-page,
+.report-page .top-page,
+.modern-main-container .top-page {
+    background: linear-gradient(45deg, var(--neo-dashboard-bg-tertiary, #f1f5f9) 30%, #fff 70%) !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+    margin-left: 10px !important;
+    margin-right: 10px !important;
+}
+
+.top-page .page-title,
+.top-page h1,
+.top-page h2,
+.top-page h3,
+.top-page span,
+#ReportBody .top-page span,
+#ReportBody .top-page .page-title {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Nav Tabs - Dark Theme */
+.nav-tabs,
+.nav.nav-tabs,
+ul.nav.nav-tabs,
+.nav-tabs:not(.d-none) {
+    background: linear-gradient(180deg, #2a2a2a 0%, var(--neo-report-header-background, #333333) 100%) !important;
+    border: 1px solid var(--neo-dashboard-widget-border, #444444) !important;
+    border-radius: 12px 12px 0 0 !important;
+    box-shadow: none !important;
+    padding: 8px 8px 0 8px !important;
+}
+
+.nav-tabs .nav-link,
+.nav.nav-tabs .nav-link,
+.nav.nav-tabs .nav-item .nav-link {
+    color: #cccccc !important;
+    background: linear-gradient(180deg, #3a3a3a 0%, var(--neo-report-header-background, #333333) 100%) !important;
+    border: 1px solid var(--neo-dashboard-widget-border, #444444) !important;
+    border-radius: 8px 8px 0 0 !important;
+    margin-right: 4px !important;
+    padding: 10px 16px !important;
+    transition: all 0.2s ease !important;
+}
+
+.nav-tabs .nav-link:hover,
+.nav.nav-tabs .nav-link:hover,
+.nav.nav-tabs .nav-item .nav-link:hover {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    background: linear-gradient(180deg, var(--neo-dashboard-widget-border, #444444) 0%, #3a3a3a 100%) !important;
+    border-color: #555555 !important;
+    box-shadow: 0 4px 12px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.15)) !important;
+}
+
+.nav-tabs .nav-link.active,
+.nav.nav-tabs .nav-link.active,
+.nav.nav-tabs .nav-item .nav-link.active {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    background: var(--neo-report-header-background, #333333) !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    border-bottom-color: var(--neo-report-header-background, #333333) !important;
+    box-shadow: 0 4px 12px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.25)) !important;
+}
+
+/* Nav Item Active State - Lime Green Theme */
+.nav-item.active,
+li.nav-item.active,
+.nav .nav-item.active,
+.nav-tabs .nav-item.active {
+    background: var(--neo-report-header-background, #333333) !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+.nav-item.active > a,
+.nav-item.active > .nav-link,
+li.nav-item.active > a,
+li.nav-item.active > .nav-link,
+.nav .nav-item.active > a,
+.nav .nav-item.active > .nav-link {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    background: var(--neo-report-header-background, #333333) !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Active Nav Item with direct class */
+a.nav-item.active,
+.active.nav-item {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    background: var(--neo-report-header-background, #333333) !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+.nav-tabs .nav-link.active i,
+.nav-tabs .nav-link.active .icon,
+.nav.nav-tabs .nav-link.active i,
+.nav.nav-tabs .nav-link.active .icon {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+.tab-content {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-top: none !important;
+}
+
+/* Card Headers / Accordion Headers */
+.card-header,
+.modern-accordion .card-header {
+    background: var(--neo-report-header-background, #333333) !important;
+    border: none !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+.card-header h5,
+.card-header .card-title,
+.modern-accordion .card-header h5,
+.modern-accordion .card-header a {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+.modern-accordion .card-header::before {
+    background: linear-gradient(90deg, var(--neo-menu-primary, #c2ef03), var(--neo-menu-primary-active, #a8d400), #c2ef03) !important;
+}
+
+.modern-accordion .card-header a:hover {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Report Main Box Header */
+.report-main-box-s .report-title,
+.report-main-box .report-title {
+    color: #333333 !important;
+}
+
+/* Metrix Box */
+.mm-metrix-box {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 12px !important;
+}
+
+.mm-metrix-box h2 {
+    color: #333333 !important;
+}
+
+.mm-metrix-box span {
+    color: #666666 !important;
+}
+
+/* Stats Card Header */
+.neo-dashboard-stats-card::before {
+    background: linear-gradient(90deg, var(--neo-report-header-background, #333333), var(--neo-menu-primary, #c2ef03)) !important;
+}
+
+.neo-dashboard-stats-card-title {
+    color: #333333 !important;
+}
+
+/* Dashboard Buttons */
+.dashboard-button {
+    background: var(--neo-report-header-background, #333333) !important;
+    color: var(--neo-dashboard-primary) !important;
+    border: none !important;
+}
+
+.dashboard-button:hover {
+    background: var(--neo-dashboard-widget-border, #444444) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Filter Header */
+.filterDiv .filter-header,
+.filter-header {
+    background: var(--neo-report-header-background, #333333) !important;
+    color: var(--neo-dashboard-primary) !important;
+    border-radius: 8px 8px 0 0 !important;
+}
+
+/* ===== TABLE STYLING - Header & Content Differentiation ===== */
+/* Table Headers - بک تیره، متن روشن */
+.table thead th,
+.table > thead > tr > th,
+.table thead th.cHeader,
+.table thead th.cColumn,
+th.cHeader,
+th.cColumn,
+.cHeader,
+.t-table-wrapper .sticky-row th,
+.tabulator .tabulator-header,
+#SubTablesTabMultiTab .table thead th,
+#SubTablesTabMultiTab table thead th,
+.modern-form table thead th,
+.modern-form-content table thead th,
+.modern-table-container table thead th {
+    background: var(--neo-report-header-background, #333333) !important;
+    color: var(--neo-header-text, #ffffff) !important;
+    border-bottom: 2px solid var(--neo-dashboard-primary, #c2ef03) !important;
+    border-color: var(--neo-dashboard-widget-border, #444444) !important;
+    font-weight: 600 !important;
+}
+
+/* Table Header Text - هماهنگ با هدر */
+.table thead th *,
+.table > thead > tr > th *,
+.table thead th span,
+.table thead th a,
+th.cHeader *,
+th.cColumn *,
+.cHeader span,
+.cHeader a,
+#SubTablesTabMultiTab .table thead th *,
+.modern-form table thead th * {
+    color: var(--neo-header-text, #ffffff) !important;
+}
+
+/* Table Header Row */
+.table thead tr,
+.table > thead > tr,
+#SubTablesTabMultiTab .table thead tr,
+.modern-form table thead tr {
+    background: var(--neo-report-header-background, #333333) !important;
+}
+
+/* Table Content Rows - Subtle Zebra Stripes */
+.table tbody tr:nth-child(odd),
+.table > tbody > tr:nth-child(odd),
+#SubTablesTabMultiTab .table tbody tr:nth-child(odd),
+.modern-form table tbody tr:nth-child(odd) {
+    background-color: #ffffff !important;
+}
+
+.table tbody tr:nth-child(even),
+.table > tbody > tr:nth-child(even),
+#SubTablesTabMultiTab .table tbody tr:nth-child(even),
+.modern-form table tbody tr:nth-child(even) {
+    background-color: #fafafa !important;
+}
+
+/* Table Row Hover */
+.table tbody tr:hover,
+.table > tbody > tr:hover,
+#SubTablesTabMultiTab .table tbody tr:hover,
+.modern-form table tbody tr:hover {
+    background-color: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.08)) !important;
+}
+
+/* Table Cell Text */
+.table tbody td,
+.table > tbody > tr > td,
+#SubTablesTabMultiTab .table tbody td,
+.t-table-wrapper .table tbody td,
+.t-table-wrapper table tbody td,
+td.cColumn {
+    color: #333333 !important;
+    font-size: 14px !important;
+    padding: 10px 12px !important;
+}
+
+/* Table Cell Input Fields */
+.t-table-wrapper .table tbody td input,
+.t-table-wrapper .table tbody td select,
+.t-table-wrapper table tbody td input,
+.t-table-wrapper table tbody td select,
+td.cColumn input,
+td.cColumn select {
+    font-size: 14px !important;
+}
+
+.tabulator .tabulator-header .tabulator-col {
+    background: var(--neo-report-header-background, #333333) !important;
+    border-color: var(--neo-dashboard-widget-border, #444444) !important;
+}
+
+.tabulator .tabulator-header .tabulator-col .tabulator-col-content .tabulator-col-title {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Modal Headers */
+.modal-header {
+    background: var(--neo-report-header-background, #333333) !important;
+    color: var(--neo-header-text, #ffffff) !important;
+    border-bottom: 1px solid var(--neo-dashboard-widget-border, #444444) !important;
+}
+
+.modal-header .modal-title {
+    color: var(--neo-header-text, #ffffff) !important;
+}
+
+    .modal-header .close,
+    .modal-header .btn-close {
+        color: var(--neo-dashboard-primary) !important;
+        opacity: 0.8 !important;
+    }
+
+.modal-header .close:hover,
+.modal-header .btn-close:hover {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    opacity: 1 !important;
+}
+
+/* ===== SUB-REPORT MODAL (DRILL-DOWN) ===== */
+/* Modal Table Header */
+.modal .table thead th,
+.modal .table > thead > tr > th,
+.modal-body .table thead th,
+.modal-content .table thead th,
+.modal .cHeader,
+.modal-body .cHeader,
+.modal-content .cHeader {
+    background: var(--neo-report-header-background, #333333) !important;
+    color: var(--neo-header-text, #ffffff) !important;
+    border-color: var(--neo-dashboard-widget-border, #444444) !important;
+    font-weight: 600 !important;
+}
+
+/* Modal Table Header Row */
+.modal .table thead tr,
+.modal-body .table thead tr,
+.modal-content .table thead tr {
+    background: var(--neo-report-header-background, #333333) !important;
+}
+
+/* Modal Sticky Header */
+.modal .t-table-wrapper .sticky-row th,
+.modal-body .t-table-wrapper .sticky-row th,
+.modal-content .sticky-row th {
+    background: var(--neo-report-header-background, #333333) !important;
+    color: var(--neo-header-text, #ffffff) !important;
+}
+
+/* Modal Pagination */
+.modal .pagination .page-link,
+.modal-body .pagination .page-link,
+.modal-content .pagination .page-link {
+    background: #ffffff !important;
+    color: #333333 !important;
+    border: 1px solid #e5e7eb !important;
+}
+
+.modal .pagination .page-link:hover,
+.modal-body .pagination .page-link:hover,
+.modal-content .pagination .page-link:hover {
+    background: var(--neo-report-header-background, #333333) !important;
+    color: var(--neo-header-text, #ffffff) !important;
+    border-color: var(--neo-report-header-background, #333333) !important;
+}
+
+.modal .pagination .page-item.active .page-link,
+.modal-body .pagination .page-item.active .page-link,
+.modal-content .pagination .page-item.active .page-link {
+    background: var(--neo-report-header-background, #333333) !important;
+    border-color: var(--neo-report-header-background, #333333) !important;
+    color: var(--neo-header-text, #ffffff) !important;
+}
+
+.modal .pagination .page-item.disabled .page-link,
+.modal-body .pagination .page-item.disabled .page-link {
+    background: #f3f4f6 !important;
+    color: #9ca3af !important;
+}
+
+/* Modal Pagination Info Text */
+.modal .pagination-info,
+.modal-body .pagination-info,
+.modal-content .page-info {
+    color: #333333 !important;
+}
+
+/* ===== REPORT & FORM HEADERS - #333333 / var(--neo-menu-primary, #c2ef03) ===== */
+
+/* Modern Title Box (Form/Report Page Headers) */
+.modern-title-box,
+.modern-title-box.details-page,
+.modern-title-box.delete-page,
+.modern-title-box.edit-page,
+.modern-title-box.index-page,
+.modern-main-container .modern-title-box,
+#ReportBody .modern-title-box,
+.report-container .modern-title-box {
+    background: linear-gradient(45deg, var(--neo-dashboard-bg-primary, #f1f5f9) 40%, #fff 60%) !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Curve at bottom of header - Lime Green Theme */
+    .modern-title-box::after,
+    .modern-title-box.details-page::after,
+    .modern-title-box.delete-page::after,
+    .modern-title-box.edit-page::after,
+    .modern-title-box.index-page::after,
+    .top-page::after,
+    .modern-main-container .modern-title-box::after,
+    #ReportBody .modern-title-box::after,
+    .report-container .modern-title-box::after,
+    .report-page .top-page::after {
+        background: linear-gradient(45deg, var(--neo-dashboard-bg-tertiary, #f1f5f9) 30%, #fff 70%) !important;
+        border-bottom: 2px solid var(--neo-menu-primary, #c2ef03) !important;
+    }
+
+.modern-title-box::before,
+.top-page::before {
+    display: none !important;
+}
+
+/* Remove any blue color from header curves */
+.top-page .badge,
+.modern-title-box .badge,
+.neo-dashboard-widget-header .badge {
+    background: var(--neo-menu-primary, #c2ef03) !important;
+    color: #333333 !important;
+}
+
+/* Report Body Header Override */
+#ReportBody .top-page,
+.report-container .top-page {
+    background: linear-gradient(45deg, var(--neo-dashboard-bg-tertiary, #f1f5f9) 30%, #fff 70%) !important;
+}
+
+.modern-title,
+.modern-title-box h2,
+.modern-title-box h3,
+.modern-title-box .modern-title {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    text-shadow: none !important;
+    font-size: 1.4rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.3px !important;
+}
+
+/* Top Page Title (Report/Form Headers) */
+.top-page h5,
+.top-page .page-title,
+.top-page span:not(.sbvr-icon-container):not(.sbvr-count-badge) {
+    font-size: 1.3rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.3px !important;
+}
+
+.modern-title-subtitle,
+.modern-title-box p {
+    color: #cccccc !important;
+    font-size: 0.9rem !important;
+}
+
+.page-header-icon,
+.modern-title-box .page-header-icon,
+.modern-title-box svg {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    fill: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* ===== TOOLBAR ICONS - Meaningful Colors ===== */
+/* Filter Icon - Lime (Primary Action) */
+.top-page .modern-settings-btn[title*="فیلتر"] svg,
+.top-page .modern-settings-btn[title*="Filter"] svg,
+.top-page a[title*="فیلتر"] svg,
+.modern-title-box .fa-filter,
+.top-page .fa-filter {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    fill: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Filter Icon - Global Theme Styling */
+.fa-filter,
+.fa.fa-filter,
+i.fa-filter,
+i.fa.fa-filter,
+.btn .fa-filter,
+.nav-tabs .fa-filter,
+.nav-link .fa-filter,
+.filter-btn .fa-filter,
+[class*="filter"] .fa-filter {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Download/Export Icon - Cyan */
+.top-page .modern-settings-btn[title*="خروجی"] svg,
+.top-page .modern-settings-btn[title*="Export"] svg,
+.top-page .modern-settings-btn[title*="دانلود"] svg,
+.top-page a[title*="خروجی"] svg,
+.modern-title-box .fa-download,
+.top-page .fa-download {
+    color: #22d3ee !important;
+    fill: #22d3ee !important;
+}
+
+/* Refresh Icon - Orange */
+.top-page .modern-settings-btn[title*="بروز"] svg,
+.top-page .modern-settings-btn[title*="Refresh"] svg,
+.top-page a[title*="بروز"] svg,
+.modern-title-box .fa-refresh,
+.modern-title-box .fa-sync,
+.top-page .fa-refresh,
+.top-page .fa-sync {
+    color: #fb923c !important;
+    fill: #fb923c !important;
+}
+
+/* Add New Icon - Lime (Primary Action) */
+.top-page .modern-settings-btn[title*="افزودن"] svg,
+.top-page .modern-settings-btn[title*="Add"] svg,
+.top-page .modern-settings-btn[title*="جدید"] svg,
+.top-page a[title*="افزودن"] svg,
+.modern-title-box .fa-plus,
+.top-page .fa-plus {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    fill: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Edit Icon - Yellow */
+.modern-action-link[title*="ویرایش"] .action-link-icon,
+.modern-action-link[title*="Edit"] .action-link-icon,
+.fa-edit,
+.fa-pencil {
+    color: #facc15 !important;
+}
+
+/* Delete Icon - Red */
+.modern-action-link[title*="حذف"] .action-link-icon,
+.modern-action-link[title*="Delete"] .action-link-icon,
+.fa-trash,
+.fa-trash-o {
+    color: #ef4444 !important;
+}
+
+/* Details/View Icon - Blue */
+.modern-action-link[title*="جزئیات"] .action-link-icon,
+.modern-action-link[title*="Details"] .action-link-icon,
+.modern-action-link[title*="مشاهده"] .action-link-icon,
+.fa-eye,
+.fa-info-circle {
+    color: #3b82f6 !important;
+}
+
+/* Modern Filter Header - HIDDEN (takes up space and looks bad) */
+.modern-filter-header {
+    display: none !important;
+}
+
+/* Keep filter-panel-header - Theme Styled */
+.filter-panel-header {
+    background: linear-gradient(135deg, var(--neo-report-header-background, #333333) 0%, #2a2a2a 100%) !important;
+    border-bottom: 2px solid var(--neo-menu-primary, #c2ef03) !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    padding: 12px 16px !important;
+    border-radius: 8px 8px 0 0 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+
+.filter-panel-header h5,
+.filter-panel-header .filter-title {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    margin: 0 !important;
+    font-weight: 600 !important;
+    font-size: 16px !important;
+}
+
+/* Filter panel close button */
+.filter-panel-close {
+    background: transparent !important;
+    border: none !important;
+    color: #888888 !important;
+    font-size: 18px !important;
+    cursor: pointer !important;
+    padding: 4px 8px !important;
+    border-radius: 4px !important;
+    transition: all 0.2s ease !important;
+}
+
+.filter-panel-close:hover {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    background: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.1)) !important;
+}
+
+/* ===== FILTER TABS - Hide when only one tab ===== */
+/* Hide filter nav tabs when there's only one tab - Report Filter & Index Form Filter */
+.filter-tooltip-panel .nav-tabs:has(.nav-item:only-child),
+.filter-tooltip-panel .nav.nav-tabs:has(.nav-item:only-child),
+.modern-filter-wrapper .nav-tabs:has(.nav-item:only-child),
+.modern-filter-content .nav-tabs:has(.nav-item:only-child),
+#filterTooltipPanel .nav-tabs:has(.nav-item:only-child),
+.modern-form .nav-tabs:has(.nav-item:only-child),
+.modern-form-wrapper .nav-tabs:has(.nav-item:only-child),
+.index-filter .nav-tabs:has(.nav-item:only-child),
+.index-form-filter .nav-tabs:has(.nav-item:only-child),
+#filter-form .nav-tabs:has(.nav-item:only-child),
+.dWrapper .nav-tabs:has(.nav-item:only-child),
+form[id*="filter"] .nav-tabs:has(.nav-item:only-child) {
+    display: none !important;
+}
+
+/* Also hide tabs with only one li child */
+.filter-tooltip-panel .nav-tabs:has(li:only-child),
+.modern-filter-wrapper .nav-tabs:has(li:only-child),
+.modern-filter-content .nav-tabs:has(li:only-child),
+.modern-form .nav-tabs:has(li:only-child),
+.modern-form-wrapper .nav-tabs:has(li:only-child),
+.dWrapper .nav-tabs:has(li:only-child),
+#filter-form .nav-tabs:has(li:only-child) {
+    display: none !important;
+}
+
+/* Also hide using JavaScript fallback class */
+.filter-tooltip-panel .nav-tabs.single-tab,
+.modern-filter-wrapper .nav-tabs.single-tab,
+.modern-filter-content .nav-tabs.single-tab,
+#filterTooltipPanel .nav-tabs.single-tab,
+.modern-form .nav-tabs.single-tab,
+.modern-form-wrapper .nav-tabs.single-tab,
+.dWrapper .nav-tabs.single-tab,
+#filter-form .nav-tabs.single-tab {
+    display: none !important;
+}
+
+/* Style filter tabs when visible (multiple tabs) - Report Filter & Index Form Filter */
+.filter-tooltip-panel .nav-tabs,
+.modern-filter-wrapper .nav-tabs,
+.modern-filter-content .nav-tabs,
+#filterTooltipPanel .nav-tabs,
+.modern-form > .nav-tabs,
+.modern-form-wrapper > .nav-tabs,
+.dWrapper > .nav-tabs,
+#filter-form > .nav-tabs {
+    background: linear-gradient(135deg, #2a2a2a 0%, var(--neo-report-header-background, #333333) 100%) !important;
+    border: 1px solid var(--neo-dashboard-widget-border, #444444) !important;
+    border-radius: 8px !important;
+    padding: 4px !important;
+    margin-bottom: 16px !important;
+}
+
+.filter-tooltip-panel .nav-tabs .nav-link,
+.modern-filter-wrapper .nav-tabs .nav-link,
+.modern-filter-content .nav-tabs .nav-link,
+#filterTooltipPanel .nav-tabs .nav-link,
+.modern-form > .nav-tabs .nav-link,
+.modern-form-wrapper > .nav-tabs .nav-link,
+.dWrapper > .nav-tabs .nav-link,
+#filter-form > .nav-tabs .nav-link {
+    background: transparent !important;
+    color: #888888 !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 8px 16px !important;
+    margin: 0 2px !important;
+    transition: all 0.2s ease !important;
+    font-size: 14px !important;
+}
+
+.filter-tooltip-panel .nav-tabs .nav-link:hover,
+.modern-filter-wrapper .nav-tabs .nav-link:hover,
+.modern-filter-content .nav-tabs .nav-link:hover,
+#filterTooltipPanel .nav-tabs .nav-link:hover,
+.modern-form > .nav-tabs .nav-link:hover,
+.modern-form-wrapper > .nav-tabs .nav-link:hover,
+.dWrapper > .nav-tabs .nav-link:hover,
+#filter-form > .nav-tabs .nav-link:hover {
+    background: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.15)) !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+.filter-tooltip-panel .nav-tabs .nav-link.active,
+.modern-filter-wrapper .nav-tabs .nav-link.active,
+.modern-filter-content .nav-tabs .nav-link.active,
+#filterTooltipPanel .nav-tabs .nav-link.active,
+.modern-form > .nav-tabs .nav-link.active,
+.modern-form-wrapper > .nav-tabs .nav-link.active,
+.dWrapper > .nav-tabs .nav-link.active,
+#filter-form > .nav-tabs .nav-link.active {
+    background: linear-gradient(135deg, var(--neo-menu-primary, #c2ef03) 0%, var(--neo-menu-primary-active, #a8d400) 100%) !important;
+    color: #333333 !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 8px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.3)) !important;
+}
+
+.modern-filter-icon {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    fill: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Popular Filters Header */
+.popular-filters-header {
+    background: var(--neo-report-header-background, #333333) !important;
+    border-bottom: 1px solid var(--neo-dashboard-widget-border, #444444) !important;
+}
+
+.popular-filters-header h6,
+.popular-filters-header span {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Popular Filters Auto-Hide Tab (Vertical Nav Box) - Simplified */
+.popular-filters-auto-hide-tab {
+    background: var(--neo-report-header-background, #333333) !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    border: 1px solid var(--neo-dashboard-widget-border, #444444) !important;
+    transition: background 0.2s ease !important;
+}
+
+.popular-filters-auto-hide-tab:hover {
+    background: var(--neo-dashboard-widget-border, #444444) !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+.popular-filters-auto-hide-tab i {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+.popular-filters-auto-hide-tab .auto-hide-tab-text {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* ===== SUB-REPORT / SUBTABLE TABS - #333333 / var(--neo-menu-primary, #c2ef03) ===== */
+/* ===== FORM SUBTABLE MULTITAB - Theme Override ===== */
+#SubTablesTabMultiTab .nav-tabs,
+.modern-form #SubTablesTabMultiTab .nav-tabs,
+.modern-form-content #SubTablesTabMultiTab .nav-tabs {
+    background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%) !important;
+    border: 1px solid #dee2e6 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+}
+
+#SubTablesTabMultiTab .nav-tabs::before {
+    background: linear-gradient(90deg, transparent 0%, var(--neo-menu-primary-light, rgba(194, 239, 3, 0.3)) 50%, transparent 100%) !important;
+}
+
+#SubTablesTabMultiTab .nav-tabs .nav-link,
+.modern-form #SubTablesTabMultiTab .nav-tabs .nav-link {
+    color: #495057 !important;
+    background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%) !important;
+    border: 1px solid #dee2e6 !important;
+}
+
+#SubTablesTabMultiTab .nav-tabs .nav-link:hover,
+.modern-form #SubTablesTabMultiTab .nav-tabs .nav-link:hover,
+.neo-control .nav-tabs .nav-link:hover,
+[data-id] .nav-tabs .nav-link:hover,
+[data-id] > .row > .col-lg-12 > .nav-tabs .nav-link:hover {
+    color: #333333 !important;
+    background: var(--neo-menu-primary, #c2ef03) !important;
+    background-image: none !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    box-shadow: 0 4px 12px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.3)) !important;
+    transform: translateY(-2px) !important;
+}
+
+#SubTablesTabMultiTab .nav-tabs .nav-link.active,
+.modern-form #SubTablesTabMultiTab .nav-tabs .nav-link.active,
+#SubTablesTabMultiTab .nav-tabs .nav-item .nav-link.active,
+#SubTablesTabMultiTab .nav-tabs > .nav-item > .nav-link.active,
+.modern-form-content #SubTablesTabMultiTab .nav-tabs .nav-link.active,
+#mainPartOfTheForm #SubTablesTabMultiTab .nav-tabs .nav-link.active {
+    color: var(--neo-header-text, #ffffff) !important;
+    background: var(--neo-report-header-background, #333333) !important;
+    background-color: var(--neo-report-header-background, #333333) !important;
+    background-image: linear-gradient(180deg, var(--neo-report-header-background, #333333) 0%, #2a2a2a 100%) !important;
+    border-color: var(--neo-report-header-background, #333333) !important;
+    box-shadow: 0 4px 12px rgba(51, 51, 51, 0.3) !important;
+    transform: translateY(-2px) !important;
+}
+
+#SubTablesTabMultiTab .nav-tabs .nav-link.active::before {
+    background: linear-gradient(90deg, var(--neo-menu-primary-light, rgba(194, 239, 3, 0.2)), var(--neo-menu-primary-light, rgba(194, 239, 3, 0.5)), var(--neo-menu-primary-light, rgba(194, 239, 3, 0.2))) !important;
+}
+
+#SubTablesTabMultiTab .nav-tabs .nav-link.active::after {
+    background: linear-gradient(90deg, transparent, var(--neo-menu-primary, #c2ef03), transparent) !important;
+}
+
+#SubTablesTabMultiTab .nav-tabs .nav-link i,
+#SubTablesTabMultiTab .nav-tabs .nav-link .icon,
+#SubTablesTabMultiTab .nav-tabs .nav-link svg {
+    color: inherit !important;
+}
+
+#SubTablesTabMultiTab .nav-tabs .nav-link.active i,
+#SubTablesTabMultiTab .nav-tabs .nav-link.active .icon,
+#SubTablesTabMultiTab .nav-tabs .nav-link.active svg {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Sub-report Section Title */
+#SubTablesTabMultiTab .tab-pane > h4,
+#SubTablesTabMultiTab .tab-pane > h5,
+#SubTablesTabMultiTab .tab-pane > .section-title {
+    background: linear-gradient(135deg, var(--neo-report-header-background, #333333) 0%, #2a2a2a 100%) !important;
+    color: var(--neo-header-text, #ffffff) !important;
+    border-right: 4px solid var(--neo-menu-primary, #c2ef03) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Sub-report Icon (fa-desktop) */
+.fa-desktop,
+i.fa-desktop,
+i.fa.fa-desktop,
+i.fa.fa-2x.fa-desktop,
+.fa.fa-2x.fa-desktop,
+td .fa-desktop,
+td i.fa-desktop,
+.t-table-wrapper .fa-desktop,
+.modern-table-container .fa-desktop,
+table .fa-desktop {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    transition: color 0.2s ease, transform 0.2s ease !important;
+}
+
+.fa-desktop:hover,
+i.fa-desktop:hover,
+i.fa.fa-desktop:hover,
+i.fa.fa-2x.fa-desktop:hover,
+td .fa-desktop:hover,
+td i.fa-desktop:hover {
+    color: var(--neo-menu-primary-hover, #d4f55a) !important;
+    transform: scale(1.1) !important;
+}
+
+/* ===== GLOBAL BLUE TO LIME GREEN THEME OVERRIDE ===== */
+
+/* Resend Container (Verify Page) */
+.resend-container.active {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Form Focus States */
+.modern-form .form-control:focus,
+.modern-form .tField:focus,
+.neo-login-input:focus-visible,
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    box-shadow: 0 0 0 3px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.2)) !important;
+}
+
+/* Checkbox Accent */
+.neo-login-checkbox,
+input[type="checkbox"] {
+    accent-color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Filter Parameter Selected */
+.filter-parameter-item.selected {
+    background: linear-gradient(135deg, var(--neo-report-header-background, #333333) 0%, #2a2a2a 100%) !important;
+    color: var(--neo-header-text, #ffffff) !important;
+}
+
+/* Filter Link Hover */
+.modern-filter-wrapper .choice-form-link:hover {
+    background: var(--neo-report-header-background, #333333) !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    box-shadow: 0 2px 4px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.3)) !important;
+}
+
+/* Choice Form Link - Override Blue Styles */
+.choice-form-link,
+a.choice-form-link,
+.modern-filter-wrapper .choice-form-link,
+.modern-form .choice-form-link,
+.dWrapper .choice-form-link,
+.filter-parameter-icon {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+    border: 1px solid var(--neo-menu-primary, #c2ef03) !important;
+    color: #333333 !important;
+    /* Fix size and overflow issues */
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    max-width: 20px !important;
+    min-height: 20px !important;
+    max-height: 20px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 4px !important;
+    padding: 0 !important;
+    margin: 0 2px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    flex-shrink: 0 !important;
+    position: relative !important;
+    vertical-align: middle !important;
+}
+
+.choice-form-link:hover,
+a.choice-form-link:hover,
+.modern-filter-wrapper .choice-form-link:hover,
+.modern-form .choice-form-link:hover,
+.dWrapper .choice-form-link:hover,
+.filter-parameter-icon:hover {
+    background: linear-gradient(135deg, var(--neo-menu-primary, #c2ef03) 0%, var(--neo-menu-primary-active, #a8d400) 100%) !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    box-shadow: 0 2px 4px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.3)) !important;
+    /* No transform to prevent layout shift */
+}
+
+.choice-form-link:hover svg,
+a.choice-form-link:hover svg,
+.modern-filter-wrapper .choice-form-link:hover svg,
+.modern-form .choice-form-link:hover svg,
+.dWrapper .choice-form-link:hover svg,
+.filter-parameter-icon:hover svg {
+    fill: #333333 !important;
+    color: #333333 !important;
+}
+
+.choice-form-link svg,
+a.choice-form-link svg,
+.modern-filter-wrapper .choice-form-link svg,
+.modern-form .choice-form-link svg,
+.dWrapper .choice-form-link svg,
+.filter-parameter-icon svg {
+    fill: #333333 !important;
+    color: #333333 !important;
+    /* Fix SVG size to prevent overflow */
+    width: 12px !important;
+    height: 12px !important;
+    max-width: 12px !important;
+    max-height: 12px !important;
+    flex-shrink: 0 !important;
+    overflow: hidden !important;
+}
+
+.choice-form-link:focus,
+a.choice-form-link:focus {
+    box-shadow: 0 0 0 3px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.3)) !important;
+    outline: none !important;
+}
+
+.choice-form-link::before,
+a.choice-form-link::before {
+    display: none !important;
+    content: none !important;
+}
+
+.choice-form-link::after,
+a.choice-form-link::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* ===== FILTER PARAMETER ICON - Same as choice-form-link ===== */
+.filter-parameter-icon,
+.filter-parameter-icon.filter-parameter-btn,
+.dWrapper .filter-parameter-icon,
+.modern-filter-wrapper .filter-parameter-icon {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+    border: 1px solid var(--neo-menu-primary, #c2ef03) !important;
+    color: #333333 !important;
+    width: 20px !important;
+    height: 20px !important;
+    min-width: 20px !important;
+    max-width: 20px !important;
+    min-height: 20px !important;
+    max-height: 20px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
+    padding: 0 !important;
+    margin: 0 2px !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    flex-shrink: 0 !important;
+    position: relative !important;
+    vertical-align: middle !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    box-shadow: none !important;
+}
+
+.filter-parameter-icon:hover,
+.filter-parameter-icon.filter-parameter-btn:hover,
+.dWrapper .filter-parameter-icon:hover,
+.modern-filter-wrapper .filter-parameter-icon:hover {
+    background: linear-gradient(135deg, var(--neo-menu-primary, #c2ef03) 0%, var(--neo-menu-primary-active, #a8d400) 100%) !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    box-shadow: 0 2px 4px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.3)) !important;
+    transform: none !important;
+}
+
+.filter-parameter-icon svg,
+.filter-parameter-icon.filter-parameter-btn svg,
+.dWrapper .filter-parameter-icon svg,
+.modern-filter-wrapper .filter-parameter-icon svg {
+    fill: #333333 !important;
+    color: #333333 !important;
+    width: 12px !important;
+    height: 12px !important;
+    max-width: 12px !important;
+    max-height: 12px !important;
+    flex-shrink: 0 !important;
+    overflow: hidden !important;
+    filter: none !important;
+}
+
+.filter-parameter-icon:hover svg,
+.filter-parameter-icon.filter-parameter-btn:hover svg,
+.dWrapper .filter-parameter-icon:hover svg,
+.modern-filter-wrapper .filter-parameter-icon:hover svg {
+    fill: #333333 !important;
+    color: #333333 !important;
+}
+
+.filter-parameter-icon:focus,
+.filter-parameter-icon.filter-parameter-btn:focus {
+    box-shadow: 0 0 0 3px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.3)) !important;
+    outline: none !important;
+}
+
+.filter-parameter-icon:active,
+.filter-parameter-icon.filter-parameter-btn:active {
+    transform: none !important;
+    box-shadow: 0 1px 2px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.2)) !important;
+}
+
+/* Select2 Multiple Choice Tags - ensure proper display of selected values */
+.modern-filter-wrapper .select2-container .select2-selection--multiple .select2-selection__choice,
+.select2-container .select2-selection--multiple .select2-selection__choice,
+.filter-tooltip-panel .select2-selection__choice {
+    background: #333333 !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    border: none !important;
+    width: auto !important;
+    max-width: 100% !important;
+}
+
+/* Select2 Dropdown Highlight */
+.modern-filter-wrapper .select2-results__option--highlighted,
+.select2-results__option--highlighted {
+    background: #333333 !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Select2 Focus Border */
+.select2-container--focus .select2-selection,
+.select2-container--open .select2-selection {
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    box-shadow: 0 0 0 2px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.2)) !important;
+}
+
+/* Select2 Clear Button */
+.select2-selection__clear {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Boolean Button Active */
+.modern-filter-wrapper .boolean-btn.active,
+.boolean-btn.active {
+    background: #333333 !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Action Link Icons - Keep original style, just update hover colors */
+.modern-action-link {
+    background: transparent !important;
+}
+
+.modern-action-link:hover {
+    box-shadow: 0 4px 12px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.2)) !important;
+}
+
+.action-link-icon {
+    color: #6b7280 !important;
+    background: transparent !important;
+}
+
+.modern-action-link:hover .action-link-icon {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Details Icon */
+.modern-action-link[title*="جزئیات"] .action-link-icon,
+.modern-action-link[title*="Details"] .action-link-icon,
+.details-icon,
+i.fa-info-circle {
+    color: #3b82f6 !important;
+}
+
+.modern-action-link[title*="جزئیات"]:hover .action-link-icon,
+.modern-action-link[title*="Details"]:hover .action-link-icon,
+.details-icon:hover {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Page Icon Wrapper */
+.page-icon-wrapper {
+    background: linear-gradient(135deg, #333333 0%, #2a2a2a 100%) !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Accordion Hover */
+.modern-accordion .card-header a:hover {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    background: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.05)) !important;
+}
+
+.modern-accordion .card-header a[aria-expanded="true"]::after {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Accordion Gradient Line */
+.modern-accordion .card-header::before {
+    background: linear-gradient(90deg, var(--neo-menu-primary, #c2ef03), var(--neo-menu-primary-active, #a8d400), #c2ef03) !important;
+}
+
+/* Accordion Bullet */
+.modern-accordion .card-header a::before {
+    background: linear-gradient(135deg, var(--neo-menu-primary, #c2ef03), var(--neo-menu-primary-active, #a8d400)) !important;
+}
+
+/* Scrollbar Colors */
+.custom-scroll::-webkit-scrollbar-thumb,
+.custom-scroll.thick-scroll::-webkit-scrollbar-thumb,
+.t-table-wrapper.custom-scroll::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #333333, #2a2a2a) !important;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover,
+.custom-scroll.thick-scroll::-webkit-scrollbar-thumb:hover,
+.t-table-wrapper.custom-scroll::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #444444, #333333) !important;
+}
+
+.t-table-wrapper.custom-scroll {
+    scrollbar-color: #333333 #f1f5f9 !important;
+}
+
+/* Group Title */
+.neo-group-title {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    background: #333333 !important;
+    padding: 8px 12px !important;
+    border-radius: 6px !important;
+}
+
+/* Focus Visible for Accessibility */
+.combo-clear-btn:focus-visible,
+button:focus-visible,
+a:focus-visible {
+    outline: 2px solid var(--neo-menu-primary, #c2ef03) !important;
+    outline-offset: 2px !important;
+}
+
+/* Logo Container */
+#logo-container {
+    background: linear-gradient(135deg, #333333 0%, #2a2a2a 100%) !important;
+}
+
+/* Link Colors */
+a:hover {
+    color: var(--neo-menu-primary, #c2ef03);
+}
+
+/* Primary Button Override */
+.btn-primary,
+.btn-primary:hover,
+.btn-primary:focus {
+    background: #333333 !important;
+    border-color: #333333 !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+.btn-primary:hover {
+    background: #444444 !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Success Button Override (Apply Filter, Save, etc.) */
+.btn-success,
+.btn-success:hover,
+.btn-success:focus {
+    background: var(--neo-menu-primary, #c2ef03) !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    color: #333333 !important;
+}
+
+.btn-success:hover {
+    background: var(--neo-menu-primary-active, #a8d400) !important;
+    border-color: var(--neo-menu-primary-active, #a8d400) !important;
+}
+
+/* Info Button Override */
+.btn-info,
+.btn-info:hover,
+.btn-info:focus {
+    background: #333333 !important;
+    border-color: #444444 !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+.btn-info:hover {
+    background: #444444 !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Filter Panel Specific Styles */
+.filter-tooltip-panel {
+    border-color: #444444 !important;
+}
+
+.filter-tooltip-panel .btn-success,
+#submit-filter {
+    background: var(--neo-menu-primary, #c2ef03) !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    color: #333333 !important;
+}
+
+.filter-tooltip-panel .btn-success:hover,
+#submit-filter:hover {
+    background: var(--neo-menu-primary-active, #a8d400) !important;
+}
+
+/* Filter Panel Tabs */
+.filter-tooltip-panel .nav-tabs,
+.filter-panel-tabs {
+    background: #333333 !important;
+    border: none !important;
+}
+
+.filter-tooltip-panel .nav-tabs .nav-link,
+.filter-panel-tabs .nav-link {
+    color: #cccccc !important;
+    background: #3a3a3a !important;
+    border: 1px solid #444444 !important;
+}
+
+.filter-tooltip-panel .nav-tabs .nav-link:hover,
+.filter-panel-tabs .nav-link:hover {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    background: #444444 !important;
+}
+
+.filter-tooltip-panel .nav-tabs .nav-link.active,
+.filter-panel-tabs .nav-link.active {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    background: #333333 !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Filter Panel Header - Override inline styles */
+.filter-tooltip-panel .filter-panel-header {
+    background: linear-gradient(135deg, #333333 0%, #2a2a2a 100%) !important;
+    border-bottom: 2px solid var(--neo-menu-primary, #c2ef03) !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    padding: 12px 16px !important;
+    border-radius: 0 !important;
+}
+
+.filter-tooltip-panel .filter-panel-header h5 {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    margin: 0 !important;
+    font-weight: 600 !important;
+}
+
+.filter-tooltip-panel .filter-panel-close {
+    background: transparent !important;
+    color: #888888 !important;
+    border: none !important;
+}
+
+.filter-tooltip-panel .filter-panel-close:hover {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    background: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.1)) !important;
+}
+
+/* Save New Filter Button */
+.btn-outline-primary,
+.filter-tooltip-panel .btn-outline-primary {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    background: transparent !important;
+}
+
+.btn-outline-primary:hover,
+.filter-tooltip-panel .btn-outline-primary:hover {
+    background: var(--neo-menu-primary, #c2ef03) !important;
+    color: #333333 !important;
+}
+
+/* Filter Labels and Icons */
+.filter-tooltip-panel label,
+.filter-tooltip-panel .form-label {
+    color: #333333 !important;
+}
+
+.filter-tooltip-panel svg,
+.filter-tooltip-panel i.fa {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    fill: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Popular Filters Section - Simplified */
+.popular-filters-section {
+    background: #f8f9fa !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 8px !important;
+}
+
+.popular-filters-section .popular-filters-header {
+    background: #333333 !important;
+    border-bottom: 1px solid #444444 !important;
+    border-radius: 8px 8px 0 0 !important;
+    padding: 10px 15px !important;
+}
+
+.popular-filters-section .popular-filters-header h6 {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    margin: 0 !important;
+}
+
+.popular-filters-section .popular-filters-content {
+    background: #ffffff !important;
+    padding: 10px !important;
+}
+
+.popular-filters-toggle-btn {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    background: #333333 !important;
+    border: 1px solid #444444 !important;
+}
+
+.popular-filters-toggle-btn:hover {
+    background: var(--neo-menu-primary, #c2ef03) !important;
+    color: #333333 !important;
+}
+
+/* Popular Filters Dock Container */
+.popular-filters-dock-container,
+.popular-filters-dock-container.auto-hide {
+    background: #f8f9fa !important;
+    border: 1px solid #e0e0e0 !important;
+}
+
+/* Search Box in Popular Filters */
+.popular-filters-section .search-box .input-group-text {
+    background: #333333 !important;
+    border-color: #333333 !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+.popular-filters-section .search-box .form-control,
+#popular-filters-search-input {
+    background: #ffffff !important;
+    border-color: #e0e0e0 !important;
+    color: #333333 !important;
+}
+
+#popular-filters-search-input::placeholder {
+    color: #999999 !important;
+}
+
+#popular-filters-search-input:focus {
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    box-shadow: 0 0 0 2px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.2)) !important;
+}
+
+/* Popular Filters Tree */
+#popular-filters-tree,
+.popular-filters-section .report-tree-container {
+    background: #ffffff !important;
+}
+
+/* Add Folder Button */
+.popular-filters-actions .btn-outline-primary {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    background: transparent !important;
+}
+
+.popular-filters-actions .btn-outline-primary:hover {
+    background: var(--neo-menu-primary, #c2ef03) !important;
+    color: #333333 !important;
+}
+
+/* Filter Tree Items */
+.filter-tree-item.selected,
+.filter-tree-item:hover {
+    background: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.1)) !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Clear Filter Button */
+.filter-tooltip-panel .btn-secondary,
+.btn-clear-filter {
+    background: #6b7280 !important;
+    border-color: #6b7280 !important;
+    color: var(--neo-menu-primary, #c2ef03);
+}
+
+.filter-tooltip-panel .btn-secondary:hover,
+.btn-clear-filter:hover {
+    background: #4b5563 !important;
+}
+
+/* ===== BOOTSTRAP TOGGLE (CHECKBOX) - Fix Font ===== */
+.toggle.btn,
+.toggle .toggle-on,
+.toggle .toggle-off,
+.toggle .toggle-handle {
+    font-size: 14px !important;
+    font-family: 'IRANSansX-Medium', 'Vazir', system-ui, -apple-system, sans-serif !important;
+}
+
+.toggle.btn .toggle-on,
+.toggle.btn .toggle-off {
+    padding-top: 0.35rem !important;
+    padding-bottom: 0.25rem !important;
+    line-height: 1.2 !important;
+}
+
+/* ===== CHART TYPE SELECTOR TAB BAR ===== */
+/* Button Group Toggle (Chart Type Selection) - NOT checkbox toggle */
+.chart-type-selector .btn,
+.btn-group:not(.toggle) .btn-check + .btn {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    color: #6b7280 !important;
+    transition: all 0.2s ease !important;
+}
+
+.chart-type-selector .btn:hover,
+.btn-group:not(.toggle) .btn-check + .btn:hover {
+    background: #f3f4f6 !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    color: #333333 !important;
+}
+
+.chart-type-selector .btn.active,
+.btn-group:not(.toggle) .btn-check:checked + .btn,
+.btn-group:not(.toggle) .btn.active {
+    background: #333333 !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    box-shadow: 0 2px 8px rgba(51, 51, 51, 0.3) !important;
+}
+
+.chart-type-selector .btn.active:hover,
+.btn-group:not(.toggle) .btn-check:checked + .btn:hover,
+.btn-group:not(.toggle) .btn.active:hover {
+    background: #444444 !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Chart type selected icon */
+.btn-group-toggle .btn.active i,
+.btn-group-toggle .btn.active svg,
+.btn-group .btn.active i,
+.btn-group .btn.active svg,
+.btn-group-toggle .btn[aria-pressed="true"] i,
+.btn-group-toggle .btn[aria-pressed="true"] svg {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    fill: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Chart type icons */
+.btn-group-toggle .btn i,
+.btn-group-toggle .btn svg,
+.chart-type-selector .btn i,
+.chart-type-selector .btn svg {
+    color: currentColor !important;
+    fill: currentColor !important;
+}
+
+/* Focus state */
+.btn-group-toggle .btn:focus,
+.btn-group-toggle .btn:focus-within {
+    outline: 2px solid var(--neo-menu-primary, #c2ef03) !important;
+    outline-offset: 2px !important;
+}
+
+/* Outline Primary Button */
+.btn-outline-primary {
+    color: #333333 !important;
+    border-color: #333333 !important;
+}
+
+.btn-outline-primary:hover {
+    background: #333333 !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Info/Success Colors */
+.text-primary,
+.text-info {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Badge Primary */
+.badge-primary,
+.badge.bg-primary {
+    background: #333333 !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Progress Bar */
+.progress-bar {
+    background: linear-gradient(90deg, #333333, #c2ef03) !important;
+}
+
+/* Pagination Active */
+/* ===== PAGINATION THEME ===== */
+.pagination,
+.modern-pagination {
+    background: transparent !important;
+}
+
+.pagination .page-link,
+.modern-pagination a,
+.modern-pagination span,
+.page-link {
+    background: #ffffff !important;
+    color: #333333 !important;
+    border: 1px solid #e5e7eb !important;
+    transition: all 0.2s ease !important;
+}
+
+.pagination .page-link:hover,
+.modern-pagination a:hover,
+.page-link:hover {
+    background: #333333 !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    border-color: #333333 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 8px rgba(51, 51, 51, 0.3) !important;
+}
+
+.pagination .page-item.active .page-link,
+.page-item.active .page-link,
+.modern-pagination .active {
+    background: #333333 !important;
+    border-color: #333333 !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    box-shadow: 0 2px 8px rgba(51, 51, 51, 0.3) !important;
+}
+
+.pagination .page-item.disabled .page-link,
+.page-item.disabled .page-link {
+    background: #f3f4f6 !important;
+    color: #9ca3af !important;
+    border-color: #e5e7eb !important;
+    cursor: not-allowed !important;
+}
+
+/* Pagination Icons */
+.pagination .page-link i,
+.pagination .page-link svg,
+.pagination .page-link .fa,
+.modern-pagination i,
+.modern-pagination svg,
+.modern-pagination .fa {
+    color: currentColor !important;
+}
+
+/* Page Link with Mouse Pointer - Theme */
+.page-link.mouse-pointer,
+a.page-link.mouse-pointer,
+.pagination .page-link.mouse-pointer {
+    background: #ffffff !important;
+    color: #333333 !important;
+    border: 1px solid #e5e7eb !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+.page-link.mouse-pointer:hover,
+a.page-link.mouse-pointer:hover,
+.pagination .page-link.mouse-pointer:hover {
+    background: #333333 !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    border-color: #333333 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 8px rgba(51, 51, 51, 0.3) !important;
+}
+
+.page-item.active .page-link.mouse-pointer,
+.pagination .page-item.active .page-link.mouse-pointer {
+    background: #333333 !important;
+    border-color: #333333 !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    box-shadow: 0 2px 8px rgba(51, 51, 51, 0.3) !important;
+}
+
+.page-item.disabled .page-link.mouse-pointer,
+.pagination .page-item.disabled .page-link.mouse-pointer {
+    background: #f3f4f6 !important;
+    color: #9ca3af !important;
+    border-color: #e5e7eb !important;
+    cursor: not-allowed !important;
+}
+
+/* Pagination Text */
+.pagination-info,
+.page-info,
+.pager-info,
+.dataTables_info,
+.showing-info {
+    color: #333333 !important;
+}
+
+/* Page Size Selector */
+.page-size-selector,
+.pagination select,
+.dataTables_length select {
+    background: #ffffff !important;
+    color: #333333 !important;
+    border: 1px solid #e5e7eb !important;
+}
+
+.page-size-selector:focus,
+.pagination select:focus,
+.dataTables_length select:focus {
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    box-shadow: 0 0 0 3px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.2)) !important;
+}
+
+/* Alert Primary */
+.alert-primary {
+    background: rgba(51, 51, 51, 0.1) !important;
+    border-color: #333333 !important;
+    color: #333333 !important;
+}
+
+/* Loading Spinner */
+.spinner-border,
+.spinner-grow {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Pivot Table Headers - Theme Colors */
+.pivot-header,
+.pivot-row-header,
+.pivot-row-dimension-header,
+.pivot-value-dimension-header,
+.pivot-col-header,
+.pivot-column-header {
+    background: #333333 !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    border-color: #444444 !important;
+    font-weight: 600 !important;
+}
+
+.pivot-corner,
+.pivot-table th:first-child {
+    background: #2a2a2a !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    border-color: #444444 !important;
+}
+
+.pivot-table thead th,
+.pivot-table thead td {
+    background: var(--neo-report-header-background, #333333) !important;
+    color: var(--neo-header-text, #ffffff) !important;
+    border: 1px solid var(--neo-dashboard-widget-border, #444444) !important;
+}
+
+.pivot-table tbody td {
+    border: 1px solid #e5e7eb !important;
+}
+
+.pivot-table tbody tr:hover td {
+    background: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.08)) !important;
+}
+
+/* Pivot Value Label - Theme Colors */
+.pivot-value-label {
+    background: #444444 !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    font-weight: 600 !important;
+    border: 1px solid #555555 !important;
+}
+
+.pivot-value-label__icon {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    opacity: 0.8 !important;
+}
+
+.pivot-value-label__text {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+.pivot-col-value {
+    background: #3a3a3a !important;
+    color: #ffffff !important;
+    border: 1px solid #444444 !important;
+}
+
+/* Details Card Header - Theme Colors */
+.details-card-header {
+    background: linear-gradient(135deg, #333333 0%, #2a2a2a 100%) !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    border-bottom: 2px solid var(--neo-menu-primary, #c2ef03) !important;
+}
+
+.details-card-header h4,
+.details-card-header h5,
+.details-card-header .title {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    margin: 0 !important;
+}
+
+.details-card-header .close-btn,
+.details-card-header button {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 6px !important;
+}
+
+.details-card-header .close-btn:hover,
+.details-card-header button:hover {
+    background: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.2)) !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Report Toolbar */
+.neo-dashboard-toolbar,
+.neo-dashboard-header-toolbar {
+    background: transparent !important;
+    border: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+
+.neo-dashboard-toolbar-left,
+.neo-dashboard-toolbar-right {
+    color: #ffffff !important;
+}
+
+/* Page Bar / Breadcrumb Header */
+.page-bar,
+.breadcrumb-wrapper {
+    background: #333333 !important;
+    border-bottom: 1px solid #444444 !important;
+}
+
+.page-bar .breadcrumb,
+.page-bar .breadcrumb a,
+.page-bar .breadcrumb li {
+    color: #cccccc !important;
+}
+
+.page-bar .breadcrumb .active,
+.page-bar .breadcrumb a:hover {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Report Main Box Title */
+.report-main-box-s .title,
+.report-main-box .title,
+#ReportBody .report-title {
+    color: #333333 !important;
+    font-weight: 600 !important;
+}
+
+/* Details Column Header */
+.details-column-header {
+    background: #333333 !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Details Icon (Hidden Columns Info Button) */
+.details-icon,
+span.details-icon,
+.details-column-cell .details-icon,
+span[data-hidden-columns-base64] {
+    background: #333333 !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    border: 1px solid var(--neo-menu-primary, #c2ef03) !important;
+    transition: all 0.2s ease !important;
+}
+
+.details-icon:hover,
+span.details-icon:hover,
+span[data-hidden-columns-base64]:hover {
+    background: var(--neo-menu-primary, #c2ef03) !important;
+    color: #333333 !important;
+    transform: scale(1.1) !important;
+    box-shadow: 0 2px 8px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.4)) !important;
+}
+
+/* Settings Button on Title - Base style (same as refresh-icon) */
+.modern-settings-btn {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    background: #333333 !important;
+    border: 2px solid #444444 !important;
+}
+
+.modern-settings-btn:hover {
+    color: #333333 !important;
+    background: var(--neo-menu-primary, #c2ef03) !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+.modern-settings-btn svg,
+.modern-settings-btn svg use,
+.modern-settings-btn svg * {
+    fill: currentColor !important;
+    stroke: currentColor !important;
+    color: currentColor !important;
+}
+
+/* Refresh Icon Button (modern-settings-btn.refresh-icon) */
+.modern-settings-btn.refresh-icon {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    background: #333333 !important;
+    border: 2px solid #444444 !important;
+}
+
+.modern-settings-btn.refresh-icon:hover {
+    color: #333333 !important;
+    background: var(--neo-menu-primary, #c2ef03) !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+.modern-settings-btn.refresh-icon svg,
+.modern-settings-btn.refresh-icon svg use,
+.modern-settings-btn.refresh-icon svg * {
+    fill: currentColor !important;
+    stroke: currentColor !important;
+    color: currentColor !important;
+}
+
+/* Add New Record Button (modern-settings-btn.modern-add-btn) */
+.modern-settings-btn.modern-add-btn {
+    color: #333333 !important;
+    background: var(--neo-menu-primary, #c2ef03) !important;
+    border: 2px solid var(--neo-menu-primary, #c2ef03) !important;
+}
+
+.modern-settings-btn.modern-add-btn:hover {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    background: #333333 !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    box-shadow: 0 10px 30px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.3)) !important;
+}
+
+.modern-settings-btn.modern-add-btn::before {
+    background: rgba(51, 51, 51, 0.2) !important;
+}
+
+.modern-settings-btn.modern-add-btn svg {
+    stroke: currentColor !important;
+    color: currentColor !important;
+}
+
+/* ===== FINAL OVERRIDE: NAV-LINK ACTIVE - #333333 / var(--neo-menu-primary, #c2ef03) ===== */
+/* These styles MUST be at the end to override controls-modern.css blue styles */
+.nav-link.active,
+.nav-tabs .nav-link.active,
+.neo-control .nav-tabs .nav-link.active,
+[data-id] .nav-tabs .nav-link.active,
+[data-id] > .row > .col-lg-12 > .nav-tabs .nav-link.active,
+#SubTablesTabMultiTab .nav-tabs .nav-link.active,
+#SubTablesTabMultiTab .nav-tabs > .nav-item > .nav-link.active,
+#SubTablesTabMultiTab .nav-tabs .nav-item .nav-link.active,
+.modern-form .nav-tabs .nav-link.active,
+.modern-form #SubTablesTabMultiTab .nav-link.active,
+.modern-form-content #SubTablesTabMultiTab .nav-link.active,
+#mainPartOfTheForm #SubTablesTabMultiTab .nav-link.active,
+#mainPartOfTheForm .nav-tabs .nav-link.active {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    background: #333333 !important;
+    background-color: #333333 !important;
+    background-image: none !important;
+    border-color: #333333 !important;
+    box-shadow: 0 4px 12px rgba(51, 51, 51, 0.3) !important;
+    transform: translateY(-1px) !important;
+}
+
+.nav-link.active::before,
+.nav-tabs .nav-link.active::before,
+#SubTablesTabMultiTab .nav-tabs .nav-link.active::before {
+    background: linear-gradient(90deg, var(--neo-menu-primary-light, rgba(194, 239, 3, 0.2)), var(--neo-menu-primary-light, rgba(194, 239, 3, 0.5)), var(--neo-menu-primary-light, rgba(194, 239, 3, 0.2))) !important;
+}
+
+.nav-link.active::after,
+.nav-tabs .nav-link.active::after,
+#SubTablesTabMultiTab .nav-tabs .nav-link.active::after {
+    background: linear-gradient(90deg, transparent, var(--neo-menu-primary, #c2ef03), transparent) !important;
+}
+
+.nav-link.active i,
+.nav-link.active svg,
+.nav-link.active .icon,
+.nav-tabs .nav-link.active i,
+.nav-tabs .nav-link.active svg,
+.nav-tabs .nav-link.active .icon,
+#SubTablesTabMultiTab .nav-tabs .nav-link.active i,
+#SubTablesTabMultiTab .nav-tabs .nav-link.active svg,
+#SubTablesTabMultiTab .nav-tabs .nav-link.active .icon {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    fill: var(--neo-menu-primary, #c2ef03) !important;
+    opacity: 1 !important;
+}
+
+/* ===== FINAL OVERRIDE: NAV-LINK HOVER - Lime Background ===== */
+.nav-link:hover,
+.nav-tabs .nav-link:hover,
+.neo-control .nav-tabs .nav-link:hover,
+[data-id] .nav-tabs .nav-link:hover,
+[data-id] > .row > .col-lg-12 > .nav-tabs .nav-link:hover,
+#SubTablesTabMultiTab .nav-tabs .nav-link:hover,
+#SubTablesTabMultiTab .nav-tabs > .nav-item > .nav-link:hover,
+.modern-form .nav-tabs .nav-link:hover,
+#mainPartOfTheForm .nav-tabs .nav-link:hover {
+    color: #333333 !important;
+    background: var(--neo-menu-primary, #c2ef03) !important;
+    background-color: var(--neo-menu-primary, #c2ef03) !important;
+    background-image: none !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    box-shadow: 0 4px 12px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.3)) !important;
+    transform: translateY(-2px) !important;
+}
+
+.nav-link:hover i,
+.nav-link:hover svg,
+.nav-link:hover .icon,
+.nav-tabs .nav-link:hover i,
+.nav-tabs .nav-link:hover svg,
+#SubTablesTabMultiTab .nav-tabs .nav-link:hover i,
+#SubTablesTabMultiTab .nav-tabs .nav-link:hover svg {
+    color: #333333 !important;
+    fill: #333333 !important;
+}
+
+/* ===== FINAL OVERRIDE: TABLE HEADERS ===== */
+table thead th,
+table > thead > tr > th,
+.table thead th,
+.table > thead > tr > th,
+thead th,
+thead tr th,
+th.cHeader,
+th.cColumn,
+.sticky-row th,
+.t-table-wrapper .sticky-row th,
+.table-striped thead th,
+.table-bordered thead th,
+.t-table-wrapper table thead th,
+.t-table-wrapper .table thead th {
+    background-color: var(--neo-report-header-background, #333333) !important;
+    color: var(--neo-header-text, #ffffff) !important;
+    border-bottom: 2px solid var(--neo-menu-primary, #c2ef03) !important;
+    font-weight: 600 !important;
+}
+
+table thead th *,
+table thead th span,
+table thead th a,
+table thead th label,
+.table thead th *,
+.table thead th span,
+.table thead th a,
+thead th *,
+thead th span,
+th.cHeader *,
+th.cColumn *,
+.sticky-row th *,
+.t-table-wrapper table thead th *,
+.t-table-wrapper .table thead th * {
+    color: var(--neo-header-text, #ffffff) !important;
+}
+
+/* ===== IndexTable Specific Styling ===== */
+/* IndexTable Header Row */
+.t-table-wrapper table.table-striped thead tr,
+.t-table-wrapper table.table-bordered thead tr,
+.t-table-wrapper .table thead tr.sticky-row {
+    background: var(--neo-report-header-background, #333333) !important;
+    background-color: var(--neo-report-header-background, #333333) !important;
+}
+
+/* IndexTable Header Cells */
+.t-table-wrapper table thead th.cColumn,
+.t-table-wrapper .table thead th.cColumn,
+table[editable] thead th,
+table[editable] thead th.cColumn {
+    background: var(--neo-report-header-background, #333333) !important;
+    background-color: var(--neo-report-header-background, #333333) !important;
+    color: var(--neo-header-text, #ffffff) !important;
+    border-color: #444444 !important;
+    border-bottom: 2px solid var(--neo-menu-primary, #c2ef03) !important;
+    font-weight: 600 !important;
+}
+
+/* IndexTable Header Cell Text */
+.t-table-wrapper table thead th.cColumn *,
+.t-table-wrapper .table thead th.cColumn *,
+table[editable] thead th *,
+table[editable] thead th.cColumn * {
+    color: var(--neo-header-text, #ffffff) !important;
+}
+
+/* IndexTable Content Rows - Subtle Zebra */
+.t-table-wrapper table.table-striped tbody tr:nth-child(odd),
+.t-table-wrapper .table.table-striped tbody tr:nth-child(odd) {
+    background-color: #ffffff !important;
+}
+
+.t-table-wrapper table.table-striped tbody tr:nth-child(even),
+.t-table-wrapper .table.table-striped tbody tr:nth-child(even) {
+    background-color: #fafafa !important;
+}
+
+/* IndexTable Row Hover */
+.t-table-wrapper table tbody tr:hover,
+.t-table-wrapper .table tbody tr:hover {
+    background-color: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.08)) !important;
+}
+
+/* IndexTable Wrapper - Hide unnecessary scrollbar */
+.t-table-wrapper {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    min-height: auto !important;
+}
+
+.t-table-wrapper.no-min-height {
+    min-height: unset !important;
+    overflow: hidden !important;
+}
+
+.t-table-wrapper.custom-scroll {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+}
+
+/* Only show horizontal scrollbar when table is wider than container */
+.t-table-wrapper.has-horizontal-overflow {
+    overflow-x: auto !important;
+}
+
+/* Style scrollbar when visible */
+.t-table-wrapper::-webkit-scrollbar {
+    width: 6px !important;
+    height: 6px !important;
+}
+
+.t-table-wrapper::-webkit-scrollbar-track {
+    background: #f1f5f9 !important;
+    border-radius: 3px !important;
+}
+
+.t-table-wrapper::-webkit-scrollbar-thumb {
+    background: #333333 !important;
+    border-radius: 3px !important;
+}
+
+.t-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* IndexTable Title */
+.tableTitle,
+.tableTitle-label {
+    color: #333333 !important;
+    font-weight: 600 !important;
+}
+
+.tableTitle .toggle {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* ===== FINAL OVERRIDE: TABLE CELL FONT SIZE ===== */
+/* Force larger font size for all table cells */
+table td,
+table tbody td,
+.table td,
+.table tbody td,
+.table > tbody > tr > td,
+td.cColumn,
+.t-table-wrapper td,
+.t-table-wrapper table td,
+.t-table-wrapper .table td,
+.t-table-wrapper table tbody td,
+.t-table-wrapper .table tbody td,
+#SubTablesTabMultiTab table td,
+#SubTablesTabMultiTab .table td,
+table[editable] td,
+table[editable] tbody td,
+table[editable='editable'] td,
+table[editable='editable'] tbody td {
+    font-size: 15px !important;
+    line-height: 1.6 !important;
+    padding: 8px 10px !important;
+    vertical-align: middle !important;
+}
+
+/* ===== EDITABLE TABLE INPUT/SELECT CONTROLS ===== */
+/* Input fields inside editable table cells */
+table td input,
+table td select,
+table td input.form-control,
+table td select.form-control,
+.t-table-wrapper td input,
+.t-table-wrapper td select,
+.t-table-wrapper td input.form-control,
+.t-table-wrapper td select.form-control,
+td.cColumn input,
+td.cColumn select,
+table[editable] td input,
+table[editable] td select,
+table[editable='editable'] td input,
+table[editable='editable'] td select,
+table[editable='editable'] td input.form-control,
+table[editable='editable'] td select.form-control {
+    font-size: 15px !important;
+    padding: 10px 14px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 8px !important;
+    background-color: #ffffff !important;
+    color: #333333 !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+table[editable='editable'] td input:focus,
+table[editable='editable'] td select:focus,
+.t-table-wrapper td input:focus,
+.t-table-wrapper td select:focus {
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    box-shadow: 0 0 0 3px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.2)) !important;
+    outline: none !important;
+}
+
+/* Select dropdown styling */
+table[editable='editable'] td select,
+.t-table-wrapper td select {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333333' d='M6 8L1 3h10z'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: left 12px center !important;
+    padding-left: 36px !important;
+}
+
+/* ===== Table Responsive & Drill-Down Theme ===== */
+/* Table Responsive Container */
+.table-responsive,
+.table-responsive.t-table-wrapper,
+.t-table-wrapper.table-responsive {
+    background: #ffffff !important;
+    border: 1px solid #e0e0e0 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Table Responsive Scrollbar */
+.table-responsive::-webkit-scrollbar,
+.table-responsive.t-table-wrapper::-webkit-scrollbar {
+    width: 8px !important;
+    height: 8px !important;
+}
+
+.table-responsive::-webkit-scrollbar-track,
+.table-responsive.t-table-wrapper::-webkit-scrollbar-track {
+    background: #f1f5f9 !important;
+    border-radius: 4px !important;
+}
+
+.table-responsive::-webkit-scrollbar-thumb,
+.table-responsive.t-table-wrapper::-webkit-scrollbar-thumb {
+    background: #333333 !important;
+    border-radius: 4px !important;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover,
+.table-responsive.t-table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Drill-Down Table Wrapper */
+.drill-down-tw,
+.t-table-wrapper.drill-down-tw {
+    background: #ffffff !important;
+    border: 1px solid #444444 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Drill-Down Header */
+.drill-down-tw .sticky-row th,
+.drill-down-tw table thead th,
+.drill-down-tw .table thead th {
+    background: var(--neo-report-header-background, #333333) !important;
+    color: var(--neo-header-text, #ffffff) !important;
+    border-color: var(--neo-dashboard-widget-border, #444444) !important;
+    font-weight: 600 !important;
+}
+
+.drill-down-tw .sticky-row th *,
+.drill-down-tw table thead th *,
+.drill-down-tw .table thead th * {
+    color: var(--neo-header-text, #ffffff) !important;
+}
+
+/* Drill-Down Content Rows */
+.drill-down-tw table tbody tr:nth-child(odd),
+.drill-down-tw .table tbody tr:nth-child(odd) {
+    background-color: #ffffff !important;
+}
+
+.drill-down-tw table tbody tr:nth-child(even),
+.drill-down-tw .table tbody tr:nth-child(even) {
+    background-color: #fafafa !important;
+}
+
+/* Drill-Down Row Hover */
+.drill-down-tw table tbody tr:hover,
+.drill-down-tw .table tbody tr:hover {
+    background-color: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.1)) !important;
+}
+
+/* Drill-Down Scrollbar */
+.drill-down-tw::-webkit-scrollbar {
+    width: 8px !important;
+    height: 8px !important;
+}
+
+.drill-down-tw::-webkit-scrollbar-track {
+    background: #f1f5f9 !important;
+    border-radius: 4px !important;
+}
+
+.drill-down-tw::-webkit-scrollbar-thumb {
+    background: #333333 !important;
+    border-radius: 4px !important;
+}
+
+.drill-down-tw::-webkit-scrollbar-thumb:hover {
+    background: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* ===== SIDE NAVIGATION (فیلترهای پرکاربرد) THEME ===== */
+/* Side Nav Item - Default State */
+.side-navi-item {
+    background-color: #ffffff !important;
+    color: #333333 !important;
+    border: 1px solid #e5e7eb !important;
+    transition: all 0.3s ease !important;
+}
+
+.side-navi-item:not(.active) {
+    background-color: #ffffff !important;
+}
+
+/* Side Nav Item - Hover State */
+.side-navi-item:hover {
+    background-color: #f8f8f8 !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    box-shadow: 0 2px 8px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.3)) !important;
+}
+
+/* Side Nav Item - Active State (Green Theme) */
+.side-navi-item.active {
+    background: var(--neo-menu-primary, #c2ef03) !important;
+    background: linear-gradient(135deg, var(--neo-menu-primary, #c2ef03) 0%, var(--neo-menu-primary-active, #a8d400) 100%) !important;
+    color: #333333 !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    box-shadow: 0 4px 12px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.4)) !important;
+}
+
+.side-navi-item.active > div,
+.side-navi-item.active span,
+.side-navi-item.active * {
+    color: #333333 !important;
+}
+
+/* Side Nav Tab Content */
+.side-navi-tab.active {
+    color: #333333 !important;
+}
+
+/* Side Nav Data Panel */
+.side-navi-data {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+}
+
+/* Side Nav Body */
+.side-navi-body {
+    background-color: #ffffff !important;
+    color: #333333 !important;
+    border: 1px solid #e5e7eb !important;
+}
+
+/* Side Nav Top Bar */
+.sideNavi-top-bar {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+}
+
+/* Side Nav Mobile Responsive */
+@media (max-width: 800px) {
+    .side-navi-item {
+        width: 120px !important;
+    }
+    
+    .side-navi-item > div {
+        font-size: 11px !important;
+    }
+}
+
+/* ===== LOGIN/VERIFY PAGE - BUTTON STRUCTURE ===== */
+/* Button with text and loader spans */
+.neo-login-submit-btn {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.neo-login-submit-btn .btn-text {
+    transition: opacity 0.2s ease;
+}
+
+.neo-login-submit-btn .btn-loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 28px;
+    height: 28px;
+    margin-top: -14px;
+    margin-left: -14px;
+    border: 4px solid var(--neo-menu-primary-light, rgba(194, 239, 3, 0.25));
+    border-top-color: var(--neo-menu-primary, #c2ef03);
+    border-radius: 50%;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease;
+    box-sizing: border-box;
+}
+
+/* ===== LOADING STATE ===== */
+.neo-login-submit-btn.loading,
+.neo-login-submit-btn.loading:disabled,
+.neo-login-submit-btn.loading:hover,
+.neo-login-submit-btn.loading:active,
+.neo-login-submit-btn.loading:focus {
+    background: linear-gradient(135deg, #333333 0%, #222222 100%) !important;
+    cursor: wait !important;
+    transform: none !important;
+    box-shadow: 0 0 25px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.5)), inset 0 0 20px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.1)) !important;
+    border: 2px solid var(--neo-menu-primary, #c2ef03) !important;
+    pointer-events: none !important;
+}
+
+/* Hide text when loading */
+.neo-login-submit-btn.loading .btn-text {
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+/* Show and animate spinner when loading */
+.neo-login-submit-btn.loading .btn-loader {
+    opacity: 1 !important;
+    visibility: visible !important;
+    animation: neo-btn-spin 0.7s linear infinite !important;
+}
+
+@keyframes neo-btn-spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Disabled state (when not loading) */
+.neo-login-submit-btn:disabled:not(.loading) {
+    background: #444444 !important;
+    color: #888888 !important;
+    cursor: not-allowed !important;
+    border: 1px solid #555555 !important;
+}
+
+/* Locked input state during loading */
+.neo-login-input.locked,
+.neo-login-input:disabled,
+.neo-login-input[readonly] {
+    background: #3a3a3a !important;
+    color: #888888 !important;
+    cursor: not-allowed !important;
+    opacity: 0.7 !important;
+}
+
+/* ===== REPORT MODAL - THEME STYLING ===== */
+/* Modal backdrop */
+.report-modal {
+    background: rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Modal content container */
+.report-modal-content,
+#report-designs-modal .report-modal-content {
+    background: linear-gradient(145deg, #2a2a2a 0%, #1f1f1f 100%) !important;
+    border: 1px solid #444444 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 30px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.1)) !important;
+}
+
+/* Scheduling Modal - Fit content width */
+#scheduling-modal .report-modal-content {
+    background: linear-gradient(145deg, #2a2a2a 0%, #1f1f1f 100%) !important;
+    border: 1px solid #444444 !important;
+    border-radius: 16px !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 30px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.1)) !important;
+    width: auto !important;
+    min-width: 400px !important;
+    max-width: 500px !important;
+}
+
+#scheduling-modal .report-modal-body {
+    padding: 16px 20px !important;
+}
+
+#scheduling-modal .report-tree-container {
+    min-height: 200px !important;
+    max-height: 400px !important;
+    min-width: 350px !important;
+}
+
+/* Scheduling modal buttons - compact */
+#scheduling-modal .btn {
+    padding: 6px 12px !important;
+    font-size: 13px !important;
+}
+
+/* Modal header */
+.report-modal-header {
+    background: linear-gradient(135deg, #333333 0%, #2a2a2a 100%) !important;
+    border-bottom: 2px solid var(--neo-menu-primary, #c2ef03) !important;
+    padding: 16px 20px !important;
+    border-radius: 16px 16px 0 0 !important;
+}
+
+.report-modal-header h5,
+.report-modal-header .modal-title {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    font-weight: 600 !important;
+}
+
+/* Modal close button */
+.report-modal-close {
+    color: #888888 !important;
+    background: transparent !important;
+    border: none !important;
+    transition: all 0.2s ease !important;
+}
+
+.report-modal-close:hover {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    transform: scale(1.1) !important;
+}
+
+/* Modal body */
+.report-modal-body {
+    background: #2a2a2a !important;
+    color: #e5e7eb !important;
+    padding: 20px !important;
+}
+
+/* Modal footer */
+.report-modal-footer {
+    background: linear-gradient(135deg, #2a2a2a 0%, #252525 100%) !important;
+    border-top: 1px solid #444444 !important;
+    padding: 16px 20px !important;
+    border-radius: 0 0 16px 16px !important;
+}
+
+/* Buttons in modal */
+.report-modal .btn,
+.report-modal-content .btn {
+    border-radius: 8px !important;
+    padding: 8px 16px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s ease !important;
+}
+
+.report-modal .btn-primary,
+.report-modal-content .btn-primary {
+    background: linear-gradient(135deg, var(--neo-menu-primary, #c2ef03) 0%, var(--neo-menu-primary-active, #a8d400) 100%) !important;
+    color: #333333 !important;
+    border: none !important;
+}
+
+.report-modal .btn-primary:hover,
+.report-modal-content .btn-primary:hover {
+    background: linear-gradient(135deg, var(--neo-menu-primary-hover, #d4ff1a) 0%, var(--neo-menu-primary, #c2ef03) 100%) !important;
+    box-shadow: 0 4px 15px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.4)) !important;
+    transform: translateY(-1px) !important;
+}
+
+.report-modal .btn-secondary,
+.report-modal .btn-default,
+.report-modal-content .btn-secondary,
+.report-modal-content .btn-default {
+    background: #444444 !important;
+    color: #e5e7eb !important;
+    border: 1px solid #555555 !important;
+}
+
+.report-modal .btn-secondary:hover,
+.report-modal .btn-default:hover,
+.report-modal-content .btn-secondary:hover,
+.report-modal-content .btn-default:hover {
+    background: #555555 !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Form controls in modal */
+.report-modal input,
+.report-modal select,
+.report-modal textarea,
+.report-modal-content input,
+.report-modal-content select,
+.report-modal-content textarea {
+    background: #3a3a3a !important;
+    border: 1px solid #555555 !important;
+    color: #e5e7eb !important;
+    border-radius: 8px !important;
+    padding: 10px 12px !important;
+}
+
+.report-modal input:focus,
+.report-modal select:focus,
+.report-modal textarea:focus,
+.report-modal-content input:focus,
+.report-modal-content select:focus,
+.report-modal-content textarea:focus {
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+    box-shadow: 0 0 0 2px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.2)) !important;
+    outline: none !important;
+}
+
+/* Labels in modal */
+.report-modal label,
+.report-modal-content label {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    font-weight: 500 !important;
+    margin-bottom: 6px !important;
+}
+
+/* List items in modal (for design list) */
+.report-modal .list-group-item,
+.report-modal-content .list-group-item {
+    background: #3a3a3a !important;
+    border: 1px solid #444444 !important;
+    color: #e5e7eb !important;
+    transition: all 0.2s ease !important;
+}
+
+.report-modal .list-group-item:hover,
+.report-modal-content .list-group-item:hover {
+    background: #444444 !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+.report-modal .list-group-item.active,
+.report-modal-content .list-group-item.active {
+    background: linear-gradient(135deg, var(--neo-menu-primary, #c2ef03) 0%, var(--neo-menu-primary-active, #a8d400) 100%) !important;
+    color: #333333 !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* ===== JSTREE - TREE VIEW THEMING ===== */
+/* Tree container */
+.jstree,
+.jstree-default,
+.jstree-container-ul {
+    background: transparent !important;
+}
+
+/* Tree node text/anchor */
+.jstree-default .jstree-anchor,
+.jstree .jstree-anchor {
+    color: #e5e7eb !important;
+    font-size: 14px !important;
+    padding: 4px 8px !important;
+    border-radius: 6px !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Tree node hover */
+.jstree-default .jstree-anchor:hover,
+.jstree .jstree-anchor:hover,
+.jstree-default .jstree-wholerow-hovered,
+.jstree .jstree-wholerow-hovered {
+    background: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.15)) !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    box-shadow: none !important;
+}
+
+/* Tree node selected */
+.jstree-default .jstree-anchor.jstree-clicked,
+.jstree .jstree-anchor.jstree-clicked,
+.jstree-default .jstree-wholerow-clicked,
+.jstree .jstree-wholerow-clicked {
+    background: linear-gradient(135deg, var(--neo-menu-primary, #c2ef03) 0%, var(--neo-menu-primary-active, #a8d400) 100%) !important;
+    color: #333333 !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 8px var(--neo-menu-primary-light, rgba(194, 239, 3, 0.3)) !important;
+}
+
+/* Tree node icons */
+.jstree-default .jstree-icon,
+.jstree .jstree-icon,
+.jstree-default .jstree-themeicon,
+.jstree .jstree-themeicon {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Tree node icon when selected */
+.jstree-default .jstree-clicked > .jstree-icon,
+.jstree .jstree-clicked > .jstree-icon {
+    color: #333333 !important;
+}
+
+/* Tree expand/collapse icons */
+.jstree-default .jstree-ocl,
+.jstree .jstree-ocl {
+    color: #888888 !important;
+    transition: color 0.2s ease !important;
+}
+
+.jstree-default .jstree-ocl:hover,
+.jstree .jstree-ocl:hover {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Tree node open/closed icons (arrows) */
+.jstree-default .jstree-open > .jstree-ocl,
+.jstree-default .jstree-closed > .jstree-ocl {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Tree checkbox */
+.jstree-default .jstree-checkbox,
+.jstree .jstree-checkbox {
+    background-color: #3a3a3a !important;
+    border: 2px solid #555555 !important;
+    border-radius: 4px !important;
+}
+
+.jstree-default .jstree-checkbox:hover,
+.jstree .jstree-checkbox:hover {
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+.jstree-default .jstree-checkbox.jstree-checked,
+.jstree .jstree-checkbox.jstree-checked {
+    background-color: var(--neo-menu-primary, #c2ef03) !important;
+    border-color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Tree context menu */
+.jstree-contextmenu,
+.vakata-context,
+.vakata-context ul {
+    background: #2a2a2a !important;
+    border: 1px solid #444444 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4) !important;
+    padding: 6px 0 !important;
+}
+
+.jstree-contextmenu li a,
+.vakata-context li a {
+    color: #e5e7eb !important;
+    padding: 8px 16px !important;
+    transition: all 0.2s ease !important;
+}
+
+.jstree-contextmenu li a:hover,
+.vakata-context li a:hover,
+.vakata-context li a.vakata-context-hover {
+    background: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.15)) !important;
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+.jstree-contextmenu li a i,
+.vakata-context li a i {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    margin-right: 8px !important;
+}
+
+/* Tree search highlight */
+.jstree-default .jstree-search,
+.jstree .jstree-search {
+    color: #333333 !important;
+    background: var(--neo-menu-primary, #c2ef03) !important;
+    font-weight: 600 !important;
+    border-radius: 4px !important;
+    padding: 2px 4px !important;
+}
+
+/* Tree loading indicator */
+.jstree-default .jstree-loading,
+.jstree .jstree-loading {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+/* Tree disabled node */
+.jstree-default .jstree-disabled,
+.jstree .jstree-disabled {
+    color: #666666 !important;
+    opacity: 0.5 !important;
+}
+
+/* Tree wholerow plugin */
+.jstree-wholerow {
+    background: transparent !important;
+}
+
+.jstree-wholerow-hovered {
+    background: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.1)) !important;
+}
+
+.jstree-wholerow-clicked {
+    background: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.2)) !important;
+}
+
+/* Tree inside containers (report tree, filter tree, etc.) */
+.report-tree-container .jstree,
+.filter-tree .jstree,
+.side-navi-body .jstree,
+#popular-filters-tree .jstree {
+    background: transparent !important;
+}
+
+/* Tree in dark containers */
+.popular-filters-section .jstree-anchor,
+.side-navi-body .jstree-anchor {
+    color: #333333 !important;
+}
+
+.popular-filters-section .jstree-anchor:hover,
+.side-navi-body .jstree-anchor:hover {
+    background: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.2)) !important;
+    color: #333333 !important;
+}
+
+.popular-filters-section .jstree-anchor.jstree-clicked,
+.side-navi-body .jstree-anchor.jstree-clicked {
+    background: linear-gradient(135deg, var(--neo-menu-primary, #c2ef03) 0%, var(--neo-menu-primary-active, #a8d400) 100%) !important;
+    color: #333333 !important;
+}
+
+/* ===== THEME SELECTION DROPDOWN ===== */
+.theme-selection {
+    width: 100%;
+}
+
+.theme-selection .dropdown {
+    position: relative;
+    width: 100%;
+}
+
+.theme-selection .theme-selector {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: center;
+    margin-top: 4px;
+    padding: 6px 12px;
+    width: 100%;
+    text-decoration: none;
+    border: 2px solid var(--neo-menu-primary, #c2ef03);
+    background: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.2));
+    color: var(--neo-menu-primary, #c2ef03) !important;
+}
+
+.theme-selection .theme-selector:hover {
+    background: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.3)) !important;
+    border-color: var(--neo-menu-primary-hover, #d4f55a) !important;
+    color: var(--neo-menu-primary-hover, #d4f55a) !important;
+    opacity: 1;
+}
+
+.theme-selection .theme-selector-icon {
+    color: var(--neo-menu-primary, #c2ef03) !important;
+    transition: color 0.2s ease;
+}
+
+.theme-selection .theme-selector:hover .theme-selector-icon {
+    color: var(--neo-menu-primary-hover, #d4f55a) !important;
+}
+
+.theme-selection .dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    min-width: 100%;
+    margin-top: 4px;
+    padding: 4px 0;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.theme-selection .dropdown.show .dropdown-menu {
+    display: block;
+}
+
+.theme-selection .dropdown-item {
+    padding: 8px 12px;
+    color: #374151;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: right;
+}
+
+.theme-selection .dropdown-item:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+.theme-selection .dropdown-item.active {
+    background: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.2));
+    color: var(--neo-menu-primary, #c2ef03);
+    font-weight: 500;
+}
+
+.theme-selection .dropdown-item.active:hover {
+    background: var(--neo-menu-primary-light, rgba(194, 239, 3, 0.3));
+    color: var(--neo-menu-primary-hover, #d4f55a);
+}
+
+/* ===== LANGUAGE SELECTION DROPDOWN ===== */
+.language-selection {
+    width: 100%;
+}
+
+.language-selection .dropdown {
+    position: relative;
+    width: 100%;
+}
+
+.language-selection .language-selector {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.language-selection .language-selector:hover {
+    background: #BFDBFE !important;
+    opacity: 0.9;
+}
+
+.language-selection .dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    min-width: 100%;
+    margin-top: 4px;
+    padding: 4px 0;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.language-selection .dropdown.show .dropdown-menu {
+    display: block;
+}
+
+.language-selection .dropdown-item {
+    padding: 8px 12px;
+    color: #374151;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: right;
+}
+
+.language-selection .dropdown-item:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+.language-selection .dropdown-item.active {
+    background: #eff6ff;
+    color: #1e40af;
+    font-weight: 500;
+}
+
+.language-selection .dropdown-item.active:hover {
+    background: #dbeafe;
+}
+
+/* ===== VERSION DISPLAY STYLING ===== */
+.version-display {
+    color: var(--neo-menu-text-muted, #aaaaaa) !important;
+    font-size: 0.75rem !important;
+    font-weight: 400 !important;
+    padding: var(--neo-menu-spacing-sm, 0.5rem) var(--neo-menu-spacing-md, 1rem) !important;
+    margin: var(--neo-menu-spacing-sm, 0.5rem) auto !important;
+    text-align: center !important;
+    display: block !important;
+    width: 100% !important;
+    opacity: 0.8 !important;
+    transition: var(--neo-menu-transition-normal, 0.3s ease-in-out) !important;
+    font-family: 'IRANSansX-Regular', system-ui, -apple-system, sans-serif !important;
+    direction: rtl !important;
+    border-top: 1px solid var(--neo-menu-border-light, #444444) !important;
+    padding-top: var(--neo-menu-spacing-md, 1rem) !important;
+}
+
+.version-display:hover {
+    opacity: 1 !important;
+    color: var(--neo-menu-text-secondary, #e0e0e0) !important;
+}
+
+/* Ensure version display is visible in navbar bottom */
+.mm-navbar[data-position="bottom"] .version-display {
+    color: var(--neo-menu-text-muted, #aaaaaa) !important;
+    background: transparent !important;
+}

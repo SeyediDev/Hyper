@@ -1,0 +1,80 @@
+﻿.columnsSettingsModal ul.vertical-sortable-list {
+	min-height: 200px;
+	border-top: solid rgb(160, 160, 160) 1px;
+	border-top: solid rgba(0, 0, 0, 0.4) 1px;
+}
+
+.columnsSettingsModal ul.vertical-sortable-list li {
+	background-color: white;
+	border-right: solid rgb(160, 160, 160) 1px;
+	border-right: solid rgba(0, 0, 0, 0.4) 1px;
+	border-left: solid rgb(160, 160, 160) 1px;
+	border-left: solid rgba(0, 0, 0, 0.4) 1px;
+	border-bottom: solid rgb(160, 160, 160) 1px;
+	border-bottom: solid rgba(0, 0, 0, 0.4) 1px;
+	float: right;
+	padding: 2px 4px;
+	width: 100%;
+}
+
+.columnsSettingsModal ul.vertical-sortable-list li:hover {
+	cursor: move; /* fallback if grab cursor is unsupported */
+	cursor: grab;
+	cursor: -moz-grab;
+	cursor: -webkit-grab;
+}
+
+.columnsSettingsModal ul.vertical-sortable-list li.selected { background-color: #CCE8FF; }
+
+.columnsSettingsModal ul.vertical-sortable-list li.ui-sortable-helper {
+	cursor: move;
+	cursor: -moz-grabbing;
+	cursor: -webkit-grabbing;
+}
+
+
+
+.columnsSettingsModal ul.vertical-sortable-list input {
+	direction: rtl;
+	background-color: white !important;
+}
+
+input.formulaText { direction: ltr; }
+
+
+.columnsSettingsModal ul li > div > i { display: none; }
+
+.columnsSettingsModal ul.selected-column-ul li > div > i.tooltipNo {
+	display: inline-block !important;
+	cursor: pointer;
+	color: gray;
+	opacity: 0.2;
+	/*margin-left: -5px;*/
+}
+
+.columnsSettingsModal ul.selected-column-ul li > div > i.tooltipYes {
+	display: inline-block !important;
+	cursor: pointer;
+	color: #4cae4c;
+	/*margin-left: -5px;*/
+}
+
+.columnsSettingsModal ul.selected-column-ul li > div > i.matrixTypeHorizontal {
+	display: inline-block !important;
+	cursor: pointer;
+	color: gray;
+	opacity: 0.2;
+	margin-left: 1px;
+}
+
+.columnsSettingsModal ul.selected-column-ul li > div > i.matrixTypeVertical {
+	display: inline-block !important;
+	cursor: pointer;
+	color: #4cae4c;
+	margin-left: 1px;
+}
+
+.scrollbar {
+	height: 250px;
+	overflow-y: auto;
+}
