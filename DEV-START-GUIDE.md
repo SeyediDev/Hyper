@@ -61,7 +61,7 @@ npm run dev
 **1. Database:**
 - Connection String در `appsettings.Development.json`:
 ```json
-"HyperCommandConnection": "Server=localhost;Database=HyperDb;Trusted_Connection=True;TrustServerCertificate=True;"
+"HyperCommandConnection": "Server=localhost;Database=Hyperyek;Trusted_Connection=True;TrustServerCertificate=True;"
 ```
 
 **2. CORS:**

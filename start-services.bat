@@ -1,24 +1,24 @@
 @echo off
 echo.
 echo ========================================
-echo    Starting Club Backend Services
+echo    Starting Hyper Backend Services
 echo ========================================
 echo.
 
 REM Customer Portal API
 echo Starting Customer Portal API on http://localhost:5000
-start "Customer Portal API" cmd /k "cd /d %~dp0src\CustomerPortal\Club.CustomerPortal.Api && dotnet run --urls=http://localhost:5000"
+start "Customer Portal API" cmd /k "cd /d %~dp0src\CustomerPortal\Hyper.CustomerPortal.Api && dotnet run --urls=http://localhost:5000"
 timeout /t 2 /nobreak >nul
 
 REM Admin Panel
 echo Starting Admin Panel on http://localhost:5001
-start "Admin Panel Web" cmd /k "cd /d %~dp0src\AdminPanel\Club.AdminPanel.Web && dotnet run --urls=http://localhost:5001"
+start "Admin Panel Web" cmd /k "cd /d %~dp0src\AdminPanel\Hyper.AdminPanel.Web && dotnet run --urls=http://localhost:5001"
 timeout /t 2 /nobreak >nul
 
 REM Frontend
 echo.
 echo Starting Frontend on http://localhost:3000
-start "Customer Portal Frontend" cmd /k "cd /d D:\Projects\Club\Frontend\CustomerPortal\Club.CustomerPortal.Web && npm run dev"
+start "Customer Portal Frontend" cmd /k "cd /d D:\Projects\Hyper\Frontend\CustomerPortal\Hyper.CustomerPortal.Web && npm run dev"
 
 echo.
 echo ========================================

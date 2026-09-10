@@ -1,0 +1,13 @@
+@using Neo.Bpms.Domain.Extensions
+@using Neo.Bpms.Domain.Features.MetaDefinitions.ProjectDefinitions
+@using Neo.Bpms.Domain.Model.Project
+@using Neo.Bpms.Domain.Utility
+@model Neo.Bpms.UI.MVC.PartialModels.Layout.TitleAndMetaTagsModel
+<title>@Model.title</title>
+<meta charset="utf-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="@Model.description">
+<meta name="author" content="پنل مدیریتی هایپریک">
+<meta name="root" content="@(Model.root ?? "/")"/>
+<meta name="todayDate" content="@DateTime.Now.ToHtmlInputValue(ProjectDefinition.Project.DefaultCalendar)"/>

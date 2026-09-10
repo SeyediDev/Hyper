@@ -1,5 +1,5 @@
 /*
-    Club dashboard demo-data seed
+    Hyper dashboard demo-data seed
     --------------------------------
     اجرا: فایل را روی دیتابیس Domain برنامه در SSMS اجرا کنید.
 

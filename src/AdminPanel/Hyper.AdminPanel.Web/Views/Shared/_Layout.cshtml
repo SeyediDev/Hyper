@@ -1,0 +1,249 @@
+@using Neo.Bpms.UI.MVC.Helpers
+@using Hyper.AdminPanel.Web.Resources
+@using Microsoft.AspNetCore.Html
+@using Microsoft.AspNetCore.Mvc.Razor
+@using Neo.Bpms.UI.MVC.PartialModels.Layout
+
+@{
+    var title = ViewBag.Title ?? Texts.Title;
+    var containerClass = ViewBag.ContainerClass ?? "container-flud";
+    var user = ViewBag.user;
+
+    var titleAndMetaTagsModel = new TitleAndMetaTagsModel
+    {
+        title = title,
+        description = Texts.Title,
+        root = "/" //Context.Request.GetBaseUrl()
+    };
+    Func<dynamic, HelperResult> Logo =
+        @<svg width="67" height="30" viewBox="0 0 67 30" fill="none" xmlns="http://www.w3.org/2000/svg" >
+            <rect width="67" height="40" fill="white" />
+          <text x="65" y="25" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#D90006">
+            پنل مدیریتی هایپریک
+          </text>
+         </svg>
+        ;
+
+    var headerModel = new HeaderModel
+    {
+        user = user,
+        title = Texts.Title,
+        logo = Logo,
+        hasLanguageSelection = true
+    };
+    var bodyModel = new BodyModel
+    {
+        bodyRenderFunc = RenderBody,
+        containerClass = containerClass
+    };
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <partial name="Layout/TitleAndMetaTags" model="titleAndMetaTagsModel"/>
+    <partial name="Layout/CommonIncludes" model="true"/>
+    <link href="/Content/icons/flat-icon/flaticon.css?d=20201109" rel="stylesheet"/>
+    <link href="/Content/custom-theme.css" rel="stylesheet" />
+    <partial name="Layout/_ThemeVariables" />
+    @{
+        FaviconThings();
+    }
+
+    <style>
+        /* Prevent FOUC (Flash of Unstyled Content) - Hide body until CSS is loaded */
+        body#page-body {
+            visibility: hidden;
+            opacity: 0;
+        }
+        
+        /* Show body after CSS is loaded */
+        body#page-body.css-loaded {
+            visibility: visible;
+            opacity: 1;
+            transition: opacity 0.2s ease-in;
+        }
+    </style>
+    <script>
+        // Prevent FOUC - Show body after CSS is loaded
+        (function() {
+            // Function to check if all critical CSS files are loaded
+            function areStylesheetsLoaded() {
+                var stylesheets = document.querySelectorAll('link[rel="stylesheet"]');
+                var allLoaded = true;
+                
+                for (var i = 0; i < stylesheets.length; i++) {
+                    if (stylesheets[i].sheet === null && stylesheets[i].href) {
+                        // Stylesheet is still loading
+                        allLoaded = false;
+                        break;
+                    }
+                }
+                
+                return allLoaded;
+            }
+            
+            // Function to show body
+            function showBody() {
+                var body = document.getElementById('page-body');
+                if (body) {
+                    body.classList.add('css-loaded');
+                }
+            }
+            
+            // Try to show body immediately if stylesheets are already loaded
+            if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                // Wait a bit for stylesheets to load
+                setTimeout(function() {
+                    if (areStylesheetsLoaded()) {
+                        showBody();
+                    } else {
+                        // Fallback: show after a short delay
+                        setTimeout(showBody, 100);
+                    }
+                }, 50);
+            } else {
+                // Wait for DOM to be ready
+                if (document.addEventListener) {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        setTimeout(function() {
+                            if (areStylesheetsLoaded()) {
+                                showBody();
+                            } else {
+                                // Fallback: show after a short delay
+                                setTimeout(showBody, 100);
+                            }
+                        }, 50);
+                    });
+                }
+            }
+            
+            // Fallback: Always show body after window load (ensures everything is loaded)
+            if (window.addEventListener) {
+                window.addEventListener('load', function() {
+                    showBody();
+                });
+            } else if (window.attachEvent) {
+                window.attachEvent('onload', function() {
+                    showBody();
+                });
+            }
+        })();
+    </script>
+</head>
+<body id="page-body" @(CultureHelper.IsRightToLeft() ? new HtmlString("style=\"direction: rtl; text-align: right;\" dir=\"rtl\"") : new HtmlString("dir=ltr"))>
+    @{
+        bool checkPage = true;
+        if( ViewBag.IsLoginPage==true )
+            checkPage = false;
+        if (ViewBag.IsVerifyPage == true)
+            checkPage = false;
+    }
+
+    <div class="d-flex" style="justify-content:stretch;overflow-x: hidden; @(checkPage == true ? "height:100vh;" : "")">
+        <div style="flex-grow: 1;">
+            @if (checkPage == true)
+            {
+                <partial name="Layout/Header" model="headerModel" />
+            }
+            <partial name="Layout/Body" model="bodyModel"/>
+        </div>
+    </div>
+
+    @if (checkPage == true)
+    {
+        <partial name="Layout/Mmenu" model="user" />
+    }
+    <partial name="Common/ScriptInject"/>
+@await RenderSectionAsync("scripts", required: false)
+
+<script>
+    // باز کردن لینک مانیتورینگ در تب جدید
+    (function() {
+        function setupMonitoringLink() {
+            // پیدا کردن تمام لینک‌های مانیتورینگ در منو
+            var monitoringLinks = document.querySelectorAll('#menu2 a[href*="/Monitoring/Index"], #menu2 a[href*="/Monitoring"], nav#menu2 a[href*="/Monitoring"]');
+            
+            monitoringLinks.forEach(function(link) {
+                // اضافه کردن target="_blank" به لینک
+                link.setAttribute('target', '_blank');
+                link.setAttribute('rel', 'noopener noreferrer');
+                
+                // همچنین می‌توانیم event listener اضافه کنیم برای اطمینان
+                link.addEventListener('click', function(e) {
+                    // اگر target="_blank" کار نکرد، به صورت دستی باز کنیم
+                    if (!link.getAttribute('target') || link.getAttribute('target') !== '_blank') {
+                        e.preventDefault();
+                        window.open(link.href, '_blank', 'noopener,noreferrer');
+                    }
+                });
+            });
+        }
+        
+        // اجرا بعد از لود شدن DOM
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                // تاخیر کوتاه برای اطمینان از اینکه منو رندر شده است
+                setTimeout(setupMonitoringLink, 100);
+                setTimeout(setupMonitoringLink, 500);
+            });
+        } else {
+            setTimeout(setupMonitoringLink, 100);
+            setTimeout(setupMonitoringLink, 500);
+        }
+        
+        // همچنین بعد از لود شدن کامل صفحه
+        window.addEventListener('load', function() {
+            setTimeout(setupMonitoringLink, 200);
+        });
+        
+        // استفاده از MutationObserver برای رصد تغییرات در منو
+        if (typeof MutationObserver !== 'undefined') {
+            var observer = new MutationObserver(function(mutations) {
+                var shouldCheck = false;
+                mutations.forEach(function(mutation) {
+                    if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+                        mutation.addedNodes.forEach(function(node) {
+                            if (node.nodeType === 1 && 
+                                (node.id === 'menu2' || 
+                                 (node.querySelector && node.querySelector('#menu2')) ||
+                                 (node.tagName && node.tagName.toLowerCase() === 'a' && node.href && node.href.includes('/Monitoring')))) {
+                                shouldCheck = true;
+                            }
+                        });
+                    }
+                });
+                if (shouldCheck) {
+                    setTimeout(setupMonitoringLink, 100);
+                }
+            });
+            
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        }
+    })();
+</script>
+
+
+</body>
+</html>
+
+@functions
+{
+
+    void FaviconThings()
+    {
+        <link rel="apple-touch-icon" sizes="180x180" href="/Content/icons/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="/Content/icons/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/Content/icons/favicon-16x16.png">
+        <link rel="manifest" href="/Content/icons/manifest.json">
+        <link rel="mask-icon" href="/Content/icons/safari-pinned-tab.svg" color="#5bbad5">
+        <link rel="shortcut icon" href="/Content/icons/favicon.ico">
+        <meta name="msapplication-TileColor" content="#da532c">
+        <meta name="msapplication-config" content="/Content/icons/browserconfig.xml">
+        <meta name="theme-color" content="#ffffff">
+    }
+
+}

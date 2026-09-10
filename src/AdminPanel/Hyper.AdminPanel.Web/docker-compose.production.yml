@@ -1,0 +1,157 @@
+version: '3.8'
+
+services:
+  # ========================================
+  # برنامه اصلی (3 instance برای Load Balancing)
+  # ========================================
+  Hyperbpms:
+    image: Hyperbpms:latest
+    build:
+      context: ../..
+      dockerfile: Hyper.Bpms/Hyper.Bpms.Web/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:80
+      
+      # Redis Configuration
+      - Redis__Configuration=redis:6379
+      - Redis__InstanceName=HyperBpms_
+      
+      # Caching Strategy
+      - Caching__Strategy=Hybrid
+      - Caching__L1_Expiration=5
+      - Caching__L2_Expiration=30
+      
+      # Database
+      - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=Hyperyek;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
+      
+    depends_on:
+      redis:
+        condition: service_healthy
+      sqlserver:
+        condition: service_healthy
+        
+    deploy:
+      replicas: 3  # 3 containers برای High Availability
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+          
+    networks:
+      - Hypernetwork
+      
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # ========================================
+  # Nginx Load Balancer
+  # ========================================
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - Hyperbpms
+    networks:
+      - Hypernetwork
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+  # ========================================
+  # Redis (Shared Cache)
+  # ========================================
+  redis:
+    image: redis:7-alpine
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - Hypernetwork
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+
+  # ========================================
+  # SQL Server
+  # ========================================
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong@Passw0rd
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    networks:
+      - Hypernetwork
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "YourStrong@Passw0rd", "-Q", "SELECT 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ========================================
+  # Redis Commander (برای Monitoring - Optional)
+  # ========================================
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    depends_on:
+      - redis
+    networks:
+      - Hypernetwork
+    profiles:
+      - debug  # فقط با --profile debug اجرا می‌شود
+
+volumes:
+  redis-data:
+    driver: local
+  sqlserver-data:
+    driver: local
+
+networks:
+  Hypernetwork:
+    driver: bridge
+
+

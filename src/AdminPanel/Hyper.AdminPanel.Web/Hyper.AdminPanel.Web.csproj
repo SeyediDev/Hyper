@@ -1,0 +1,257 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+	<PropertyGroup>
+		<UserSecretsId>f470c652-f1d5-4866-87e9-1f050cd61397</UserSecretsId>
+		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<DockerComposeProjectPath>..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="AutoMapper" />
+		<PackageReference Include="Ardalis.GuardClauses" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
+		<!-- Serilog.AspNetCore.Plus package does not ship a net10 asset. -->
+		<!-- Serilog.Sinks.Splunk package does not ship a net10 asset. -->
+
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+		<PackageReference Include="Minio" />
+		<PackageReference Include="Otp.NET" />
+		
+		<PackageReference Include="DNTPersianUtils.Core" />
+		<PackageReference Include="Mapster" />
+		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+		<!--<PackageReference Include="Microsoft.AspNetCore.Mvc.Core" />-->
+
+		<PackageReference Include="MassTransit" />
+		<PackageReference Include="MassTransit.RabbitMQ" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+
+		<PackageReference Include="System.Drawing.Common" />
+		<PackageReference Include="System.Formats.Asn1" />
+		<PackageReference Include="System.Security.Cryptography.Pkcs" />
+		<PackageReference Include="System.Data.OracleClient" />
+		<PackageReference Include="SharpZipLib" />
+		<PackageReference Include="Microsoft.SqlServer.SqlManagementObjects" />
+		<PackageReference Include="RestSharp" />
+		<PackageReference Include="System.Text.RegularExpressions" />
+
+		<PackageReference Include="MediatR" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Abstractions" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" />
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Remove="libman.json" />
+		<Content Remove="web.config" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Update="Dockerfile">
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</None>
+		<None Update="docker-compose.yml">
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<_ContentIncludedByDefault Remove="web.config" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="appsettings.Production.json" />
+		<None Include="web.config" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="wwwroot\EmbedFrame\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\..\..\..\Neo-Bpms\src\Neo.Bpms.Api\Neo.Bpms.Api.csproj" />
+	  <ProjectReference Include="..\Hyper.AdminPanel.Domain\Hyper.AdminPanel.Domain.csproj" />
+	  <ProjectReference Include="..\..\Core\Hyper.Application\Hyper.Application.csproj" />
+	  <ProjectReference Include="..\..\Core\Hyper.Infrastructure\Hyper.Infrastructure.csproj" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <!-- TODO: Replace with NuGet packages after Neo.Bpms is published -->
+	  <ProjectReference Include="..\..\..\..\..\Neo-Bpms\src\Neo.Bpms.UI.MVC\Neo.Bpms.UI.MVC.csproj" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <!-- TODO: Replace with NuGet packages after Neo is published -->
+	  <!-- Temporary local project references -->
+	  <ProjectReference Include="..\..\..\..\..\Neo\src\Neo.Endpoint\Neo.Endpoint.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Resources\Texts.Designer.cs">
+	    <DependentUpon>Texts.resx</DependentUpon>
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="Resources\Texts.en.resx">
+	    <SubType>Designer</SubType>
+	  </EmbeddedResource>
+	  <EmbeddedResource Update="Resources\Texts.resx">
+	    <SubType>Designer</SubType>
+	    <LastGenOutput>Texts.Designer.cs</LastGenOutput>
+	    <Generator>PublicResXFileCodeGenerator</Generator>
+	  </EmbeddedResource>
+	</ItemGroup>
+	<!--<Import Project="..\..\Neo-Bpms\src\Neo.Bpms.UI.MVC\CommonAssets\CommonContentLinks.targets.xml" />
+	<Target Name="CopyLinkedContentFiles" BeforeTargets="Build">
+    <Copy SourceFiles="%(Content.Identity)" DestinationFiles="%(Content.Link)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" Condition="'%(Content.Link)' != ''" />
+  </Target>-->
+	<!--<Target Name="CopyBundles" BeforeTargets="Build">
+		<ItemGroup>
+			<_BundleItems Include="..\..\Neo-Bpms\src\Neo.Bpms.UI.MVC\CommonAssets\bundles\*.*" />
+		</ItemGroup>
+		<Copy SourceFiles="@(_BundleItems)" DestinationFolder="wwwroot\bundles\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+	</Target>-->
+	<Target Name="CopyIcons" BeforeTargets="Build">
+		<ItemGroup>
+			<_IconItems Include="..\..\..\..\..\Neo-Bpms\src\Neo.Bpms.UI.MVC\CommonAssets\Icons\*.*" />
+		</ItemGroup>
+		<Copy SourceFiles="@(_IconItems)" DestinationFolder="wwwroot\Content\common-assets-includes\icons\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+	</Target>
+	<Target Name="CopySBVRAssets" BeforeTargets="Build">
+		<ItemGroup>
+			<_SBVRItems Include="..\..\..\..\..\Neo-Bpms\src\Neo.Bpms.UI.MVC\wwwroot\Content\common-assets-includes\features\sbvr\*.*" />
+		</ItemGroup>
+		<Copy SourceFiles="@(_SBVRItems)" DestinationFolder="wwwroot\Content\common-assets-includes\features\sbvr\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+	</Target>
+	<Target Name="CopyComboAssets" BeforeTargets="Build">
+		<ItemGroup>
+			<_ComboItems Include="..\..\..\..\..\Neo-Bpms\src\Neo.Bpms.UI.MVC\wwwroot\Content\common-assets-includes\features\combo\*.*" />
+		</ItemGroup>
+		<Copy SourceFiles="@(_ComboItems)" DestinationFolder="wwwroot\Content\common-assets-includes\features\combo\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+	</Target>
+	<Target Name="CopyFilterAssets" BeforeTargets="Build">
+		<ItemGroup>
+			<_FilterItems Include="..\..\..\..\..\Neo-Bpms\src\Neo.Bpms.UI.MVC\wwwroot\Content\common-assets-includes\features\filter\*.*" />
+		</ItemGroup>
+		<Copy SourceFiles="@(_FilterItems)" DestinationFolder="wwwroot\Content\common-assets-includes\features\filter\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+	</Target>
+	<Target Name="CopyReportAssets" BeforeTargets="Build">
+		<ItemGroup>
+			<_ReportStyleItems Include="..\..\..\..\..\Neo-Bpms\src\Neo.Bpms.UI.MVC\CommonAssets\Styles\Features\Report\*.*" />
+			<_ReportTreeCleanupJs Include="..\..\..\..\..\Neo-Bpms\src\Neo.Bpms.UI.MVC\CommonAssets\bundles\report-tree-cleanup.js" />
+		</ItemGroup>
+		<Copy SourceFiles="@(_ReportStyleItems)" DestinationFolder="wwwroot\CommonAssets\Styles\Features\Report\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+		<Copy SourceFiles="@(_ReportTreeCleanupJs)" DestinationFolder="wwwroot\CommonAssets\bundles\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+	</Target>
+	<!-- Commented out - Hyper icon files not found in AdminPanel.Domain -->
+	<!--<Target Name="CopyMmenuAssets" BeforeTargets="Build">
+		<ItemGroup>
+			<_MmenuRtlFixCss Include="..\..\..\..\..\Neo-Bpms\src\Neo.Bpms.UI.MVC\CommonAssets\Styles\Features\Global\mmenu-rtl-fix.css" />
+			<_HyperMenuIconsCssHyper Include="..\Hyper.AdminPanel.Domain\wwwroot\Content\custom-icons\custom-menu-icons.css" />
+			<_HyperSpriteSvgHyper Include="..\Hyper.AdminPanel.Domain\wwwroot\Content\custom-icons\custom-sprite.svg" />
+		</ItemGroup>
+		<Copy SourceFiles="@(_MmenuRtlFixCss)" DestinationFolder="wwwroot\bundles\mmenu\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+		<Copy SourceFiles="@(_HyperMenuIconsCssHyper)" DestinationFolder="wwwroot\bundles\mmenu\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+		<Copy SourceFiles="@(_HyperSpriteSvgHyper)" DestinationFolder="wwwroot\bundles\mmenu\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+	</Target>-->
+	<Target Name="CopyGlobalAssets" BeforeTargets="Build">
+		<ItemGroup>
+			<_GlobalCssItems Include="..\..\..\..\..\Neo-Bpms\src\Neo.Bpms.UI.MVC\CommonAssets\Styles\Features\Global\*.css" />
+		</ItemGroup>
+		<Copy SourceFiles="@(_GlobalCssItems)" DestinationFolder="wwwroot\CommonAssets\Styles\Features\Global\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+	</Target>
+	<Target Name="CopyFormAssets" BeforeTargets="Build">
+		<ItemGroup>
+			<_FormJsItems Include="..\..\..\..\..\Neo-Bpms\src\Neo.Bpms.UI.MVC\CommonAssets\Scripts\Features\Form\TableModalLinks.js" />
+		</ItemGroup>
+		<Copy SourceFiles="@(_FormJsItems)" DestinationFolder="wwwroot\Scripts\common-assets-includes\features\form\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+	</Target>
+	
+	<!-- Microfrontend Build Configuration -->
+	<PropertyGroup>
+		<EditableGridSourcePath>$(MSBuildProjectDirectory)\..\..\..\..\..\Neo-Bpms\src\Neo.UI.EditableGrid</EditableGridSourcePath>
+		<MonitoringSourcePath>$(MSBuildProjectDirectory)\..\..\..\..\..\Neo-Bpms\src\Neo.UI.Monitoring</MonitoringSourcePath>
+		<EditableGridOutputPath>$(MSBuildProjectDirectory)\wwwroot\editable-grid</EditableGridOutputPath>
+		<MonitoringOutputPath>$(MSBuildProjectDirectory)\wwwroot\monitoring</MonitoringOutputPath>
+	</PropertyGroup>
+	
+	<!-- Microfrontend Build Configuration -->
+	<!-- Only build microfrontends during Rebuild, not regular Build -->
+	<!-- Rebuild = Clean + Build, so we use AfterTargets="Clean" to detect Rebuild -->
+	<!-- Note: This will also run if user executes Clean separately, but that's acceptable -->
+	
+	<!-- Check Node.js and npm availability -->
+	<Target Name="CheckNodeJs" AfterTargets="Clean" BeforeTargets="BuildMicrofrontendsOnRebuild">
+		<Exec Command="node --version" ContinueOnError="true" IgnoreExitCode="true" StandardOutputImportance="low">
+			<Output TaskParameter="ExitCode" PropertyName="NodeJsExitCode" />
+		</Exec>
+		<Exec Command="npm --version" ContinueOnError="true" IgnoreExitCode="true" StandardOutputImportance="low">
+			<Output TaskParameter="ExitCode" PropertyName="NpmExitCode" />
+		</Exec>
+		
+		<Error Condition="'$(NodeJsExitCode)' != '0'" Text="Node.js is not installed or not in PATH. Please install Node.js from https://nodejs.org/" />
+		<Error Condition="'$(NpmExitCode)' != '0'" Text="npm is not installed or not in PATH. Please install npm (usually comes with Node.js)." />
+		
+		<Message Condition="'$(NodeJsExitCode)' == '0' AND '$(NpmExitCode)' == '0'" Text="? Node.js and npm are available" Importance="high" />
+	</Target>
+	
+	<!-- Main target that builds all microfrontends - Only runs after Clean (i.e., during Rebuild) -->
+	<Target Name="BuildMicrofrontendsOnRebuild" AfterTargets="Clean">
+		<Message Text="========================================" Importance="high" />
+		<Message Text="Building Microfrontends for Admin Panel (Rebuild only)" Importance="high" />
+		<Message Text="========================================" Importance="high" />
+		
+		<Warning Condition="!Exists('$(EditableGridSourcePath)')" Text="EditableGrid source not found at: $(EditableGridSourcePath). Skipping build." />
+		<Warning Condition="!Exists('$(MonitoringSourcePath)')" Text="Monitoring source not found at: $(MonitoringSourcePath). Skipping build." />
+	</Target>
+	
+	<!-- Build EditableGrid Microfrontend -->
+	<Target Name="BuildEditableGrid" AfterTargets="BuildMicrofrontendsOnRebuild" Condition="Exists('$(EditableGridSourcePath)')">
+		<Message Text="Building Neo.UI.EditableGrid microfrontend..." Importance="high" />
+		
+		<Exec Command="npm install" WorkingDirectory="$(EditableGridSourcePath)" ContinueOnError="false" />
+		
+		<Exec Command="npm run build" WorkingDirectory="$(EditableGridSourcePath)" ContinueOnError="false" />
+		
+		<Message Text="Copying EditableGrid build output to wwwroot..." Importance="high" />
+		<ItemGroup>
+			<_EditableGridFiles Include="$(EditableGridSourcePath)\dist\**\*.*" />
+		</ItemGroup>
+		<MakeDir Directories="$(EditableGridOutputPath)" Condition="!Exists('$(EditableGridOutputPath)')" />
+		<RemoveDir Directories="$(EditableGridOutputPath)" Condition="Exists('$(EditableGridOutputPath)')" />
+		<MakeDir Directories="$(EditableGridOutputPath)" />
+		<Copy SourceFiles="@(_EditableGridFiles)" DestinationFolder="$(EditableGridOutputPath)\%(RecursiveDir)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+		
+		<Message Text="? EditableGrid microfrontend built and copied successfully" Importance="high" />
+	</Target>
+	
+	<!-- Build Monitoring Microfrontend -->
+	<Target Name="BuildMonitoring" AfterTargets="BuildMicrofrontendsOnRebuild" Condition="Exists('$(MonitoringSourcePath)')">
+		<Message Text="Building Neo.UI.Monitoring microfrontend..." Importance="high" />
+		
+		<Exec Command="npm install" WorkingDirectory="$(MonitoringSourcePath)" ContinueOnError="false" />
+		
+		<Exec Command="npm run build" WorkingDirectory="$(MonitoringSourcePath)" ContinueOnError="false" />
+		
+		<Message Text="Copying Monitoring build output to wwwroot..." Importance="high" />
+		<ItemGroup>
+			<_MonitoringFiles Include="$(MonitoringSourcePath)\dist\**\*.*" />
+		</ItemGroup>
+		<MakeDir Directories="$(MonitoringOutputPath)" Condition="!Exists('$(MonitoringOutputPath)')" />
+		<Copy SourceFiles="@(_MonitoringFiles)" DestinationFolder="$(MonitoringOutputPath)\%(RecursiveDir)" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
+		
+		<Message Text="? Monitoring microfrontend built and copied successfully" Importance="high" />
+	</Target>
+</Project>
+

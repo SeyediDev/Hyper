@@ -197,7 +197,7 @@ git push origin v1.0.0
 ```yaml
 environment:
   # Connection String
-  - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=HyperDb;...
+  - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=Hyperyek;...
   
   # Redis
   - Redis__Configuration=redis:6379
