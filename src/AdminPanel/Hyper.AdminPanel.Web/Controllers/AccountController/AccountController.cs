@@ -13,9 +13,10 @@ namespace Hyper.AdminPanel.Web.Controllers.AccountController;
 public partial class AccountController(
     ISmsService smsService, IIdentityUserService identityUserService,
     //IIdpService idpService, IJwtDecode jwtDecode,
-    IOtpService otpService)
+    IOtpService otpService, IWebHostEnvironment environment)
     : ControllerBaseMVC
 {
+    protected IWebHostEnvironment Environment { get; } = environment;
     [HttpPost]
     [AllowAnonymous]
     [IgnoreAntiforgeryToken]

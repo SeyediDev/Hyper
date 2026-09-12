@@ -1,8 +1,8 @@
 using Hyper.AdminPanel.Web;
 using Neo.Domain.Features.Telementry;
-using Neo.Endpoint.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
+Hyper.AdminPanel.Web.Infrastructure.AdminRuntime.ConfigureLocalSql(builder);
 
 builder.Services.Configure<TelemetryOptions>(builder.Configuration.GetSection(nameof(TelemetryOptions))); 
 
@@ -19,7 +19,6 @@ builder.Services.AddHyperAdminPanelServices(builder.Configuration, builder.Envir
 var app = builder.Build();
 
 app.UseHyperBpms(builder.Configuration, builder.Environment);
-app.UseRecuringJobs();
 /*app.Use(async (context, next) =>
 {
     context.Response.Headers.Append(

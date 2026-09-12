@@ -1,4 +1,3 @@
-using Neo.Domain.Features.Sms;
 using Neo.Domain.Features.Sms.Dto;
 
 namespace Hyper.Application.Features.Sms.Notifications;

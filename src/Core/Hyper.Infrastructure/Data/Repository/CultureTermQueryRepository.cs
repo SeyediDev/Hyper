@@ -1,7 +1,5 @@
 using Neo.Domain.Entities.Common;
 using Neo.Domain.Features.Client;
-using Neo.Domain.Repository;
-using Hyper.Domain.Repository;
 using Hyper.Infrastructure.Data.Repository.Hyper;
 
 namespace Hyper.Infrastructure.Data.Repository;

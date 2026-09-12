@@ -1,5 +1,4 @@
 using System.Reflection;
-using Hyper.Domain.Repository;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hyper.Infrastructure.Data.Repository.Hyper;

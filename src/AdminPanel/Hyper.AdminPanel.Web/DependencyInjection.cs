@@ -1,9 +1,9 @@
 using Hyper.AdminPanel.Web.Infrastructure.Icons;
-using Hyper.AdminPanel.Web.Infrastructure.Jobs;
 using Neo.Bpms.Api;
 using Neo.Bpms.UI.MVC.Controls;
 using Neo.Bpms.UI.MVC.Features;
 using Neo.Endpoint;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Hyper.AdminPanel.Web;
 
@@ -11,8 +11,17 @@ public static class DependencyInjection
 {
     public static void AddHyperAdminPanelServices(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
+        services.AddSingleton<AdminSimulationTickets>();
         // Core Domain Services
         services.AddHyperDomainServices(configuration);
+
+        if (environment.IsDevelopment())
+        {
+            // Neo defaults the panel cookie to SecurePolicy.Always. Local HTTP
+            // development must be able to send the cookie back to AdminDashboard.
+            services.PostConfigure<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme,
+                options => options.Cookie.SecurePolicy = CookieSecurePolicy.None);
+        }
 
         services.AddHyperApplicationServices(configuration);
 
@@ -37,7 +46,7 @@ public static class DependencyInjection
         services.AddNeoMinIo(configuration);
 
         // Background Jobs (Hangfire)
-        services.AddNeoHangfire(configuration);
+        services.AddAdminJobContracts(configuration);
 
         // CORS Policy
         AddCorsPolicy(services, configuration);
@@ -86,7 +95,7 @@ public static class DependencyInjection
     public static void UseHyperBpms(this IApplicationBuilder app,
         IConfiguration configuration, IHostEnvironment environment, BpmsMVCConfigurationOptions options = null!)
     {
-        app.UseHyper(configuration, environment);
+        // Integration work runs in the independent worker; admin does not expose the legacy Hangfire dashboard.
 
         // Performance Optimizations: must be called BEFORE UseBpmsMVC
         // This ensures UseResponseCompression and UseStaticFiles (with caching) are registered first
@@ -135,7 +144,7 @@ public static class DependencyInjection
         services.AddSmsDummyServices(configuration);
 
         // Recurring Jobs (AdminPanel manages background jobs)
-        services.AddScoped<IRegisterRecurringJobs, RegisterHyperRecurringJobs>();
+
 
         services.AddScoped<INeoPublisher, MediatRNeoPublisher>();
         _ = services.AddScoped<ICmmnDocument, CmmnDocument>();

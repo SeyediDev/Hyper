@@ -1,5 +1,3 @@
-using Neo.Domain.Features.Sms;
-
 namespace Hyper.Application.Features.Sms.Commands.SendOtpSms;
 
 /// <summary>

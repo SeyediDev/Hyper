@@ -1,0 +1,80 @@
+@model Hyper.AdminPanel.Web.ViewModels.MerchantSimulationViewModel
+@using Hyper.Domain.Entities.Integrations
+@{
+    Layout = "_HyperAdminLayout";
+    ViewBag.Title = "شبیه‌سازی درخواست مغازه‌دار | پنل مدیریتی هایپریک";
+}
+<link rel="stylesheet" href="~/Content/merchant-simulation.css" />
+<section class="merchant-simulation" dir="rtl">
+    <header class="simulation-heading">
+        <div><span class="simulation-eyebrow">پنل مدیریتی هایپریک</span><h1>شبیه‌سازی درخواست مغازه‌دار</h1>
+        <p>مغازه‌دار و مغازه‌ای را انتخاب کنید که می‌خواهید درخواست اتصال را از طرف او بررسی کنید.</p></div>
+        <span class="simulation-admin">ادمین: @Model.AdminName</span>
+    </header>
+    @if (TempData["SimulationNotice"] is string notice)
+    {
+        <div class="simulation-notice" role="status">@notice</div>
+    }
+    <div class="simulation-grid">
+        <section class="simulation-card">
+            <h2>۱. انتخاب مغازه‌دار و مغازه</h2>
+            <form asp-action="Index" method="get" class="simulation-search">
+                <label for="shop-search">نام مغازه یا شناسه مغازه‌دار</label>
+                <div><input id="shop-search" name="search" value="@Model.Search" maxlength="200" placeholder="جست‌وجو در مغازه‌ها" />
+                    <button type="submit" class="simulation-secondary">جست‌وجو</button></div>
+            </form>
+            @if (Model.Shops.Count == 0)
+            {
+                <p class="simulation-empty">مغازه‌ای با این مشخصات پیدا نشد.</p>
+            }
+            else
+            {
+                <form asp-action="Select" method="post">
+                    <label for="selected-shop">مغازه‌دار / مغازه</label>
+                    <select id="selected-shop" name="shopId" required size="7">
+                        @foreach (var shop in Model.Shops)
+                        {
+                            <option value="@shop.ShopId" selected="@(Model.Selected?.ShopId == shop.ShopId)">@shop.ShopName — مغازه‌دار: @shop.MerchantIdentifier — مغازه @shop.ShopId</option>
+                        }
+                    </select>
+                    <p class="simulation-help">حداکثر ۱۰۰ نتیجه نمایش داده می‌شود. برای یافتن موارد دیگر جست‌وجو کنید.</p>
+                    <button type="submit" class="simulation-primary">فعال‌کردن این زمینه</button>
+                </form>
+            }
+        </section>
+        <section class="simulation-card">
+            <h2>۲. درخواست توکن برای زمینه انتخاب‌شده</h2>
+            @if (Model.Selected is { } selected)
+            {
+                <div class="simulation-selection" role="status">
+                    <strong>@selected.ShopName</strong>
+                    <dl><dt>شناسه مغازه‌دار</dt><dd>@selected.MerchantIdentifier</dd>
+                        <dt>شناسه مغازه</dt><dd>@selected.ShopId</dd>
+                        <dt>ادمین انجام‌دهنده</dt><dd>@Model.AdminName</dd>
+                        <dt>اعتبار زمینه</dt><dd>۳۰ دقیقه از زمان انتخاب</dd></dl>
+                </div>
+                <form asp-action="RequestToken" method="post">
+                    <input type="hidden" name="contextTicket" value="@Model.ContextTicket" />
+                    <input type="hidden" name="displayedShopId" value="@selected.ShopId" />
+                    <label for="simulation-provider">پلتفرم غرفه</label>
+                    <select id="simulation-provider" name="provider">
+                        <option value="1">باسلام</option><option value="2">دیجی‌کالا</option>
+                        <option value="3">ترب</option><option value="255">سامانه دیگر</option>
+                    </select>
+                    <label for="simulation-credential">روش اتصال</label>
+                    <select id="simulation-credential" name="credentialType">
+                        <option value="1">اجازه دسترسی از پلتفرم (OAuth)</option>
+                        <option value="3">توکن دسترسی</option><option value="2">کلید API</option>
+                    </select>
+                    <p class="simulation-help">این عملیات درخواست شبیه‌سازی را ثبت می‌کند. دریافت واقعی توکن از پلتفرم هنوز فعال نیست.</p>
+                    <button type="submit" class="simulation-primary">ثبت درخواست شبیه‌سازی توکن</button>
+                </form>
+                <form asp-action="Clear" method="post"><button type="submit" class="simulation-link">پایان شبیه‌سازی این مغازه</button></form>
+            }
+            else
+            {
+                <div class="simulation-empty"><strong>هنوز مغازه‌ای انتخاب نشده است.</strong><p>پس از انتخاب، نام مغازه و مغازه‌دار را اینجا بررسی کنید.</p></div>
+            }
+        </section>
+    </div>
+</section>

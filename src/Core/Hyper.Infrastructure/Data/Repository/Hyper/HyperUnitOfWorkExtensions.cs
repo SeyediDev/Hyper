@@ -1,5 +1,4 @@
-using Neo.Domain.Repository;
-using Hyper.Domain.Repository;
+using Neo.Domain.Entities.Base;
 
 namespace Hyper.Infrastructure.Data.Repository.Hyper;
 

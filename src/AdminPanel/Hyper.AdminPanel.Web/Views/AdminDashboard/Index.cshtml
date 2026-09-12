@@ -1,0 +1,61 @@
+@model Hyper.AdminPanel.Web.ViewModels.AdminOverviewViewModel
+@using System.Globalization
+@using Hyper.Domain.Entities.Integrations
+@{
+    Layout = "_HyperAdminLayout";
+    ViewBag.Title = "نمای کلی | پنل مدیریتی هایپریک";
+    var s = Model.Statistics;
+    string N(int value) => string.Concat(value.ToString("N0", CultureInfo.InvariantCulture).Select(c => c is >= '0' and <= '9' ? "۰۱۲۳۴۵۶۷۸۹"[c - '0'] : c == ',' ? '٬' : c));
+    string Provider(IntegrationProvider value) => value switch { IntegrationProvider.Basalam => "باسلام", IntegrationProvider.Digikala => "دیجی‌کالا", IntegrationProvider.Torob => "ترب", _ => "سامانهٔ سفارشی" };
+    string State(byte value) => value switch { 0 => "در حال اجرا", 1 => "موفق", 2 => "ناموفق", 3 => "نیازمند نگاشت", _ => "نامشخص" };
+    var selectedAction = Model.IsPreview ? "Preview" : "Index";
+    var totalQueue = s.PendingOutbox + s.SendingOutbox + s.DeliveredOutbox + s.FailedOutbox;
+    var ratio = totalQueue == 0 ? 0 : 100d * s.DeliveredOutbox / totalQueue;
+    var issues = s.ExpiredConnections + s.FailedOutbox + s.FailedWebhooks;
+    var chartMax = Math.Max(1, s.Trend.Max(x => Math.Max(x.Invoices, x.SuccessfulRuns)));
+    string Points(bool invoices) => string.Join(" ", s.Trend.Select((d,i) => $"{(i*640d/Math.Max(1,s.Trend.Count-1)).ToString("0.##",CultureInfo.InvariantCulture)},{(170-(invoices?d.Invoices:d.SuccessfulRuns)*150d/chartMax).ToString("0.##",CultureInfo.InvariantCulture)}"));
+}
+@if (Model.IsPreview)
+{ <div class="demo-notice" role="note"><strong>داده‌های این صفحه نمونه هستند.</strong> این پیش‌نمایش هیچ داده‌ای از پایگاه داده نمی‌خواند و عملیاتی روی غرفه انجام نمی‌دهد.<a asp-controller="Account" asp-action="Login" asp-route-returnUrl="/AdminDashboard">ورود به پنل واقعی <span>←</span></a></div> }
+<section class="dashboard-heading">
+    <div><p class="eyebrow">نمای کلی کسب‌وکار</p><h1>داشبورد مدیریتی</h1><p>وضعیت مغازه‌ها، اطلاعات حسابداری و جریان یکسان‌سازی در یک نگاه</p></div>
+    <a class="button button-primary" asp-controller="MerchantSimulation" asp-action="Index"><span>+</span> انتخاب مغازه‌دار</a>
+</section>
+<div class="dashboard-toolbar"><div><span class="scope-dot"></span><strong>@Model.ScopeName</strong><span class="toolbar-divider">|</span><span>به‌روزرسانی @s.GeneratedAtUtc.ToString("HH:mm") UTC</span></div><div class="period-picker" aria-label="بازه گزارش"><a class="@(s.Days==7?"selected":"")" asp-action="@selectedAction" asp-route-days="7">۷ روز اخیر</a><a class="@(s.Days==30?"selected":"")" asp-action="@selectedAction" asp-route-days="30">۳۰ روز اخیر</a><a class="refresh-link" asp-action="@selectedAction" asp-route-days="@s.Days" aria-label="تازه‌سازی آمار"><svg><use href="#hi-sync"/></svg></a></div></div>
+<section class="metric-grid" aria-label="شاخص‌های اصلی">
+    <article class="metric-card"><div><span>مغازه‌ها</span><svg class="metric-icon mint"><use href="#hi-shop"/></svg></div><strong>@N(s.Shops)</strong><p>در محدودهٔ @Model.ScopeName</p><div class="metric-foot"><span class="mini-dot"></span>کسب‌وکارهای ثبت‌شده</div></article>
+    <article class="metric-card"><div><span>کالاهای حسابداری</span><svg class="metric-icon blue"><use href="#hi-box"/></svg></div><strong>@N(s.Products)</strong><p>@N(s.ActiveProducts) کالای فعال</p><div class="metric-foot"><span class="mini-dot blue-dot"></span>کاتالوگ هایپریک</div></article>
+    <article class="metric-card"><div><span>فاکتورهای ثبت‌شده</span><svg class="metric-icon violet"><use href="#hi-file"/></svg></div><strong>@N(s.Invoices)</strong><p>در @N(s.Days) روز اخیر، همهٔ وضعیت‌ها</p><div class="metric-foot"><span class="mini-dot violet-dot"></span>بر اساس تاریخ صدور</div></article>
+    <article class="metric-card"><div><span>طرف‌های حساب</span><svg class="metric-icon amber"><use href="#hi-users"/></svg></div><strong>@N(s.People)</strong><p>اشخاص ثبت‌شده در حسابداری</p><div class="metric-foot"><span class="mini-dot amber-dot"></span>مستقل از کاربران ادمین</div></article>
+</section>
+<section class="dashboard-middle">
+    <article class="dashboard-card trend-card"><header class="card-heading"><div><h2>روند فعالیت</h2><p>تعداد ثبت فاکتور و اجراهای موفق دریافت کالا</p></div><span class="soft-label">@N(s.Days) روز اخیر</span></header>
+        <div class="chart-legend"><span><i></i>فاکتور ثبت‌شده</span><span><i class="blue-dot"></i>دریافت موفق کالا</span></div>
+        <div class="trend-chart" dir="ltr"><div class="chart-axis"><span>@N(chartMax)</span><span>@N(chartMax/2)</span><span>۰</span></div><svg viewBox="0 0 640 190" preserveAspectRatio="none" role="img" aria-label="روند تعداد فاکتورها و اجراهای موفق در بازه انتخابی"><defs><linearGradient id="chart-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#279878" stop-opacity=".18"/><stop offset="100%" stop-color="#279878" stop-opacity="0"/></linearGradient></defs><path class="chart-grid" d="M0 20H640M0 95H640M0 170H640"/><polygon points="0,190 @Points(true) 640,190" fill="url(#chart-fill)"/><polyline class="chart-line secondary" points="@Points(false)"/><polyline class="chart-line" points="@Points(true)"/></svg></div>
+        <div class="chart-labels" dir="ltr">@foreach(var point in s.Trend.Where((_,i)=>s.Days==7 || i%5==0 || i==s.Days-1)){<span>@point.Date.ToString("MM/dd",CultureInfo.GetCultureInfo("fa-IR"))</span>}</div>
+        <details class="chart-data"><summary>مشاهدهٔ داده‌های نمودار</summary><div class="table-scroll"><table><thead><tr><th>تاریخ</th><th>فاکتور</th><th>اجرای موفق</th><th>اجرای ناموفق</th></tr></thead><tbody>@foreach(var point in s.Trend){<tr><td>@point.Date.ToString("yyyy/MM/dd",CultureInfo.GetCultureInfo("fa-IR"))</td><td>@N(point.Invoices)</td><td>@N(point.SuccessfulRuns)</td><td>@N(point.FailedRuns)</td></tr>}</tbody></table></div></details>
+    </article>
+    <article class="dashboard-card queue-card"><header class="card-heading"><div><h2>صف ارسال به پلتفرم‌ها</h2><p>همهٔ پیام‌های ثبت‌شده</p></div><svg class="heading-icon"><use href="#hi-sync"/></svg></header>
+        <div class="queue-donut" style="--delivered:@(ratio.ToString("0.##",CultureInfo.InvariantCulture))%" role="img" aria-label="@N(s.DeliveredOutbox) پیام ارسال‌شده از @N(totalQueue) پیام"><div><strong>@N(totalQueue)</strong><span>پیام خروجی</span></div></div>
+        <ul class="queue-legend"><li><span><i class="mini-dot"></i>ارسال‌شده</span><strong>@N(s.DeliveredOutbox)</strong></li><li><span><i class="mini-dot blue-dot"></i>در حال ارسال</span><strong>@N(s.SendingOutbox)</strong></li><li><span><i class="mini-dot amber-dot"></i>در انتظار / تلاش مجدد</span><strong>@N(s.PendingOutbox)</strong></li><li><span><i class="mini-dot red-dot"></i>خطای نهایی</span><strong>@N(s.FailedOutbox)</strong></li></ul>
+        @if(totalQueue==0){<p class="empty-caption">هنوز پیامی برای ارسال ثبت نشده است.</p>}
+    </article>
+</section>
+<section class="dashboard-bottom">
+    <article class="dashboard-card recent-card"><header class="card-heading"><div><h2>آخرین اجراهای یکسان‌سازی</h2><p>دریافت و تطبیق کاتالوگ در بازه انتخابی</p></div><a asp-controller="MerchantSimulation" asp-action="Dashboard">جزئیات اجراها ←</a></header>
+        <div class="table-scroll"><table><thead><tr><th>مغازه / اتصال</th><th>پلتفرم</th><th>وضعیت</th><th>کالای خوانده‌شده</th><th>زمان UTC</th></tr></thead><tbody>
+        @foreach(var run in s.RecentRuns){<tr><td><strong>@run.ConnectionName</strong><small>اجرای #@run.Id</small></td><td>@Provider(run.Provider)</td><td><span class="state state-@run.Status">@State(run.Status)</span></td><td>@N(run.ItemsRead)</td><td class="numeric">@run.StartedAtUtc.ToString("MM/dd HH:mm")</td></tr>}
+        @if(s.RecentRuns.Count==0){<tr><td colspan="5" class="table-empty"><svg><use href="#hi-sync"/></svg><strong>هنوز اجرایی در این بازه ثبت نشده است</strong><span>پس از اتصال مغازه و اجرای دریافت کالا، سوابق اینجا نمایش داده می‌شوند.</span></td></tr>}
+        </tbody></table></div>
+    </article>
+    <article class="dashboard-card attention-card" id="attention"><header class="card-heading"><h2>نیازمند بررسی</h2><span class="issue-count">@N(issues)</span></header>
+        <div class="attention-item"><span class="attention-symbol amber">!</span><div><strong>اعتبار اتصال‌ها</strong><p>@N(s.ExpiredConnections) اتصال فعال با توکن منقضی</p></div></div>
+        <div class="attention-item"><span class="attention-symbol rose">!</span><div><strong>پیام‌های ناموفق</strong><p>@N(s.FailedOutbox) خطای ارسال و @N(s.FailedWebhooks) خطای وب‌هوک</p></div></div>
+        <div class="attention-item"><span class="attention-symbol blue"><svg><use href="#hi-box"/></svg></span><div><strong>کالاهای زیر حداقل موجودی</strong><p>@N(s.LowStockProducts) کالا بر اساس حداقل تعریف‌شده</p></div></div>
+        <a class="button button-secondary" asp-controller="MerchantSimulation" asp-action="Index">انتخاب مغازه و بررسی اتصال <svg><use href="#hi-arrow"/></svg></a>
+    </article>
+</section>
+<section class="dashboard-card platforms-card"><header class="card-heading"><div><h2>کانال‌های متصل</h2><p>وضعیت ثبت اتصال‌ها به تفکیک پلتفرم؛ فعال‌بودن اتصال به معنی تأیید توکن نیست.</p></div><span class="soft-label">@N(s.Connections) اتصال</span></header><div class="platform-list">
+    @foreach(var provider in s.Providers){<div class="platform-item"><span class="platform-logo">@(Provider(provider.Provider)[0])</span><div><strong>@Provider(provider.Provider)</strong><p>@N(provider.Enabled) فعال‌شده از @N(provider.Connections) اتصال</p></div><span class="platform-time">@(provider.LastSyncAtUtc is {} date ? "آخرین دریافت " + date.ToString("MM/dd HH:mm") + " UTC" : "هنوز دریافت موفق ثبت نشده")</span></div>}
+    @if(s.Providers.Count==0){<p class="empty-caption">هنوز اتصالی برای این محدوده ثبت نشده است. از بخش «مغازه‌دار و اتصال» شروع کنید.</p>}
+</div></section>

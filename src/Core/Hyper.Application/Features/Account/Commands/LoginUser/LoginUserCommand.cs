@@ -1,5 +1,5 @@
 using Neo.Application.Exceptions;
-using Neo.Domain.Features.Sms;
+using Neo.Domain.Entities.Common;
 
 namespace Hyper.Application.Features.Account.Commands.LoginUser;
 

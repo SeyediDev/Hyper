@@ -1,4 +1,5 @@
-global using Hyper.Domain.Entities.Feedback;
-global using Hyper.Domain.Entities.Forum;
-global using Hyper.Domain.Entities.Promotions.Surveys;
-global using Neo.Domain.Entities.Base;
+global using Hyper.Domain.Entities.Common;
+global using Hyper.Domain.Entities.Integrations;
+global using Hyper.Domain.Features.Integrations;
+global using Hyper.Domain.Repository;
+global using Neo.Domain.Repository;

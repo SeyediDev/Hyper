@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RestoreSources></RestoreSources>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../src/Core/Hyper.Domain/Features/Integrations/IntegrationInventoryCapture.cs" Link="Production/IntegrationInventoryCapture.cs" />
+    <Compile Include="../../src/Core/Hyper.Infrastructure/Features/Integrations/BasalamIntegrationAdapter.cs" Link="Production/BasalamIntegrationAdapter.cs" />
+    <Compile Include="../../src/Core/Hyper.Domain/Features/Integrations/IntegrationProviderException.cs" Link="Production/IntegrationProviderException.cs" />
+    <Compile Include="../../src/Core/Hyper.Domain/Features/Integrations/IntegrationOutbox.cs" Link="Production/IntegrationOutbox.cs" />
+    <Compile Include="../../src/AdminPanel/Hyper.AdminPanel.Web/Infrastructure/AdminSimulationTickets.cs" Link="Production/AdminSimulationTickets.cs" />
+    <Compile Include="../../src/Core/Hyper.Domain/Features/Integrations/IntegrationAccess.cs" Link="Production/IntegrationAccess.cs" />
+    <Compile Include="../../src/Core/Hyper.Domain/Features/Integrations/AdminMerchantSimulation.cs" Link="Production/AdminMerchantSimulation.cs" />
+    <Compile Include="../../src/Core/Hyper.Domain/Entities/Integrations/IntegrationAdminSimulation.cs" Link="Production/IntegrationAdminSimulation.cs" />
+    <Compile Include="../../src/Core/Hyper.Domain/Features/Integrations/IntegrationWebhookContracts.cs" Link="Production/IntegrationWebhookContracts.cs" />
+    <Compile Include="../../src/Core/Hyper.Infrastructure/Features/Integrations/IntegrationWebhookVerifier.cs" Link="Production/IntegrationWebhookVerifier.cs" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <Compile Include="../../src/Core/Hyper.Domain/Entities/Integrations/ExternalIntegrationModels.cs" Link="Production/ExternalIntegrationModels.cs" />
+    <Compile Include="../../src/Core/Hyper.Domain/Features/Integrations/IntegrationContracts.cs" Link="Production/IntegrationContracts.cs" />
+    <Compile Include="../../src/Core/Hyper.Domain/Features/Integrations/IntegrationEvents.cs" Link="Production/IntegrationEvents.cs" />
+    <Compile Include="../../src/Core/Hyper.Domain/Features/Integrations/IntegrationConnectionReadiness.cs" Link="Production/IntegrationConnectionReadiness.cs" />
+    <Compile Include="../../src/Core/Hyper.Infrastructure/Features/Integrations/ProviderAdapters.cs" Link="Production/ProviderAdapters.cs" />
+  </ItemGroup>
+</Project>

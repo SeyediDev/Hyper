@@ -14,6 +14,7 @@ public static class DependencyInjection
         _configuration = configuration;
         
         services.AddHttpContextAccessor();
+        services.AddScoped<Hyper.Domain.Features.Integrations.IIntegrationActor, IntegrationActor>();
         services.AddScoped<IRequesterUser, CustomerRequesterUser>();
         services.AddScoped<ICustomerRequesterUser, CustomerRequesterUser>();
         

@@ -1,54 +1,26 @@
-using Hyper.Domain.Entities.Channels;
-using Hyper.Domain.Entities.Events.Data;
-
 namespace Hyper.AdminPanel.Domain.UiDefinitions.HomePage;
 
-public partial class HomePageEntityUiDefinitions : CRUDDefinition<HomePageEntity>
+/// <summary>Neo home-page metadata for Hyper business and booth/store synchronization.</summary>
+public sealed class HomePageEntityUiDefinitions : CRUDDefinition<HomePageEntity>
 {
-    private static readonly List<string> DefaultRoles =
-    [
-        Neo.Domain.Constants.Roles.Admin,
-        HyperRoles.Manager
-    ];
+    private static readonly List<string> AdminRoles = [HyperRoles.Admin];
+    public override List<string>? Roles => AdminRoles;
 
-    public override List<string>? Roles => DefaultRoles;
-
-    protected override void Forms()
+    public sealed class HomePageDashboard : DashboardDefinition
     {
-        //DefineForm<ManagerHomePage>();
-        //DefineForm<Default>();
-    }
-
-    public partial class HomePageDashboard : DashboardDefinition
-    {
-        public override List<string>? Roles => DefaultRoles;
-
-        protected override Form Identify()
-        {
-            return DefineDashboard("داشبورد اصلی هایپریک");
-        }
-
-        protected override void Filters()
-        {
-        }
-
+        public override List<string>? Roles => AdminRoles;
+        protected override Form Identify() => DefineDashboard("داشبورد هایپریک و یکسان‌سازی");
         protected override void DataSources()
         {
-            base.DataSources();
-            AddReport<Customer>();
-            AddReport<CustomerTenant>();
-            AddReport<CustomerTransaction>();
-            AddReport<RewardAsset>();
-            AddReport<Reward>();
-            AddReport<Product>();
-            AddReport<ProductFitAnalysis>();
-            AddReport<CustomerSegment>();
-            AddReport<EventType>();
-            AddReport<EventChannel>();
-            AddReport<EventLog>();
-            AddReport<Promotion>();
-            AddReport<Point>();
-            AddReport<Survey>();
+            AddReport<ExternalIntegrationConnection>();
+            AddReport<ExternalProductMapping>();
+            AddReport<ExternalOrderMapping>();
+            AddReport<IntegrationSyncRun>();
+            AddReport<IntegrationWebhookInbox>();
+            AddReport<IntegrationOutboxMessage>();
+            AddReport<IntegrationAdminSimulation>();
+            AddReport<IntegrationTokenRequest>();
+            AddReport<IntegrationMerchantAccess>();
         }
     }
 }

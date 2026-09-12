@@ -1,6 +1,4 @@
 namespace Hyper.AdminPanel.Web.Infrastructure;
-using Hyper.AdminPanel.Web.Infrastructure.Jobs;
-
 /// <summary>
 /// Infrastructure services for AdminPanel.Web
 /// AdminPanel needs full infrastructure: Database, Cache, ObjectStore, Hangfire, SMS, etc.
@@ -30,7 +28,7 @@ public static class InfrastructureDependencyInjection
         services.AddNeoMinIo(configuration);
         
         // Background Jobs (Hangfire)
-        services.AddNeoHangfire(configuration);
+        services.AddAdminJobContracts(configuration);
 
         // CORS Policy
         AddCorsPolicy(services, configuration);
@@ -74,7 +72,7 @@ public static class InfrastructureDependencyInjection
         services.AddSmsDummyServices(configuration);
         
         // Recurring Jobs (AdminPanel manages background jobs)
-        services.AddScoped<IRegisterRecurringJobs, RegisterHyperRecurringJobs>();
+
         
         return services;
     }

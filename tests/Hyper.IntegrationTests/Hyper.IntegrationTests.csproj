@@ -23,11 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Channel\Hyper.Channel.Api\Hyper.Channel.Api.csproj" />
-    <ProjectReference Include="..\..\src\CustomerPortal\Hyper.CustomerPortal.Api\Hyper.CustomerPortal.Api.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
 

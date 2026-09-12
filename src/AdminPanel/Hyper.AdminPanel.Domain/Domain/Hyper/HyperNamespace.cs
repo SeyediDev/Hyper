@@ -1,5 +1,4 @@
 using Neo.Bpms.Domain.Models.Cmmn.Partitions;
-using Neo.Domain.Entities.Common;
 
 namespace Hyper.AdminPanel.Domain.Domain.Hyper;
 
@@ -7,7 +6,7 @@ public class HyperNamespace : ModelDefinition<HyperNamespace>
 {
     protected override bool Identify()
     {
-        return DefineModel(nameof(Domains.Hyper), "پنل مدیریتی هایپریک", null, nameof(DomainProvider.Domain));
+        return DefineModel(nameof(Hyper), "پنل مدیریتی هایپریک", null, nameof(DomainProvider.Domain));
     }
     protected override void Partitions()
     {
@@ -22,11 +21,19 @@ public class HyperNamespace : ModelDefinition<HyperNamespace>
 
     protected override void Entities()
     {
+        // HomePageEntity is Neo's metadata anchor. Business entities are loaded
+        // explicitly by their own Hyper definitions; do not scan the copied Club
+        // assemblies here because that registers Club tables in the admin model.
         DefineEntity<HomePageEntity>();
-        DefineEntities<IDomainEventEntity>(typeof(Language).Assembly);
-        DefineEntities<IDomainEventEntity>(typeof(Point).Assembly);
-		DefineEntities<IView>(typeof(Language).Assembly);
-		DefineEntities<IView>(typeof(Point).Assembly);
+        DefineEntity<ExternalIntegrationConnection>();
+        DefineEntity<ExternalProductMapping>();
+        DefineEntity<ExternalOrderMapping>();
+        DefineEntity<IntegrationSyncRun>();
+        DefineEntity<IntegrationWebhookInbox>();
+        DefineEntity<IntegrationOutboxMessage>();
+        DefineEntity<IntegrationAdminSimulation>();
+        DefineEntity<IntegrationTokenRequest>();
+        DefineEntity<IntegrationMerchantAccess>();
 	}
 
     private void AddArchivePartitionScheme(string name)

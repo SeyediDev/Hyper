@@ -2550,36 +2550,36 @@
         color: var(--neo-dashboard-border-dark);
     }
 
-/* ===== HEADER Hyper BADGE STYLES ===== */
-.header-Hyper-badge {
+/* ===== HEADER CLUB BADGE STYLES ===== */
+.header-club-badge {
     position: relative;
     z-index: 10;
 }
 
-.Hyper-svg-icon-header {
+.club-svg-icon-header {
     transition: all 0.3s ease;
     cursor: pointer;
 }
 
-    .Hyper-svg-icon-header:hover {
+    .club-svg-icon-header:hover {
         transform: scale(1.05);
         filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3));
     }
 
-    .Hyper-svg-icon-header svg {
+    .club-svg-icon-header svg {
         transition: all 0.3s ease;
     }
 
 /* Responsive Design for Header Logo */
 @media (max-width: 768px) {
-    .Hyper-svg-icon-header svg {
+    .club-svg-icon-header svg {
         width: 50px;
         height: 50px;
     }
 }
 
 @media (max-width: 480px) {
-    .Hyper-svg-icon-header svg {
+    .club-svg-icon-header svg {
         width: 45px;
         height: 45px;
     }
@@ -2598,13 +2598,13 @@
     }
 }
 
-.Hyper-svg-icon-header:hover svg {
+.club-svg-icon-header:hover svg {
     animation: header-pulse 2s ease-in-out infinite;
 }
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
-    .Hyper-svg-icon-header svg {
+    .club-svg-icon-header svg {
         filter: brightness(1.1) contrast(1.1);
     }
 }
@@ -2748,17 +2748,17 @@
     align-items: center;
 }
 
-.Hyper-header-logo {
+.club-header-logo {
     display: block;
     vertical-align: middle;
 }
 
-.header-Hyper-badge {
+.header-club-badge {
     display: flex;
     align-items: center;
 }
 
-    .header-Hyper-badge a {
+    .header-club-badge a {
         display: flex;
         align-items: center;
     }

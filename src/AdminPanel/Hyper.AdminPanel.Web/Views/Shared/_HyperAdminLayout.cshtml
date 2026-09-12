@@ -1,0 +1,49 @@
+@{
+    var preview = ViewBag.DashboardPreview == true;
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    string Active(string c, string a) => controller == c && action == a ? "active" : "";
+}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@(ViewBag.Title ?? "پنل مدیریتی هایپریک")</title>
+    <link rel="stylesheet" href="~/Content/hyper-admin.css" asp-append-version="true" />
+</head>
+<body class="hyper-admin">
+    <svg class="icon-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+        <symbol id="hi-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
+        <symbol id="hi-shop" viewBox="0 0 24 24"><path d="M4 10v11h16V10M3 10l2-7h14l2 7M3 10c0 4 4 4 4 0 0 4 5 4 5 0 0 4 5 4 5 0 0 4 4 4 4 0M9 21v-6h6v6"/></symbol>
+        <symbol id="hi-sync" viewBox="0 0 24 24"><path d="M20 8a8 8 0 0 0-14-3L3 8m0-5v5h5M4 16a8 8 0 0 0 14 3l3-3m0 5v-5h-5"/></symbol>
+        <symbol id="hi-box" viewBox="0 0 24 24"><path d="m12 2 9 5v10l-9 5-9-5V7l9-5Zm0 10v10M3 7l9 5 9-5M7.5 4.5l9 5V14"/></symbol>
+        <symbol id="hi-users" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M2 21v-3a7 7 0 0 1 14 0v3M16 3a4 4 0 0 1 0 8m3 4a6 6 0 0 1 3 6"/></symbol>
+        <symbol id="hi-file" viewBox="0 0 24 24"><path d="M6 2h9l4 4v16H5V2h1m9 0v5h4M8 11h8m-8 4h8m-8 4h5"/></symbol>
+        <symbol id="hi-arrow" viewBox="0 0 24 24"><path d="M20 12H4m6-6-6 6 6 6"/></symbol>
+        <symbol id="hi-bell" viewBox="0 0 24 24"><path d="M5 9a7 7 0 0 1 14 0v6l2 3H3l2-3V9m4 12h6"/></symbol>
+        <symbol id="hi-menu" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></symbol>
+    </defs></svg>
+    <a class="skip-link" href="#main-content">رفتن به محتوای اصلی</a>
+    <aside class="hyper-sidebar" id="admin-navigation">
+        <a class="hyper-brand" href="@(preview ? Url.Action("Preview", "AdminDashboard") : Url.Action("Index", "AdminDashboard"))"><span class="brand-mark">هـ</span><span>هایپریک<small>پنل مدیریتی کسب‌وکار</small></span></a>
+        <p class="nav-caption">فضای مدیریت</p>
+        <nav aria-label="منوی اصلی">
+            <a class="@(controller == "AdminDashboard" ? "active" : "")" href="@(preview ? Url.Action("Preview", "AdminDashboard") : Url.Action("Index", "AdminDashboard"))"><svg><use href="#hi-grid"/></svg>نمای کلی</a>
+            <a class="@Active("MerchantSimulation", "Index")" asp-controller="MerchantSimulation" asp-action="Index"><svg><use href="#hi-shop"/></svg>مغازه‌دار و اتصال</a>
+            <a class="@Active("MerchantSimulation", "Dashboard")" asp-controller="MerchantSimulation" asp-action="Dashboard"><svg><use href="#hi-sync"/></svg>عملیات یکسان‌سازی</a>
+        </nav>
+        <div class="sidebar-note"><span class="small-label">مرجع موجودی غرفه</span><strong>موجودی کل مغازه</strong><p>پس از کسر رزروهای فعال</p><span class="note-line"></span><small>هر اتصال، یک زمینهٔ مشخص برای مغازه‌دار دارد.</small></div>
+        <div class="sidebar-footer"><span class="status-dot"></span>پنل مدیریتی هایپریک<small>فروشگاه · حسابداری · اتصال‌ها</small></div>
+    </aside>
+    <div class="hyper-workspace">
+        <header class="hyper-topbar">
+            <div class="topbar-heading"><button class="icon-button mobile-toggle" type="button" aria-label="باز و بسته کردن منو" aria-controls="admin-navigation" aria-expanded="false"><svg><use href="#hi-menu"/></svg></button><span>مدیریت کسب‌وکار <b>/</b> داشبورد</span></div>
+            <div class="topbar-user">@if(preview){<span class="preview-pill">پیش‌نمایش طراحی</span>}<span class="user-avatar">م</span><span>@(preview ? "داده‌های نمونه" : ViewBag.AdminDisplayName ?? "مدیر سامانه")<small>@(preview ? "بدون دسترسی به اطلاعات واقعی" : "حساب ادمین پنل")</small></span></div>
+        </header>
+        @if (!preview) { <partial name="Layout/_MerchantSimulationContext" /> }
+        <main id="main-content" class="hyper-content">@RenderBody()</main>
+        <footer class="hyper-footer">پنل مدیریتی هایپریک <span>@(preview ? "این صفحه فقط برای بررسی طراحی است." : "آمار بر اساس داده‌های ثبت‌شده در سامانه")</span></footer>
+    </div>
+    <script src="~/Scripts/hyper-admin.js" asp-append-version="true" defer></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body></html>

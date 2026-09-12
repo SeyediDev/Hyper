@@ -1,0 +1,22 @@
+<aside dir="rtl" style="padding:8px 20px;background:#edf6f2;border-bottom:1px solid #d5e7df;font-size:13px;display:flex;gap:14px;align-items:center">
+    <span id="merchant-simulation-summary">زمینه شبیه‌سازی: انتخاب نشده</span>
+    <a href="@Url.Action("Index", "MerchantSimulation")">انتخاب مغازه‌دار / تغییر زمینه</a>
+    <a href="@Url.Action("Dashboard", "MerchantSimulation")">آمار یکسان‌سازی</a>
+</aside>
+<script>
+(function () {
+    var summary = document.getElementById('merchant-simulation-summary');
+    function refresh() {
+        fetch('@Url.Action("Current", "MerchantSimulation")', { credentials: 'same-origin', cache: 'no-store', headers: { 'Accept': 'application/json' } })
+            .then(function (response) { if (!response.ok) throw new Error(); return response.json(); })
+            .then(function (context) {
+                summary.textContent = context.selected
+                    ? 'شبیه‌سازی برای «' + context.shopName + '» — مغازه‌دار: ' + context.merchantIdentifier
+                    : 'زمینه شبیه‌سازی: انتخاب نشده یا منقضی شده';
+            }).catch(function () { summary.textContent = 'زمینه شبیه‌سازی در دسترس نیست'; });
+    }
+    refresh();
+    setInterval(function () { if (!document.hidden) refresh(); }, 60000);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) refresh(); });
+})();
+</script>

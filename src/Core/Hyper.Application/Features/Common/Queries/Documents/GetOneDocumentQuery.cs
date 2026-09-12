@@ -1,6 +1,5 @@
 using Neo.Application.Exceptions;
 using Neo.Domain.Features.ObjectStore;
-using Hyper.Domain.Entities.Common;
 
 namespace Hyper.Application.Features.Common.Queries.Documents;
 

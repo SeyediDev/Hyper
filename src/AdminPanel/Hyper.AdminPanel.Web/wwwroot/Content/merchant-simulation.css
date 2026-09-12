@@ -1,0 +1,16 @@
+.merchant-simulation{max-width:1120px;margin:0 auto;padding:30px 24px 48px;color:#19313b;line-height:1.9}
+.simulation-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:24px}
+.simulation-heading h1{font-size:26px;font-weight:700;margin:5px 0 8px}.simulation-heading p{color:#5c6e75;margin:0}
+.simulation-eyebrow{color:#167767;font-size:13px}.simulation-admin{background:#edf4f5;padding:8px 14px;border-radius:10px;white-space:nowrap}
+.simulation-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}.simulation-card{background:#fff;border:1px solid #dce5e8;border-radius:14px;padding:24px}
+.simulation-card h2{font-size:18px;margin:0 0 22px;font-weight:700}.simulation-card label{display:block;font-weight:600;margin:15px 0 6px}
+.simulation-card select,.simulation-card input{width:100%;border:1px solid #b9cbd0;background:#fff;border-radius:8px;padding:10px;color:#19313b;font:inherit}
+.simulation-card select[size]{padding:6px}.simulation-card option{padding:10px}.simulation-search>div{display:flex;gap:8px}.simulation-search input{min-width:0}
+.simulation-primary,.simulation-secondary{border:0;border-radius:8px;padding:10px 18px;font:inherit;cursor:pointer}.simulation-primary{background:#126d60;color:#fff;width:100%;margin-top:12px}.simulation-primary:hover{background:#0a544a}
+.simulation-secondary{background:#edf4f5;color:#19313b}.simulation-link{border:0;background:none;color:#9a3d32;cursor:pointer;margin-top:14px;font:inherit}
+.simulation-help{font-size:12px;color:#65777d;margin-top:12px}.simulation-empty{padding:30px 14px;background:#f5f8f9;border-radius:10px;color:#5c6e75}
+.simulation-selection{background:#eaf5f0;border-right:4px solid #167767;border-radius:8px;padding:16px}.simulation-selection>strong{font-size:19px}.simulation-selection dl{display:grid;grid-template-columns:1fr 1fr;gap:5px 12px;margin:12px 0 0}.simulation-selection dt{font-weight:400;color:#52696c}.simulation-selection dd{margin:0;overflow-wrap:anywhere}
+.simulation-notice{background:#eef6fb;border:1px solid #c1daec;border-radius:10px;padding:14px;margin-bottom:20px;overflow-wrap:anywhere}
+.sync-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:22px 0}.sync-stat-grid article{background:#fff;border:1px solid #dce5e8;padding:18px;border-radius:12px}.sync-stat-grid span{display:block;color:#5c6e75;font-size:13px}.sync-stat-grid strong{display:block;font-size:30px;margin-top:8px}.sync-stat-secondary strong{font-size:23px}.sync-table-scroll{overflow-x:auto}.sync-runs{width:100%;border-collapse:collapse;font-size:13px}.sync-runs th,.sync-runs td{text-align:right;padding:12px;border-bottom:1px solid #e1e8eb}.sync-runs th{background:#f3f7f8;white-space:nowrap}.sync-runs td:last-child{max-width:260px;overflow-wrap:anywhere}
+@media(max-width:760px){.sync-stat-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.simulation-grid{grid-template-columns:1fr}.simulation-heading{display:block}.simulation-admin{display:inline-block;margin-top:14px}.merchant-simulation{padding:20px 14px}.simulation-card{padding:18px}}

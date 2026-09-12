@@ -1,6 +1,3 @@
-using Hyper.Application.Features.Hyper.Jobs;
-using Hyper.Application.Features.Points.Jobs;
-
 namespace Hyper.AdminPanel.Web.Infrastructure.Jobs;
 
 /// <summary>
@@ -8,7 +5,7 @@ namespace Hyper.AdminPanel.Web.Infrastructure.Jobs;
 /// این کلاس باید در Application layer استفاده شود
 /// </summary>
 public class RegisterHyperRecurringJobs(
-    IRecurringJobsManager recurringJobsManager,
+    //IRecurringJobsManager recurringJobsManager,
     ILogger<RegisterHyperRecurringJobs> logger) : IRegisterRecurringJobs
 {
     public void Register()
@@ -16,16 +13,16 @@ public class RegisterHyperRecurringJobs(
         logger.LogWarning("Registering recurring jobs is diable. at {Time}", DateTime.UtcNow);
         
         logger.LogInformation("Registering Hyper recurring jobs at {Time}", DateTime.UtcNow);
-        recurringJobsManager.RemoveIfExists<IProcessScheduledLotteriesJob>();
+        //recurringJobsManager.RemoveIfExists<IProcessScheduledLotteriesJob>();
         //recurringJobsManager.AddOrUpdate<IProcessScheduledLotteriesJob>();
-        recurringJobsManager.RemoveIfExists<IProcessScheduledPromotionsJob>();
+        //recurringJobsManager.RemoveIfExists<IProcessScheduledPromotionsJob>();
         //recurringJobsManager.AddOrUpdate<IProcessScheduledPromotionsJob>();
-        recurringJobsManager.RemoveIfExists<IScheduleLotteriesJob>();
+        //recurringJobsManager.RemoveIfExists<IScheduleLotteriesJob>();
         //recurringJobsManager.AddOrUpdate<IScheduleLotteriesJob>();
 
         //recurringJobsManager.AddOrUpdate<Hyper.CustomerPortal.Application.Features.Plans.Jobs.IExpireCustomerPlansJob>();
 
-        recurringJobsManager.RemoveIfExists<IExpirePointsJob>();
+        //recurringJobsManager.RemoveIfExists<IExpirePointsJob>();
         //recurringJobsManager.AddOrUpdate<IExpirePointsJob>();
         // Get job types dynamically from service provider
 

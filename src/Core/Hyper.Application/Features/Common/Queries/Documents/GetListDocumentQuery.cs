@@ -1,5 +1,4 @@
 using Neo.Domain.Features.ObjectStore;
-using Hyper.Domain.Entities.Common;
 using System.Text;
 
 namespace Hyper.Application.Features.Common.Queries.Documents;

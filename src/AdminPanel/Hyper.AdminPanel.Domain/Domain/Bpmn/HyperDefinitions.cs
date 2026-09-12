@@ -1,3 +1,4 @@
+using Hyper.Domain.Entities.Common;
 using Neo.Bpms.Domain.Features.Definitions.Entities.Processes;
 
 namespace Hyper.AdminPanel.Domain.Domain.Hyper;

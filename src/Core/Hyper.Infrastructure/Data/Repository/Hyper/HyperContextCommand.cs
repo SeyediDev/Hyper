@@ -1,4 +1,3 @@
-using Hyper.Domain.Repository;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 

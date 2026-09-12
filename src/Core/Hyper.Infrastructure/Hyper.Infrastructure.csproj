@@ -38,5 +38,17 @@
     <Folder Include="Data\Interceptors\" />
   </ItemGroup>
 
-</Project>
+  <ItemGroup>
+    <!-- Club persistence is retired from Hyper. Keep only shared account primitives and integration mappings. -->
+    <Compile Remove="Data\Configurations\Customer*.cs" />
+    <Compile Remove="Data\Configurations\Feedback*.cs" />
+    <Compile Remove="Data\Configurations\Forum*.cs" />
+    <Compile Remove="Data\Configurations\Lottery*.cs" />
+    <Compile Remove="Data\Configurations\Plan*.cs" />
+    <Compile Remove="Data\Configurations\Promotion*.cs" />
+    <Compile Remove="Data\Configurations\Interaction*.cs" />
+    <Compile Remove="Data\Configurations\Product*.cs" />
+    <Compile Remove="Data\Configurations\EventLogConfiguration.cs" />
+    <Compile Remove="Data\Configurations\Tenant*.cs" />
+  </ItemGroup></Project>
 

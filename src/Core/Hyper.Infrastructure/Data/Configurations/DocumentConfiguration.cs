@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Hyper.Domain.Entities.Common;
 
 namespace Hyper.Infrastructure.Data.Configurations;
 internal class DocumentConfiguration : IEntityTypeConfiguration<Document>

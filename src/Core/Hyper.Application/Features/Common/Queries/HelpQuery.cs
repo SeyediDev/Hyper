@@ -1,5 +1,4 @@
 using Neo.Application.Exceptions;
-using Hyper.Domain.Entities.Common;
 
 namespace Hyper.Application.Features.Common.Queries;
 

@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType></PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="../Hyper.IntegrationWorker.Application/Hyper.IntegrationWorker.Application.csproj" />
+    <ProjectReference Include="../../Core/Hyper.Infrastructure/Hyper.Infrastructure.csproj" />
+    <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

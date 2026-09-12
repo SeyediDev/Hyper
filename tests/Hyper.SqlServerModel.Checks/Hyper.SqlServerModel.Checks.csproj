@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <NeoSourceRoot Condition="'$(NeoSourceRoot)' == ''">../../../../Neo/src</NeoSourceRoot>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <Using Include="Microsoft.AspNetCore.Mvc" />
+    <Using Include="Microsoft.AspNetCore.Http" />
+    <Using Include="Neo.Endpoint.Controller" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.8" />
+    <PackageReference Include="MediatR.Contracts" Version="2.0.1" />
+    <Compile Include="$(NeoSourceRoot)/Neo.Domain/Entities/Base/IEntity.cs" Link="Neo/IEntity.cs" />
+    <Compile Include="$(NeoSourceRoot)/Neo.Domain/Entities/Base/IDomainEventEntity.cs" Link="Neo/IDomainEventEntity.cs" />
+    <Compile Include="$(NeoSourceRoot)/Neo.Domain/Entities/Base/BaseEvent.cs" Link="Neo/BaseEvent.cs" />
+    <Compile Include="$(NeoSourceRoot)/Neo.Common/Attributes/DataProviderAttribute.cs" Link="Neo/DataProviderAttribute.cs" />
+    <Compile Include="../../src/Core/Hyper.Domain/Entities/Database/*.cs" Link="Production/%(Filename)%(Extension)" />
+    <Compile Include="../../src/Core/Hyper.Infrastructure/Data/Repository/Hyper/HyperSqlServerContext.cs" Link="Production/HyperSqlServerContext.cs" />
+    <Compile Include="../../src/Core/Hyper.Infrastructure/Data/Repository/Hyper/HyperSqlServerModel.cs" Link="Production/HyperSqlServerModel.cs" />
+    <Compile Include="../../src/Core/Hyper.Infrastructure/Data/Repository/Hyper/HyperIntegrationContext.cs" Link="Production/HyperIntegrationContext.cs" />
+    <Compile Include="../../src/Core/Hyper.Domain/Entities/Integrations/*.cs" Link="Production/%(Filename)%(Extension)" />
+    <Compile Include="../../src/Core/Hyper.Domain/Features/Integrations/*.cs" Link="Production/%(Filename)%(Extension)" />
+    <Compile Include="../../src/Core/Hyper.Infrastructure/Features/Integrations/*.cs" Link="Production/%(Filename)%(Extension)" />
+    <Compile Include="../../src/Core/Hyper.Infrastructure/Data/Configurations/External*Configuration.cs" Link="Production/%(Filename)%(Extension)" />
+    <Compile Include="../../src/Core/Hyper.Infrastructure/Data/Configurations/Integration*Configuration.cs" Link="Production/%(Filename)%(Extension)" />
+    <Compile Include="../../src/Core/Hyper.Infrastructure/Data/Configurations/InventoryReservationLogConfiguration.cs" Link="Production/InventoryReservationLogConfiguration.cs" />
+    <Compile Include="../../src/CustomerPortal/Hyper.CustomerPortal.Api/Controllers/IntegrationsController.cs" Link="Production/IntegrationsController.cs" />
+    <Compile Include="$(NeoSourceRoot)/Neo.Endpoint/Controller/VersionRouteAttribute.cs" Link="Neo/VersionRouteAttribute.cs" />
+    <None Include="../../../docs/schema/hyper-schema.json" Link="hyper-schema.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

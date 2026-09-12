@@ -1,5 +1,3 @@
-using Hyper.Domain.Entities.Common;
-
 namespace Hyper.Application.Features.Common.Queries;
 
 public record FaqQuery() : IRequest<FaqQueryResponse>

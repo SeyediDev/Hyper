@@ -1,5 +1,3 @@
-using Hyper.Domain.Entities.Common;
-using Hyper.Domain.Repository;
 using Hyper.Infrastructure.Data.Repository.Hyper;
 using Neo.Domain.Entities.Common;
 

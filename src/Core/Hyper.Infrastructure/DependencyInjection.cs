@@ -1,16 +1,14 @@
 using Ardalis.GuardClauses;
-using Hyper.Domain.Repository;
 using Hyper.Infrastructure.Data.Repository;
 using Hyper.Infrastructure.Data.Repository.Hyper;
+using Hyper.Infrastructure.Features.Integrations;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Hyper.Domain.Features.Integrations;
-using Hyper.Infrastructure.Features.Integrations;
 using Microsoft.Extensions.Hosting;
-using Neo.Domain.Repository;
+using Neo.Domain.Entities.Base;
 using Neo.Infrastructure.Features.Queue.Hangfire;
 using Quartz;
 
@@ -21,7 +19,6 @@ public static class DependencyInjection
 	public static void AddHyperRepositories(this IServiceCollection services, IConfiguration configuration)
 	{
 		// Initialize Mapster configurations
-		_ = typeof(Configuration.AttributeValueMappingConfig);
         var commandConnectionString = configuration.GetConnectionString($"{nameof(DomainProvider.Domain)}CommandConnection");
         Guard.Against.Null(commandConnectionString, message: $"Connection string '{nameof(DomainProvider.Domain)}CommandConnection' not found.");
         services.AddDbContext<HyperContextCommand>((serviceProvider, options) =>
@@ -29,14 +26,9 @@ public static class DependencyInjection
             options.UseSqlServer(commandConnectionString);
             options.AddInterceptors(serviceProvider.GetServices<ISaveChangesInterceptor>());
         });
-        services.AddScoped<IIntegrationSynchronizationService, IntegrationSynchronizationService>();
-        services.AddScoped<IIntegrationStrategyResolver, IntegrationStrategyResolver>();
-        services.AddHttpClient("ExternalIntegrations", client => client.Timeout = TimeSpan.FromSeconds(30));
-        services.AddSingleton<IExternalIntegrationAdapter, BasalamIntegrationAdapter>();
-        services.AddSingleton<IExternalIntegrationAdapter, DigikalaIntegrationAdapter>();
-        services.AddSingleton<IExternalIntegrationAdapter, TorobIntegrationAdapter>();
+        services.AddHyperIntegrations(commandConnectionString);
+        services.Configure<IntegrationInventoryCaptureOptions>(configuration.GetSection("IntegrationInventoryCapture"));
         services.AddScoped<IHyperUnitOfWorkCommand>(serviceProvider => serviceProvider.GetRequiredService<HyperContextCommand>());
-        services.AddDbContext<HyperSqlServerContext>(options => options.UseSqlServer(commandConnectionString));
 
         var queryConnectionString = configuration.GetConnectionString($"{nameof(DomainProvider.Domain)}QueryConnection");
         Guard.Against.Null(queryConnectionString, message: $"Connection string '{nameof(DomainProvider.Domain)}QueryConnection' not found.");

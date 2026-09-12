@@ -1,0 +1,67 @@
+@model Hyper.AdminPanel.Web.ViewModels.IntegrationDashboardViewModel
+@{
+    Layout = "_HyperAdminLayout";
+    ViewBag.Title = "آمار یکسان‌سازی | پنل مدیریتی هایپریک";
+    string Status(byte status) => status switch { 0 => "در حال اجرا", 1 => "موفق", 2 => "ناموفق", 3 => "نیازمند نگاشت", _ => "نامشخص" };
+    string QueueStatus(byte status) => status switch { 0 => "در انتظار / تلاش مجدد", 1 => "در حال ارسال", 2 => "ارسال‌شده", 3 => "خطای نهایی", _ => "نامشخص" };
+}
+<link rel="stylesheet" href="~/Content/merchant-simulation.css" />
+<section class="merchant-simulation" dir="rtl">
+    <header class="simulation-heading"><div><span class="simulation-eyebrow">پنل مدیریتی هایپریک</span>
+        <h1>آمار یکسان‌سازی</h1><p>سوابق ثبت‌شده برای مغازهٔ انتخاب‌شده؛ تمام زمان‌ها به وقت UTC نمایش داده می‌شوند.</p></div>
+        <a asp-action="Index" class="simulation-secondary">انتخاب / تغییر مغازه</a></header>
+    @if (Model.Selected is { } shop && Model.Statistics is { } stats)
+    {
+        <div class="simulation-selection"><strong>@shop.ShopName</strong> — مغازه‌دار: @shop.MerchantIdentifier — مغازه @shop.ShopId</div>
+        <p class="simulation-help">انتقال واقعی داده به پلتفرم‌ها هنوز در حال توسعه است. آمار زیر نتیجهٔ اجراهای ثبت‌شده در سامانه است.</p>
+        <div class="sync-stat-grid">
+            <article><span>موفق</span><strong>@stats.RunCount(1)</strong></article>
+            <article><span>ناموفق</span><strong>@stats.RunCount(2)</strong></article>
+            <article><span>در حال اجرا</span><strong>@stats.RunCount(0)</strong></article>
+            <article><span>نیازمند نگاشت</span><strong>@stats.RunCount(3)</strong></article>
+        </div>
+        <div class="sync-stat-grid sync-stat-secondary">
+            <article><span>اتصال فعال / کل اتصال‌ها</span><strong>@stats.EnabledConnections / @stats.Connections</strong></article>
+            <article><span>نگاشت معتبر کالا</span><strong>@stats.MappedProducts</strong></article>
+            <article><span>وب‌هوک در انتظار</span><strong>@stats.WebhookCount(0)</strong></article>
+            <article><span>وب‌هوک ناموفق</span><strong>@stats.WebhookCount(2)</strong></article>
+        </div>
+        <div class="sync-stat-grid">
+            <article><span>صف ارسال / تلاش مجدد</span><strong>@stats.OutboxCount(0)</strong></article>
+            <article><span>در حال ارسال به پلتفرم</span><strong>@stats.OutboxCount(1)</strong></article>
+            <article><span>ارسال موفق به پلتفرم</span><strong>@stats.OutboxCount(2)</strong></article>
+            <article><span>خطای نهایی ارسال</span><strong>@stats.OutboxCount(3)</strong></article>
+        </div>
+        <section class="simulation-card"><h2>آخرین پیام‌های خروجی</h2>
+            @if (stats.RecentOutbox.Count == 0)
+            { <div class="simulation-empty">پیامی برای ارسال ثبت نشده است.</div> }
+            else
+            {
+                <div class="sync-table-scroll"><table class="sync-runs"><thead><tr><th>شناسه</th><th>اتصال</th><th>وضعیت</th><th>تعداد تلاش</th><th>زمان تلاش بعدی (UTC)</th><th>خطا</th></tr></thead><tbody>
+                @foreach (var message in stats.RecentOutbox)
+                {
+                    <tr><td>@message.Id</td><td>@message.ConnectionName</td><td>@QueueStatus(message.Status)</td><td>@message.Attempts</td>
+                    <td dir="ltr">@(message.Status == 0 ? message.NextAttemptAtUtc.ToString("yyyy-MM-dd HH:mm") : "—")</td><td>@(message.LastError ?? "—")</td></tr>
+                }
+                </tbody></table></div>
+            }
+        </section>
+        <section class="simulation-card"><h2>آخرین اجراهای دریافت کالا</h2>
+            @if (stats.RecentRuns.Count == 0)
+            { <div class="simulation-empty">برای این مغازه هنوز اجرای یکسان‌سازی ثبت نشده است.</div> }
+            else
+            {
+                <div class="sync-table-scroll"><table class="sync-runs"><thead><tr><th>اتصال</th><th>پلتفرم</th><th>وضعیت</th><th>شروع (UTC)</th><th>خوانده‌شده</th><th>ثبت‌شده</th><th>خطای اقلام</th><th>توضیح</th></tr></thead><tbody>
+                @foreach (var run in stats.RecentRuns)
+                {
+                    <tr><td>@run.ConnectionName</td><td>@run.Provider</td><td>@Status(run.Status)</td><td dir="ltr">@run.StartedAtUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@run.ItemsRead</td><td>@run.ItemsWritten</td><td>@run.ItemsFailed</td><td>@(run.Error ?? "—")</td></tr>
+                }
+                </tbody></table></div>
+            }
+        </section>
+        <a asp-action="Dashboard" class="simulation-link">تازه‌سازی آمار</a>
+    }
+    else
+    { <div class="simulation-empty">برای دیدن آمار، ابتدا مغازه‌دار و مغازه را انتخاب کنید.</div> }
+</section>

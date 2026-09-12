@@ -1,6 +1,6 @@
 using Neo.Application.Features.GenericEntity.Commands;
 using Neo.Domain.Features.ObjectStore;
-using Hyper.Domain.Entities.Common;
+using Neo.Domain.Dto;
 
 namespace Hyper.Application.Features.Common.Commands.Documents;
 

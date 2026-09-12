@@ -182,7 +182,7 @@ public class DemoScenarioIntegrationTests : IClassFixture<HyperWebApplicationFac
 /// <summary>
 /// Factory برای ایجاد WebApplication در Integration Tests
 /// </summary>
-public class HyperWebApplicationFactory : WebApplicationFactory<Hyper.Channel.Api.Program>
+public class HyperWebApplicationFactory : WebApplicationFactory<Microsoft.VisualStudio.TestPlatform.TestHost.Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
