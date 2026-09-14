@@ -53,22 +53,34 @@
                         <dt>ادمین انجام‌دهنده</dt><dd>@Model.AdminName</dd>
                         <dt>اعتبار زمینه</dt><dd>۳۰ دقیقه از زمان انتخاب</dd></dl>
                 </div>
-                <form asp-action="RequestToken" method="post">
+                <form action="@Url.Content("~/api/auth/basalam/login")" method="post">
+                    @Html.AntiForgeryToken()
                     <input type="hidden" name="contextTicket" value="@Model.ContextTicket" />
                     <input type="hidden" name="displayedShopId" value="@selected.ShopId" />
-                    <label for="simulation-provider">پلتفرم غرفه</label>
-                    <select id="simulation-provider" name="provider">
-                        <option value="1">باسلام</option><option value="2">دیجی‌کالا</option>
-                        <option value="3">ترب</option><option value="255">سامانه دیگر</option>
-                    </select>
-                    <label for="simulation-credential">روش اتصال</label>
-                    <select id="simulation-credential" name="credentialType">
-                        <option value="1">اجازه دسترسی از پلتفرم (OAuth)</option>
-                        <option value="3">توکن دسترسی</option><option value="2">کلید API</option>
-                    </select>
-                    <p class="simulation-help">این عملیات درخواست شبیه‌سازی را ثبت می‌کند. دریافت واقعی توکن از پلتفرم هنوز فعال نیست.</p>
-                    <button type="submit" class="simulation-primary">ثبت درخواست شبیه‌سازی توکن</button>
+                    <p>با حساب صاحب غرفه وارد باسلام شوید و مجوزهای نمایش‌داده‌شده را تأیید کنید. نتیجه برای همین مغازه ذخیره می‌شود.</p>
+                    <p class="simulation-help">مجوزهای درخواستی: <bdi>@ViewBag.OAuthScopes</bdi></p>
+                    @if (ViewBag.OAuthConfigurationError is string configurationError)
+                    {
+                        <div class="simulation-notice" role="alert">@configurationError</div>
+                        <p class="simulation-help">راهنمای راه‌اندازی: docs/BASALAM_OAUTH_WEB.md</p>
+                        <button type="button" class="simulation-primary" disabled>ابتدا تنظیمات اتصال را تکمیل کنید</button>
+                    }
+                    else
+                    {
+                        <button type="submit" class="simulation-primary">ورود به باسلام و اعطای مجوز</button>
+                    }
+                    <p class="simulation-help">پس از تأیید به پنل برمی‌گردید. توکن نمایش داده نمی‌شود و دریافت آن، یکسان‌سازی خودکار را فعال نمی‌کند.</p>
                 </form>
+                @if (ViewBag.OAuthStatus is Hyper.Infrastructure.Features.Integrations.BasalamTokenStatus tokenStatus)
+                {
+                    <div class="simulation-selection" role="status">
+                        <strong>توکن ذخیره‌شده: @tokenStatus.VendorName</strong>
+                        <dl><dt>شناسه غرفه</dt><dd>@tokenStatus.VendorId</dd>
+                            <dt>زمان دریافت (UTC)</dt><dd>@tokenStatus.IssuedAtUtc.ToString("yyyy-MM-dd HH:mm")</dd>
+                            <dt>انقضا (UTC)</dt><dd>@(tokenStatus.ExpiresAtUtc?.ToString("yyyy-MM-dd HH:mm") ?? "اعلام نشده")</dd>
+                            <dt>وضعیت</dt><dd>@(!tokenStatus.IsActive ? "غیرفعال" : tokenStatus.ExpiresAtUtc <= DateTime.UtcNow ? "منقضی" : "ذخیره‌شده")</dd></dl>
+                    </div>
+                }
                 <form asp-action="Clear" method="post"><button type="submit" class="simulation-link">پایان شبیه‌سازی این مغازه</button></form>
             }
             else

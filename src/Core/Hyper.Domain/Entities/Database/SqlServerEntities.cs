@@ -1655,6 +1655,7 @@ public sealed class SqlTblNotificationconfig : SqlServerEntity
     public string? TenantId { get; set; }
 }
 
+[DisplayName("شخص")]
 public sealed class SqlTblPerson : SqlServerEntity<int>
 {
     public int Shopid { get; set; }
@@ -2299,6 +2300,7 @@ public sealed class SqlTblServicesubscription : SqlServerEntity
     public decimal? Subscriptiontaxamount { get; set; }
 }
 
+[DisplayName("سهامدار")]
 public sealed class SqlTblShareholder : SqlServerEntity
 {
     public int Shareholderid { get; set; }
@@ -2311,6 +2313,7 @@ public sealed class SqlTblShareholder : SqlServerEntity
     public string? TenantId { get; set; }
 }
 
+[DisplayName("مغازه")]
 public sealed class SqlTblShop : SqlServerEntity
 {
     public int Shopid { get; set; }

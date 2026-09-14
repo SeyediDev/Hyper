@@ -1,4 +1,6 @@
 using Hyper.AdminPanel.Web.ViewModels;
+using Hyper.Infrastructure.Features.Integrations;
+using Microsoft.Data.SqlClient;
 using Hyper.Domain.Entities.Integrations;
 using Hyper.Domain.Features.Integrations;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +10,8 @@ namespace Hyper.AdminPanel.Web.Controllers;
 
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
 public sealed class MerchantSimulationController(IAdminMerchantSimulationService simulations,
-    AdminSimulationTickets tickets, IIntegrationDashboardQuery dashboard) : ControllerBaseMVC
+    AdminSimulationTickets tickets, IIntegrationDashboardQuery dashboard,
+    BasalamOAuthService oauth, BasalamOAuthStore oauthStore) : ControllerBaseMVC
 {
     private const string CookieName = "Hyper.AdminMerchantSimulation";
 
@@ -32,6 +35,17 @@ public sealed class MerchantSimulationController(IAdminMerchantSimulationService
         var selected = ReadTicket(admin.Id, Request.Cookies[CookieName]) is { } id
             ? await simulations.GetAsync(admin.Id, id, ct) : null;
         var shops = await simulations.SearchShopsAsync(search, ct);
+        ViewBag.OAuthConfigurationError = oauth.ConfigurationError();
+        ViewBag.OAuthScopes = oauth.Scopes;
+        ViewBag.OAuthRedirectUri = oauth.RedirectUri;
+        if (selected is not null)
+        {
+            try { ViewBag.OAuthStatus = await oauthStore.GetStatusAsync(selected.ShopId, selected.TenantId, ct); }
+            catch (SqlException ex) when (ex.Number == 208)
+            {
+                ViewBag.OAuthConfigurationError = "جدول توکن آماده نیست؛ اسکریپت docs/schema/ensure-external-oauth-tokens.sql را روی Hyperyek اجرا کنید.";
+            }
+        }
         return View(new MerchantSimulationViewModel(admin.UserName, search, shops, selected,
             selected is null ? null : Protect(admin.Id, selected.Id)));
     }

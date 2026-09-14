@@ -25,6 +25,7 @@ public abstract partial class HyperContext<TContext>(DbContextOptions<TContext> 
     public virtual DbSet<Help> Help { get; set; }
 
     public virtual DbSet<ExternalIntegrationConnection> ExternalIntegrationConnections { get; set; }
+    public virtual DbSet<ExternalOAuthToken> ExternalOAuthTokens { get; set; }
     public virtual DbSet<ExternalProductMapping> ExternalProductMappings { get; set; }
     public virtual DbSet<IntegrationSyncRun> IntegrationSyncRuns { get; set; }
     public virtual DbSet<IntegrationWebhookInbox> IntegrationWebhookInbox { get; set; }
