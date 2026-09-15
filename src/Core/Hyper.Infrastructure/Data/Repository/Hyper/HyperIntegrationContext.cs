@@ -7,6 +7,7 @@ namespace Hyper.Infrastructure.Data.Repository.Hyper;
 /// <summary>Integration persistence without the copied Club business model.</summary>
 public sealed class HyperIntegrationContext(DbContextOptions<HyperIntegrationContext> options) : DbContext(options)
 {
+    public DbSet<IntegrationScenarioJob> IntegrationScenarioJobs => Set<IntegrationScenarioJob>();
     public DbSet<IntegrationOutboxMessage> IntegrationOutbox => Set<IntegrationOutboxMessage>();
     public DbSet<IntegrationMerchantAccess> IntegrationMerchantAccess => Set<IntegrationMerchantAccess>();
     public DbSet<IntegrationAdminSimulation> IntegrationAdminSimulations => Set<IntegrationAdminSimulation>();
@@ -28,6 +29,18 @@ public sealed class HyperIntegrationContext(DbContextOptions<HyperIntegrationCon
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<IntegrationScenarioJob>(entity =>
+        {
+            entity.ToTable("IntegrationScenarioJobs", "dbo");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.EventId).HasMaxLength(128).UseCollation("Latin1_General_100_BIN2");
+            entity.Property(x => x.TenantId).HasMaxLength(128);
+            entity.Property(x => x.ErrorCode).HasMaxLength(100);
+            entity.Property(x => x.Item).HasConversion<byte>();
+            entity.Property(x => x.Trigger).HasConversion<byte>();
+            entity.Property(x => x.Status).HasConversion<byte>();
+            entity.HasIndex(x => new { x.ConnectionId, x.EventId }).IsUnique();
+        });
         modelBuilder.ApplyConfiguration(new IntegrationOutboxMessageConfiguration());
         modelBuilder.ApplyConfiguration(new IntegrationMerchantAccessConfiguration());
         modelBuilder.ApplyConfiguration(new IntegrationAdminSimulationConfiguration());

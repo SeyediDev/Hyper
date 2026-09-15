@@ -3,6 +3,7 @@ namespace Hyper.Domain.Features.Integrations;
 public interface IIntegrationInventoryCapture
 {
     Task<int> CaptureAsync(CancellationToken ct);
+    Task<bool> ReconcileOneAsync(long connectionId, long mappingId, CancellationToken ct);
 }
 
 public static class IntegrationAvailableInventory

@@ -25,6 +25,9 @@ public sealed class IntegrationWorker(IServiceScopeFactory scopes, ILogger<Integ
                     catch (Exception error) { logger.LogError("Inventory capture failed ({ErrorType}).", error.GetType().Name); }
                 }
                 processed = await scope.ServiceProvider.GetRequiredService<IIntegrationOutbox>().ProcessNextAsync(stoppingToken);
+                // A busy inventory outbox must not starve reconciliation requests.
+                var scenarioProcessed = await scope.ServiceProvider.GetRequiredService<IIntegrationScenarioQueue>().ProcessNextAsync(stoppingToken);
+                processed = processed || scenarioProcessed;
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested) { break; }
             catch (Exception error)

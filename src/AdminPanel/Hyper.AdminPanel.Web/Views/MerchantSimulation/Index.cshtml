@@ -1,7 +1,9 @@
 @model Hyper.AdminPanel.Web.ViewModels.MerchantSimulationViewModel
 @using Hyper.Domain.Entities.Integrations
+@using Hyper.Domain.Features.Integrations
 @{
     Layout = "_HyperAdminLayout";
+    var authorization = (Hyper.Infrastructure.Features.Integrations.IntegrationAuthorizationOption)ViewBag.Authorization;
     ViewBag.Title = "شبیه‌سازی درخواست مغازه‌دار | پنل مدیریتی هایپریک";
 }
 <link rel="stylesheet" href="~/Content/merchant-simulation.css" />
@@ -44,6 +46,17 @@
         </section>
         <section class="simulation-card">
             <h2>۲. درخواست توکن برای زمینه انتخاب‌شده</h2>
+            <form asp-action="Index" method="get">
+                <input type="hidden" name="search" value="@Model.Search" />
+                <label for="integration-provider">پلتفرم غرفه</label>
+                <select id="integration-provider" name="integrationProvider">
+                    @foreach (var option in Hyper.Infrastructure.Features.Integrations.IntegrationAuthorizationCatalog.Options)
+                    {
+                        <option value="@option.Provider" selected="@(option.Provider == authorization.Provider)">@option.Title</option>
+                    }
+                </select>
+                <button type="submit" class="simulation-secondary">انتخاب پلتفرم</button>
+            </form>
             @if (Model.Selected is { } selected)
             {
                 <div class="simulation-selection" role="status">
@@ -53,21 +66,21 @@
                         <dt>ادمین انجام‌دهنده</dt><dd>@Model.AdminName</dd>
                         <dt>اعتبار زمینه</dt><dd>۳۰ دقیقه از زمان انتخاب</dd></dl>
                 </div>
-                <form action="@Url.Content("~/api/auth/basalam/login")" method="post">
+                <form action="@(authorization.StartPath is null ? null : Url.Content("~" + authorization.StartPath))" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="contextTicket" value="@Model.ContextTicket" />
                     <input type="hidden" name="displayedShopId" value="@selected.ShopId" />
-                    <p>با حساب صاحب غرفه وارد باسلام شوید و مجوزهای نمایش‌داده‌شده را تأیید کنید. نتیجه برای همین مغازه ذخیره می‌شود.</p>
-                    <p class="simulation-help">مجوزهای درخواستی: <bdi>@ViewBag.OAuthScopes</bdi></p>
+                    <p>با حساب صاحب غرفه وارد @authorization.Title شوید و مجوزهای نمایش‌داده‌شده را تأیید کنید. نتیجه برای همین مغازه ذخیره می‌شود.</p>
+                    @if (authorization.Provider == IntegrationProvider.Basalam) { <p class="simulation-help">مجوزهای درخواستی: <bdi>@ViewBag.OAuthScopes</bdi></p> }
                     @if (ViewBag.OAuthConfigurationError is string configurationError)
                     {
                         <div class="simulation-notice" role="alert">@configurationError</div>
                         <p class="simulation-help">راهنمای راه‌اندازی: docs/BASALAM_OAUTH_WEB.md</p>
-                        <button type="button" class="simulation-primary" disabled>ابتدا تنظیمات اتصال را تکمیل کنید</button>
+                        <button type="button" class="simulation-primary" disabled>@(authorization.UnavailableReason is null ? "ابتدا تنظیمات اتصال را تکمیل کنید" : "اتصال هنوز آماده نیست")</button>
                     }
                     else
                     {
-                        <button type="submit" class="simulation-primary">ورود به باسلام و اعطای مجوز</button>
+                        <button type="submit" class="simulation-primary">ورود به @authorization.Title و اعطای مجوز</button>
                     }
                     <p class="simulation-help">پس از تأیید به پنل برمی‌گردید. توکن نمایش داده نمی‌شود و دریافت آن، یکسان‌سازی خودکار را فعال نمی‌کند.</p>
                 </form>
@@ -81,7 +94,33 @@
                             <dt>وضعیت</dt><dd>@(!tokenStatus.IsActive ? "غیرفعال" : tokenStatus.ExpiresAtUtc <= DateTime.UtcNow ? "منقضی" : "ذخیره‌شده")</dd></dl>
                     </div>
                 }
-                <form asp-action="Clear" method="post"><button type="submit" class="simulation-link">پایان شبیه‌سازی این مغازه</button></form>
+                <section class="simulation-selection">
+                    <h3>دریافت رویداد آزمایشی</h3>
+                    <p class="simulation-help">این فرم رویداد «تغییر مغازه» یا «تغییر غرفه» را برای اتصال انتخاب‌شده در صف پایدار ثبت می‌کند؛ جایگزین webhook واقعی پلتفرم نیست.</p>
+                    @if (ViewBag.ScenarioConnections is IEnumerable<Hyper.Domain.Features.Integrations.IntegrationScenarioConnection> connections && connections.Any())
+                    {
+                        <form asp-action="ReceiveScenario" method="post">
+                            <input type="hidden" name="eventId" value="@Guid.NewGuid().ToString("N")" />
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="contextTicket" value="@Model.ContextTicket" />
+                            <label>اتصال</label>
+                            <select name="connectionId">@foreach (var connection in connections) { <option value="@connection.Id">@connection.DisplayName — @connection.Provider</option> }</select>
+                            <label>آیتم</label><select name="item"><option value="1">کالا</option><option value="2">موجودی</option><option value="3">طرف حساب</option><option value="4">فروش</option><option value="5">خرید</option></select>
+                            <label>محرک</label><select name="trigger"><option value="1">تغییر مغازه</option><option value="2">تغییر غرفه</option><option value="3">تطبیق اولیه</option><option value="4">تطبیق دوره‌ای</option><option value="5">درخواست دستی</option></select>
+                            <button type="submit" class="simulation-primary">ثبت رویداد در صف</button>
+                        </form>
+                    }
+                    else { <p class="simulation-help">برای این مغازه اتصالی ثبت نشده است.</p> }
+                    @if (ViewBag.ScenarioJobs is IEnumerable<Hyper.Domain.Entities.Integrations.IntegrationScenarioJob> jobs)
+                    {
+                        <h4>آخرین رویدادها</h4><ul>@foreach (var job in jobs.Take(10)) { <li>
+                            <strong>درخواست @job.Id</strong> — @(job.Item switch { IntegrationSyncItem.Product => "کالا", IntegrationSyncItem.Inventory => "موجودی", IntegrationSyncItem.Counterparty => "طرف حساب", IntegrationSyncItem.Sale => "فروش", _ => "خرید" })
+                            — @(job.Status switch { IntegrationScenarioStatus.Pending => "در صف", IntegrationScenarioStatus.Running => "در حال پردازش", IntegrationScenarioStatus.Completed => "تطبیق بدون مغایرت", IntegrationScenarioStatus.NeedsAttention => "دارای مغایرت", _ => "خطای نهایی" })
+                            @if (job.ErrorCode is not null) { <bdi>@job.ErrorCode</bdi> }
+                            @if (job.ResultJson is not null) { <details><summary>جزئیات تطبیق</summary><pre dir="ltr">@job.ResultJson</pre></details> }
+                        </li> }</ul>
+                    }
+                </section>                <form asp-action="Clear" method="post"><button type="submit" class="simulation-link">پایان شبیه‌سازی این مغازه</button></form>
             }
             else
             {

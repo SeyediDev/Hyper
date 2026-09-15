@@ -12,6 +12,9 @@ public static class IntegrationServiceRegistration
         services.AddDbContext<HyperSqlServerContext>(options => options.UseSqlServer(connectionString));
         services.AddDbContext<HyperIntegrationContext>(options => options.UseSqlServer(connectionString));
         services.AddScoped<IIntegrationSynchronizationService, IntegrationSynchronizationService>();
+        services.AddScoped<IIntegrationScenarioQueue, IntegrationScenarioQueue>();
+        services.AddScoped<IntegrationScenarioProcessor>();
+        services.AddScoped<MediatR.INotificationHandler<IntegrationScenarioRequested>, IntegrationScenarioSubscriber>();
         services.AddScoped<IIntegrationOutbox, IntegrationOutbox>();
         services.AddOptions<IntegrationInventoryCaptureOptions>();
         services.AddScoped<IIntegrationInventoryCapture, IntegrationInventoryCapture>();

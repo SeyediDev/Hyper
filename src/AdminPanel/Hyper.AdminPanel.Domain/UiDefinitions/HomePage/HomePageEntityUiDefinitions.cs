@@ -1,26 +1,150 @@
+using Hyper.Domain.Entities.Database;
+using Hyper.AdminPanel.Domain.UiDefinitions.Database;
 namespace Hyper.AdminPanel.Domain.UiDefinitions.HomePage;
-
-/// <summary>Neo home-page metadata for Hyper business and booth/store synchronization.</summary>
 public sealed class HomePageEntityUiDefinitions : CRUDDefinition<HomePageEntity>
 {
-    private static readonly List<string> AdminRoles = [HyperRoles.Admin];
-    public override List<string>? Roles => AdminRoles;
-
+    public override List<string>? Roles => [HyperRoles.Admin];
     public sealed class HomePageDashboard : DashboardDefinition
     {
-        public override List<string>? Roles => AdminRoles;
+        public override List<string>? Roles => [HyperRoles.Admin];
         protected override Form Identify() => DefineDashboard("داشبورد هایپریک و یکسان‌سازی");
         protected override void DataSources()
         {
-            AddReport<ExternalIntegrationConnection>();
-            AddReport<ExternalProductMapping>();
-            AddReport<ExternalOrderMapping>();
-            AddReport<IntegrationSyncRun>();
-            AddReport<IntegrationWebhookInbox>();
-            AddReport<IntegrationOutboxMessage>();
-            AddReport<IntegrationAdminSimulation>();
-            AddReport<IntegrationTokenRequest>();
-            AddReport<IntegrationMerchantAccess>();
+            AddReport<SqlTblShop>();
+            AddReport<SqlTblProduct>();
+            AddReport<SqlTblPerson>();
+            AddReport<SqlTblWarehouse>();
+            AddReport<SqlTblSaleorder>();
+            AddReport<SqlTblPurchaseorder>();
+            AddReport<SqlExternalintegrationconnections>();
+            AddReport<SqlExternalproductmappings>();
+            AddReport<SqlIntegrationoutbox>();
+            AddReport<SqlIntegrationwebhookinbox>();
+            AddReport<SqlIntegrationsyncruns>();
+        }
+        public class BusinessDashboard : DashboardConfigDefinition
+        {
+            protected override string Title => "مغازه و حسابداری";
+            protected override List<string> Roles => [HyperRoles.Admin];
+            protected override bool IsDefault => true;
+            public class Widget1 : DashboardDivWidgetDefinition<SqlTblShop, SqlTblShopUiDefinitions.PublicReport, SqlTblShopUiDefinitions.PublicReport.CountConfig>
+            {
+                public override string Title => "مغازه‌ها";
+                public override int Width => 3;
+                protected override int? HeightInPixels => 160;
+                protected override int? CacheTimeMinutes => 1;
+            }
+            public class Widget2 : DashboardDivWidgetDefinition<SqlTblProduct, SqlTblProductUiDefinitions.PublicReport, SqlTblProductUiDefinitions.PublicReport.CountConfig>
+            {
+                public override string Title => "کالاها";
+                public override int Width => 3;
+                protected override int? HeightInPixels => 160;
+                protected override int? CacheTimeMinutes => 1;
+            }
+            public class Widget3 : DashboardDivWidgetDefinition<SqlTblPerson, SqlTblPersonUiDefinitions.PublicReport, SqlTblPersonUiDefinitions.PublicReport.CountConfig>
+            {
+                public override string Title => "طرف حساب‌ها";
+                public override int Width => 3;
+                protected override int? HeightInPixels => 160;
+                protected override int? CacheTimeMinutes => 1;
+            }
+            public class Widget4 : DashboardDivWidgetDefinition<SqlTblWarehouse, SqlTblWarehouseUiDefinitions.PublicReport, SqlTblWarehouseUiDefinitions.PublicReport.CountConfig>
+            {
+                public override string Title => "انبارها";
+                public override int Width => 3;
+                protected override int? HeightInPixels => 160;
+                protected override int? CacheTimeMinutes => 1;
+            }
+            public class Widget5 : DashboardDivWidgetDefinition<SqlTblSaleorder, SqlTblSaleorderUiDefinitions.PublicReport, SqlTblSaleorderUiDefinitions.PublicReport.CountConfig>
+            {
+                public override string Title => "فاکتورهای فروش";
+                public override int Width => 6;
+                protected override int? HeightInPixels => 300;
+                protected override int? CacheTimeMinutes => 1;
+            }
+            public class Widget6 : DashboardDivWidgetDefinition<SqlTblPurchaseorder, SqlTblPurchaseorderUiDefinitions.PublicReport, SqlTblPurchaseorderUiDefinitions.PublicReport.CountConfig>
+            {
+                public override string Title => "فاکتورهای خرید";
+                public override int Width => 6;
+                protected override int? HeightInPixels => 300;
+                protected override int? CacheTimeMinutes => 1;
+            }
+            public class Widget7 : DashboardDivWidgetDefinition<SqlTblProduct, SqlTblProductUiDefinitions.PublicReport, SqlTblProductUiDefinitions.PublicReport.ByShopidConfig>
+            {
+                public override string Title => "کالا به تفکیک مغازه";
+                public override int Width => 6;
+                protected override int? HeightInPixels => 300;
+                protected override int? CacheTimeMinutes => 1;
+            }
+            public class Widget8 : DashboardDivWidgetDefinition<SqlTblSaleorder, SqlTblSaleorderUiDefinitions.PublicReport, SqlTblSaleorderUiDefinitions.PublicReport.ByShopidConfig>
+            {
+                public override string Title => "فروش به تفکیک مغازه";
+                public override int Width => 6;
+                protected override int? HeightInPixels => 300;
+                protected override int? CacheTimeMinutes => 1;
+            }
+        }
+        public class SynchronizationDashboard : DashboardConfigDefinition
+        {
+            protected override string Title => "یکسان‌سازی مغازه و غرفه";
+            protected override List<string> Roles => [HyperRoles.Admin];
+            protected override bool IsDefault => false;
+            public class Widget1 : DashboardDivWidgetDefinition<SqlExternalintegrationconnections, SqlExternalintegrationconnectionsUiDefinitions.PublicReport, SqlExternalintegrationconnectionsUiDefinitions.PublicReport.CountConfig>
+            {
+                public override string Title => "اتصال‌ها";
+                public override int Width => 3;
+                protected override int? HeightInPixels => 160;
+                protected override int? CacheTimeMinutes => 1;
+            }
+            public class Widget2 : DashboardDivWidgetDefinition<SqlExternalproductmappings, SqlExternalproductmappingsUiDefinitions.PublicReport, SqlExternalproductmappingsUiDefinitions.PublicReport.CountConfig>
+            {
+                public override string Title => "نگاشت کالا";
+                public override int Width => 3;
+                protected override int? HeightInPixels => 160;
+                protected override int? CacheTimeMinutes => 1;
+            }
+            public class Widget3 : DashboardDivWidgetDefinition<SqlIntegrationoutbox, SqlIntegrationoutboxUiDefinitions.PublicReport, SqlIntegrationoutboxUiDefinitions.PublicReport.CountConfig>
+            {
+                public override string Title => "پیام‌های خروجی";
+                public override int Width => 3;
+                protected override int? HeightInPixels => 160;
+                protected override int? CacheTimeMinutes => 1;
+            }
+            public class Widget4 : DashboardDivWidgetDefinition<SqlIntegrationwebhookinbox, SqlIntegrationwebhookinboxUiDefinitions.PublicReport, SqlIntegrationwebhookinboxUiDefinitions.PublicReport.CountConfig>
+            {
+                public override string Title => "رویدادهای ورودی";
+                public override int Width => 3;
+                protected override int? HeightInPixels => 160;
+                protected override int? CacheTimeMinutes => 1;
+            }
+            public class Widget5 : DashboardDivWidgetDefinition<SqlIntegrationsyncruns, SqlIntegrationsyncrunsUiDefinitions.PublicReport, SqlIntegrationsyncrunsUiDefinitions.PublicReport.ByStatusConfig>
+            {
+                public override string Title => "وضعیت اجراها";
+                public override int Width => 6;
+                protected override int? HeightInPixels => 300;
+                protected override int? CacheTimeMinutes => 1;
+            }
+            public class Widget6 : DashboardDivWidgetDefinition<SqlIntegrationoutbox, SqlIntegrationoutboxUiDefinitions.PublicReport, SqlIntegrationoutboxUiDefinitions.PublicReport.ByStatusConfig>
+            {
+                public override string Title => "وضعیت صف خروجی";
+                public override int Width => 6;
+                protected override int? HeightInPixels => 300;
+                protected override int? CacheTimeMinutes => 1;
+            }
+            public class Widget7 : DashboardDivWidgetDefinition<SqlIntegrationwebhookinbox, SqlIntegrationwebhookinboxUiDefinitions.PublicReport, SqlIntegrationwebhookinboxUiDefinitions.PublicReport.ByStatusConfig>
+            {
+                public override string Title => "وضعیت صندوق ورودی";
+                public override int Width => 6;
+                protected override int? HeightInPixels => 300;
+                protected override int? CacheTimeMinutes => 1;
+            }
+            public class Widget8 : DashboardDivWidgetDefinition<SqlExternalintegrationconnections, SqlExternalintegrationconnectionsUiDefinitions.PublicReport, SqlExternalintegrationconnectionsUiDefinitions.PublicReport.ByProviderConfig>
+            {
+                public override string Title => "اتصال به تفکیک پلتفرم";
+                public override int Width => 6;
+                protected override int? HeightInPixels => 300;
+                protected override int? CacheTimeMinutes => 1;
+            }
         }
     }
 }

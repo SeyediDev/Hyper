@@ -1,0 +1,6932 @@
+[
+  {
+    "table": "Account",
+    "title": "حساب",
+    "category": "حسابداری",
+    "column": "AccountID",
+    "columnTitle": "شناسه حساب"
+  },
+  {
+    "table": "Account",
+    "title": "حساب",
+    "category": "حسابداری",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "Account",
+    "title": "حساب",
+    "category": "حسابداری",
+    "column": "Type",
+    "columnTitle": "نوع حساب"
+  },
+  {
+    "table": "Account",
+    "title": "حساب",
+    "category": "حسابداری",
+    "column": "DetailType",
+    "columnTitle": "نوع تفصیل"
+  },
+  {
+    "table": "Account",
+    "title": "حساب",
+    "category": "حسابداری",
+    "column": "Nature",
+    "columnTitle": "ماهیت حساب"
+  },
+  {
+    "table": "Account",
+    "title": "حساب",
+    "category": "حسابداری",
+    "column": "ParentID",
+    "columnTitle": "شناسه حساب والد"
+  },
+  {
+    "table": "Account",
+    "title": "حساب",
+    "category": "حسابداری",
+    "column": "Code",
+    "columnTitle": "کد حساب"
+  },
+  {
+    "table": "Account",
+    "title": "حساب",
+    "category": "حسابداری",
+    "column": "Name",
+    "columnTitle": "نام حساب"
+  },
+  {
+    "table": "Account",
+    "title": "حساب",
+    "category": "حسابداری",
+    "column": "Level",
+    "columnTitle": "سطح حساب"
+  },
+  {
+    "table": "Account",
+    "title": "حساب",
+    "category": "حسابداری",
+    "column": "ReferenceID",
+    "columnTitle": "شناسه حساب مرجع"
+  },
+  {
+    "table": "Account",
+    "title": "حساب",
+    "category": "حسابداری",
+    "column": "IsPostable",
+    "columnTitle": "امکان ثبت سند"
+  },
+  {
+    "table": "Account",
+    "title": "حساب",
+    "category": "حسابداری",
+    "column": "GlobalAccountKey",
+    "columnTitle": "کلید حساب در سند خودکار"
+  },
+  {
+    "table": "Account",
+    "title": "حساب",
+    "category": "حسابداری",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "Account",
+    "title": "حساب",
+    "category": "حسابداری",
+    "column": "FiscalPeriodId",
+    "columnTitle": "شناسه دوره مالی"
+  },
+  {
+    "table": "Account",
+    "title": "حساب",
+    "category": "حسابداری",
+    "column": "ReportType",
+    "columnTitle": "نوع گزارش"
+  },
+  {
+    "table": "Account",
+    "title": "حساب",
+    "category": "حسابداری",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "AccountingArticle",
+    "title": "آرتیکل حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "Id",
+    "columnTitle": "شناسه آرتیکل حسابداری"
+  },
+  {
+    "table": "AccountingArticle",
+    "title": "آرتیکل حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "DocumentId",
+    "columnTitle": "شناسه سند"
+  },
+  {
+    "table": "AccountingArticle",
+    "title": "آرتیکل حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "AccountingArticle",
+    "title": "آرتیکل حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "Currency",
+    "columnTitle": "ارز"
+  },
+  {
+    "table": "AccountingArticle",
+    "title": "آرتیکل حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "AccountId",
+    "columnTitle": "شناسه حساب"
+  },
+  {
+    "table": "AccountingArticle",
+    "title": "آرتیکل حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "Amount",
+    "columnTitle": "مبلغ"
+  },
+  {
+    "table": "AccountingArticle",
+    "title": "آرتیکل حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "ExchangeRate",
+    "columnTitle": "نرخ تبدیل ارز"
+  },
+  {
+    "table": "AccountingArticle",
+    "title": "آرتیکل حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "CheckId",
+    "columnTitle": "شناسه چک"
+  },
+  {
+    "table": "AccountingArticle",
+    "title": "آرتیکل حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "BaseAmount",
+    "columnTitle": "مبلغ به ارز پایه"
+  },
+  {
+    "table": "AccountingArticle",
+    "title": "آرتیکل حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "Type",
+    "columnTitle": "نوع آرتیکل (بستانکار)"
+  },
+  {
+    "table": "AccountingArticle",
+    "title": "آرتیکل حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "Description",
+    "columnTitle": "شرح آتیکل"
+  },
+  {
+    "table": "AccountingArticle",
+    "title": "آرتیکل حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "DetailAccountId",
+    "columnTitle": "شناسه حساب تفصیلی"
+  },
+  {
+    "table": "AccountingArticle",
+    "title": "آرتیکل حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "AccountingDocument",
+    "title": "سند حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "Id",
+    "columnTitle": "شناسه سند حسابداری"
+  },
+  {
+    "table": "AccountingDocument",
+    "title": "سند حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "AccountingDocument",
+    "title": "سند حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "AccountingDocument",
+    "title": "سند حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "FiscalPeriodId",
+    "columnTitle": "شناسه دوره مالی"
+  },
+  {
+    "table": "AccountingDocument",
+    "title": "سند حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "DateTime",
+    "columnTitle": "زمان سند"
+  },
+  {
+    "table": "AccountingDocument",
+    "title": "سند حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "Number",
+    "columnTitle": "شماره سند"
+  },
+  {
+    "table": "AccountingDocument",
+    "title": "سند حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "Month",
+    "columnTitle": "ماه شمسی"
+  },
+  {
+    "table": "AccountingDocument",
+    "title": "سند حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "SecondaryType",
+    "columnTitle": "تفکیک اسناد"
+  },
+  {
+    "table": "AccountingDocument",
+    "title": "سند حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "Status",
+    "columnTitle": "وضعیت سند"
+  },
+  {
+    "table": "AccountingDocument",
+    "title": "سند حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "ProjectId",
+    "columnTitle": "شناسه پروژه"
+  },
+  {
+    "table": "AccountingDocument",
+    "title": "سند حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "ReferenceNumber",
+    "columnTitle": "شماره عطف"
+  },
+  {
+    "table": "AccountingDocument",
+    "title": "سند حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "TotalBaseAmount",
+    "columnTitle": "مبلغ به ارز پایه"
+  },
+  {
+    "table": "AccountingDocument",
+    "title": "سند حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "ReferenceId",
+    "columnTitle": "شناسه مرجع رویداد مالی"
+  },
+  {
+    "table": "AccountingDocument",
+    "title": "سند حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "Date",
+    "columnTitle": "تاریخ سند"
+  },
+  {
+    "table": "AccountingDocument",
+    "title": "سند حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "PrimaryType",
+    "columnTitle": "نوع سند"
+  },
+  {
+    "table": "AccountingDocument",
+    "title": "سند حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "ReferenceType",
+    "columnTitle": "نوع مرجع رویداد مالی"
+  },
+  {
+    "table": "AccountingDocument",
+    "title": "سند حسابداری",
+    "category": "حسابداری فروشگاه",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "AutoProcessLog",
+    "title": "لاگ فرایند خودکار",
+    "category": "عمومی",
+    "column": "LogID",
+    "columnTitle": "شناسه لاگ فرایند خودکار"
+  },
+  {
+    "table": "AutoProcessLog",
+    "title": "لاگ فرایند خودکار",
+    "category": "عمومی",
+    "column": "ProcessName",
+    "columnTitle": "نام فرایند"
+  },
+  {
+    "table": "AutoProcessLog",
+    "title": "لاگ فرایند خودکار",
+    "category": "عمومی",
+    "column": "ProcessKey",
+    "columnTitle": "کلید فرایند"
+  },
+  {
+    "table": "AutoProcessLog",
+    "title": "لاگ فرایند خودکار",
+    "category": "عمومی",
+    "column": "ProcessVersion",
+    "columnTitle": "نسخه فرایند"
+  },
+  {
+    "table": "AutoProcessLog",
+    "title": "لاگ فرایند خودکار",
+    "category": "عمومی",
+    "column": "TriggerConfig",
+    "columnTitle": "تنظیم اجرا"
+  },
+  {
+    "table": "AutoProcessLog",
+    "title": "لاگ فرایند خودکار",
+    "category": "عمومی",
+    "column": "StartTime",
+    "columnTitle": "زمان شروع"
+  },
+  {
+    "table": "AutoProcessLog",
+    "title": "لاگ فرایند خودکار",
+    "category": "عمومی",
+    "column": "EndTime",
+    "columnTitle": "زمان پایان"
+  },
+  {
+    "table": "AutoProcessLog",
+    "title": "لاگ فرایند خودکار",
+    "category": "عمومی",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "BankAccount",
+    "title": "حساب بانکی",
+    "category": "خزانه داری",
+    "column": "Id",
+    "columnTitle": "شناسه حساب بانکی"
+  },
+  {
+    "table": "BankAccount",
+    "title": "حساب بانکی",
+    "category": "خزانه داری",
+    "column": "Name",
+    "columnTitle": "نام حساب بانکی"
+  },
+  {
+    "table": "BankAccount",
+    "title": "حساب بانکی",
+    "category": "خزانه داری",
+    "column": "Number",
+    "columnTitle": "شماره حساب"
+  },
+  {
+    "table": "BankAccount",
+    "title": "حساب بانکی",
+    "category": "خزانه داری",
+    "column": "Iban",
+    "columnTitle": "شماره شبا"
+  },
+  {
+    "table": "BankAccount",
+    "title": "حساب بانکی",
+    "category": "خزانه داری",
+    "column": "BankBranchName",
+    "columnTitle": "نام شعبه"
+  },
+  {
+    "table": "BankAccount",
+    "title": "حساب بانکی",
+    "category": "خزانه داری",
+    "column": "OwnerName",
+    "columnTitle": "صاحب حساب"
+  },
+  {
+    "table": "BankAccount",
+    "title": "حساب بانکی",
+    "category": "خزانه داری",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "BankAccount",
+    "title": "حساب بانکی",
+    "category": "خزانه داری",
+    "column": "CardNumber",
+    "columnTitle": "شماره کارت"
+  },
+  {
+    "table": "BankAccount",
+    "title": "حساب بانکی",
+    "category": "خزانه داری",
+    "column": "IsEnabled",
+    "columnTitle": "فعال بودن"
+  },
+  {
+    "table": "BankAccount",
+    "title": "حساب بانکی",
+    "category": "خزانه داری",
+    "column": "IsDefault",
+    "columnTitle": "پیش فرض بودن"
+  },
+  {
+    "table": "BankAccount",
+    "title": "حساب بانکی",
+    "category": "خزانه داری",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "BankAccount",
+    "title": "حساب بانکی",
+    "category": "خزانه داری",
+    "column": "Currency",
+    "columnTitle": "ارز"
+  },
+  {
+    "table": "BankAccount",
+    "title": "حساب بانکی",
+    "category": "خزانه داری",
+    "column": "Bank",
+    "columnTitle": "بانک"
+  },
+  {
+    "table": "BankAccount",
+    "title": "حساب بانکی",
+    "category": "خزانه داری",
+    "column": "DetailAccountId",
+    "columnTitle": "شناسه حساب تفصیلی"
+  },
+  {
+    "table": "BankAccount",
+    "title": "حساب بانکی",
+    "category": "خزانه داری",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "CashFund",
+    "title": "صندوق نقدی",
+    "category": "خزانه داری",
+    "column": "Id",
+    "columnTitle": "شناسه صندوق نقدی"
+  },
+  {
+    "table": "CashFund",
+    "title": "صندوق نقدی",
+    "category": "خزانه داری",
+    "column": "Name",
+    "columnTitle": "نام صندوق نقدی"
+  },
+  {
+    "table": "CashFund",
+    "title": "صندوق نقدی",
+    "category": "خزانه داری",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "CashFund",
+    "title": "صندوق نقدی",
+    "category": "خزانه داری",
+    "column": "IsEnabled",
+    "columnTitle": "فعال بودن"
+  },
+  {
+    "table": "CashFund",
+    "title": "صندوق نقدی",
+    "category": "خزانه داری",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "CashFund",
+    "title": "صندوق نقدی",
+    "category": "خزانه داری",
+    "column": "IsDefault",
+    "columnTitle": "پیش‌فرض بودن"
+  },
+  {
+    "table": "CashFund",
+    "title": "صندوق نقدی",
+    "category": "خزانه داری",
+    "column": "Currency",
+    "columnTitle": "ارز"
+  },
+  {
+    "table": "CashFund",
+    "title": "صندوق نقدی",
+    "category": "خزانه داری",
+    "column": "DetailAccountId",
+    "columnTitle": "شناسه حساب تفصیلی"
+  },
+  {
+    "table": "CashFund",
+    "title": "صندوق نقدی",
+    "category": "خزانه داری",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "Check",
+    "title": "چک",
+    "category": "خزانه‌داری",
+    "column": "CheckId",
+    "columnTitle": "شناسه چک"
+  },
+  {
+    "table": "Check",
+    "title": "چک",
+    "category": "خزانه‌داری",
+    "column": "SerialNumber",
+    "columnTitle": "شماره چک"
+  },
+  {
+    "table": "Check",
+    "title": "چک",
+    "category": "خزانه‌داری",
+    "column": "DueDate",
+    "columnTitle": "تاریخ سررسید چک"
+  },
+  {
+    "table": "Check",
+    "title": "چک",
+    "category": "خزانه‌داری",
+    "column": "Amount",
+    "columnTitle": "مبلغ چک"
+  },
+  {
+    "table": "Check",
+    "title": "چک",
+    "category": "خزانه‌داری",
+    "column": "Status",
+    "columnTitle": "وضعیت چک"
+  },
+  {
+    "table": "Check",
+    "title": "چک",
+    "category": "خزانه‌داری",
+    "column": "StatusDatetime",
+    "columnTitle": "تاریخ و زمان آخرین تغییر وضعیت"
+  },
+  {
+    "table": "Check",
+    "title": "چک",
+    "category": "خزانه‌داری",
+    "column": "SayadNumber",
+    "columnTitle": "شماره صیاد"
+  },
+  {
+    "table": "Check",
+    "title": "چک",
+    "category": "خزانه‌داری",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "Check",
+    "title": "چک",
+    "category": "خزانه‌داری",
+    "column": "Payee",
+    "columnTitle": "طرف حساب"
+  },
+  {
+    "table": "Check",
+    "title": "چک",
+    "category": "خزانه‌داری",
+    "column": "PayeeNationalId",
+    "columnTitle": "شناسه ملی طرف حساب"
+  },
+  {
+    "table": "Check",
+    "title": "چک",
+    "category": "خزانه‌داری",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "Check",
+    "title": "چک",
+    "category": "خزانه‌داری",
+    "column": "BankAccountId",
+    "columnTitle": "شناسه حساب بانکی"
+  },
+  {
+    "table": "Check",
+    "title": "چک",
+    "category": "خزانه‌داری",
+    "column": "IssueDate",
+    "columnTitle": "تاریخ و زمان ثبت چک"
+  },
+  {
+    "table": "Check",
+    "title": "چک",
+    "category": "خزانه‌داری",
+    "column": "BankBranch",
+    "columnTitle": "شعبه بانک"
+  },
+  {
+    "table": "Check",
+    "title": "چک",
+    "category": "خزانه‌داری",
+    "column": "Bank",
+    "columnTitle": "بانک"
+  },
+  {
+    "table": "Check",
+    "title": "چک",
+    "category": "خزانه‌داری",
+    "column": "PersonId",
+    "columnTitle": "شناسه شخص"
+  },
+  {
+    "table": "Check",
+    "title": "چک",
+    "category": "خزانه‌داری",
+    "column": "IsReceipt",
+    "columnTitle": "نوع تراکنش"
+  },
+  {
+    "table": "Check",
+    "title": "چک",
+    "category": "خزانه‌داری",
+    "column": "Currency",
+    "columnTitle": "ارز"
+  },
+  {
+    "table": "Check",
+    "title": "چک",
+    "category": "خزانه‌داری",
+    "column": "ExchangeRate",
+    "columnTitle": "نرخ تبدیل ارز"
+  },
+  {
+    "table": "Check",
+    "title": "چک",
+    "category": "خزانه‌داری",
+    "column": "ProjectId",
+    "columnTitle": "شناسه پروژه"
+  },
+  {
+    "table": "Check",
+    "title": "چک",
+    "category": "خزانه‌داری",
+    "column": "FiscalPeriodId",
+    "columnTitle": "شناسه دوره مالی"
+  },
+  {
+    "table": "Check",
+    "title": "چک",
+    "category": "خزانه‌داری",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "CreditTransaction",
+    "title": "تراکنش‌های کیف پول",
+    "category": "کاربر",
+    "column": "Id",
+    "columnTitle": "شناسه تراکنش"
+  },
+  {
+    "table": "CreditTransaction",
+    "title": "تراکنش‌های کیف پول",
+    "category": "کاربر",
+    "column": "UserId",
+    "columnTitle": "نام کاربری"
+  },
+  {
+    "table": "CreditTransaction",
+    "title": "تراکنش‌های کیف پول",
+    "category": "کاربر",
+    "column": "Amount",
+    "columnTitle": "مبلغ"
+  },
+  {
+    "table": "CreditTransaction",
+    "title": "تراکنش‌های کیف پول",
+    "category": "کاربر",
+    "column": "Type",
+    "columnTitle": "نوع تراکنش"
+  },
+  {
+    "table": "CreditTransaction",
+    "title": "تراکنش‌های کیف پول",
+    "category": "کاربر",
+    "column": "ReferenceId",
+    "columnTitle": "شناسه مرجع"
+  },
+  {
+    "table": "CreditTransaction",
+    "title": "تراکنش‌های کیف پول",
+    "category": "کاربر",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "CreditTransaction",
+    "title": "تراکنش‌های کیف پول",
+    "category": "کاربر",
+    "column": "DateTime",
+    "columnTitle": "زمان ایجاد"
+  },
+  {
+    "table": "CreditTransaction",
+    "title": "تراکنش‌های کیف پول",
+    "category": "کاربر",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "DetailAccount",
+    "title": "حساب تفصیلی",
+    "category": "حسابداری فروشگاه",
+    "column": "DetailAccountId",
+    "columnTitle": "شناسه حساب تفصیلی"
+  },
+  {
+    "table": "DetailAccount",
+    "title": "حساب تفصیلی",
+    "category": "حسابداری فروشگاه",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "DetailAccount",
+    "title": "حساب تفصیلی",
+    "category": "حسابداری فروشگاه",
+    "column": "EntityType",
+    "columnTitle": "نوع موجودیت"
+  },
+  {
+    "table": "DetailAccount",
+    "title": "حساب تفصیلی",
+    "category": "حسابداری فروشگاه",
+    "column": "Name",
+    "columnTitle": "نام"
+  },
+  {
+    "table": "DetailAccount",
+    "title": "حساب تفصیلی",
+    "category": "حسابداری فروشگاه",
+    "column": "ReferenceId",
+    "columnTitle": "شناسه مرجع تفصیل"
+  },
+  {
+    "table": "DetailAccount",
+    "title": "حساب تفصیلی",
+    "category": "حسابداری فروشگاه",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "EntityFile",
+    "title": "فایل‌ها",
+    "category": "عمومی",
+    "column": "Id",
+    "columnTitle": "شناسه فایل"
+  },
+  {
+    "table": "EntityFile",
+    "title": "فایل‌ها",
+    "category": "عمومی",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "EntityFile",
+    "title": "فایل‌ها",
+    "category": "عمومی",
+    "column": "EntityType",
+    "columnTitle": "نوع موجودیت"
+  },
+  {
+    "table": "EntityFile",
+    "title": "فایل‌ها",
+    "category": "عمومی",
+    "column": "EntityId",
+    "columnTitle": "شناسه موجودیت"
+  },
+  {
+    "table": "EntityFile",
+    "title": "فایل‌ها",
+    "category": "عمومی",
+    "column": "OriginalName",
+    "columnTitle": "نام اصلی فایل"
+  },
+  {
+    "table": "EntityFile",
+    "title": "فایل‌ها",
+    "category": "عمومی",
+    "column": "UniqueName",
+    "columnTitle": "نام منحصر به فرد"
+  },
+  {
+    "table": "EntityFile",
+    "title": "فایل‌ها",
+    "category": "عمومی",
+    "column": "Size",
+    "columnTitle": "اندازه فایل به بایت"
+  },
+  {
+    "table": "EntityFile",
+    "title": "فایل‌ها",
+    "category": "عمومی",
+    "column": "RelativeUrl",
+    "columnTitle": "مسیر نسبی دانلود فایل"
+  },
+  {
+    "table": "EntityFile",
+    "title": "فایل‌ها",
+    "category": "عمومی",
+    "column": "Type",
+    "columnTitle": "نوع محتوای فایل"
+  },
+  {
+    "table": "EntityFile",
+    "title": "فایل‌ها",
+    "category": "عمومی",
+    "column": "CreatedAt",
+    "columnTitle": "زمان ایجاد"
+  },
+  {
+    "table": "EntityFile",
+    "title": "فایل‌ها",
+    "category": "عمومی",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "EntityFile",
+    "title": "فایل‌ها",
+    "category": "عمومی",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "EntityNote",
+    "title": "یادداشت موجودیت",
+    "category": "عمومی",
+    "column": "Id",
+    "columnTitle": "شناسه یادداشت"
+  },
+  {
+    "table": "EntityNote",
+    "title": "یادداشت موجودیت",
+    "category": "عمومی",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "EntityNote",
+    "title": "یادداشت موجودیت",
+    "category": "عمومی",
+    "column": "EntityId",
+    "columnTitle": "شناسه موجودیت"
+  },
+  {
+    "table": "EntityNote",
+    "title": "یادداشت موجودیت",
+    "category": "عمومی",
+    "column": "EntityType",
+    "columnTitle": "نوع موجودیت"
+  },
+  {
+    "table": "EntityNote",
+    "title": "یادداشت موجودیت",
+    "category": "عمومی",
+    "column": "Note",
+    "columnTitle": "یادداشت"
+  },
+  {
+    "table": "EntityNote",
+    "title": "یادداشت موجودیت",
+    "category": "عمومی",
+    "column": "IsPublic",
+    "columnTitle": "یادداشت عمومی"
+  },
+  {
+    "table": "EntityNote",
+    "title": "یادداشت موجودیت",
+    "category": "عمومی",
+    "column": "CreatedBy",
+    "columnTitle": "کاربر ایجاد کننده"
+  },
+  {
+    "table": "EntityNote",
+    "title": "یادداشت موجودیت",
+    "category": "عمومی",
+    "column": "CreatedTime",
+    "columnTitle": "زمان ایجاد"
+  },
+  {
+    "table": "EntityNote",
+    "title": "یادداشت موجودیت",
+    "category": "عمومی",
+    "column": "UpdatedTime",
+    "columnTitle": "زمان آخرین ویرایش"
+  },
+  {
+    "table": "EntityNote",
+    "title": "یادداشت موجودیت",
+    "category": "عمومی",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "GeneralConfig",
+    "title": "تنظیمات کلی فروشگاه",
+    "category": "فروشگاه",
+    "column": "ConfigId",
+    "columnTitle": "شناسه تنظیمات"
+  },
+  {
+    "table": "GeneralConfig",
+    "title": "تنظیمات کلی فروشگاه",
+    "category": "فروشگاه",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "GeneralConfig",
+    "title": "تنظیمات کلی فروشگاه",
+    "category": "فروشگاه",
+    "column": "BaseCurrency",
+    "columnTitle": "ارز پایه"
+  },
+  {
+    "table": "GeneralConfig",
+    "title": "تنظیمات کلی فروشگاه",
+    "category": "فروشگاه",
+    "column": "TimeZone",
+    "columnTitle": "منطقه زمانی"
+  },
+  {
+    "table": "GeneralConfig",
+    "title": "تنظیمات کلی فروشگاه",
+    "category": "فروشگاه",
+    "column": "CalendarType",
+    "columnTitle": "نوع تقویم"
+  },
+  {
+    "table": "GeneralConfig",
+    "title": "تنظیمات کلی فروشگاه",
+    "category": "فروشگاه",
+    "column": "DefaultVatRate",
+    "columnTitle": "نرخ مالیات بر ارزش افزوده پیشفرض"
+  },
+  {
+    "table": "GeneralConfig",
+    "title": "تنظیمات کلی فروشگاه",
+    "category": "فروشگاه",
+    "column": "IsMultiCurrencyEnabled",
+    "columnTitle": "چند ارزی"
+  },
+  {
+    "table": "GeneralConfig",
+    "title": "تنظیمات کلی فروشگاه",
+    "category": "فروشگاه",
+    "column": "OtherCurrencies",
+    "columnTitle": "سایر ارزها"
+  },
+  {
+    "table": "GeneralConfig",
+    "title": "تنظیمات کلی فروشگاه",
+    "category": "فروشگاه",
+    "column": "AllowEditOpeningBalance",
+    "columnTitle": "ویرایش تراز افتتاحیه"
+  },
+  {
+    "table": "GeneralConfig",
+    "title": "تنظیمات کلی فروشگاه",
+    "category": "فروشگاه",
+    "column": "AutoApproveSystemGeneratedDocuments",
+    "columnTitle": "تایید خودکار اسناد سیستمی"
+  },
+  {
+    "table": "GeneralConfig",
+    "title": "تنظیمات کلی فروشگاه",
+    "category": "فروشگاه",
+    "column": "IsWarehouseEnabled",
+    "columnTitle": "فعال بودن انبار"
+  },
+  {
+    "table": "GeneralConfig",
+    "title": "تنظیمات کلی فروشگاه",
+    "category": "فروشگاه",
+    "column": "ValuationMethod",
+    "columnTitle": "روش ارزیابی موجودی انبار"
+  },
+  {
+    "table": "GeneralConfig",
+    "title": "تنظیمات کلی فروشگاه",
+    "category": "فروشگاه",
+    "column": "TrackingMethod",
+    "columnTitle": "روش نگهداری موجودی کالا"
+  },
+  {
+    "table": "GeneralConfig",
+    "title": "تنظیمات کلی فروشگاه",
+    "category": "فروشگاه",
+    "column": "StorageSize",
+    "columnTitle": "حجم ذخیره (بر اساس مگابایت)"
+  },
+  {
+    "table": "GeneralConfig",
+    "title": "تنظیمات کلی فروشگاه",
+    "category": "فروشگاه",
+    "column": "AllowNegativePhysicalStock",
+    "columnTitle": "ثبت حواله بیش از موجودی انبار"
+  },
+  {
+    "table": "GeneralConfig",
+    "title": "تنظیمات کلی فروشگاه",
+    "category": "فروشگاه",
+    "column": "StorageExpirationDate",
+    "columnTitle": "تاریخ انقضاء ذخیره‌سازی"
+  },
+  {
+    "table": "GeneralConfig",
+    "title": "تنظیمات کلی فروشگاه",
+    "category": "فروشگاه",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "GlobalConfig",
+    "title": "Global Config",
+    "category": "SYSTEM",
+    "column": "key",
+    "columnTitle": "Key"
+  },
+  {
+    "table": "GlobalConfig",
+    "title": "Global Config",
+    "category": "SYSTEM",
+    "column": "value",
+    "columnTitle": "Value"
+  },
+  {
+    "table": "GlobalConfig",
+    "title": "Global Config",
+    "category": "SYSTEM",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "GlobalProduct",
+    "title": "محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "GlobalProductId",
+    "columnTitle": "شناسه محصول هایپریک"
+  },
+  {
+    "table": "GlobalProduct",
+    "title": "محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "Name",
+    "columnTitle": "نام"
+  },
+  {
+    "table": "GlobalProduct",
+    "title": "محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "Barcode",
+    "columnTitle": "بارکد"
+  },
+  {
+    "table": "GlobalProduct",
+    "title": "محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "GlobalProduct",
+    "title": "محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "IsPublished",
+    "columnTitle": "منتشر شده"
+  },
+  {
+    "table": "GlobalProduct",
+    "title": "محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "BrandId",
+    "columnTitle": "شناسه برند"
+  },
+  {
+    "table": "GlobalProduct",
+    "title": "محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "UnitCode",
+    "columnTitle": "شناسه واحد اندازه‌گیری"
+  },
+  {
+    "table": "GlobalProduct",
+    "title": "محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "IsEnabled",
+    "columnTitle": "فعال است"
+  },
+  {
+    "table": "GlobalProduct",
+    "title": "محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "IsApproved",
+    "columnTitle": "تایید شده"
+  },
+  {
+    "table": "GlobalProduct",
+    "title": "محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "ReviewStatusId",
+    "columnTitle": "شناسه وضعیت فراوری"
+  },
+  {
+    "table": "GlobalProduct",
+    "title": "محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "CreateTime",
+    "columnTitle": "زمان ایجاد"
+  },
+  {
+    "table": "GlobalProduct",
+    "title": "محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "CreatorUser",
+    "columnTitle": "کاربر ایجاد کننده"
+  },
+  {
+    "table": "GlobalProduct",
+    "title": "محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "UpdateTime",
+    "columnTitle": "زمان آخرین ویرایش"
+  },
+  {
+    "table": "GlobalProduct",
+    "title": "محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "UpdaterUser",
+    "columnTitle": "کاربر ویرایش کننده"
+  },
+  {
+    "table": "GlobalProduct",
+    "title": "محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "SaleTaxRate",
+    "columnTitle": "نرخ مالیات فروش"
+  },
+  {
+    "table": "GlobalProduct",
+    "title": "محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "PurchaseTaxRate",
+    "columnTitle": "نرخ مالیات خرید"
+  },
+  {
+    "table": "GlobalProduct",
+    "title": "محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "IsService",
+    "columnTitle": "خدمات است"
+  },
+  {
+    "table": "GlobalProduct",
+    "title": "محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "GroupId",
+    "columnTitle": "شناسه گروه"
+  },
+  {
+    "table": "GlobalProduct",
+    "title": "محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "ImageRelativeUrl",
+    "columnTitle": "آدرس نسبی فایل تصویر"
+  },
+  {
+    "table": "GlobalProduct",
+    "title": "محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "GlobalProductGroup",
+    "title": "گروه محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "GroupId",
+    "columnTitle": "شناسه گروه محصول"
+  },
+  {
+    "table": "GlobalProductGroup",
+    "title": "گروه محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "ParentId",
+    "columnTitle": "شناسه والد"
+  },
+  {
+    "table": "GlobalProductGroup",
+    "title": "گروه محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "Name",
+    "columnTitle": "نام"
+  },
+  {
+    "table": "GlobalProductGroup",
+    "title": "گروه محصول هایپریک",
+    "category": "محصول هایپریک",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "GlobalProductMedia",
+    "title": "رسانه محصول",
+    "category": "محصول",
+    "column": "MediaId",
+    "columnTitle": "شناسه رسانه محصول"
+  },
+  {
+    "table": "GlobalProductMedia",
+    "title": "رسانه محصول",
+    "category": "محصول",
+    "column": "ProductId",
+    "columnTitle": "شناسه محصول هایپریک"
+  },
+  {
+    "table": "GlobalProductMedia",
+    "title": "رسانه محصول",
+    "category": "محصول",
+    "column": "FileRelativeUrl",
+    "columnTitle": "آدرس نسبی فایل"
+  },
+  {
+    "table": "GlobalProductMedia",
+    "title": "رسانه محصول",
+    "category": "محصول",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "Groups",
+    "title": "گروه‌ها",
+    "category": "عمومی",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "Groups",
+    "title": "گروه‌ها",
+    "category": "عمومی",
+    "column": "GroupId",
+    "columnTitle": "شناسه گروه"
+  },
+  {
+    "table": "Groups",
+    "title": "گروه‌ها",
+    "category": "عمومی",
+    "column": "EntityType",
+    "columnTitle": "نوع موجودیت"
+  },
+  {
+    "table": "Groups",
+    "title": "گروه‌ها",
+    "category": "عمومی",
+    "column": "ParentId",
+    "columnTitle": "شناسه گروه والد"
+  },
+  {
+    "table": "Groups",
+    "title": "گروه‌ها",
+    "category": "عمومی",
+    "column": "Code",
+    "columnTitle": "کد"
+  },
+  {
+    "table": "Groups",
+    "title": "گروه‌ها",
+    "category": "عمومی",
+    "column": "Name",
+    "columnTitle": "نام"
+  },
+  {
+    "table": "Groups",
+    "title": "گروه‌ها",
+    "category": "عمومی",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "Groups",
+    "title": "گروه‌ها",
+    "category": "عمومی",
+    "column": "FullPath",
+    "columnTitle": "مسیر"
+  },
+  {
+    "table": "Groups",
+    "title": "گروه‌ها",
+    "category": "عمومی",
+    "column": "NameFullPath",
+    "columnTitle": "نام گروه‌های مسیر"
+  },
+  {
+    "table": "Groups",
+    "title": "گروه‌ها",
+    "category": "عمومی",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "InventoryFifoConsumption",
+    "title": "مصرف لایه‌های FIFO",
+    "category": "انبارداری",
+    "column": "Id",
+    "columnTitle": "شناسه مصرف"
+  },
+  {
+    "table": "InventoryFifoConsumption",
+    "title": "مصرف لایه‌های FIFO",
+    "category": "انبارداری",
+    "column": "StockCardItemId",
+    "columnTitle": "شناسه آیتم حواله"
+  },
+  {
+    "table": "InventoryFifoConsumption",
+    "title": "مصرف لایه‌های FIFO",
+    "category": "انبارداری",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "InventoryFifoConsumption",
+    "title": "مصرف لایه‌های FIFO",
+    "category": "انبارداری",
+    "column": "ConsumedQuantity",
+    "columnTitle": "مقدار مصرف شده به واحد اصلی"
+  },
+  {
+    "table": "InventoryFifoConsumption",
+    "title": "مصرف لایه‌های FIFO",
+    "category": "انبارداری",
+    "column": "UnitCost",
+    "columnTitle": "بهای تمام شده در لحظه مصرف"
+  },
+  {
+    "table": "InventoryFifoConsumption",
+    "title": "مصرف لایه‌های FIFO",
+    "category": "انبارداری",
+    "column": "ConsumptionDateTime",
+    "columnTitle": "تاریخ و زمان مصرف"
+  },
+  {
+    "table": "InventoryFifoConsumption",
+    "title": "مصرف لایه‌های FIFO",
+    "category": "انبارداری",
+    "column": "Amount",
+    "columnTitle": "مبلغ مصرف به ارز پایه"
+  },
+  {
+    "table": "InventoryFifoConsumption",
+    "title": "مصرف لایه‌های FIFO",
+    "category": "انبارداری",
+    "column": "ProductId",
+    "columnTitle": "شناسه کالا"
+  },
+  {
+    "table": "InventoryFifoConsumption",
+    "title": "مصرف لایه‌های FIFO",
+    "category": "انبارداری",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "InventoryFifoLayer",
+    "title": "لایه موجودی FIFO",
+    "category": "انبارداری",
+    "column": "Id",
+    "columnTitle": "شناسه لایه"
+  },
+  {
+    "table": "InventoryFifoLayer",
+    "title": "لایه موجودی FIFO",
+    "category": "انبارداری",
+    "column": "StockCardItemId",
+    "columnTitle": "شناسه آیتم رسید"
+  },
+  {
+    "table": "InventoryFifoLayer",
+    "title": "لایه موجودی FIFO",
+    "category": "انبارداری",
+    "column": "ProductId",
+    "columnTitle": "شناسه کالا"
+  },
+  {
+    "table": "InventoryFifoLayer",
+    "title": "لایه موجودی FIFO",
+    "category": "انبارداری",
+    "column": "WarehouseId",
+    "columnTitle": "شناسه انبار"
+  },
+  {
+    "table": "InventoryFifoLayer",
+    "title": "لایه موجودی FIFO",
+    "category": "انبارداری",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "InventoryFifoLayer",
+    "title": "لایه موجودی FIFO",
+    "category": "انبارداری",
+    "column": "InitialQuantity",
+    "columnTitle": "مقدار اولیه به واحد اصلی"
+  },
+  {
+    "table": "InventoryFifoLayer",
+    "title": "لایه موجودی FIFO",
+    "category": "انبارداری",
+    "column": "RemainingQuantity",
+    "columnTitle": "مقدار باقیمانده به واحد اصلی"
+  },
+  {
+    "table": "InventoryFifoLayer",
+    "title": "لایه موجودی FIFO",
+    "category": "انبارداری",
+    "column": "UnitCost",
+    "columnTitle": "بهای تمام شده واحد"
+  },
+  {
+    "table": "InventoryFifoLayer",
+    "title": "لایه موجودی FIFO",
+    "category": "انبارداری",
+    "column": "ReceiptDateTime",
+    "columnTitle": "تاریخ و زمان"
+  },
+  {
+    "table": "InventoryFifoLayer",
+    "title": "لایه موجودی FIFO",
+    "category": "انبارداری",
+    "column": "Amount",
+    "columnTitle": "مبلغ کل لایه به ارز پایه"
+  },
+  {
+    "table": "InventoryFifoLayer",
+    "title": "لایه موجودی FIFO",
+    "category": "انبارداری",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "IranCities",
+    "title": "شهرهای ایران",
+    "category": "عمومی",
+    "column": "CityID",
+    "columnTitle": "شناسه شهر"
+  },
+  {
+    "table": "IranCities",
+    "title": "شهرهای ایران",
+    "category": "عمومی",
+    "column": "StateID",
+    "columnTitle": "شناسه استان"
+  },
+  {
+    "table": "IranCities",
+    "title": "شهرهای ایران",
+    "category": "عمومی",
+    "column": "CityName",
+    "columnTitle": "نام"
+  },
+  {
+    "table": "IranCities",
+    "title": "شهرهای ایران",
+    "category": "عمومی",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "IranStates",
+    "title": "استان‌های ایران",
+    "category": "عمومی",
+    "column": "StateID",
+    "columnTitle": "شناسه استان‌"
+  },
+  {
+    "table": "IranStates",
+    "title": "استان‌های ایران",
+    "category": "عمومی",
+    "column": "StateName",
+    "columnTitle": "نام"
+  },
+  {
+    "table": "IranStates",
+    "title": "استان‌های ایران",
+    "category": "عمومی",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "MessageHistory",
+    "title": "تاریخچه پیامک‌ها",
+    "category": "عمومی",
+    "column": "MessageID",
+    "columnTitle": "شناسه تاریخچه پیامک‌"
+  },
+  {
+    "table": "MessageHistory",
+    "title": "تاریخچه پیامک‌ها",
+    "category": "عمومی",
+    "column": "MobileNumber",
+    "columnTitle": "تلفن همراه"
+  },
+  {
+    "table": "MessageHistory",
+    "title": "تاریخچه پیامک‌ها",
+    "category": "عمومی",
+    "column": "SendTime",
+    "columnTitle": "زمان ارسال"
+  },
+  {
+    "table": "MessageHistory",
+    "title": "تاریخچه پیامک‌ها",
+    "category": "عمومی",
+    "column": "MessageText",
+    "columnTitle": "متن پیامک"
+  },
+  {
+    "table": "MessageHistory",
+    "title": "تاریخچه پیامک‌ها",
+    "category": "عمومی",
+    "column": "ErrorCode",
+    "columnTitle": "کد خطا"
+  },
+  {
+    "table": "MessageHistory",
+    "title": "تاریخچه پیامک‌ها",
+    "category": "عمومی",
+    "column": "Subject",
+    "columnTitle": "موضوع"
+  },
+  {
+    "table": "MessageHistory",
+    "title": "تاریخچه پیامک‌ها",
+    "category": "عمومی",
+    "column": "ErrorMessage",
+    "columnTitle": "پیغام خطا"
+  },
+  {
+    "table": "MessageHistory",
+    "title": "تاریخچه پیامک‌ها",
+    "category": "عمومی",
+    "column": "DeliveryStatus",
+    "columnTitle": "وضعیت تحویل"
+  },
+  {
+    "table": "MessageHistory",
+    "title": "تاریخچه پیامک‌ها",
+    "category": "عمومی",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "ConfigId",
+    "columnTitle": "شناسه تنظیمات"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "NotificationMethod",
+    "columnTitle": "روش ارسال اعلان"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "NotifySaleInvoiceDueDate",
+    "columnTitle": "سررسید فاکتور فروش"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "SaleInvoiceDueNotificationThreshold",
+    "columnTitle": "زمان اعلان سررسید فاکتور فروش"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "NotifyPurchaseInvoiceDueDate",
+    "columnTitle": "سررسید فاکتور خرید"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "PurchaseInvoiceDueNotificationThreshold",
+    "columnTitle": "زمان اعلان سررسید فاکتور خرید"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "NotifyReceivedChequeDueDate",
+    "columnTitle": "سررسید چک دریافتی"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "ReceivedChequeDueNotificationThreshold",
+    "columnTitle": "زمان اعلان سررسید چک دریافتی"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "NotifyPaidChequeDueDate",
+    "columnTitle": "سررسید چک پرداختی"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "PaidChequeDueNotificationThreshold",
+    "columnTitle": "زمان اعلان سررسید چک پرداختی"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "NotifyInstallmentDueDate",
+    "columnTitle": "سررسید اقساط"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "InstallmentDueNotificationThreshold",
+    "columnTitle": "زمان اعلان سررسید اقساط"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "NotifyReorderPoint",
+    "columnTitle": "حد سفارش کالا"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "NotifyTaxInvoiceSubmissionDueDate",
+    "columnTitle": "سررسید مهلت ارسال فاکتور به سامانه مودیان"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "TaxInvoiceSubmissionDueNotificationThreshold",
+    "columnTitle": "زمان اعلان سررسید مهلت ارسال فاکتور به سامانه مودیان"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "NotifyDocumentLimitReached",
+    "columnTitle": "اتمام تعداد اسناد قابل ثبت"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "DocumentLimitNotificationThreshold",
+    "columnTitle": "تعداد اسناد مانده در زمان اعلان"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "NotifyOnlineInvoiceLimitReached",
+    "columnTitle": "اتمام تعداد فاکتور آنلاین قابل صدور"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "OnlineInvoiceNotificationThreshold",
+    "columnTitle": "تعداد فاکتور آنلاین مانده در زمان اعلان"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "NotifyTaxSubmissionLimitReached",
+    "columnTitle": "اتمام تعداد فاکتور قابل ارسال به سامانه مودیان"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "TaxSubmissionNotificationThreshold",
+    "columnTitle": "تعداد مانده از فاکتورهای قابل ارسال به سامانه مودیان در زمان اعلان"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "NotifyStorageLimitReached",
+    "columnTitle": "اتمام فضای ذخیره‌سازی"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "StorageNotificationThreshold",
+    "columnTitle": "میزان فضای مانده در زمان اعلان"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "NotifyWalletLowBalance",
+    "columnTitle": "کمبود موجودی کیف پول"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "WalletLowBalanceThreshold",
+    "columnTitle": "حداقل موجودی"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "SendDailySalesReport",
+    "columnTitle": "ارسال آمار فروش روزانه"
+  },
+  {
+    "table": "NotificationConfig",
+    "title": "تنظیمات اعلانات",
+    "category": "اعلان فروشگاه",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "Id",
+    "columnTitle": "شناسه شخص"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "DetailAccountId",
+    "columnTitle": "شناسه حساب تفصیلی"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "Name",
+    "columnTitle": "نام شخص"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "LastName",
+    "columnTitle": "نام خانوادگی شخص"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "CompanyName",
+    "columnTitle": "نام کسب‌وکار"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "Nickname",
+    "columnTitle": "نام مستعار"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "Type",
+    "columnTitle": "نوع شخص"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "IsEnabled",
+    "columnTitle": "فعال بودن"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "IdentifierNumber",
+    "columnTitle": "کد ملی / شناسه ملی / کد فراگیر / کد مشارکت مدنی"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "EconomicCode",
+    "columnTitle": "شماره اقتصادی"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "BranchCode",
+    "columnTitle": "کد شعبه"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "CreditLimit",
+    "columnTitle": "میزان اعتبار"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "ProfileImageUrl",
+    "columnTitle": "مسیر تصویر پروفایل"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "ContactInfo",
+    "columnTitle": "اطلاعات تماس"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "SpecialDates",
+    "columnTitle": "تاریخ‌های خاص"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "BankAccountsInfo",
+    "columnTitle": "اطلاعات حساب‌های بانکی"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "AddressesInfo",
+    "columnTitle": "اطلاعات آدرس‌ها"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "Roles",
+    "columnTitle": "نقش‌ها"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "MobileNumber",
+    "columnTitle": "شماره موبایل"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "PassportNumber",
+    "columnTitle": "شماره گذرنامه"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "ContractNumber",
+    "columnTitle": "شماره قرارداد پیمانکاری"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "SubscriptionNumber",
+    "columnTitle": "شماره اشتراک/شناسه قبض"
+  },
+  {
+    "table": "Person",
+    "title": "شخص",
+    "category": "اشخاص",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "PettyCash",
+    "title": "تنخواه",
+    "category": "حسابداری",
+    "column": "PettyCashId",
+    "columnTitle": "شناسه تنخواه"
+  },
+  {
+    "table": "PettyCash",
+    "title": "تنخواه",
+    "category": "حسابداری",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "PettyCash",
+    "title": "تنخواه",
+    "category": "حسابداری",
+    "column": "DetailAccountId",
+    "columnTitle": "شناسه حساب تفصیلی"
+  },
+  {
+    "table": "PettyCash",
+    "title": "تنخواه",
+    "category": "حسابداری",
+    "column": "PersonId",
+    "columnTitle": "شناسه تنخواه گردان"
+  },
+  {
+    "table": "PettyCash",
+    "title": "تنخواه",
+    "category": "حسابداری",
+    "column": "IsDefault",
+    "columnTitle": "پیش‌فرض"
+  },
+  {
+    "table": "PettyCash",
+    "title": "تنخواه",
+    "category": "حسابداری",
+    "column": "IsEnabled",
+    "columnTitle": "فعال"
+  },
+  {
+    "table": "PettyCash",
+    "title": "تنخواه",
+    "category": "حسابداری",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "PettyCash",
+    "title": "تنخواه",
+    "category": "حسابداری",
+    "column": "Code",
+    "columnTitle": "کد تنخواه"
+  },
+  {
+    "table": "PettyCash",
+    "title": "تنخواه",
+    "category": "حسابداری",
+    "column": "Currency",
+    "columnTitle": "ارز"
+  },
+  {
+    "table": "PettyCash",
+    "title": "تنخواه",
+    "category": "حسابداری",
+    "column": "Name",
+    "columnTitle": "نام"
+  },
+  {
+    "table": "PettyCash",
+    "title": "تنخواه",
+    "category": "حسابداری",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "PosDevice",
+    "title": "دستگاه کارتخوان",
+    "category": "خزانه داری",
+    "column": "Id",
+    "columnTitle": "شناسه کارتخوان"
+  },
+  {
+    "table": "PosDevice",
+    "title": "دستگاه کارتخوان",
+    "category": "خزانه داری",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "PosDevice",
+    "title": "دستگاه کارتخوان",
+    "category": "خزانه داری",
+    "column": "IsEnabled",
+    "columnTitle": "فعال بودن"
+  },
+  {
+    "table": "PosDevice",
+    "title": "دستگاه کارتخوان",
+    "category": "خزانه داری",
+    "column": "BankAccountId",
+    "columnTitle": "شناسه حساب بانکی"
+  },
+  {
+    "table": "PosDevice",
+    "title": "دستگاه کارتخوان",
+    "category": "خزانه داری",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "PosDevice",
+    "title": "دستگاه کارتخوان",
+    "category": "خزانه داری",
+    "column": "Name",
+    "columnTitle": "نام کارتخوان"
+  },
+  {
+    "table": "PosDevice",
+    "title": "دستگاه کارتخوان",
+    "category": "خزانه داری",
+    "column": "IpAddress",
+    "columnTitle": "آدرس IP"
+  },
+  {
+    "table": "PosDevice",
+    "title": "دستگاه کارتخوان",
+    "category": "خزانه داری",
+    "column": "PortNumber",
+    "columnTitle": "شماره پورت"
+  },
+  {
+    "table": "PosDevice",
+    "title": "دستگاه کارتخوان",
+    "category": "خزانه داری",
+    "column": "TerminalNumber",
+    "columnTitle": "شماره پایانه"
+  },
+  {
+    "table": "PosDevice",
+    "title": "دستگاه کارتخوان",
+    "category": "خزانه داری",
+    "column": "MerchantNumber",
+    "columnTitle": "شماره پذیرنده"
+  },
+  {
+    "table": "PosDevice",
+    "title": "دستگاه کارتخوان",
+    "category": "خزانه داری",
+    "column": "SerialNumber",
+    "columnTitle": "شماره سریال"
+  },
+  {
+    "table": "PosDevice",
+    "title": "دستگاه کارتخوان",
+    "category": "خزانه داری",
+    "column": "IsDefault",
+    "columnTitle": "پیش فرض بودن"
+  },
+  {
+    "table": "PosDevice",
+    "title": "دستگاه کارتخوان",
+    "category": "خزانه داری",
+    "column": "Psp",
+    "columnTitle": "نوع کارتخوان"
+  },
+  {
+    "table": "PosDevice",
+    "title": "دستگاه کارتخوان",
+    "category": "خزانه داری",
+    "column": "DetailAccountId",
+    "columnTitle": "شناسه حساب تفصیلی"
+  },
+  {
+    "table": "PosDevice",
+    "title": "دستگاه کارتخوان",
+    "category": "خزانه داری",
+    "column": "Currency",
+    "columnTitle": "ارز"
+  },
+  {
+    "table": "PosDevice",
+    "title": "دستگاه کارتخوان",
+    "category": "خزانه داری",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "PrintConfig",
+    "title": "تنظیمات چاپ",
+    "category": "فروشگاه",
+    "column": "ConfigId",
+    "columnTitle": "شناسه تنظیمات"
+  },
+  {
+    "table": "PrintConfig",
+    "title": "تنظیمات چاپ",
+    "category": "فروشگاه",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "PrintConfig",
+    "title": "تنظیمات چاپ",
+    "category": "فروشگاه",
+    "column": "PrintLogo",
+    "columnTitle": "چاپ لوگو"
+  },
+  {
+    "table": "PrintConfig",
+    "title": "تنظیمات چاپ",
+    "category": "فروشگاه",
+    "column": "InvoiceTitle",
+    "columnTitle": "عنوان صورتحساب"
+  },
+  {
+    "table": "PrintConfig",
+    "title": "تنظیمات چاپ",
+    "category": "فروشگاه",
+    "column": "PrintSellerInfo",
+    "columnTitle": "چاپ اطلاعات کسب‌وکار"
+  },
+  {
+    "table": "PrintConfig",
+    "title": "تنظیمات چاپ",
+    "category": "فروشگاه",
+    "column": "PrintCustomerInfo",
+    "columnTitle": "چاپ اطلاعات خریدار"
+  },
+  {
+    "table": "PrintConfig",
+    "title": "تنظیمات چاپ",
+    "category": "فروشگاه",
+    "column": "PrintSignatureArea",
+    "columnTitle": "چاپ محل امضاها"
+  },
+  {
+    "table": "PrintConfig",
+    "title": "تنظیمات چاپ",
+    "category": "فروشگاه",
+    "column": "SignatureTitle1",
+    "columnTitle": "عنوان امضای یک"
+  },
+  {
+    "table": "PrintConfig",
+    "title": "تنظیمات چاپ",
+    "category": "فروشگاه",
+    "column": "SignatureTitle2",
+    "columnTitle": "عنوان امضای دو"
+  },
+  {
+    "table": "PrintConfig",
+    "title": "تنظیمات چاپ",
+    "category": "فروشگاه",
+    "column": "SignatureTitle3",
+    "columnTitle": "عنوان امضای سه"
+  },
+  {
+    "table": "PrintConfig",
+    "title": "تنظیمات چاپ",
+    "category": "فروشگاه",
+    "column": "SignatureTitle4",
+    "columnTitle": "عنوان امضای چهار"
+  },
+  {
+    "table": "PrintConfig",
+    "title": "تنظیمات چاپ",
+    "category": "فروشگاه",
+    "column": "SignatureTitle5",
+    "columnTitle": "عنوان امضای پنج"
+  },
+  {
+    "table": "PrintConfig",
+    "title": "تنظیمات چاپ",
+    "category": "فروشگاه",
+    "column": "PrintDueDate",
+    "columnTitle": "چاپ تاریخ سررسید"
+  },
+  {
+    "table": "PrintConfig",
+    "title": "تنظیمات چاپ",
+    "category": "فروشگاه",
+    "column": "TaxPrintMethod",
+    "columnTitle": "چاپ ستون مالیات"
+  },
+  {
+    "table": "PrintConfig",
+    "title": "تنظیمات چاپ",
+    "category": "فروشگاه",
+    "column": "DiscountPrintMethod",
+    "columnTitle": "چاپ ستون تخفیف"
+  },
+  {
+    "table": "PrintConfig",
+    "title": "تنظیمات چاپ",
+    "category": "فروشگاه",
+    "column": "PrintPaymentInfo",
+    "columnTitle": "چاپ اطلاعات پرداخت"
+  },
+  {
+    "table": "PrintConfig",
+    "title": "تنظیمات چاپ",
+    "category": "فروشگاه",
+    "column": "PrintAccountBalance",
+    "columnTitle": "چاپ مانده حساب"
+  },
+  {
+    "table": "PrintConfig",
+    "title": "تنظیمات چاپ",
+    "category": "فروشگاه",
+    "column": "PrintCurrentDateTime",
+    "columnTitle": "چاپ تاریخ و زمان چاپ"
+  },
+  {
+    "table": "PrintConfig",
+    "title": "تنظیمات چاپ",
+    "category": "فروشگاه",
+    "column": "InvoiceFooterText",
+    "columnTitle": "متن انتهای فاکتور"
+  },
+  {
+    "table": "PrintConfig",
+    "title": "تنظیمات چاپ",
+    "category": "فروشگاه",
+    "column": "PrintCopyCount",
+    "columnTitle": "تعداد چاپ"
+  },
+  {
+    "table": "PrintConfig",
+    "title": "تنظیمات چاپ",
+    "category": "فروشگاه",
+    "column": "PrintInvoiceItemCount",
+    "columnTitle": "چاپ تعداد اقلام داخل فاکتور"
+  },
+  {
+    "table": "PrintConfig",
+    "title": "تنظیمات چاپ",
+    "category": "فروشگاه",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "Id",
+    "columnTitle": "شناسه محصول"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "GlobalId",
+    "columnTitle": "شناسه محصول هایپریک"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "TaxCode",
+    "columnTitle": "شناسه یکتای مالیاتی"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "Name",
+    "columnTitle": "نام محصول"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "IsEnabled",
+    "columnTitle": "فعال/غیرفعال بودن"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "BaseUnit",
+    "columnTitle": "کد واحد اول"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "SecondaryUnit",
+    "columnTitle": "کد واحد دوم"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "UnitConversionFactor",
+    "columnTitle": "ضریب تبدیل واحد"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "PurchasePrice",
+    "columnTitle": "قیمت خرید"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "PurchaseTaxRate",
+    "columnTitle": "نرخ مالیات خرید"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "SalePrice",
+    "columnTitle": "قیمت فروش"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "SaleTaxRate",
+    "columnTitle": "نرخ مالیات فروش"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "PercentDiscount",
+    "columnTitle": "تخفیف درصدی"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "FixedDiscount",
+    "columnTitle": "تخفیف ثابت"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "IsConsumable",
+    "columnTitle": "آیا قابل مصرف است"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "IsPurchasable",
+    "columnTitle": "آیا قابل خرید است"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "IsStockable",
+    "columnTitle": "آیا قابل انبار است"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "IsSellable",
+    "columnTitle": "آیا قابل فروش است"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "IsOnlineSellable",
+    "columnTitle": "آیا به‌صورت اینترنتی قابل فروش است"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "IsService",
+    "columnTitle": "آیا خدمت است"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "IsSerialized",
+    "columnTitle": "آیا کالا سریال پذیر است"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "DetailAccountId",
+    "columnTitle": "شناسه حساب تفصیلی"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "ImageRelativeUrl",
+    "columnTitle": "مسیر نسبی تصویر"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "MaxSalesQuantity",
+    "columnTitle": "حداکثر مقدار فروش"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "AccountingStock",
+    "columnTitle": "موجودی حسابداری"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "MinimumStock",
+    "columnTitle": "حداقل موجودی ایمنی"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "GroupId",
+    "columnTitle": "شناسه گروه"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "ReorderPoint",
+    "columnTitle": "نقطه سفارش مجدد"
+  },
+  {
+    "table": "Product",
+    "title": "محصول",
+    "category": "محصول فروشگاه",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "ProductBarcode",
+    "title": "بارکد محصول",
+    "category": "محصول فروشگاه",
+    "column": "BarcodeId",
+    "columnTitle": "شناسه بارکد محصول"
+  },
+  {
+    "table": "ProductBarcode",
+    "title": "بارکد محصول",
+    "category": "محصول فروشگاه",
+    "column": "ProductId",
+    "columnTitle": "شناسه محصول"
+  },
+  {
+    "table": "ProductBarcode",
+    "title": "بارکد محصول",
+    "category": "محصول فروشگاه",
+    "column": "Barcode",
+    "columnTitle": "بارکد"
+  },
+  {
+    "table": "ProductBarcode",
+    "title": "بارکد محصول",
+    "category": "محصول فروشگاه",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "ProductBarcode",
+    "title": "بارکد محصول",
+    "category": "محصول فروشگاه",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "ProductBrand",
+    "title": "برند محصول",
+    "category": "محصول",
+    "column": "BrandId",
+    "columnTitle": "شناسه برند محصول"
+  },
+  {
+    "table": "ProductBrand",
+    "title": "برند محصول",
+    "category": "محصول",
+    "column": "BrandName",
+    "columnTitle": "نام"
+  },
+  {
+    "table": "ProductBrand",
+    "title": "برند محصول",
+    "category": "محصول",
+    "column": "BrandDescription",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "ProductBrand",
+    "title": "برند محصول",
+    "category": "محصول",
+    "column": "LogoRelativeUrl",
+    "columnTitle": "آدرس نسبی فایل لوگو"
+  },
+  {
+    "table": "ProductBrand",
+    "title": "برند محصول",
+    "category": "محصول",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "ProductReviewStatus",
+    "title": "وضعیت فراوری محصول",
+    "category": "محصول",
+    "column": "ProductReviewStatusId",
+    "columnTitle": "شناسه وضعیت فراوری محصول"
+  },
+  {
+    "table": "ProductReviewStatus",
+    "title": "وضعیت فراوری محصول",
+    "category": "محصول",
+    "column": "ProductReviewStatusName",
+    "columnTitle": "عنوان"
+  },
+  {
+    "table": "ProductReviewStatus",
+    "title": "وضعیت فراوری محصول",
+    "category": "محصول",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "ProductUnit",
+    "title": "واحد اندازه‌گیری محصول",
+    "category": "محصول",
+    "column": "UnitCode",
+    "columnTitle": "شناسه واحد اندازه‌گیری محصول"
+  },
+  {
+    "table": "ProductUnit",
+    "title": "واحد اندازه‌گیری محصول",
+    "category": "محصول",
+    "column": "Name",
+    "columnTitle": "نام"
+  },
+  {
+    "table": "ProductUnit",
+    "title": "واحد اندازه‌گیری محصول",
+    "category": "محصول",
+    "column": "DecimalPrecision",
+    "columnTitle": "دقت اعشار"
+  },
+  {
+    "table": "ProductUnit",
+    "title": "واحد اندازه‌گیری محصول",
+    "category": "محصول",
+    "column": "Conversions",
+    "columnTitle": "تبدیل‌ها"
+  },
+  {
+    "table": "ProductUnit",
+    "title": "واحد اندازه‌گیری محصول",
+    "category": "محصول",
+    "column": "CountAsSingleItem",
+    "columnTitle": "شمارش به عنوان یک آیتم"
+  },
+  {
+    "table": "ProductUnit",
+    "title": "واحد اندازه‌گیری محصول",
+    "category": "محصول",
+    "column": "UsageType",
+    "columnTitle": "نوع واحد اندازه‌گیری"
+  },
+  {
+    "table": "ProductUnit",
+    "title": "واحد اندازه‌گیری محصول",
+    "category": "محصول",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "Project",
+    "title": "پروژه",
+    "category": "فروشگاه",
+    "column": "ProjectId",
+    "columnTitle": "شناسه پروژه"
+  },
+  {
+    "table": "Project",
+    "title": "پروژه",
+    "category": "فروشگاه",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "Project",
+    "title": "پروژه",
+    "category": "فروشگاه",
+    "column": "Name",
+    "columnTitle": "نام پروژه"
+  },
+  {
+    "table": "Project",
+    "title": "پروژه",
+    "category": "فروشگاه",
+    "column": "IsDefault",
+    "columnTitle": "پروژه پیش‌فرض"
+  },
+  {
+    "table": "Project",
+    "title": "پروژه",
+    "category": "فروشگاه",
+    "column": "IsEnabled",
+    "columnTitle": "پروژه فعال"
+  },
+  {
+    "table": "Project",
+    "title": "پروژه",
+    "category": "فروشگاه",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "Project",
+    "title": "پروژه",
+    "category": "فروشگاه",
+    "column": "Code",
+    "columnTitle": "کد پروژه"
+  },
+  {
+    "table": "Project",
+    "title": "پروژه",
+    "category": "فروشگاه",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "PurchaseOrderId",
+    "columnTitle": "شناسه سفارش خرید"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "TotalAmountBeforeDiscount",
+    "columnTitle": "مجموع مبلغ قبل از کسر تخفیف"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "TotalVatAmount",
+    "columnTitle": "مجموع مالیات بر ارزش افزوده"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "TotalInvoiceAmount",
+    "columnTitle": "مجموع صورتحساب"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "TotalDiscountAmount",
+    "columnTitle": "مجموع تخفیفات"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "FiscalPeriodId",
+    "columnTitle": "شناسه دوره مالی"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "WarehouseId",
+    "columnTitle": "شناسه انبار"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "ProjectId",
+    "columnTitle": "شناسه پروژه"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "Currency",
+    "columnTitle": "ارز"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "ExchangeRate",
+    "columnTitle": "نرخ تبدیل ارز"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "InvoiceNumber",
+    "columnTitle": "شماره صورتحساب"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "IssueDateTime",
+    "columnTitle": "تاریخ و زمان صدور صورتحساب"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "Status",
+    "columnTitle": "وضعیت صورتحساب"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "SupplierId",
+    "columnTitle": "شناسه شخص تامین‌کننده"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "DeliveryStatus",
+    "columnTitle": "وضعیت تحویل"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "InventoryStatus",
+    "columnTitle": "وضعیت صدور رسید انبار"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "PaymentStatus",
+    "columnTitle": "وضعیت پرداخت"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "TotalAmountAfterDiscount",
+    "columnTitle": "مجموع مبلغ پس از کسر تخفیف"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "PaidAmount",
+    "columnTitle": "مبلغ پرداخت شده"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "InvoiceType",
+    "columnTitle": "نوع صورتحساب"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "TotalAmount",
+    "columnTitle": "مبلغ قابل پرداخت"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "TaxInvoiceInternalSerial",
+    "columnTitle": "سریال صورتحساب داخلی حافظه مالیاتی"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "InvoiceFormat",
+    "columnTitle": "الگوی صورتحساب"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "CustomsPermitNumber",
+    "columnTitle": "شماره پروانه گمرکی"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "DueDate",
+    "columnTitle": "تاریخ سر رسید"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "Adjustments",
+    "columnTitle": "اضافات و کسورات"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "SellerCustomsOfficeCode",
+    "columnTitle": "کد گمرک محل اظهار فروشنده"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "AdjustmentsAmount",
+    "columnTitle": "مابه‌التفاوت اضافات و کسورات"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "TotalOtherTaxesAndChargesAmount",
+    "columnTitle": "مجموع سایر مالیات، عوارض و وجوه قانونی"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "TaxUniqueId",
+    "columnTitle": "شماره منحصر به فرد مالیاتی"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "SettlementTypeId",
+    "columnTitle": "روش تسویه"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "TotalCashPaidAmount",
+    "columnTitle": "مبلغ پرداختی نقدی"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "TotalCreditAmount",
+    "columnTitle": "مبلغ نسیه"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "TotalVatPaidAmount",
+    "columnTitle": "مجموع سهم مالیات بر ارزش افزوده از پرداخت"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "TotalArticle17TaxAmount",
+    "columnTitle": "مالیات موضوع ماده 17"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "FlightType",
+    "columnTitle": "نوع پرواز"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "CustomsDeclarationNumber",
+    "columnTitle": "شماره کوتاژ اظهارنامه گمرکی"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "CustomsDeclarationDate",
+    "columnTitle": "تاریخ کوتاژ اظهارنامه گمرکی"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "SubscriberNumber",
+    "columnTitle": "شماره اشتراک/ شناسه قبض بهره بردار"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "TotalNetWeight",
+    "columnTitle": "مجموع وزن خالص"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "TotalRialAmount",
+    "columnTitle": "مجموع ارزش ریالی"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "TotalCurrencyAmount",
+    "columnTitle": "مجموع ارزش ارزی"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "AgencyEconomicCode",
+    "columnTitle": "شماره اقتصادی آژانس"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "WaybillNumber",
+    "columnTitle": "شماره بارنامه"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "ReferenceWaybillNumber",
+    "columnTitle": "شماره بارنامه مرجع"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "OriginCountry",
+    "columnTitle": "کشور مبدا"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "OriginCity",
+    "columnTitle": "شهر مبدا"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "DestinationCountry",
+    "columnTitle": "کشور مقصد"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "DestinationCity",
+    "columnTitle": "شهر مقصد"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "SenderIdentificationNumber",
+    "columnTitle": "شناسه ملی/ شماره ملی/ شناسه مشارکت مدنی/ کد فراگیر اتباع غیر ایرانی فرستنده"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "ReceiverIdentificationNumber",
+    "columnTitle": "شناسه ملی/ شماره ملی/ شناسه مشارکت مدنی/ کد فراگیر اتباع غیر ایرانی گیرنده"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "WaybillType",
+    "columnTitle": "نوع بارنامه/نوع حمل"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "FleetNumber",
+    "columnTitle": "شماره ناوگان"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "DriverIdentificationNumber",
+    "columnTitle": "شماره ملی/کد فراگیر اتباع غیر ایرانی راننده درحمل ونقل جاده‌ای"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "ShippedProducts",
+    "columnTitle": "کالاهای حمل شده"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "SalesNoticeNumber",
+    "columnTitle": "شماره اعلامیه فروش"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "SalesNoticeDate",
+    "columnTitle": "تاریخ اعلامیه فروش"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "InsuranceId",
+    "columnTitle": "شناسه یکتای بیمه نامه"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "EndorsementId",
+    "columnTitle": "شناسه یکتای الحاقیه"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "RemainedAmount",
+    "columnTitle": "مبلغ باقیمانده"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "IsStockCardAutoCreated",
+    "columnTitle": "ایا رسید انبار به صورت خودکار ایجاد شده است"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "ShippingAmount",
+    "columnTitle": "مبلغ حمل و نقل"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "ShippingDescription",
+    "columnTitle": "توضیحات حمل و نقل"
+  },
+  {
+    "table": "PurchaseOrder",
+    "title": "فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "PurchaseOrderItemId",
+    "columnTitle": "شناسه آیتم سفارش خرید"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "PurchaseOrderId",
+    "columnTitle": "شناسه سفارش خرید"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "ProductId",
+    "columnTitle": "شناسه محصول"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "Quantity",
+    "columnTitle": "تعداد/مقدار"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "Unit",
+    "columnTitle": "واحد اندازه‌گیری"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "Price",
+    "columnTitle": "قیمت واحد"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "LinePercentDiscount",
+    "columnTitle": "تخفیف درصدی"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "LineTotalAmount",
+    "columnTitle": "مبلغ کل کالا/خدمت"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "FiscalPeriodId",
+    "columnTitle": "شناسه دوره مالی"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "VatRate",
+    "columnTitle": "نرخ مالیات بر ارزش افزوده"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "LineWarehouseId",
+    "columnTitle": "شناسه انبار"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "ProjectId",
+    "columnTitle": "شناسه پروژه"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "LineCurrency",
+    "columnTitle": "ارز"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "LineExchangeRate",
+    "columnTitle": "نرخ تبدیل ارز"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "UnitConversionFactor",
+    "columnTitle": "ضریب تبدیل واحد"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "VatAmount",
+    "columnTitle": "مبلغ مالیات بر ارزش افزوده"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "LineCurrencyAmount",
+    "columnTitle": "میزان ارز"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "LineAmountBeforeDiscount",
+    "columnTitle": "مبلغ قبل از تخفیف"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "CommissionContractNumber",
+    "columnTitle": "شماره قرارداد حق العمل کاری"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "LineDiscountAmount",
+    "columnTitle": "مبلغ تخفیف"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "LineAmountAfterDiscount",
+    "columnTitle": "مبلغ بعد از تخفیف"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "NetWeight",
+    "columnTitle": "وزن خالص"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "LineRialValue",
+    "columnTitle": "ارزش ریالی کالا"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "LineCurrencyValue",
+    "columnTitle": "ارزش ارزی کالا"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "MakingCharge",
+    "columnTitle": "اجرت ساخت"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "SellerProfit",
+    "columnTitle": "سود فروشنده"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "Commission",
+    "columnTitle": "حق‌العمل"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "TotalMakingCommissionProfit",
+    "columnTitle": "جمع کل اجرت، حق‌العمل و سود"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "Purity",
+    "columnTitle": "عیار"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "CurrencyBuyRate",
+    "columnTitle": "نرخ خرید ارز"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "VatCalculationBase",
+    "columnTitle": "ماخذ مالیات بر ارزش افزوده در الگوی فروش ارز"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "VatBaseAmount",
+    "columnTitle": "مبلغ پایه مالیات بر ارزش افزوده"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "OtherTaxesAndChargesSubject",
+    "columnTitle": "موضوع سایر مالیات و عوارض"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "OtherTaxesAndChargesRate",
+    "columnTitle": "نرخ سایر مالیات و عوارض"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "OtherTaxesAndChargesAmount",
+    "columnTitle": "مبلغ سایر مالیات و عوارض"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "OtherLegalDuesSubject",
+    "columnTitle": "موضوع سایر وجوه قانونی"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "OtherLegalDuesRate",
+    "columnTitle": "نرخ سایر وجوه قانونی"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "OtherLegalDuesAmount",
+    "columnTitle": "مبلغ سایر وجوه قانونی"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "LineCashPaidAmount",
+    "columnTitle": "سهم نقدی از پرداخت"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "LineVatPaidAmount",
+    "columnTitle": "سهم مالیات بر ارزش افزوده از پرداخت"
+  },
+  {
+    "table": "PurchaseOrderItem",
+    "title": "اقلام فاکتور خرید",
+    "category": "سفارش خرید",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "PurchaseOrderReturnId",
+    "columnTitle": "شناسه صورتحساب برگشتی"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "FiscalPeriodId",
+    "columnTitle": "شناسه دوره مالی"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "WarehouseId",
+    "columnTitle": "شناسه انبار"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "ProjectId",
+    "columnTitle": "شناسه پروژه"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "ReferencePurchaseOrderId",
+    "columnTitle": "شناسه صورتحساب مرجع"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "InvoiceNumber",
+    "columnTitle": "شماره صورتحساب برگشتی"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "IssueDateTime",
+    "columnTitle": "تاریخ و زمان صدور صورتحساب برگشتی"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "CreationDateTime",
+    "columnTitle": "تاریخ و زمان ایجاد صورتحساب برگشتی"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "Status",
+    "columnTitle": "وضعیت صورتحساب برگشتی"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "DeliveryStatus",
+    "columnTitle": "وضعیت تحویل"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "InventoryStatus",
+    "columnTitle": "وضعیت انبار"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "PaymentStatus",
+    "columnTitle": "وضعیت دریافت"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "TotalReturnAmountBeforeDiscount",
+    "columnTitle": "مجموع مبلغ برگشتی قبل از کسر تخفیف"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "TotalDiscountReturnAmount",
+    "columnTitle": "مجموع مبلغ برگشتی تخفیفات"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "TotalReturnAmountAfterDiscount",
+    "columnTitle": "مجموع مبلغ برگشتی پس از کسر تخفیف"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "TotalVatReturnAmount",
+    "columnTitle": "مجموع مبلغ برگشتی مالیات بر ارزش افزوده"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "TotalInvoiceReturnAmount",
+    "columnTitle": "مجموع مبلغ برگشتی صورتحساب"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "PaidReturnAmount",
+    "columnTitle": "مبلغ برگشتی دریافت شده"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "TotalReturnAmount",
+    "columnTitle": "مبلغ برگشتی قابل دریافت"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "Adjustments",
+    "columnTitle": "اضافات و کسورات"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "AdjustmentsAmount",
+    "columnTitle": "مابه‌التفاوت اضافات، کسورات"
+  },
+  {
+    "table": "PurchaseOrderReturn",
+    "title": "فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "PurchaseOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "PurchaseOrderReturnItemId",
+    "columnTitle": "شناسه آیتم برگشتی"
+  },
+  {
+    "table": "PurchaseOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "ReferencePurchaseOrderItemId",
+    "columnTitle": "شناسه آیتم مرجع"
+  },
+  {
+    "table": "PurchaseOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "PurchaseOrderReturnId",
+    "columnTitle": "شناسه صورتحساب برگشتی"
+  },
+  {
+    "table": "PurchaseOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "PurchaseOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "FiscalPeriodId",
+    "columnTitle": "شناسه دوره مالی"
+  },
+  {
+    "table": "PurchaseOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "LineWarehouseId",
+    "columnTitle": "شناسه انبار"
+  },
+  {
+    "table": "PurchaseOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "ProjectId",
+    "columnTitle": "شناسه پروژه"
+  },
+  {
+    "table": "PurchaseOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "ProductId",
+    "columnTitle": "شناسه محصول"
+  },
+  {
+    "table": "PurchaseOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "ReturnQuantity",
+    "columnTitle": "تعداد/مقدار برگشتی"
+  },
+  {
+    "table": "PurchaseOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "Unit",
+    "columnTitle": "واحد اندازه‌گیری"
+  },
+  {
+    "table": "PurchaseOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "UnitConversionFactor",
+    "columnTitle": "ضریب تبدیل واحد"
+  },
+  {
+    "table": "PurchaseOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "Price",
+    "columnTitle": "قیمت واحد"
+  },
+  {
+    "table": "PurchaseOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "LineReturnAmountBeforeDiscount",
+    "columnTitle": "مبلغ برگشتی قبل از تخفیف"
+  },
+  {
+    "table": "PurchaseOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "LinePercentDiscount",
+    "columnTitle": "تخفیف درصدی"
+  },
+  {
+    "table": "PurchaseOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "LineDiscountReturnAmount",
+    "columnTitle": "مبلغ برگشتی تخفیف"
+  },
+  {
+    "table": "PurchaseOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "LineReturnAmountAfterDiscount",
+    "columnTitle": "مبلغ برگشتی بعد از تخفیف"
+  },
+  {
+    "table": "PurchaseOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "VatRate",
+    "columnTitle": "نرخ مالیات بر ارزش افزوده"
+  },
+  {
+    "table": "PurchaseOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "VatReturnAmount",
+    "columnTitle": "مبلغ برگشتی مالیات بر ارزش افزوده"
+  },
+  {
+    "table": "PurchaseOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "LineTotalReturnAmount",
+    "columnTitle": "مبلغ کل برگشتی کالا/خدمت"
+  },
+  {
+    "table": "PurchaseOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از خرید",
+    "category": "سفارش خرید",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "ReleaseNote",
+    "title": "تغییرات نسخه",
+    "category": "عمومی",
+    "column": "ReleaseID",
+    "columnTitle": "شناسه تغییرات نسخه"
+  },
+  {
+    "table": "ReleaseNote",
+    "title": "تغییرات نسخه",
+    "category": "عمومی",
+    "column": "ReleaseDate",
+    "columnTitle": "تاریخ نسخه"
+  },
+  {
+    "table": "ReleaseNote",
+    "title": "تغییرات نسخه",
+    "category": "عمومی",
+    "column": "ReleaseVersion",
+    "columnTitle": "شماره نسخه"
+  },
+  {
+    "table": "ReleaseNote",
+    "title": "تغییرات نسخه",
+    "category": "عمومی",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "ReleaseNoteItem",
+    "title": "آیتم تغییرات نسخه",
+    "category": "عمومی",
+    "column": "ReleaseItemID",
+    "columnTitle": "شناسه آیتم تغییرات نسخه"
+  },
+  {
+    "table": "ReleaseNoteItem",
+    "title": "آیتم تغییرات نسخه",
+    "category": "عمومی",
+    "column": "ReleaseID",
+    "columnTitle": "شناسه نسخه"
+  },
+  {
+    "table": "ReleaseNoteItem",
+    "title": "آیتم تغییرات نسخه",
+    "category": "عمومی",
+    "column": "ReleaseItemOrder",
+    "columnTitle": "ترتیب"
+  },
+  {
+    "table": "ReleaseNoteItem",
+    "title": "آیتم تغییرات نسخه",
+    "category": "عمومی",
+    "column": "ReleaseItemTitle",
+    "columnTitle": "عنوان"
+  },
+  {
+    "table": "ReleaseNoteItem",
+    "title": "آیتم تغییرات نسخه",
+    "category": "عمومی",
+    "column": "ReleaseItemDescription",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "ReleaseNoteItem",
+    "title": "آیتم تغییرات نسخه",
+    "category": "عمومی",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "SaleOrderId",
+    "columnTitle": "شناسه سفارش فروش"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "TotalAmountBeforeDiscount",
+    "columnTitle": "مجموع مبلغ قبل از کسر تخفیف"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "TotalVatAmount",
+    "columnTitle": "مجموع مالیات بر ارزش افزوده"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "TotalDiscountAmount",
+    "columnTitle": "مجموع تخفیفات"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "TotalInvoiceAmount",
+    "columnTitle": "مجموع صورتحساب"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "ReferenceSaleOrderId",
+    "columnTitle": "شناسه صورتحساب مرجع"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "WarehouseId",
+    "columnTitle": "شناسه انبار"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "ProjectId",
+    "columnTitle": "شناسه پروژه"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "FiscalPeriodId",
+    "columnTitle": "شناسه دوره مالی"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "Currency",
+    "columnTitle": "ارز"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "ExchangeRate",
+    "columnTitle": "نرخ تبدیل ارز"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "InvoiceNumber",
+    "columnTitle": "شماره صورتحساب"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "TaxUniqueId",
+    "columnTitle": "شماره منحصر به فرد مالیاتی"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "IssueDateTime",
+    "columnTitle": "تاریخ و زمان صدور صورتحساب"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "CreationDateTime",
+    "columnTitle": "تاریخ و زمان ایجاد صورتحساب"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "InvoiceType",
+    "columnTitle": "نوع صورتحساب"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "TaxInvoiceInternalSerial",
+    "columnTitle": "سریال صورتحساب داخلی حافظه مالیاتی"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "ReferenceTaxUniqueId",
+    "columnTitle": "شماره منحصر به فرد مالیاتی صورتحساب مرجع"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "InvoiceFormat",
+    "columnTitle": "الگوی صورتحساب"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "InvoiceSubject",
+    "columnTitle": "موضوع صورتحساب"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "SalespersonId",
+    "columnTitle": "شناسه شخص فروشنده"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "CustomerId",
+    "columnTitle": "شناسه شخص خریدار"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "SellerEconomicCode",
+    "columnTitle": "شماره اقتصادی فروشنده"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "CustomerPersonType",
+    "columnTitle": "نوع شخص خریدار"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "CustomerIdentificationNumber",
+    "columnTitle": "شناسه ملی /شماره ملی/شناسه مشارکت مدنی/کد فراگیر اتباع غیرایرانی خریدار"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "CustomerEconomicCode",
+    "columnTitle": "شماره اقتصادی خریدار"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "SellerBranchCode",
+    "columnTitle": "کد شعبه فروشنده"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "CustomerPostalCode",
+    "columnTitle": "کد پستی خریدار"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "CustomerBranchCode",
+    "columnTitle": "کد شعبه خریدار"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "CustomsPermitNumber",
+    "columnTitle": "شماره پروانه گمرکی"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "SellerCustomsOfficeCode",
+    "columnTitle": "کد گمرک محل اظهار فروشنده"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "ContractNumber",
+    "columnTitle": "شماره قرارداد پیمانکاری"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "Status",
+    "columnTitle": "وضعیت صورتحساب"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "DeliveryStatus",
+    "columnTitle": "وضعیت تحویل"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "InventoryStatus",
+    "columnTitle": "وضعیت صدور حواله انبار"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "PaymentStatus",
+    "columnTitle": "وضعیت دریافت"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "TotalOtherTaxesAndChargesAmount",
+    "columnTitle": "مجموع سایر مالیات، عوارض و وجوه قانونی"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "TotalAmountAfterDiscount",
+    "columnTitle": "مجموع مبلغ پس از کسر تخفیف"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "PaidAmount",
+    "columnTitle": "مبلغ دریافت شده"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "TotalAmount",
+    "columnTitle": "مبلغ قابل دریافت"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "SettlementTypeId",
+    "columnTitle": "روش تسویه"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "TotalCashPaidAmount",
+    "columnTitle": "مبلغ پرداختی نقدی"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "TotalCreditAmount",
+    "columnTitle": "مبلغ نسیه"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "TotalVatPaidAmount",
+    "columnTitle": "مجموع سهم مالیات بر ارزش افزوده از پرداخت"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "TotalArticle17TaxAmount",
+    "columnTitle": "مالیات موضوع ماده 17"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "TaxpayerPortalStatus",
+    "columnTitle": "وضعیت صورتحساب در سامانه مودیان"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "DueDate",
+    "columnTitle": "تاریخ سر رسید"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "Adjustments",
+    "columnTitle": "اضافات و کسورات"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "AdjustmentsAmount",
+    "columnTitle": "مابه‌التفاوت اضافات و کسورات"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "FlightType",
+    "columnTitle": "نوع پرواز"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "CustomerPassportNumber",
+    "columnTitle": "شماره گذرنامه خریدار"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "CustomsDeclarationNumber",
+    "columnTitle": "شماره کوتاژ اظهارنامه گمرکی"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "CustomsDeclarationDate",
+    "columnTitle": "تاریخ کوتاژ اظهارنامه گمرکی"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "SubscriberNumber",
+    "columnTitle": "شماره اشتراک/ شناسه قبض بهره بردار"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "TotalNetWeight",
+    "columnTitle": "مجموع وزن خالص"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "TotalRialAmount",
+    "columnTitle": "مجموع ارزش ریالی"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "TotalCurrencyAmount",
+    "columnTitle": "مجموع ارزش ارزی"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "AgencyEconomicCode",
+    "columnTitle": "شماره اقتصادی آژانس"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "WaybillNumber",
+    "columnTitle": "شماره بارنامه"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "ReferenceWaybillNumber",
+    "columnTitle": "شماره بارنامه مرجع"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "OriginCountry",
+    "columnTitle": "کشور مبدا"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "OriginCity",
+    "columnTitle": "شهر مبدا"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "DestinationCountry",
+    "columnTitle": "کشور مقصد"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "DestinationCity",
+    "columnTitle": "شهر مقصد"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "SenderIdentificationNumber",
+    "columnTitle": "شناسه ملی/ شماره ملی/ شناسه مشارکت مدنی/ کد فراگیر اتباع غیر ایرانی فرستنده"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "ReceiverIdentificationNumber",
+    "columnTitle": "شناسه ملی/ شماره ملی/ شناسه مشارکت مدنی/ کد فراگیر اتباع غیر ایرانی گیرنده"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "WaybillType",
+    "columnTitle": "نوع بارنامه/نوع حمل"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "FleetNumber",
+    "columnTitle": "شماره ناوگان"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "DriverIdentificationNumber",
+    "columnTitle": "شماره ملی/کد فراگیر اتباع غیر ایرانی راننده درحمل ونقل جاده‌ای"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "ShippedProducts",
+    "columnTitle": "کالاهای حمل شده"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "SalesNoticeNumber",
+    "columnTitle": "شماره اعلامیه فروش"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "RemainedAmount",
+    "columnTitle": "مبلغ باقیمانده"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "SalesNoticeDate",
+    "columnTitle": "تاریخ اعلامیه فروش"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "IsStockCardAutoCreated",
+    "columnTitle": "ایا رسید انبار به صورت خودکار ایجاد شده است"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "InsuranceId",
+    "columnTitle": "شناسه یکتای بیمه نامه"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "EndorsementId",
+    "columnTitle": "شناسه یکتای الحاقیه"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "TaxpayerPortalInquiryResponse",
+    "columnTitle": "پاسخ استعلام سامانه مودیان"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "CourierId",
+    "columnTitle": "شناسه شخص حمل کننده"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "ShippingAmount",
+    "columnTitle": "مبلغ حمل و نقل"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "ShippingDescription",
+    "columnTitle": "توضیحات حمل و نقل"
+  },
+  {
+    "table": "SaleOrder",
+    "title": "فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "SaleOrderConfig",
+    "title": "تنظیمات فروش",
+    "category": "سفارش فروش",
+    "column": "ConfigId",
+    "columnTitle": "شناسه تنظیمات"
+  },
+  {
+    "table": "SaleOrderConfig",
+    "title": "تنظیمات فروش",
+    "category": "سفارش فروش",
+    "column": "UpdateSalePriceOnInvoiceSave",
+    "columnTitle": "به‌روزرسانی قیمت فروش بعد از ثبت فاکتور فروش"
+  },
+  {
+    "table": "SaleOrderConfig",
+    "title": "تنظیمات فروش",
+    "category": "سفارش فروش",
+    "column": "UpdatePurchasePriceOnInvoiceSave",
+    "columnTitle": "به‌روزرسانی قیمت خرید بعد از ثبت فاکتور خرید"
+  },
+  {
+    "table": "SaleOrderConfig",
+    "title": "تنظیمات فروش",
+    "category": "سفارش فروش",
+    "column": "NotifyUserAfterPriceUpdate",
+    "columnTitle": "نمایش پیغام به‌روزرسانی قیمت"
+  },
+  {
+    "table": "SaleOrderConfig",
+    "title": "تنظیمات فروش",
+    "category": "سفارش فروش",
+    "column": "AllowLowStockSale",
+    "columnTitle": "فروش بیشتر از موجودی حسابداری"
+  },
+  {
+    "table": "SaleOrderConfig",
+    "title": "تنظیمات فروش",
+    "category": "سفارش فروش",
+    "column": "ShowZeroNegativeStockItems",
+    "columnTitle": "نمایش کالاهای ناموجود"
+  },
+  {
+    "table": "SaleOrderConfig",
+    "title": "تنظیمات فروش",
+    "category": "سفارش فروش",
+    "column": "AllowDuplicateItemsInInvoice",
+    "columnTitle": "ثبت ردیف تکراری در فاکتور"
+  },
+  {
+    "table": "SaleOrderConfig",
+    "title": "تنظیمات فروش",
+    "category": "سفارش فروش",
+    "column": "CheckCustomerCreditOnSale",
+    "columnTitle": "ثبت فاکتور در صورت تجاوز از سقف اعتبار خریدار"
+  },
+  {
+    "table": "SaleOrderConfig",
+    "title": "تنظیمات فروش",
+    "category": "سفارش فروش",
+    "column": "WarnSaleBelowPurchasePrice",
+    "columnTitle": "نمایش هشدار در صورت فروش با قیمتی کمتر از قیمت خرید"
+  },
+  {
+    "table": "SaleOrderConfig",
+    "title": "تنظیمات فروش",
+    "category": "سفارش فروش",
+    "column": "ShowProfitInInvoice",
+    "columnTitle": "نمایش سود در فاکتور"
+  },
+  {
+    "table": "SaleOrderConfig",
+    "title": "تنظیمات فروش",
+    "category": "سفارش فروش",
+    "column": "DefaultCustomer",
+    "columnTitle": "خریدار پیش‌فرض"
+  },
+  {
+    "table": "SaleOrderConfig",
+    "title": "تنظیمات فروش",
+    "category": "سفارش فروش",
+    "column": "SalespersonRequired",
+    "columnTitle": "اجباری بودن انتخاب فروشنده"
+  },
+  {
+    "table": "SaleOrderConfig",
+    "title": "تنظیمات فروش",
+    "category": "سفارش فروش",
+    "column": "EnableAutoWarehouseIssue",
+    "columnTitle": "ثبت خودکار حواله انبار"
+  },
+  {
+    "table": "SaleOrderConfig",
+    "title": "تنظیمات فروش",
+    "category": "سفارش فروش",
+    "column": "InvoicePrintMethod",
+    "columnTitle": "نحوه چاپ فاکتور"
+  },
+  {
+    "table": "SaleOrderConfig",
+    "title": "تنظیمات فروش",
+    "category": "سفارش فروش",
+    "column": "EnableScale",
+    "columnTitle": "فعال بودن ترازو"
+  },
+  {
+    "table": "SaleOrderConfig",
+    "title": "تنظیمات فروش",
+    "category": "سفارش فروش",
+    "column": "PaymentPageOpeningMode",
+    "columnTitle": "نحوۀ باز شدن صفحۀ دریافت"
+  },
+  {
+    "table": "SaleOrderConfig",
+    "title": "تنظیمات فروش",
+    "category": "سفارش فروش",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "SaleOrderConfig",
+    "title": "تنظیمات فروش",
+    "category": "سفارش فروش",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "SaleOrderItemId",
+    "columnTitle": "شناسه آیتم سفارش فروش"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "SaleOrderId",
+    "columnTitle": "شناسه سفارش فروش"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "ProductId",
+    "columnTitle": "شناسه محصول"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "Quantity",
+    "columnTitle": "تعداد/مقدار"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "Unit",
+    "columnTitle": "واحد اندازه‌گیری"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "Price",
+    "columnTitle": "قیمت واحد"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "LinePercentDiscount",
+    "columnTitle": "تخفیف درصدی"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "LineTotalAmount",
+    "columnTitle": "مبلغ کل کالا/خدمت"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "Cost",
+    "columnTitle": "بهای تمام شده"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "VatRate",
+    "columnTitle": "نرخ مالیات بر ارزش افزوده"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "UnitConversionFactor",
+    "columnTitle": "ضریب تبدیل واحد به واحد مرجع"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "LineCurrency",
+    "columnTitle": "ارز"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "LineExchangeRate",
+    "columnTitle": "نرخ تبدیل ارز"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "LineCurrencyAmount",
+    "columnTitle": "میزان ارز"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "LineAmountBeforeDiscount",
+    "columnTitle": "مبلغ قبل از تخفیف"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "LineDiscountAmount",
+    "columnTitle": "مبلغ تخفیف"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "LineAmountAfterDiscount",
+    "columnTitle": "مبلغ بعد از تخفیف"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "OtherTaxesAndChargesSubject",
+    "columnTitle": "موضوع سایر مالیات و عوارض"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "OtherTaxesAndChargesRate",
+    "columnTitle": "نرخ سایر مالیات و عوارض"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "OtherTaxesAndChargesAmount",
+    "columnTitle": "مبلغ سایر مالیات و عوارض"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "OtherLegalDuesSubject",
+    "columnTitle": "موضوع سایر وجوه قانونی"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "OtherLegalDuesRate",
+    "columnTitle": "نرخ سایر وجوه قانونی"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "OtherLegalDuesAmount",
+    "columnTitle": "مبلغ سایر وجوه قانونی"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "LineCashPaidAmount",
+    "columnTitle": "سهم نقدی از پرداخت"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "LineVatPaidAmount",
+    "columnTitle": "سهم مالیات بر ارزش افزوده از پرداخت"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "NetWeight",
+    "columnTitle": "وزن خالص"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "CommissionContractNumber",
+    "columnTitle": "شماره قرارداد حق العمل کاری"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "LineRialValue",
+    "columnTitle": "ارزش ریالی کالا"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "LineCurrencyValue",
+    "columnTitle": "ارزش ارزی کالا"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "MakingCharge",
+    "columnTitle": "اجرت ساخت"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "SellerProfit",
+    "columnTitle": "سود فروشنده"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "Commission",
+    "columnTitle": "حق‌العمل"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "TotalMakingCommissionProfit",
+    "columnTitle": "جمع کل اجرت، حق‌العمل و سود"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "Purity",
+    "columnTitle": "عیار"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "CurrencyBuyRate",
+    "columnTitle": "نرخ خرید ارز"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "VatCalculationBase",
+    "columnTitle": "ماخذ مالیات بر ارزش افزوده در الگوی فروش ارز"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "VatBaseAmount",
+    "columnTitle": "مبلغ پایه مالیات بر ارزش افزوده"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "FiscalPeriodId",
+    "columnTitle": "شناسه دوره مالی"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "LineWarehouseId",
+    "columnTitle": "شناسه انبار"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "ProjectId",
+    "columnTitle": "شناسه پروژه"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "ProductTaxCode",
+    "columnTitle": "شناسه مالیاتی کالا/خدمت"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "ProductDescription",
+    "columnTitle": "شرح کالا/خدمت"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "VatAmount",
+    "columnTitle": "مبلغ مالیات بر ارزش افزوده"
+  },
+  {
+    "table": "SaleOrderItem",
+    "title": "اقلام فاکتور فروش",
+    "category": "سفارش فروش",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "SaleOrderReturnId",
+    "columnTitle": "شناسه صورتحساب برگشتی"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "FiscalPeriodId",
+    "columnTitle": "شناسه دوره مالی"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "WarehouseId",
+    "columnTitle": "شناسه انبار"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "ProjectId",
+    "columnTitle": "شناسه پروژه"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "ReferenceSaleOrderId",
+    "columnTitle": "شناسه صورتحساب مرجع"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "InvoiceNumber",
+    "columnTitle": "شماره صورتحساب برگشتی"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "IssueDateTime",
+    "columnTitle": "تاریخ و زمان صدور صورتحساب برگشتی"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "CreationDateTime",
+    "columnTitle": "تاریخ و زمان ایجاد صورتحساب برگشتی"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "Status",
+    "columnTitle": "وضعیت صورتحساب برگشتی"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "DeliveryStatus",
+    "columnTitle": "وضعیت تحویل"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "InventoryStatus",
+    "columnTitle": "وضعیت انبار"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "PaymentStatus",
+    "columnTitle": "وضعیت پرداخت"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "TotalReturnAmountBeforeDiscount",
+    "columnTitle": "مجموع مبلغ برگشتی قبل از کسر تخفیف"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "TotalDiscountReturnAmount",
+    "columnTitle": "مجموع مبلغ برگشتی تخفیفات"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "TotalReturnAmountAfterDiscount",
+    "columnTitle": "مجموع مبلغ برگشتی پس از کسر تخفیف"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "TotalVatReturnAmount",
+    "columnTitle": "مجموع مبلغ برگشتی مالیات بر ارزش افزوده"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "TotalOtherTaxesAndChargesReturnAmount",
+    "columnTitle": "مجموع مبلغ برگشتی سایر مالیات، عوارض و وجوه قانونی"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "TotalInvoiceReturnAmount",
+    "columnTitle": "مجموع مبلغ برگشتی صورتحساب"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "PaidReturnAmount",
+    "columnTitle": "مبلغ برگشتی پرداخت شده"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "TotalReturnAmount",
+    "columnTitle": "مبلغ برگشتی قابل پرداخت"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "Adjustments",
+    "columnTitle": "اضافات و کسورات"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "AdjustmentsAmount",
+    "columnTitle": "مابه‌التفاوت اضافات، کسورات"
+  },
+  {
+    "table": "SaleOrderReturn",
+    "title": "فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "SaleOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "SaleOrderReturnItemId",
+    "columnTitle": "شناسه آیتم برگشتی"
+  },
+  {
+    "table": "SaleOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "ReferenceSaleOrderItemId",
+    "columnTitle": "شناسه آیتم مرجع"
+  },
+  {
+    "table": "SaleOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "SaleOrderReturnId",
+    "columnTitle": "شناسه صورتحساب برگشتی"
+  },
+  {
+    "table": "SaleOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "SaleOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "FiscalPeriodId",
+    "columnTitle": "شناسه دوره مالی"
+  },
+  {
+    "table": "SaleOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "LineWarehouseId",
+    "columnTitle": "شناسه انبار"
+  },
+  {
+    "table": "SaleOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "ProjectId",
+    "columnTitle": "شناسه پروژه"
+  },
+  {
+    "table": "SaleOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "ProductId",
+    "columnTitle": "شناسه محصول"
+  },
+  {
+    "table": "SaleOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "ReturnQuantity",
+    "columnTitle": "تعداد/مقدار برگشتی"
+  },
+  {
+    "table": "SaleOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "Unit",
+    "columnTitle": "واحد اندازه‌گیری"
+  },
+  {
+    "table": "SaleOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "UnitConversionFactor",
+    "columnTitle": "ضریب تبدیل واحد"
+  },
+  {
+    "table": "SaleOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "Price",
+    "columnTitle": "قیمت واحد"
+  },
+  {
+    "table": "SaleOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "LineReturnAmountBeforeDiscount",
+    "columnTitle": "مبلغ برگشتی قبل از تخفیف"
+  },
+  {
+    "table": "SaleOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "LinePercentDiscount",
+    "columnTitle": "تخفیف درصدی"
+  },
+  {
+    "table": "SaleOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "LineDiscountReturnAmount",
+    "columnTitle": "مبلغ برگشتی تخفیف"
+  },
+  {
+    "table": "SaleOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "LineReturnAmountAfterDiscount",
+    "columnTitle": "مبلغ برگشتی بعد از تخفیف"
+  },
+  {
+    "table": "SaleOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "VatRate",
+    "columnTitle": "نرخ مالیات بر ارزش افزوده"
+  },
+  {
+    "table": "SaleOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "VatReturnAmount",
+    "columnTitle": "مبلغ برگشتی مالیات بر ارزش افزوده"
+  },
+  {
+    "table": "SaleOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "LineTotalReturnAmount",
+    "columnTitle": "مبلغ کل برگشتی کالا/خدمت"
+  },
+  {
+    "table": "SaleOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "OtherTaxesAndChargesReturnAmount",
+    "columnTitle": "مبلغ برگشتی سایر مالیات و عوارض"
+  },
+  {
+    "table": "SaleOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "OtherLegalDuesReturnAmount",
+    "columnTitle": "مبلغ برگشتی سایر وجوه قانونی"
+  },
+  {
+    "table": "SaleOrderReturnItem",
+    "title": "اقلام فاکتور برگشت از فروش",
+    "category": "سفارش فروش",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "ServiceDiscount",
+    "title": "تخفیف اشتراک",
+    "category": "سرویس",
+    "column": "Id",
+    "columnTitle": "شناسه تخفیف اشتراک"
+  },
+  {
+    "table": "ServiceDiscount",
+    "title": "تخفیف اشتراک",
+    "category": "سرویس",
+    "column": "Name",
+    "columnTitle": "عنوان"
+  },
+  {
+    "table": "ServiceDiscount",
+    "title": "تخفیف اشتراک",
+    "category": "سرویس",
+    "column": "Code",
+    "columnTitle": "کد تخفیف"
+  },
+  {
+    "table": "ServiceDiscount",
+    "title": "تخفیف اشتراک",
+    "category": "سرویس",
+    "column": "StartDate",
+    "columnTitle": "تاریخ شروع"
+  },
+  {
+    "table": "ServiceDiscount",
+    "title": "تخفیف اشتراک",
+    "category": "سرویس",
+    "column": "EndDate",
+    "columnTitle": "تاریخ پایان"
+  },
+  {
+    "table": "ServiceDiscount",
+    "title": "تخفیف اشتراک",
+    "category": "سرویس",
+    "column": "IsPublic",
+    "columnTitle": "عمومی بودن"
+  },
+  {
+    "table": "ServiceDiscount",
+    "title": "تخفیف اشتراک",
+    "category": "سرویس",
+    "column": "PercentAmount",
+    "columnTitle": "مقدار درصدی تخفیف"
+  },
+  {
+    "table": "ServiceDiscount",
+    "title": "تخفیف اشتراک",
+    "category": "سرویس",
+    "column": "FixedAmount",
+    "columnTitle": "مقدار ثابت تخفیف"
+  },
+  {
+    "table": "ServiceDiscount",
+    "title": "تخفیف اشتراک",
+    "category": "سرویس",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "ServiceDiscount",
+    "title": "تخفیف اشتراک",
+    "category": "سرویس",
+    "column": "IsEnabled",
+    "columnTitle": "فعال بودن"
+  },
+  {
+    "table": "ServiceDiscount",
+    "title": "تخفیف اشتراک",
+    "category": "سرویس",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "ServicePayment",
+    "title": "پرداخت سرویس",
+    "category": "سرویس",
+    "column": "PaymentID",
+    "columnTitle": "شناسه پرداخت سرویس"
+  },
+  {
+    "table": "ServicePayment",
+    "title": "پرداخت سرویس",
+    "category": "سرویس",
+    "column": "InvoiceNumber",
+    "columnTitle": "شماره فاکتور"
+  },
+  {
+    "table": "ServicePayment",
+    "title": "پرداخت سرویس",
+    "category": "سرویس",
+    "column": "InvoiceDate",
+    "columnTitle": "تاریخ فاکتور"
+  },
+  {
+    "table": "ServicePayment",
+    "title": "پرداخت سرویس",
+    "category": "سرویس",
+    "column": "TransactionReferenceID",
+    "columnTitle": "شناسه مرجع تراکنش"
+  },
+  {
+    "table": "ServicePayment",
+    "title": "پرداخت سرویس",
+    "category": "سرویس",
+    "column": "Amount",
+    "columnTitle": "مبلغ"
+  },
+  {
+    "table": "ServicePayment",
+    "title": "پرداخت سرویس",
+    "category": "سرویس",
+    "column": "TransactionDate",
+    "columnTitle": "تاریخ تراکنش"
+  },
+  {
+    "table": "ServicePayment",
+    "title": "پرداخت سرویس",
+    "category": "سرویس",
+    "column": "ReferenceNumber",
+    "columnTitle": "شماره مرجع"
+  },
+  {
+    "table": "ServicePayment",
+    "title": "پرداخت سرویس",
+    "category": "سرویس",
+    "column": "MaskedCardNumber",
+    "columnTitle": "شماره کارت"
+  },
+  {
+    "table": "ServicePayment",
+    "title": "پرداخت سرویس",
+    "category": "سرویس",
+    "column": "ShaparakRefNumber",
+    "columnTitle": "شماره مرجع شاپرک"
+  },
+  {
+    "table": "ServicePayment",
+    "title": "پرداخت سرویس",
+    "category": "سرویس",
+    "column": "IsSuccess",
+    "columnTitle": "موفق بودن"
+  },
+  {
+    "table": "ServicePayment",
+    "title": "پرداخت سرویس",
+    "category": "سرویس",
+    "column": "Message",
+    "columnTitle": "پیغام"
+  },
+  {
+    "table": "ServicePayment",
+    "title": "پرداخت سرویس",
+    "category": "سرویس",
+    "column": "TraceNumber",
+    "columnTitle": "شماره پیگیری"
+  },
+  {
+    "table": "ServicePayment",
+    "title": "پرداخت سرویس",
+    "category": "سرویس",
+    "column": "RegisterTime",
+    "columnTitle": "زمان ثبت"
+  },
+  {
+    "table": "ServicePayment",
+    "title": "پرداخت سرویس",
+    "category": "سرویس",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "ServicePlan",
+    "title": "نوع دسترسی اشتراک",
+    "category": "سرویس",
+    "column": "PlanID",
+    "columnTitle": "شناسه نوع دسترسی اشتراک"
+  },
+  {
+    "table": "ServicePlan",
+    "title": "نوع دسترسی اشتراک",
+    "category": "سرویس",
+    "column": "PlanName",
+    "columnTitle": "عنوان"
+  },
+  {
+    "table": "ServicePlan",
+    "title": "نوع دسترسی اشتراک",
+    "category": "سرویس",
+    "column": "PlanDescription",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "ServicePlan",
+    "title": "نوع دسترسی اشتراک",
+    "category": "سرویس",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "ServiceRequest",
+    "title": "درخواست اشتراک",
+    "category": "سرویس",
+    "column": "Id",
+    "columnTitle": "شناسه درخواست اشتراک"
+  },
+  {
+    "table": "ServiceRequest",
+    "title": "درخواست اشتراک",
+    "category": "سرویس",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "ServiceRequest",
+    "title": "درخواست اشتراک",
+    "category": "سرویس",
+    "column": "SubscriptionId",
+    "columnTitle": "شناسه نوع اشتراک"
+  },
+  {
+    "table": "ServiceRequest",
+    "title": "درخواست اشتراک",
+    "category": "سرویس",
+    "column": "Status",
+    "columnTitle": "وضعیت اشتراک"
+  },
+  {
+    "table": "ServiceRequest",
+    "title": "درخواست اشتراک",
+    "category": "سرویس",
+    "column": "RequestTime",
+    "columnTitle": "زمان درخواست"
+  },
+  {
+    "table": "ServiceRequest",
+    "title": "درخواست اشتراک",
+    "category": "سرویس",
+    "column": "PaymentID",
+    "columnTitle": "شناسه پرداخت"
+  },
+  {
+    "table": "ServiceRequest",
+    "title": "درخواست اشتراک",
+    "category": "سرویس",
+    "column": "Price",
+    "columnTitle": "قیمت فروش"
+  },
+  {
+    "table": "ServiceRequest",
+    "title": "درخواست اشتراک",
+    "category": "سرویس",
+    "column": "DiscountId",
+    "columnTitle": "شناسه تخفیف اشتراک"
+  },
+  {
+    "table": "ServiceRequest",
+    "title": "درخواست اشتراک",
+    "category": "سرویس",
+    "column": "DiscountAmount",
+    "columnTitle": "مبلغ تخفیف"
+  },
+  {
+    "table": "ServiceRequest",
+    "title": "درخواست اشتراک",
+    "category": "سرویس",
+    "column": "TaxAmount",
+    "columnTitle": "مبلغ مالیات"
+  },
+  {
+    "table": "ServiceRequest",
+    "title": "درخواست اشتراک",
+    "category": "سرویس",
+    "column": "PayableAmount",
+    "columnTitle": "مبلغ قابل پرداخت"
+  },
+  {
+    "table": "ServiceRequest",
+    "title": "درخواست اشتراک",
+    "category": "سرویس",
+    "column": "SubscriptionStartDate",
+    "columnTitle": "تاریخ شروع اشتراک"
+  },
+  {
+    "table": "ServiceRequest",
+    "title": "درخواست اشتراک",
+    "category": "سرویس",
+    "column": "SubscriptionEndDate",
+    "columnTitle": "تاریخ پایان اشتراک"
+  },
+  {
+    "table": "ServiceRequest",
+    "title": "درخواست اشتراک",
+    "category": "سرویس",
+    "column": "UserId",
+    "columnTitle": "نام کاربری"
+  },
+  {
+    "table": "ServiceRequest",
+    "title": "درخواست اشتراک",
+    "category": "سرویس",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "ServiceSubscription",
+    "title": "نوع اشتراک",
+    "category": "سرویس",
+    "column": "SubscriptionID",
+    "columnTitle": "شناسه نوع اشتراک"
+  },
+  {
+    "table": "ServiceSubscription",
+    "title": "نوع اشتراک",
+    "category": "سرویس",
+    "column": "SubscriptionName",
+    "columnTitle": "عنوان"
+  },
+  {
+    "table": "ServiceSubscription",
+    "title": "نوع اشتراک",
+    "category": "سرویس",
+    "column": "PlanID",
+    "columnTitle": "شناسه نوع دسترسی"
+  },
+  {
+    "table": "ServiceSubscription",
+    "title": "نوع اشتراک",
+    "category": "سرویس",
+    "column": "SubscriptionPrice",
+    "columnTitle": "قیمت پایه"
+  },
+  {
+    "table": "ServiceSubscription",
+    "title": "نوع اشتراک",
+    "category": "سرویس",
+    "column": "SubscriptionDescription",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "ServiceSubscription",
+    "title": "نوع اشتراک",
+    "category": "سرویس",
+    "column": "SubscriptionEnable",
+    "columnTitle": "فعال بودن"
+  },
+  {
+    "table": "ServiceSubscription",
+    "title": "نوع اشتراک",
+    "category": "سرویس",
+    "column": "SubscriptionDefault",
+    "columnTitle": "پیش فرض بودن"
+  },
+  {
+    "table": "ServiceSubscription",
+    "title": "نوع اشتراک",
+    "category": "سرویس",
+    "column": "FixedDiscount",
+    "columnTitle": "تخفیف ثابت"
+  },
+  {
+    "table": "ServiceSubscription",
+    "title": "نوع اشتراک",
+    "category": "سرویس",
+    "column": "PercentDiscount",
+    "columnTitle": "تخفیف درصدی"
+  },
+  {
+    "table": "ServiceSubscription",
+    "title": "نوع اشتراک",
+    "category": "سرویس",
+    "column": "SubscriptionTaxRate",
+    "columnTitle": "نرخ مالیات"
+  },
+  {
+    "table": "ServiceSubscription",
+    "title": "نوع اشتراک",
+    "category": "سرویس",
+    "column": "SubscriptionTaxAmount",
+    "columnTitle": "مبلغ مالیات"
+  },
+  {
+    "table": "ServiceSubscription",
+    "title": "نوع اشتراک",
+    "category": "سرویس",
+    "column": "SubscriptionDays",
+    "columnTitle": "تعداد روزهای اشتراک"
+  },
+  {
+    "table": "ServiceSubscription",
+    "title": "نوع اشتراک",
+    "category": "سرویس",
+    "column": "SubscriptionPayableAmount",
+    "columnTitle": "مبلغ قابل پرداخت"
+  },
+  {
+    "table": "ServiceSubscription",
+    "title": "نوع اشتراک",
+    "category": "سرویس",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "Shareholder",
+    "title": "سهامدار",
+    "category": "اشخاص",
+    "column": "ShareholderId",
+    "columnTitle": "شناسه سهامدار"
+  },
+  {
+    "table": "Shareholder",
+    "title": "سهامدار",
+    "category": "اشخاص",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "Shareholder",
+    "title": "سهامدار",
+    "category": "اشخاص",
+    "column": "FiscalPeriodId",
+    "columnTitle": "شناسه دوره مالی"
+  },
+  {
+    "table": "Shareholder",
+    "title": "سهامدار",
+    "category": "اشخاص",
+    "column": "PersonId",
+    "columnTitle": "شناسه شخص"
+  },
+  {
+    "table": "Shareholder",
+    "title": "سهامدار",
+    "category": "اشخاص",
+    "column": "SharePercent",
+    "columnTitle": "درصد سهام"
+  },
+  {
+    "table": "Shareholder",
+    "title": "سهامدار",
+    "category": "اشخاص",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "Shareholder",
+    "title": "سهامدار",
+    "category": "اشخاص",
+    "column": "InitialCapitalShare",
+    "columnTitle": "سهم سرمایه اولیه"
+  },
+  {
+    "table": "Shareholder",
+    "title": "سهامدار",
+    "category": "اشخاص",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "Shop",
+    "title": "فروشگاه",
+    "category": "فروشگاه",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "Shop",
+    "title": "فروشگاه",
+    "category": "فروشگاه",
+    "column": "OwnerId",
+    "columnTitle": "نام کاربری مالک"
+  },
+  {
+    "table": "Shop",
+    "title": "فروشگاه",
+    "category": "فروشگاه",
+    "column": "Name",
+    "columnTitle": "نام"
+  },
+  {
+    "table": "Shop",
+    "title": "فروشگاه",
+    "category": "فروشگاه",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "Shop",
+    "title": "فروشگاه",
+    "category": "فروشگاه",
+    "column": "AddressLine",
+    "columnTitle": "آدرس"
+  },
+  {
+    "table": "Shop",
+    "title": "فروشگاه",
+    "category": "فروشگاه",
+    "column": "PostalCode",
+    "columnTitle": "کد پستی"
+  },
+  {
+    "table": "Shop",
+    "title": "فروشگاه",
+    "category": "فروشگاه",
+    "column": "Email",
+    "columnTitle": "ایمیل"
+  },
+  {
+    "table": "Shop",
+    "title": "فروشگاه",
+    "category": "فروشگاه",
+    "column": "Phone",
+    "columnTitle": "شماره تلفن"
+  },
+  {
+    "table": "Shop",
+    "title": "فروشگاه",
+    "category": "فروشگاه",
+    "column": "EconomicCode",
+    "columnTitle": "شماره اقتصادی"
+  },
+  {
+    "table": "Shop",
+    "title": "فروشگاه",
+    "category": "فروشگاه",
+    "column": "IdentifierNumber",
+    "columnTitle": "کد ملی / شناسه ملی / کد فراگیر / کد مشارکت مدنی"
+  },
+  {
+    "table": "Shop",
+    "title": "فروشگاه",
+    "category": "فروشگاه",
+    "column": "ActivityTypeId",
+    "columnTitle": "شناسه نوع فعالیت"
+  },
+  {
+    "table": "Shop",
+    "title": "فروشگاه",
+    "category": "فروشگاه",
+    "column": "Status",
+    "columnTitle": "وضعیت"
+  },
+  {
+    "table": "Shop",
+    "title": "فروشگاه",
+    "category": "فروشگاه",
+    "column": "Type",
+    "columnTitle": "نوع مالکیت فروشگاه"
+  },
+  {
+    "table": "Shop",
+    "title": "فروشگاه",
+    "category": "فروشگاه",
+    "column": "Website",
+    "columnTitle": "وب سایت"
+  },
+  {
+    "table": "Shop",
+    "title": "فروشگاه",
+    "category": "فروشگاه",
+    "column": "BranchCode",
+    "columnTitle": "کد شعبه"
+  },
+  {
+    "table": "Shop",
+    "title": "فروشگاه",
+    "category": "فروشگاه",
+    "column": "Country",
+    "columnTitle": "کشور"
+  },
+  {
+    "table": "Shop",
+    "title": "فروشگاه",
+    "category": "فروشگاه",
+    "column": "City",
+    "columnTitle": "شهر"
+  },
+  {
+    "table": "Shop",
+    "title": "فروشگاه",
+    "category": "فروشگاه",
+    "column": "Mobile",
+    "columnTitle": "شماره موبایل"
+  },
+  {
+    "table": "Shop",
+    "title": "فروشگاه",
+    "category": "فروشگاه",
+    "column": "Province",
+    "columnTitle": "استان"
+  },
+  {
+    "table": "Shop",
+    "title": "فروشگاه",
+    "category": "فروشگاه",
+    "column": "LogoRelativeUrl",
+    "columnTitle": "آدرس نسبی فایل لوگو"
+  },
+  {
+    "table": "Shop",
+    "title": "فروشگاه",
+    "category": "فروشگاه",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "ShopActivityType",
+    "title": "نوع فعالیت فروشگاه",
+    "category": "فروشگاه",
+    "column": "ActivityTypeId",
+    "columnTitle": "شناسه نوع فعالیت فروشگاه"
+  },
+  {
+    "table": "ShopActivityType",
+    "title": "نوع فعالیت فروشگاه",
+    "category": "فروشگاه",
+    "column": "ActivityTypeName",
+    "columnTitle": "عنوان"
+  },
+  {
+    "table": "ShopActivityType",
+    "title": "نوع فعالیت فروشگاه",
+    "category": "فروشگاه",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "ShopFiscalPeriod",
+    "title": "دوره مالی فروشگاه",
+    "category": "حسابداری فروشگاه",
+    "column": "FiscalPeriodId",
+    "columnTitle": "شناسه دوره مالی"
+  },
+  {
+    "table": "ShopFiscalPeriod",
+    "title": "دوره مالی فروشگاه",
+    "category": "حسابداری فروشگاه",
+    "column": "FiscalPeriodName",
+    "columnTitle": "عنوان دوره مالی"
+  },
+  {
+    "table": "ShopFiscalPeriod",
+    "title": "دوره مالی فروشگاه",
+    "category": "حسابداری فروشگاه",
+    "column": "FiscalPeriodDescription",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "ShopFiscalPeriod",
+    "title": "دوره مالی فروشگاه",
+    "category": "حسابداری فروشگاه",
+    "column": "StartDate",
+    "columnTitle": "تاریخ شروع"
+  },
+  {
+    "table": "ShopFiscalPeriod",
+    "title": "دوره مالی فروشگاه",
+    "category": "حسابداری فروشگاه",
+    "column": "EndDate",
+    "columnTitle": "تاریخ پایان"
+  },
+  {
+    "table": "ShopFiscalPeriod",
+    "title": "دوره مالی فروشگاه",
+    "category": "حسابداری فروشگاه",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "ShopFiscalPeriod",
+    "title": "دوره مالی فروشگاه",
+    "category": "حسابداری فروشگاه",
+    "column": "FiscalPeriodStatusID",
+    "columnTitle": "شناسه وضعیت دوره مالی"
+  },
+  {
+    "table": "ShopFiscalPeriod",
+    "title": "دوره مالی فروشگاه",
+    "category": "حسابداری فروشگاه",
+    "column": "FirstPeriod",
+    "columnTitle": "اولین دوره مالی"
+  },
+  {
+    "table": "ShopFiscalPeriod",
+    "title": "دوره مالی فروشگاه",
+    "category": "حسابداری فروشگاه",
+    "column": "LastDocumentNumber",
+    "columnTitle": "آخرین شماره سند"
+  },
+  {
+    "table": "ShopFiscalPeriod",
+    "title": "دوره مالی فروشگاه",
+    "category": "حسابداری فروشگاه",
+    "column": "LastReferenceNumber",
+    "columnTitle": "آخرین شماره عطف"
+  },
+  {
+    "table": "ShopFiscalPeriod",
+    "title": "دوره مالی فروشگاه",
+    "category": "حسابداری فروشگاه",
+    "column": "LastDocumentDateTime",
+    "columnTitle": "تاریخ آخرین سند"
+  },
+  {
+    "table": "ShopFiscalPeriod",
+    "title": "دوره مالی فروشگاه",
+    "category": "حسابداری فروشگاه",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "ShopNotification",
+    "title": "اعلان فروشگاه",
+    "category": "اعلان فروشگاه",
+    "column": "NotificationID",
+    "columnTitle": "شناسه اعلان فروشگاه"
+  },
+  {
+    "table": "ShopNotification",
+    "title": "اعلان فروشگاه",
+    "category": "اعلان فروشگاه",
+    "column": "NotificationTypeID",
+    "columnTitle": "شناسه نوع اعلان"
+  },
+  {
+    "table": "ShopNotification",
+    "title": "اعلان فروشگاه",
+    "category": "اعلان فروشگاه",
+    "column": "NotificationTitle",
+    "columnTitle": "عنوان"
+  },
+  {
+    "table": "ShopNotification",
+    "title": "اعلان فروشگاه",
+    "category": "اعلان فروشگاه",
+    "column": "NotificationText",
+    "columnTitle": "متن"
+  },
+  {
+    "table": "ShopNotification",
+    "title": "اعلان فروشگاه",
+    "category": "اعلان فروشگاه",
+    "column": "NotificationCloseAllowed",
+    "columnTitle": "مجاز به بستن"
+  },
+  {
+    "table": "ShopNotification",
+    "title": "اعلان فروشگاه",
+    "category": "اعلان فروشگاه",
+    "column": "NotificationStartTime",
+    "columnTitle": "زمان شروع"
+  },
+  {
+    "table": "ShopNotification",
+    "title": "اعلان فروشگاه",
+    "category": "اعلان فروشگاه",
+    "column": "NotificationEndTime",
+    "columnTitle": "زمان پایان"
+  },
+  {
+    "table": "ShopNotification",
+    "title": "اعلان فروشگاه",
+    "category": "اعلان فروشگاه",
+    "column": "NotificationAllShops",
+    "columnTitle": "همه فروشگاه‌ها"
+  },
+  {
+    "table": "ShopNotification",
+    "title": "اعلان فروشگاه",
+    "category": "اعلان فروشگاه",
+    "column": "NotificationAllMemberRoles",
+    "columnTitle": "همه نقش‌های اعضاء فروشگاه"
+  },
+  {
+    "table": "ShopNotification",
+    "title": "اعلان فروشگاه",
+    "category": "اعلان فروشگاه",
+    "column": "IsBanner",
+    "columnTitle": "بنر بودن"
+  },
+  {
+    "table": "ShopNotification",
+    "title": "اعلان فروشگاه",
+    "category": "اعلان فروشگاه",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "ShopNotificationInMemberRole",
+    "title": "اعلان فروشگاه در نقش عضو فروشگاه",
+    "category": "اعلان فروشگاه",
+    "column": "NotificationInMemberRoleID",
+    "columnTitle": "شناسه اعلان فروشگاه در نقش عضو فروشگاه"
+  },
+  {
+    "table": "ShopNotificationInMemberRole",
+    "title": "اعلان فروشگاه در نقش عضو فروشگاه",
+    "category": "اعلان فروشگاه",
+    "column": "NotificationID",
+    "columnTitle": "شناسه اعلان"
+  },
+  {
+    "table": "ShopNotificationInMemberRole",
+    "title": "اعلان فروشگاه در نقش عضو فروشگاه",
+    "category": "اعلان فروشگاه",
+    "column": "MemberRoleID",
+    "columnTitle": "شناسه نقش عضو فروشگاه"
+  },
+  {
+    "table": "ShopNotificationInMemberRole",
+    "title": "اعلان فروشگاه در نقش عضو فروشگاه",
+    "category": "اعلان فروشگاه",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "ShopNotificationInShop",
+    "title": "اعلان فروشگاه در فروشگاه",
+    "category": "اعلان فروشگاه",
+    "column": "NotificationInShopId",
+    "columnTitle": "شناسه اعلان فروشگاه در فروشگاه"
+  },
+  {
+    "table": "ShopNotificationInShop",
+    "title": "اعلان فروشگاه در فروشگاه",
+    "category": "اعلان فروشگاه",
+    "column": "NotificationID",
+    "columnTitle": "شناسه اعلان"
+  },
+  {
+    "table": "ShopNotificationInShop",
+    "title": "اعلان فروشگاه در فروشگاه",
+    "category": "اعلان فروشگاه",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "ShopNotificationInShop",
+    "title": "اعلان فروشگاه در فروشگاه",
+    "category": "اعلان فروشگاه",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "ShopNotificationType",
+    "title": "نوع اعلان فروشگاه",
+    "category": "اعلان فروشگاه",
+    "column": "NotificationTypeID",
+    "columnTitle": "شناسه نوع اعلان فروشگاه"
+  },
+  {
+    "table": "ShopNotificationType",
+    "title": "نوع اعلان فروشگاه",
+    "category": "اعلان فروشگاه",
+    "column": "NotificationTypeName",
+    "columnTitle": "عنوان"
+  },
+  {
+    "table": "ShopNotificationType",
+    "title": "نوع اعلان فروشگاه",
+    "category": "اعلان فروشگاه",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "StockCard",
+    "title": "کاردکس انبار",
+    "category": "انبارداری",
+    "column": "Id",
+    "columnTitle": "شناسه کاردکس"
+  },
+  {
+    "table": "StockCard",
+    "title": "کاردکس انبار",
+    "category": "انبارداری",
+    "column": "WarehouseId",
+    "columnTitle": "شناسه انبار"
+  },
+  {
+    "table": "StockCard",
+    "title": "کاردکس انبار",
+    "category": "انبارداری",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "StockCard",
+    "title": "کاردکس انبار",
+    "category": "انبارداری",
+    "column": "FiscalPeriodId",
+    "columnTitle": "شناسه دوره مالی"
+  },
+  {
+    "table": "StockCard",
+    "title": "کاردکس انبار",
+    "category": "انبارداری",
+    "column": "ProjectId",
+    "columnTitle": "شناسه پروژه"
+  },
+  {
+    "table": "StockCard",
+    "title": "کاردکس انبار",
+    "category": "انبارداری",
+    "column": "DateTime",
+    "columnTitle": "تاریخ و زمان کاردکس"
+  },
+  {
+    "table": "StockCard",
+    "title": "کاردکس انبار",
+    "category": "انبارداری",
+    "column": "Number",
+    "columnTitle": "شماره"
+  },
+  {
+    "table": "StockCard",
+    "title": "کاردکس انبار",
+    "category": "انبارداری",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "StockCard",
+    "title": "کاردکس انبار",
+    "category": "انبارداری",
+    "column": "PersonId",
+    "columnTitle": "طرف حساب"
+  },
+  {
+    "table": "StockCard",
+    "title": "کاردکس انبار",
+    "category": "انبارداری",
+    "column": "Direction",
+    "columnTitle": "جهت ورود/خروج"
+  },
+  {
+    "table": "StockCard",
+    "title": "کاردکس انبار",
+    "category": "انبارداری",
+    "column": "ReferenceType",
+    "columnTitle": "نوع مرجع رویداد مالی"
+  },
+  {
+    "table": "StockCard",
+    "title": "کاردکس انبار",
+    "category": "انبارداری",
+    "column": "ReferenceId",
+    "columnTitle": "شناسه مرجع رویداد مالی"
+  },
+  {
+    "table": "StockCard",
+    "title": "کاردکس انبار",
+    "category": "انبارداری",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "StockCardItem",
+    "title": "آیتم کاردکس انبار",
+    "category": "انبارداری",
+    "column": "Id",
+    "columnTitle": "شناسه آیتم کاردکس"
+  },
+  {
+    "table": "StockCardItem",
+    "title": "آیتم کاردکس انبار",
+    "category": "انبارداری",
+    "column": "StockCardId",
+    "columnTitle": "شناسه کاردکس"
+  },
+  {
+    "table": "StockCardItem",
+    "title": "آیتم کاردکس انبار",
+    "category": "انبارداری",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "StockCardItem",
+    "title": "آیتم کاردکس انبار",
+    "category": "انبارداری",
+    "column": "ProductId",
+    "columnTitle": "شناسه کالا"
+  },
+  {
+    "table": "StockCardItem",
+    "title": "آیتم کاردکس انبار",
+    "category": "انبارداری",
+    "column": "Quantity",
+    "columnTitle": "تعداد/مقدار"
+  },
+  {
+    "table": "StockCardItem",
+    "title": "آیتم کاردکس انبار",
+    "category": "انبارداری",
+    "column": "ShowInSecondUnit",
+    "columnTitle": "نمایش به واحد اندازه‌گیری دوم"
+  },
+  {
+    "table": "StockCardItem",
+    "title": "آیتم کاردکس انبار",
+    "category": "انبارداری",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "StockTaking",
+    "title": "انبارگردانی",
+    "category": "انبارداری",
+    "column": "Id",
+    "columnTitle": "شناسه انبارگردانی"
+  },
+  {
+    "table": "StockTaking",
+    "title": "انبارگردانی",
+    "category": "انبارداری",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "StockTaking",
+    "title": "انبارگردانی",
+    "category": "انبارداری",
+    "column": "WarehouseId",
+    "columnTitle": "شناسه انبار"
+  },
+  {
+    "table": "StockTaking",
+    "title": "انبارگردانی",
+    "category": "انبارداری",
+    "column": "FiscalPeriodId",
+    "columnTitle": "شناسه دوره مالی"
+  },
+  {
+    "table": "StockTaking",
+    "title": "انبارگردانی",
+    "category": "انبارداری",
+    "column": "ProjectId",
+    "columnTitle": "شناسه پروژه"
+  },
+  {
+    "table": "StockTaking",
+    "title": "انبارگردانی",
+    "category": "انبارداری",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "StockTaking",
+    "title": "انبارگردانی",
+    "category": "انبارداری",
+    "column": "Status",
+    "columnTitle": "وضعیت انبارگردانی"
+  },
+  {
+    "table": "StockTaking",
+    "title": "انبارگردانی",
+    "category": "انبارداری",
+    "column": "DateTime",
+    "columnTitle": "تاریخ و زمان انبارگردانی"
+  },
+  {
+    "table": "StockTaking",
+    "title": "انبارگردانی",
+    "category": "انبارداری",
+    "column": "Number",
+    "columnTitle": "شماره"
+  },
+  {
+    "table": "StockTaking",
+    "title": "انبارگردانی",
+    "category": "انبارداری",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "StockTakingItem",
+    "title": "آیتم انبارگردانی",
+    "category": "انبارداری",
+    "column": "Id",
+    "columnTitle": "شناسه آیتم انبارگردانی"
+  },
+  {
+    "table": "StockTakingItem",
+    "title": "آیتم انبارگردانی",
+    "category": "انبارداری",
+    "column": "StockTakingId",
+    "columnTitle": "شناسه انبارگردانی"
+  },
+  {
+    "table": "StockTakingItem",
+    "title": "آیتم انبارگردانی",
+    "category": "انبارداری",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "StockTakingItem",
+    "title": "آیتم انبارگردانی",
+    "category": "انبارداری",
+    "column": "ProductId",
+    "columnTitle": "شناسه کالا"
+  },
+  {
+    "table": "StockTakingItem",
+    "title": "آیتم انبارگردانی",
+    "category": "انبارداری",
+    "column": "InitialQuantity",
+    "columnTitle": "مقدار اولیه"
+  },
+  {
+    "table": "StockTakingItem",
+    "title": "آیتم انبارگردانی",
+    "category": "انبارداری",
+    "column": "FinalQuantity",
+    "columnTitle": "مقدار نهایی"
+  },
+  {
+    "table": "StockTakingItem",
+    "title": "آیتم انبارگردانی",
+    "category": "انبارداری",
+    "column": "ShowInSecondUnit",
+    "columnTitle": "نمایش به واحد اندازه‌گیری دوم"
+  },
+  {
+    "table": "StockTakingItem",
+    "title": "آیتم انبارگردانی",
+    "category": "انبارداری",
+    "column": "UnitCost",
+    "columnTitle": "بهای تمام شده واحد"
+  },
+  {
+    "table": "StockTakingItem",
+    "title": "آیتم انبارگردانی",
+    "category": "انبارداری",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "SystemGroup",
+    "title": "System Group",
+    "category": "SYSTEM",
+    "column": "id",
+    "columnTitle": "ID"
+  },
+  {
+    "table": "SystemGroup",
+    "title": "System Group",
+    "category": "SYSTEM",
+    "column": "name",
+    "columnTitle": "Name"
+  },
+  {
+    "table": "SystemTenant",
+    "title": "System Tenant",
+    "category": "SYSTEM",
+    "column": "id",
+    "columnTitle": "ID"
+  },
+  {
+    "table": "SystemTenant",
+    "title": "System Tenant",
+    "category": "SYSTEM",
+    "column": "name",
+    "columnTitle": "Name"
+  },
+  {
+    "table": "SystemUser",
+    "title": "System User",
+    "category": "SYSTEM",
+    "column": "id",
+    "columnTitle": "UserId"
+  },
+  {
+    "table": "SystemUser",
+    "title": "System User",
+    "category": "SYSTEM",
+    "column": "first",
+    "columnTitle": "First Name"
+  },
+  {
+    "table": "SystemUser",
+    "title": "System User",
+    "category": "SYSTEM",
+    "column": "last",
+    "columnTitle": "Last Name"
+  },
+  {
+    "table": "SystemUser",
+    "title": "System User",
+    "category": "SYSTEM",
+    "column": "email",
+    "columnTitle": "Email"
+  },
+  {
+    "table": "SystemUser",
+    "title": "System User",
+    "category": "SYSTEM",
+    "column": "mobile",
+    "columnTitle": "Mobile"
+  },
+  {
+    "table": "SystemUser",
+    "title": "System User",
+    "category": "SYSTEM",
+    "column": "FullName",
+    "columnTitle": "Full Name"
+  },
+  {
+    "table": "Tag",
+    "title": "برچسب",
+    "category": "عمومی",
+    "column": "Id",
+    "columnTitle": "شناسه برچسب"
+  },
+  {
+    "table": "Tag",
+    "title": "برچسب",
+    "category": "عمومی",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "Tag",
+    "title": "برچسب",
+    "category": "عمومی",
+    "column": "Value",
+    "columnTitle": "مقدار برچسب"
+  },
+  {
+    "table": "Tag",
+    "title": "برچسب",
+    "category": "عمومی",
+    "column": "EntityType",
+    "columnTitle": "نوع موجودیت"
+  },
+  {
+    "table": "Tag",
+    "title": "برچسب",
+    "category": "عمومی",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "Tag",
+    "title": "برچسب",
+    "category": "عمومی",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "TaxpayerPortalConfig",
+    "title": "تنظیمات سامانه مودیان",
+    "category": "فروشگاه",
+    "column": "ConfigId",
+    "columnTitle": "شناسه تنظیمات"
+  },
+  {
+    "table": "TaxpayerPortalConfig",
+    "title": "تنظیمات سامانه مودیان",
+    "category": "فروشگاه",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "TaxpayerPortalConfig",
+    "title": "تنظیمات سامانه مودیان",
+    "category": "فروشگاه",
+    "column": "IsTaxpayerPortalEnabled",
+    "columnTitle": "اتصال به سامانه مودیان"
+  },
+  {
+    "table": "TaxpayerPortalConfig",
+    "title": "تنظیمات سامانه مودیان",
+    "category": "فروشگاه",
+    "column": "TaxMemoryUniqueId",
+    "columnTitle": "شناسه یکتای حافظه مالیاتی"
+  },
+  {
+    "table": "TaxpayerPortalConfig",
+    "title": "تنظیمات سامانه مودیان",
+    "category": "فروشگاه",
+    "column": "PrivateKey",
+    "columnTitle": "کلید خصوصی"
+  },
+  {
+    "table": "TaxpayerPortalConfig",
+    "title": "تنظیمات سامانه مودیان",
+    "category": "فروشگاه",
+    "column": "DigitalSignatureCertificate",
+    "columnTitle": "گواهی امضای دیجیتال"
+  },
+  {
+    "table": "TaxpayerPortalConfig",
+    "title": "تنظیمات سامانه مودیان",
+    "category": "فروشگاه",
+    "column": "InvoiceFormat",
+    "columnTitle": "الگوی صورتحساب"
+  },
+  {
+    "table": "TaxpayerPortalConfig",
+    "title": "تنظیمات سامانه مودیان",
+    "category": "فروشگاه",
+    "column": "InvoiceType",
+    "columnTitle": "نوع صورتحساب پیشفرض"
+  },
+  {
+    "table": "TaxpayerPortalConfig",
+    "title": "تنظیمات سامانه مودیان",
+    "category": "فروشگاه",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "Transfer",
+    "title": "انتقال",
+    "category": "خزانه‌داری",
+    "column": "TransferId",
+    "columnTitle": "شناسه انتقال"
+  },
+  {
+    "table": "Transfer",
+    "title": "انتقال",
+    "category": "خزانه‌داری",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "Transfer",
+    "title": "انتقال",
+    "category": "خزانه‌داری",
+    "column": "FiscalPeriodId",
+    "columnTitle": "شناسه دوره مالی"
+  },
+  {
+    "table": "Transfer",
+    "title": "انتقال",
+    "category": "خزانه‌داری",
+    "column": "ProjectId",
+    "columnTitle": "شناسه پروژه"
+  },
+  {
+    "table": "Transfer",
+    "title": "انتقال",
+    "category": "خزانه‌داری",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "Transfer",
+    "title": "انتقال",
+    "category": "خزانه‌داری",
+    "column": "TotalAmount",
+    "columnTitle": "مبلغ"
+  },
+  {
+    "table": "Transfer",
+    "title": "انتقال",
+    "category": "خزانه‌داری",
+    "column": "DateTime",
+    "columnTitle": "تاریخ و زمان"
+  },
+  {
+    "table": "Transfer",
+    "title": "انتقال",
+    "category": "خزانه‌داری",
+    "column": "Currency",
+    "columnTitle": "ارز"
+  },
+  {
+    "table": "Transfer",
+    "title": "انتقال",
+    "category": "خزانه‌داری",
+    "column": "ExchangeRate",
+    "columnTitle": "نرخ تبدیل ارز"
+  },
+  {
+    "table": "Transfer",
+    "title": "انتقال",
+    "category": "خزانه‌داری",
+    "column": "TransferType",
+    "columnTitle": "نوع انتقال"
+  },
+  {
+    "table": "Transfer",
+    "title": "انتقال",
+    "category": "خزانه‌داری",
+    "column": "ReferenceType",
+    "columnTitle": "نوع مرجع رویداد مالی"
+  },
+  {
+    "table": "Transfer",
+    "title": "انتقال",
+    "category": "خزانه‌داری",
+    "column": "ReferenceId",
+    "columnTitle": "شناسه مرجع رویداد مالی"
+  },
+  {
+    "table": "Transfer",
+    "title": "انتقال",
+    "category": "خزانه‌داری",
+    "column": "Number",
+    "columnTitle": "شماره"
+  },
+  {
+    "table": "Transfer",
+    "title": "انتقال",
+    "category": "خزانه‌داری",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "TransferItem",
+    "title": "آیتم انتقال",
+    "category": "خزانه‌داری",
+    "column": "TransferItemId",
+    "columnTitle": "شناسه آیتم انتقال"
+  },
+  {
+    "table": "TransferItem",
+    "title": "آیتم انتقال",
+    "category": "خزانه‌داری",
+    "column": "TransferId",
+    "columnTitle": "شناسه انتقال"
+  },
+  {
+    "table": "TransferItem",
+    "title": "آیتم انتقال",
+    "category": "خزانه‌داری",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "TransferItem",
+    "title": "آیتم انتقال",
+    "category": "خزانه‌داری",
+    "column": "TransferType",
+    "columnTitle": "نوع انتقال"
+  },
+  {
+    "table": "TransferItem",
+    "title": "آیتم انتقال",
+    "category": "خزانه‌داری",
+    "column": "IsDestination",
+    "columnTitle": "حساب مقصد"
+  },
+  {
+    "table": "TransferItem",
+    "title": "آیتم انتقال",
+    "category": "خزانه‌داری",
+    "column": "Amount",
+    "columnTitle": "مبلغ"
+  },
+  {
+    "table": "TransferItem",
+    "title": "آیتم انتقال",
+    "category": "خزانه‌داری",
+    "column": "Commission",
+    "columnTitle": "کارمزد"
+  },
+  {
+    "table": "TransferItem",
+    "title": "آیتم انتقال",
+    "category": "خزانه‌داری",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "TransferItem",
+    "title": "آیتم انتقال",
+    "category": "خزانه‌داری",
+    "column": "AccountId",
+    "columnTitle": "شناسه حساب"
+  },
+  {
+    "table": "TransferItem",
+    "title": "آیتم انتقال",
+    "category": "خزانه‌داری",
+    "column": "EntityId",
+    "columnTitle": "شناسه موجودیت"
+  },
+  {
+    "table": "TransferItem",
+    "title": "آیتم انتقال",
+    "category": "خزانه‌داری",
+    "column": "CheckId",
+    "columnTitle": "شناسه چک"
+  },
+  {
+    "table": "TransferItem",
+    "title": "آیتم انتقال",
+    "category": "خزانه‌داری",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "UploadFile",
+    "title": "Upload Files",
+    "category": "SYSTEM",
+    "column": "id",
+    "columnTitle": "Identifier"
+  },
+  {
+    "table": "UploadFile",
+    "title": "Upload Files",
+    "category": "SYSTEM",
+    "column": "originalName",
+    "columnTitle": "Original Name"
+  },
+  {
+    "table": "UploadFile",
+    "title": "Upload Files",
+    "category": "SYSTEM",
+    "column": "name",
+    "columnTitle": "Name"
+  },
+  {
+    "table": "UploadFile",
+    "title": "Upload Files",
+    "category": "SYSTEM",
+    "column": "extension",
+    "columnTitle": "Extension"
+  },
+  {
+    "table": "UploadFile",
+    "title": "Upload Files",
+    "category": "SYSTEM",
+    "column": "size",
+    "columnTitle": "Size"
+  },
+  {
+    "table": "UploadFile",
+    "title": "Upload Files",
+    "category": "SYSTEM",
+    "column": "uid",
+    "columnTitle": "Uniqueidentifier"
+  },
+  {
+    "table": "UploadFile",
+    "title": "Upload Files",
+    "category": "SYSTEM",
+    "column": "relativeUrl",
+    "columnTitle": "Relative Url"
+  },
+  {
+    "table": "UploadFile",
+    "title": "Upload Files",
+    "category": "SYSTEM",
+    "column": "fileType",
+    "columnTitle": "File Type"
+  },
+  {
+    "table": "UploadFile",
+    "title": "Upload Files",
+    "category": "SYSTEM",
+    "column": "createTime",
+    "columnTitle": "Create Time"
+  },
+  {
+    "table": "UploadFile",
+    "title": "Upload Files",
+    "category": "SYSTEM",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "UserActionLog",
+    "title": "تاریخچه عملیات کاربران",
+    "category": "عمومی",
+    "column": "Id",
+    "columnTitle": "شناسه لاگ"
+  },
+  {
+    "table": "UserActionLog",
+    "title": "تاریخچه عملیات کاربران",
+    "category": "عمومی",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "UserActionLog",
+    "title": "تاریخچه عملیات کاربران",
+    "category": "عمومی",
+    "column": "UserId",
+    "columnTitle": "شناسه کاربر"
+  },
+  {
+    "table": "UserActionLog",
+    "title": "تاریخچه عملیات کاربران",
+    "category": "عمومی",
+    "column": "ActionType",
+    "columnTitle": "نوع عملیات"
+  },
+  {
+    "table": "UserActionLog",
+    "title": "تاریخچه عملیات کاربران",
+    "category": "عمومی",
+    "column": "EntityType",
+    "columnTitle": "نوع موجودیت"
+  },
+  {
+    "table": "UserActionLog",
+    "title": "تاریخچه عملیات کاربران",
+    "category": "عمومی",
+    "column": "EntityId",
+    "columnTitle": "شناسه موجودیت"
+  },
+  {
+    "table": "UserActionLog",
+    "title": "تاریخچه عملیات کاربران",
+    "category": "عمومی",
+    "column": "Details",
+    "columnTitle": "جزئیات"
+  },
+  {
+    "table": "UserActionLog",
+    "title": "تاریخچه عملیات کاربران",
+    "category": "عمومی",
+    "column": "DateTime",
+    "columnTitle": "زمان عملیات"
+  },
+  {
+    "table": "UserActionLog",
+    "title": "تاریخچه عملیات کاربران",
+    "category": "عمومی",
+    "column": "ParentId",
+    "columnTitle": "شناسه لاگ والد"
+  },
+  {
+    "table": "UserActionLog",
+    "title": "تاریخچه عملیات کاربران",
+    "category": "عمومی",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  },
+  {
+    "table": "Warehouse",
+    "title": "انبار",
+    "category": "انبارداری",
+    "column": "Id",
+    "columnTitle": "شناسه انبار"
+  },
+  {
+    "table": "Warehouse",
+    "title": "انبار",
+    "category": "انبارداری",
+    "column": "Name",
+    "columnTitle": "نام"
+  },
+  {
+    "table": "Warehouse",
+    "title": "انبار",
+    "category": "انبارداری",
+    "column": "ShopId",
+    "columnTitle": "شناسه فروشگاه"
+  },
+  {
+    "table": "Warehouse",
+    "title": "انبار",
+    "category": "انبارداری",
+    "column": "IsDefault",
+    "columnTitle": "پیش فرض بودن"
+  },
+  {
+    "table": "Warehouse",
+    "title": "انبار",
+    "category": "انبارداری",
+    "column": "IsEnabled",
+    "columnTitle": "فعال بودن"
+  },
+  {
+    "table": "Warehouse",
+    "title": "انبار",
+    "category": "انبارداری",
+    "column": "DetailAccountId",
+    "columnTitle": "شناسه حساب تفصیلی"
+  },
+  {
+    "table": "Warehouse",
+    "title": "انبار",
+    "category": "انبارداری",
+    "column": "Address",
+    "columnTitle": "آدرس"
+  },
+  {
+    "table": "Warehouse",
+    "title": "انبار",
+    "category": "انبارداری",
+    "column": "Phone",
+    "columnTitle": "شماره تماس"
+  },
+  {
+    "table": "Warehouse",
+    "title": "انبار",
+    "category": "انبارداری",
+    "column": "PersonId",
+    "columnTitle": "شناسه انباردار"
+  },
+  {
+    "table": "Warehouse",
+    "title": "انبار",
+    "category": "انبارداری",
+    "column": "Description",
+    "columnTitle": "توضیحات"
+  },
+  {
+    "table": "Warehouse",
+    "title": "انبار",
+    "category": "انبارداری",
+    "column": "tenant_id",
+    "columnTitle": "Tenant ID"
+  }
+]

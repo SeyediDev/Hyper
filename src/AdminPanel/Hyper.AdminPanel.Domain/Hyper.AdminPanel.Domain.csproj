@@ -19,6 +19,7 @@
     <!-- Club UI definitions are excluded; only Hyper integration definitions are loaded. -->
     <Compile Remove="UiDefinitions\**" />
     <Compile Include="UiDefinitions\HomePage\HomePageEntityUiDefinitions.cs" />
+    <Compile Include="UiDefinitions\Database\**\*.cs" />
   </ItemGroup>
 
 	

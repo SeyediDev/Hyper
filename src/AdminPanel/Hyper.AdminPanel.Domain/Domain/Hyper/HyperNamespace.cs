@@ -1,29 +1,20 @@
+using Hyper.Domain.Entities.Database;
 using Neo.Bpms.Domain.Models.Cmmn.Partitions;
 
 namespace Hyper.AdminPanel.Domain.Domain.Hyper;
 
 public class HyperNamespace : ModelDefinition<HyperNamespace>
 {
-    protected override bool Identify()
-    {
-        return DefineModel(nameof(Hyper), "پنل مدیریتی هایپریک", null, nameof(DomainProvider.Domain));
-    }
+    protected override bool Identify() => DefineModel(nameof(Hyper), "پنل مدیریتی هایپریک", null, nameof(DomainProvider.Domain));
     protected override void Partitions()
     {
-        AddPartitionFunction("pfArchive", typeof(bool),
-            PartitionFunctionType.FixRange,
-            PartitionFunctionBoundaryType.Left,
-            "0", "1", "0", "1");
+        AddPartitionFunction("pfArchive", typeof(bool), PartitionFunctionType.FixRange, PartitionFunctionBoundaryType.Left, "0", "1", "0", "1");
         AddArchivePartitionScheme(nameof(DomainSchema.CoreConfig));
         AddArchivePartitionScheme(nameof(DomainSchema.Core));
         AddArchivePartitionScheme(nameof(DomainSchema.CoreLog));
     }
-
     protected override void Entities()
     {
-        // HomePageEntity is Neo's metadata anchor. Business entities are loaded
-        // explicitly by their own Hyper definitions; do not scan the copied Club
-        // assemblies here because that registers Club tables in the admin model.
         DefineEntity<HomePageEntity>();
         DefineEntity<ExternalIntegrationConnection>();
         DefineEntity<ExternalProductMapping>();
@@ -34,12 +25,164 @@ public class HyperNamespace : ModelDefinition<HyperNamespace>
         DefineEntity<IntegrationAdminSimulation>();
         DefineEntity<IntegrationTokenRequest>();
         DefineEntity<IntegrationMerchantAccess>();
-	}
-
-    private void AddArchivePartitionScheme(string name)
-    {
-        AddPartitionScheme($"Archive_{name}", "pfArchive",
-            FileGroupSelectionType.FromList,
-            "", name, $"{name}_Archive");
+        // SQL-owned records are metadata entities only; EF maps their legacy tables and migrations exclude them.
+        DefineEntity<SqlActGeBytearray>();
+        DefineEntity<SqlActGeProperty>();
+        DefineEntity<SqlActGeSchemaLog>();
+        DefineEntity<SqlActHiActinst>();
+        DefineEntity<SqlActHiAttachment>();
+        DefineEntity<SqlActHiBatch>();
+        DefineEntity<SqlActHiCaseactinst>();
+        DefineEntity<SqlActHiCaseinst>();
+        DefineEntity<SqlActHiComment>();
+        DefineEntity<SqlActHiDecIn>();
+        DefineEntity<SqlActHiDecOut>();
+        DefineEntity<SqlActHiDecinst>();
+        DefineEntity<SqlActHiDetail>();
+        DefineEntity<SqlActHiExtTaskLog>();
+        DefineEntity<SqlActHiIdentitylink>();
+        DefineEntity<SqlActHiIncident>();
+        DefineEntity<SqlActHiJobLog>();
+        DefineEntity<SqlActHiOpLog>();
+        DefineEntity<SqlActHiProcinst>();
+        DefineEntity<SqlActHiTaskinst>();
+        DefineEntity<SqlActHiVarinst>();
+        DefineEntity<SqlActIdGroup>();
+        DefineEntity<SqlActIdInfo>();
+        DefineEntity<SqlActIdMembership>();
+        DefineEntity<SqlActIdRememberMe>();
+        DefineEntity<SqlActIdTenant>();
+        DefineEntity<SqlActIdTenantMember>();
+        DefineEntity<SqlActIdUser>();
+        DefineEntity<SqlActReAssociation>();
+        DefineEntity<SqlActReCamformdef>();
+        DefineEntity<SqlActReCaseDef>();
+        DefineEntity<SqlActReColumn>();
+        DefineEntity<SqlActReConstraint>();
+        DefineEntity<SqlActReDashboard>();
+        DefineEntity<SqlActReDataForm>();
+        DefineEntity<SqlActReDataFormColumn>();
+        DefineEntity<SqlActReDataFormFilter>();
+        DefineEntity<SqlActReDataFormHeader>();
+        DefineEntity<SqlActReDataFormSort>();
+        DefineEntity<SqlActReDataReport>();
+        DefineEntity<SqlActReDataReportColumn>();
+        DefineEntity<SqlActReDataReportFilter>();
+        DefineEntity<SqlActReDataReportHeader>();
+        DefineEntity<SqlActReDataReportSort>();
+        DefineEntity<SqlActReDecisionDef>();
+        DefineEntity<SqlActReDecisionReqDef>();
+        DefineEntity<SqlActReDeployment>();
+        DefineEntity<SqlActReForm>();
+        DefineEntity<SqlActReLink>();
+        DefineEntity<SqlActReMenu>();
+        DefineEntity<SqlActReModel>();
+        DefineEntity<SqlActReNotification>();
+        DefineEntity<SqlActReNotificationStatus>();
+        DefineEntity<SqlActReProcdef>();
+        DefineEntity<SqlActReQuery>();
+        DefineEntity<SqlActReReport>();
+        DefineEntity<SqlActReTable>();
+        DefineEntity<SqlActReTopic>();
+        DefineEntity<SqlActRuAuthorization>();
+        DefineEntity<SqlActRuBatch>();
+        DefineEntity<SqlActRuCaseExecution>();
+        DefineEntity<SqlActRuCaseSentryPart>();
+        DefineEntity<SqlActRuChangeQueue>();
+        DefineEntity<SqlActRuEventSubscr>();
+        DefineEntity<SqlActRuExecution>();
+        DefineEntity<SqlActRuExtTask>();
+        DefineEntity<SqlActRuFilter>();
+        DefineEntity<SqlActRuIdentitylink>();
+        DefineEntity<SqlActRuIncident>();
+        DefineEntity<SqlActRuJob>();
+        DefineEntity<SqlActRuJobdef>();
+        DefineEntity<SqlActRuMeterLog>();
+        DefineEntity<SqlActRuTask>();
+        DefineEntity<SqlActRuTaskMeterLog>();
+        DefineEntity<SqlActRuVariable>();
+        DefineEntity<SqlExternalintegrationconnections>();
+        DefineEntity<SqlExternalordermappings>();
+        DefineEntity<SqlExternalproductmappings>();
+        DefineEntity<SqlIntegrationadminsimulations>();
+        DefineEntity<SqlIntegrationeventaudits>();
+        DefineEntity<SqlIntegrationmerchantaccess>();
+        DefineEntity<SqlIntegrationoutbox>();
+        DefineEntity<SqlIntegrationsyncruns>();
+        DefineEntity<SqlIntegrationtokenrequests>();
+        DefineEntity<SqlIntegrationwebhookinbox>();
+        DefineEntity<SqlInventoryreservationlogs>();
+        DefineEntity<SqlTblAccount>();
+        DefineEntity<SqlTblAccountingarticle>();
+        DefineEntity<SqlTblAccountingdocument>();
+        DefineEntity<SqlTblAutoprocesslog>();
+        DefineEntity<SqlTblBankaccount>();
+        DefineEntity<SqlTblCashfund>();
+        DefineEntity<SqlTblCheck>();
+        DefineEntity<SqlTblCredittransaction>();
+        DefineEntity<SqlTblDetailaccount>();
+        DefineEntity<SqlTblEntityfile>();
+        DefineEntity<SqlTblEntitynote>();
+        DefineEntity<SqlTblGeneralconfig>();
+        DefineEntity<SqlTblGlobalconfig>();
+        DefineEntity<SqlTblGlobalproduct>();
+        DefineEntity<SqlTblGlobalproductgroup>();
+        DefineEntity<SqlTblGlobalproductmedia>();
+        DefineEntity<SqlTblGroups>();
+        DefineEntity<SqlTblInventoryfifoconsumption>();
+        DefineEntity<SqlTblInventoryfifolayer>();
+        DefineEntity<SqlTblIrancities>();
+        DefineEntity<SqlTblIranstates>();
+        DefineEntity<SqlTblMessagehistory>();
+        DefineEntity<SqlTblNotificationconfig>();
+        DefineEntity<SqlTblPerson>();
+        DefineEntity<SqlTblPettycash>();
+        DefineEntity<SqlTblPosdevice>();
+        DefineEntity<SqlTblPrintconfig>();
+        DefineEntity<SqlTblProduct>();
+        DefineEntity<SqlTblProductbarcode>();
+        DefineEntity<SqlTblProductbrand>();
+        DefineEntity<SqlTblProductreviewstatus>();
+        DefineEntity<SqlTblProductunit>();
+        DefineEntity<SqlTblProject>();
+        DefineEntity<SqlTblPurchaseorder>();
+        DefineEntity<SqlTblPurchaseorderitem>();
+        DefineEntity<SqlTblPurchaseorderreturn>();
+        DefineEntity<SqlTblPurchaseorderreturnitem>();
+        DefineEntity<SqlTblReleasenote>();
+        DefineEntity<SqlTblReleasenoteitem>();
+        DefineEntity<SqlTblSaleorder>();
+        DefineEntity<SqlTblSaleorderconfig>();
+        DefineEntity<SqlTblSaleorderitem>();
+        DefineEntity<SqlTblSaleorderreturn>();
+        DefineEntity<SqlTblSaleorderreturnitem>();
+        DefineEntity<SqlTblServicediscount>();
+        DefineEntity<SqlTblServicepayment>();
+        DefineEntity<SqlTblServiceplan>();
+        DefineEntity<SqlTblServicerequest>();
+        DefineEntity<SqlTblServicesubscription>();
+        DefineEntity<SqlTblShareholder>();
+        DefineEntity<SqlTblShop>();
+        DefineEntity<SqlTblShopactivitytype>();
+        DefineEntity<SqlTblShopfiscalperiod>();
+        DefineEntity<SqlTblShopnotification>();
+        DefineEntity<SqlTblShopnotificationinmemberrole>();
+        DefineEntity<SqlTblShopnotificationinshop>();
+        DefineEntity<SqlTblShopnotificationtype>();
+        DefineEntity<SqlTblStockcard>();
+        DefineEntity<SqlTblStockcarditem>();
+        DefineEntity<SqlTblStocktaking>();
+        DefineEntity<SqlTblStocktakingitem>();
+        DefineEntity<SqlTblTag>();
+        DefineEntity<SqlTblTaxpayerportalconfig>();
+        DefineEntity<SqlTblTransfer>();
+        DefineEntity<SqlTblTransferitem>();
+        DefineEntity<SqlTblUploadfile>();
+        DefineEntity<SqlTblUseractionlog>();
+        DefineEntity<SqlTblWarehouse>();
+        DefineEntity<SqlViewAccountbalance>();
+        DefineEntity<SqlViewDetailaccountbalance>();
+        DefineEntity<SqlVwIntegrationdashboard>();
     }
+    private void AddArchivePartitionScheme(string name) => AddPartitionScheme($"Archive_{name}", "pfArchive", FileGroupSelectionType.FromList, "", name, $"{name}_Archive");
 }

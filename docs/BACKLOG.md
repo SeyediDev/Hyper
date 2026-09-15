@@ -406,3 +406,76 @@ build نهایی هر سه پروژه Hyper.IntegrationWorker.Host، Hyper.Custo
 - مانع آزمون واقعی: ClientId و ClientSecret هنوز نمونه‌اند؛ نیاز به برنامه باسلام و ثبت RedirectUri دقیق است.
 - این نتایج ادعای دریافت واقعی توکن یا آماده‌بودن worker با توکن رمز‌شده نیست.
 - چهار بررسی SQL با query استخراج‌شده از TryClaimAsync موفق شد: ادمین نادرست رد شد، مصرف اول موفق بود، replay رد شد و زمینه پایان‌یافته رد شد. همه رکوردهای آزمایشی rollback شدند. مجموع بررسی‌های کنترل‌شده: ۲۳.
+## META-SYNC-216 — درخواست ۱۵ سپتامبر ۲۰۲۶
+
+- [x] خواندن صفحات ۱ و ۲ فهرست آنلاین هایپریک پس از ورود: ۷۱ جدول؛ استخراج ۹۹۰ سطر metadata محلی به schema/hyper-display-metadata.json.
+- [ ] META-216: عنوان فارسی تمام ۱۵۷ موجودیت SQL و فیلدهایشان، حفظ نام CLR و نگاشت SQL؛ دسته‌بندی منو و گزارش Neo.
+- [ ] DASH-216: داشبورد واقعی UiDefinitions شامل کسب‌وکار مغازه و وضعیت اتصال، نگاشت، صف و اجراها؛ نمایش از Desktop نئو.
+- [ ] AUTH-216: انتخاب پلتفرم در شبیه‌ساز و هدایت بر اساس راهبرد اعطای توکن؛ باسلام OAuth و وضعیت صریح پلتفرم‌های هنوز پیاده‌نشده.
+- [ ] SYNC-216: ماتریس تغییر مغازه، تغییر غرفه و تطبیق اولیه/دوره‌ای برای کالا، موجودی، طرف حساب، فروش، خرید؛ ادامه Outbox/Inbox موجود.
+- [ ] SYNC-217: سیاست تعارض، حذف/آرشیو، بازپخش، قطع/وصل و انقضای مجوز؛ نسخه رویداد، ترتیب، جلوگیری از حلقه، retry و صف خطا.
+- [ ] SYNC-218: سایر آیتم‌ها: قیمت، گونه کالا، رسانه، گروه/واحد، مرجوعی، لغو، تسویه و حمل؛ بر اساس قابلیت واقعی هر پلتفرم.
+
+قید: جدول‌های قدیمی تغییر نمی‌کنند. جداول موتور ACT_* هویت مغازه‌دار نیستند. FiscalPeriod در فهرست وب دیده شد ولی مدل محلی ShopFiscalPeriod دارد؛ اختلاف ثبت شد و بدون سند، جدول یا نگاشت تغییر نمی‌کند.
+ترتیب وابستگی: کالا ← موجودی؛ طرف حساب باید پیش از ثبت فروش/خرید آماده باشد. دریافت رویدادها می‌تواند همزمان باشد اما اعمال سند وابسته تا تکمیل نگاشت‌ها منتظر می‌ماند.
+
+### تصحیح META-216 — نگاشت فیزیکی
+- طبق تأکید کاربر، برای نام فعلی SQL فقط DbMap استفاده می‌شود. OldDbMap کاربردی در این مرحله ندارد و از تغییرات این مرحله حذف شد.
+- namespace صحیح آن Neo.Bpms.Domain.Models.Attributes.FieldAndEntityAttributes است. رفع using جایگزین تغییر نوع annotation است.
+
+## META-SYNC-216 implementation update — 2026-09-15
+
+- [x] `SqlServerEntities.cs`: all ۱۵۷ classes and ۲٬۰۴۹ declared SQL columns received Persian `DisplayName` and physical `DbMap`; CLR names/types and EF mapping remain unchanged.
+- [x] `HyperNamespace`: all database entities are explicitly registered in Neo metadata. Legacy ACT and SQL records are marked `DontSync` so Neo metadata/CRUD does not generate migration changes.
+- [x] `sql-ui-catalog.json` and `tools/Metadata/generate_sql_labels.py`, `generate_sql_ui.py`: reproducible catalog and UI generation sources added.
+- [x] `Menu_Hyper.cs`: categorized menu and report entries generated for all entities; views/engine tables are read-only definitions.
+- [x] `UiDefinitions/Database/SqlEntityUiDefinitions.cs`: per-entity CRUD/report definitions with actual keys, mapped columns, sensitive field exclusion and read-only engine/view forms.
+- [x] Home dashboard: Business and synchronization dashboard configurations with metric/status widgets are defined using Neo `DashboardConfigDefinition` and `DashboardDivWidgetDefinition`.
+- [x] AdminPanel.Domain build passed with zero warnings/errors after generated metadata integration.
+- [x] AUTH-216: provider selector and provider-specific authorization catalog restored; unsupported providers show unavailable status and never fall back to Basalam.
+
+Open verification: build/run the complete Web host with existing process locks cleared; verify Neo Desktop renders generated categories/widgets. Real provider credentials remain required for an end-to-end OAuth exchange.
+
+## تغییر اولویت به درخواست کاربر — 2026-09-15
+
+- **P0: SYNC-216/217/218**: تمرکز جاری سناریوهای یکسان‌سازی و مدیریت رویداد/صف است.
+- **P2: META/DASH-216**: ادامهٔ منو/داشبورد، تست مرورگر و اصلاح تو‌رفتگی هم در دسته‌بندی مفهومی و هم در کد به بک‌لاگ منتقل شد. آماده‌شدن کد به معنی پذیرش UI نیست.
+- ادامه منو: ساختار «حوزه کسب‌وکار ← موجودیت‌ها / گزارش‌ها»، انتقال جداول ACT به ابزارهای فنی و تورفتگی کد متناظر StartSubMenus/EndSubMenus.
+- نتیجه build موفق قبلی مربوط به نسخه قبل از تکمیل identity بود؛ build جدید پس از رفع nullable باید دوباره تأیید شود.
+
+### SYNC-216 — اجرای سناریوها
+- [x] ماتریس هر پنج آیتم و سه محرک اصلی، ترتیب وابستگی و سناریوهای خطا در SYNCHRONIZATION_SCENARIOS.md ثبت شد.
+- [ ] SYNC-219: صف پایدار مستقل از provider برای درخواست تطبیق، dedup رویداد، lease/retry، نتیجه قابل بازیابی و Pub/Sub نئو.
+- [ ] SYNC-220: تطبیق کامل کالا و موجودی، اختلاف و missing mapping هر دو طرف؛ اصلاح drift موجودی از outbox موجود.
+- [ ] SYNC-221: طرف حساب، فروش و خرید: آداپترهای اعمال تجاری و قرارداد حسابداری؛ endpoint نمونه یا نوشتن مستقیم جدول legacy جایگزین پیاده‌سازی واقعی نیست.
+
+### SYNC-222 — رویداد در شبیه‌ساز پنل
+- [x] فرم انتخاب اتصال، آیتم (کالا/موجودی/طرف حساب/فروش/خرید) و محرک (تغییر مغازه/غرفه/اولیه/دوره‌ای/دستی) در MerchantSimulation اضافه شد.
+- [x] رویداد با EventId پایدار در `IntegrationScenarioJobs` ثبت و تکرار همان اتصال/رویداد idempotent است؛ scope مغازه و tenant دوباره کنترل می‌شود.
+- [x] Worker صف سناریو را پس از Outbox پردازش می‌کند. تا زمان اتصال command واقعی provider/accounting، وضعیت نیازمند اقدام ثبت می‌شود و موفقیت جعلی گزارش نمی‌شود.
+- [ ] پردازش واقعی هر آیتم: resolver کالا/موجودی و commandهای حسابداری طرف حساب، فروش و خرید.
+- [ ] اجرای webhook واقعی پلتفرم پس از تأیید قرارداد امضا و payload باسلام.
+
+## نتیجهٔ جاری SYNC-219/220/222 — 2026-09-15
+
+- [x] صف `IntegrationScenarioJobs` مستقل از provider با کلید یکتای ConnectionId/EventId، کنترل محتوای replay، scope مغازه/tenant، lease، قفل session در طول پردازش، retry و ثبت نتیجه. جدول روی Hyperyek ساخته شد؛ جدول‌های قدیمی تغییر نکردند.
+- [x] subscriber رویداد Neo/MediatR به همان صف پایدار وصل است. فراخوانندهٔ تجاری باید انتشار را بعد از commit یا در outbox تراکنش خود انجام دهد؛ این subscriber ادعای اتمیک‌کردن هر تراکنش دیگر را ندارد.
+- [x] `IntegrationScenarioProcessor`: برای پنج محرک مغازه/غرفه/اولیه/دوره‌ای/دستی، کالا و موجودی را از منابع واقعی بازخوانی می‌کند. فعلاً مقایسهٔ کالا شامل **عنوان و صحت/کامل‌بودن نگاشت‌ها** است، نه تمام مشخصات یا ایجاد محصول در غرفه.
+- [x] drift موجودی حتی وقتی مقدار مغازه نسبت به checkpoint قبلی تغییر نکرده، می‌تواند پیام جدید نسخه‌دار در Outbox ایجاد کند؛ پیام همان مقدار که هنوز pending/running است دوباره ساخته نمی‌شود. ASM-001 همچنان قید فعال‌سازی منبع است.
+- [x] فرم شبیه‌ساز: انتخاب اتصال و آیتم و محرک؛ antiforgery؛ تطبیق ticket با cookie و اعتبار زمینه؛ EventId ثابت فرم برای جلوگیری از double-submit؛ نمایش نتیجه و خطای همان مغازه.
+- [x] build دامنه، زیرساخت، دامنه پنل، Web، Worker.Application و Worker.Host با استفاده از referenceهای ساخته‌شده: همگی صفر خطا/هشدار.
+- [x] ابزار `tools/ScenarioChecks`: ۲۳ آزمون موفق، شامل ۱۳ آزمون SQL واقعی در تراکنش rollback. هیچ HTTP خارجی در آزمون‌ها اجرا نشد.
+- [x] آزمون مرورگر: ورود Development، انتخاب مغازه، گزینه‌های provider و غیرفعال‌بودن دیجی‌کالا؛ نمایش فرم رویداد؛ ثبت رویداد تغییر غرفه با اتصال تست غیرفعال؛ پردازش Worker و نمایش خطای مورد انتظار در پنل. اتصال و job موقت پاک شدند؛ صف و تعداد اتصال‌ها پس از پاکسازی صفر است؛ زمینه تست پایان یافت.
+- [x] مقایسه متن قراردادهای CLR با HEAD: همه اعلان‌های ۱۵۷ کلاس و ویژگی‌ها بدون تغییر نوع یا نام مانده‌اند؛ OldDbMap در فایل SQL وجود ندارد.
+
+### کارهای P0 باقی‌مانده (انجام‌شده تلقی نشوند)
+- [ ] SYNC-221: اعمال تجاری طرف حساب، فروش و خرید و نگاشت‌های مربوط. فعلاً نتیجه `BusinessCommandNotImplemented` است.
+- [ ] SYNC-223: ایجاد/ویرایش مشخصات کامل کالا، قیمت/واحد/گروه/رسانه/گونه در آداپتر و تکمیل publisher تغییرات واقعی مغازه. مقایسهٔ عنوان با همگام‌سازی کامل کالا یکسان نیست.
+- [ ] SYNC-224: scheduler خودکار دوره‌ای و debounce/تجمیع رویدادها. گزینهٔ «دوره‌ای» فعلی در شبیه‌ساز یک اجرای دستیِ آن محرک است، نه زمان‌بندی خودکار.
+- [ ] SYNC-225: قرارداد و احراز تحویل webhook واقعی باسلام و پردازش payloadهای تجاری. فرم فعلی شبیه‌سازی کنترل‌شده است.
+- [ ] SEC-226: اتصال Worker به vault توکن OAuth و refresh؛ ClientId/Secret واقعی و تأیید ASM-001 هنوز لازم‌اند. هیچ اتصال واقعی ساخته یا فعال نشد.
+- [ ] QA-227: آزمون رقابت همزمان چند process و آزمون واقعی drift موجودی در staging؛ آزمون SQL lease/retry جایگزین این پذیرش نیست.
+
+### P2: UI معوق طبق درخواست کاربر
+- دسته‌بندی مفهومی و تورفتگی متناظر StartSubMenus/EndSubMenus باید اصلاح شود.
+- داشبورد Neo اجرا شد؛ شمارش مغازه و نمودار کالا به تفکیک مغازه داده نشان دادند، ولی چند ویجت «داده در دسترس نیست» داشتند. این خطاها و عنوان قدیمی باشگاه مشتریان در متن جایگزین لوگوی هدر به بک‌لاگ منتقل شدند؛ داشبورد پذیرفته‌شده نیست.

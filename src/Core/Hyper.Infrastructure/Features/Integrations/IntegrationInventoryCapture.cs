@@ -42,7 +42,9 @@ public sealed class IntegrationInventoryCapture(HyperIntegrationContext db, IInt
         }
     }
 
-    public async Task<bool> CaptureOneAsync(long connectionId, long mappingId, CancellationToken ct)
+    public Task<bool> ReconcileOneAsync(long connectionId, long mappingId, CancellationToken ct) => CaptureOneAsync(connectionId, mappingId, ct, true);
+
+    public async Task<bool> CaptureOneAsync(long connectionId, long mappingId, CancellationToken ct, bool forceResend = false)
     {
         if (!options.Value.AccountingStockSourceVerified) return false;
         await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
@@ -69,7 +71,8 @@ public sealed class IntegrationInventoryCapture(HyperIntegrationContext db, IInt
         var latest = await db.IntegrationOutbox.AsNoTracking().Where(x => x.MappingId == mappingId)
             .OrderByDescending(x => x.SourceVersion).FirstOrDefaultAsync(ct);
         var update = new ExternalInventoryUpdate(mapping.ExternalProductId, mapping.ExternalVariantId, quantity);
-        if (latest is not null && latest.PayloadJson == JsonSerializer.Serialize(update)) return false;
+        if (latest is not null && latest.PayloadJson == JsonSerializer.Serialize(update)
+            && (!forceResend || latest.Status is 0 or 1)) return false;
         var version = checked((latest?.SourceVersion ?? 0) + 1);
         await outbox.EnqueueInventoryAsync(connectionId, mappingId, version, quantity, ct);
         await transaction.CommitAsync(ct);
