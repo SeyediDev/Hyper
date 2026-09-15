@@ -477,6 +477,8 @@ Open verification: build/run the complete Web host with existing process locks c
 - [ ] QA-227: آزمون رقابت همزمان چند process و آزمون واقعی drift موجودی در staging؛ آزمون SQL lease/retry جایگزین این پذیرش نیست.
 
 ### P2: UI معوق طبق درخواست کاربر
+- [x] **OAUTH-229**: علت نمایش آدرس محلی مستند شد: `/api/auth/basalam/login` نقطهٔ شروع داخلی OAuth است و باید با `302` به SSO باسلام برود. `RedirectUri` محیط Development با پروفایل IIS Express روی `https://localhost:44301/api/auth/basalam/callback` همسان شد؛ ClientId/ClientSecret از تنظیم پایه خوانده می‌شوند.
+- [x] **OAUTH-230**: ورود مستقیم یا بازشدن GET روی endpoint داخلی login به صفحهٔ شبیه‌ساز برمی‌گردد؛ شروع OAuth فقط از فرم POST دارای زمینهٔ مغازه و antiforgery انجام می‌شود.
 - [x] **MENU-228**: منوی پنل بر اساس حوزه‌های کسب‌وکاری Hyper مرتب شد؛ زیرمنوی موجودیت‌ها و گزارش‌ها با تورفتگی متناظر `StartSubMenus/EndSubMenus` تعریف شد. جداول ACT زیر «ابزارهای فنی نئو» قرار گرفتند و منطق یکسان‌سازی تغییری نکرد.
 - دسته‌بندی مفهومی و تورفتگی متناظر StartSubMenus/EndSubMenus باید اصلاح شود.
 - داشبورد Neo اجرا شد؛ شمارش مغازه و نمودار کالا به تفکیک مغازه داده نشان دادند، ولی چند ویجت «داده در دسترس نیست» داشتند. این خطاها و عنوان قدیمی باشگاه مشتریان در متن جایگزین لوگوی هدر به بک‌لاگ منتقل شدند؛ داشبورد پذیرفته‌شده نیست.

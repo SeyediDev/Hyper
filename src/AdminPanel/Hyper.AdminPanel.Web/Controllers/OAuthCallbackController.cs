@@ -16,6 +16,12 @@ public sealed class OAuthCallbackController(BasalamOAuthService oauth, BasalamOA
     private const string CorrelationCookie = "Hyper.Basalam.Correlation";
     private const string SimulationCookie = "Hyper.AdminMerchantSimulation";
 
+    // This endpoint starts OAuth only through the selected-shop POST form. A direct
+    // browser navigation must return to the simulator instead of leaving the user
+    // on the internal API URL without the required context ticket and antiforgery token.
+    [HttpGet("login")]
+    public IActionResult LoginGet() => RedirectToAction("Index", "MerchantSimulation");
+
     [HttpPost("login")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Login(string? contextTicket, int displayedShopId, CancellationToken ct)
