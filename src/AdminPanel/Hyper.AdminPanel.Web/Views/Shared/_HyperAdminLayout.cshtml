@@ -8,7 +8,7 @@
 <html lang="fa" dir="rtl">
 <head>
     <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@(ViewBag.Title ?? "پنل مدیریتی هایپریک")</title>
+    <title>@(ViewBag.Title ?? "پنل مدیریت هایپریک")</title>
     <link rel="stylesheet" href="~/Content/hyper-admin.css" asp-append-version="true" />
 </head>
 <body class="hyper-admin">
@@ -33,7 +33,7 @@
             <a class="@Active("MerchantSimulation", "Dashboard")" asp-controller="MerchantSimulation" asp-action="Dashboard"><svg><use href="#hi-sync"/></svg>عملیات یکسان‌سازی</a>
         </nav>
         <div class="sidebar-note"><span class="small-label">مرجع موجودی غرفه</span><strong>موجودی کل مغازه</strong><p>پس از کسر رزروهای فعال</p><span class="note-line"></span><small>هر اتصال، یک زمینهٔ مشخص برای مغازه‌دار دارد.</small></div>
-        <div class="sidebar-footer"><span class="status-dot"></span>پنل مدیریتی هایپریک<small>فروشگاه · حسابداری · اتصال‌ها</small></div>
+        <div class="sidebar-footer"><span class="status-dot"></span>پنل مدیریت هایپریک<small>فروشگاه · حسابداری · اتصال‌ها</small></div>
     </aside>
     <div class="hyper-workspace">
         <header class="hyper-topbar">
@@ -42,7 +42,7 @@
         </header>
         @if (!preview) { <partial name="Layout/_MerchantSimulationContext" /> }
         <main id="main-content" class="hyper-content">@RenderBody()</main>
-        <footer class="hyper-footer">پنل مدیریتی هایپریک <span>@(preview ? "این صفحه فقط برای بررسی طراحی است." : "آمار بر اساس داده‌های ثبت‌شده در سامانه")</span></footer>
+        <footer class="hyper-footer">پنل مدیریت هایپریک <span>@(preview ? "این صفحه فقط برای بررسی طراحی است." : "آمار بر اساس داده‌های ثبت‌شده در سامانه")</span></footer>
     </div>
     <script src="~/Scripts/hyper-admin.js" asp-append-version="true" defer></script>
     @await RenderSectionAsync("Scripts", required: false)

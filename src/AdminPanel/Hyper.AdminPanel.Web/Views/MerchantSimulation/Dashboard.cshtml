@@ -1,13 +1,13 @@
 @model Hyper.AdminPanel.Web.ViewModels.IntegrationDashboardViewModel
 @{
     Layout = "_HyperAdminLayout";
-    ViewBag.Title = "آمار یکسان‌سازی | پنل مدیریتی هایپریک";
+    ViewBag.Title = "آمار یکسان‌سازی | پنل مدیریت هایپریک";
     string Status(byte status) => status switch { 0 => "در حال اجرا", 1 => "موفق", 2 => "ناموفق", 3 => "نیازمند نگاشت", _ => "نامشخص" };
     string QueueStatus(byte status) => status switch { 0 => "در انتظار / تلاش مجدد", 1 => "در حال ارسال", 2 => "ارسال‌شده", 3 => "خطای نهایی", _ => "نامشخص" };
 }
 <link rel="stylesheet" href="~/Content/merchant-simulation.css" />
 <section class="merchant-simulation" dir="rtl">
-    <header class="simulation-heading"><div><span class="simulation-eyebrow">پنل مدیریتی هایپریک</span>
+    <header class="simulation-heading"><div><span class="simulation-eyebrow">پنل مدیریت هایپریک</span>
         <h1>آمار یکسان‌سازی</h1><p>سوابق ثبت‌شده برای مغازهٔ انتخاب‌شده؛ تمام زمان‌ها به وقت UTC نمایش داده می‌شوند.</p></div>
         <a asp-action="Index" class="simulation-secondary">انتخاب / تغییر مغازه</a></header>
     @if (Model.Selected is { } shop && Model.Statistics is { } stats)

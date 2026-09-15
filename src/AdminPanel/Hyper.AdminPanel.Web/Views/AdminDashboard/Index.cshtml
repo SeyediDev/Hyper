@@ -3,7 +3,7 @@
 @using Hyper.Domain.Entities.Integrations
 @{
     Layout = "_HyperAdminLayout";
-    ViewBag.Title = "نمای کلی | پنل مدیریتی هایپریک";
+    ViewBag.Title = "نمای کلی | پنل مدیریت هایپریک";
     var s = Model.Statistics;
     string N(int value) => string.Concat(value.ToString("N0", CultureInfo.InvariantCulture).Select(c => c is >= '0' and <= '9' ? "۰۱۲۳۴۵۶۷۸۹"[c - '0'] : c == ',' ? '٬' : c));
     string Provider(IntegrationProvider value) => value switch { IntegrationProvider.Basalam => "باسلام", IntegrationProvider.Digikala => "دیجی‌کالا", IntegrationProvider.Torob => "ترب", _ => "سامانهٔ سفارشی" };

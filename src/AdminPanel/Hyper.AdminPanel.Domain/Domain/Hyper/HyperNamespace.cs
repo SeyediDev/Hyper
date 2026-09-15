@@ -5,7 +5,7 @@ namespace Hyper.AdminPanel.Domain.Domain.Hyper;
 
 public class HyperNamespace : ModelDefinition<HyperNamespace>
 {
-    protected override bool Identify() => DefineModel(nameof(Hyper), "پنل مدیریتی هایپریک", null, nameof(DomainProvider.Domain));
+    protected override bool Identify() => DefineModel(nameof(Hyper), "پنل مدیریت هایپریک", null, nameof(DomainProvider.Domain));
     protected override void Partitions()
     {
         AddPartitionFunction("pfArchive", typeof(bool), PartitionFunctionType.FixRange, PartitionFunctionBoundaryType.Left, "0", "1", "0", "1");
