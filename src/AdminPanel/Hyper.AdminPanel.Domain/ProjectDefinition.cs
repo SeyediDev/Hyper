@@ -7,10 +7,10 @@ public class HyperProjectDefinition : ProjectMetaDefinition
     public override ProjectContext Identify()
     {
         return DefineProject(
-             customerName: "پنل مدیریتی هایپریک",
-             projectName: "پنل مدیریتی هایپریک",
+             customerName: "پنل مدیریت هایپریک",
+             projectName: "پنل مدیریت هایپریک",
              projectCode: "580614",
-             startDate: "1404/06/05",
+             startDate: "1405/06/15",
              supportStartDate: "",
              fileMethod: "FileSystem",
              hasDesignFeatures: true

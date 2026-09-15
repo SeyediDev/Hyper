@@ -61,7 +61,7 @@ namespace Hyper.AdminPanel.Web.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to پنل مدیریتی هایپریک.
+        ///   Looks up a localized string similar to پنل مدیریت هایپریک.
         /// </summary>
         public static string ProjectTitle {
             get {
@@ -70,7 +70,7 @@ namespace Hyper.AdminPanel.Web.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to پنل مدیریتی هایپریک.
+        ///   Looks up a localized string similar to پنل مدیریت هایپریک.
         /// </summary>
         public static string Title {
             get {
