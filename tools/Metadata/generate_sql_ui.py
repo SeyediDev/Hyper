@@ -39,14 +39,33 @@ out=admin/'UiDefinitions/Database';out.mkdir(exist_ok=True)
 (out/'SqlEntityUiDefinitions.cs').write_text('\n'.join(code)+'\n','utf-8')
 # Categorized menu and corresponding report for every concrete SQL mirror, including read-only views.
 menu=['using Hyper.AdminPanel.Domain.UiDefinitions.HomePage;','using Hyper.Domain.Entities.Database;','namespace Hyper.AdminPanel.Domain.Domain;','public partial class HyperMenuDefinitions : MenuDefinition','{','    private void AddMenu_Hyper()','    {','        AddMenu<HomePageEntity, HomePageEntityUiDefinitions.HomePageDashboard>("داشبورد هایپریک", "home-dashboard");','        AddMenu("مغازه‌دار و اتصال", "building-organization", "MerchantSimulation", "Index");','        AddMenu("عملیات یکسان‌سازی", "activity-monitor", "MerchantSimulation", "Dashboard");']
+def menu_category(r):
+    """Stable business navigation categories; database source categories are not user navigation."""
+    c, n = r['category'], r['class'].lower()
+    if c == 'جداول موتور' or n.startswith('sqlact'):
+        return 'ابزارهای فنی نئو'
+    if c == 'یکسان‌سازی' or n.startswith(('sqlexternal', 'sqlintegration', 'sqlinventoryreservation')):
+        return 'اتصال و یکسان‌سازی'
+    if n in {'sqltblshop', 'sqltblperson', 'sqltblshareholder', 'sqltblwarehouse'} or c in {'اشخاص', 'فروشگاه'}:
+        return 'اطلاعات پایه مغازه'
+    if c in {'محصول', 'محصول فروشگاه', 'محصول هایپریک', 'انبارداری'}:
+        return 'کالا و موجودی'
+    if c in {'حسابداری', 'حسابداری فروشگاه', 'خزانه داری', 'خزانه‌داری'}:
+        return 'حسابداری و اسناد'
+    if c in {'سفارش خرید', 'سفارش فروش'}:
+        return 'خرید و فروش'
+    return 'خدمات و تنظیمات'
+
 groups={}
-for r in catalog:groups.setdefault(r['category'],[]).append(r)
+for r in catalog:groups.setdefault(menu_category(r),[]).append(r)
+order=['اطلاعات پایه مغازه','کالا و موجودی','حسابداری و اسناد','خرید و فروش','اتصال و یکسان‌سازی','خدمات و تنظیمات','ابزارهای فنی نئو']
+groups={k:groups[k] for k in order if k in groups}
 for i,(cat,rows) in enumerate(groups.items()):
- menu += [f'        AddMenu({quote(cat or "سایر")}, "database", "HyperCategory{i}", "");','        StartSubMenus();']
- for r in rows:menu += [f'        AddMenu<{r["class"]}>({quote(r["title"])}, "table");']
- menu += [f'        AddMenu("گزارش‌ها", "chart-bar", "HyperReports{i}", "");','        StartSubMenus();']
- for r in rows:menu += [f'        AddReport<{r["class"]}>({quote("گزارش "+r["title"])}, "chart-bar");']
- menu += ['        EndSubMenus();','        EndSubMenus();']
+ menu += [f'        AddMenu({quote(cat)}, "database", "HyperCategory{i}", "");','        {','            StartSubMenus();']
+ for r in rows:menu += [f'            AddMenu<{r["class"]}>({quote(r["title"])}, "table");']
+ menu += [f'            AddMenu("گزارش‌ها", "chart-bar", "HyperReports{i}", "");','            {','                StartSubMenus();']
+ for r in rows:menu += [f'                AddReport<{r["class"]}>({quote("گزارش "+r["title"])}, "chart-bar");']
+ menu += ['                EndSubMenus();','            }','            EndSubMenus();','        }']
 menu+=['    }','}']
 (admin/'Menu/Menu_Hyper.cs').write_text('\n'.join(menu)+'\n','utf-8')
 # Real metadata dashboards matching Club's nested dashboard config + widget convention.
