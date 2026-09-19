@@ -32,6 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\Neo\src\Neo.Infrastructure\Neo.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\src\SDK\Hyper.SDK.csproj" />
     <ProjectReference Include="..\Hyper.Domain\Hyper.Domain.csproj" />
   </ItemGroup>
   <ItemGroup>

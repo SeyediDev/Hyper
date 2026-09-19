@@ -26,7 +26,7 @@ public static class IntegrationServiceRegistration
         services.AddSingleton<IIntegrationWebhookVerifier, IntegrationWebhookVerifier>();
         services.AddHttpClient("ExternalIntegrations", client => client.Timeout = TimeSpan.FromSeconds(30))
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
-        services.AddSingleton<IExternalIntegrationAdapter, BasalamIntegrationAdapter>();
+        services.AddSingleton<IExternalIntegrationAdapter, BasalamSdkAdapter>();
         services.AddSingleton<IExternalIntegrationAdapter, DigikalaIntegrationAdapter>();
         services.AddSingleton<IExternalIntegrationAdapter, TorobIntegrationAdapter>();
         return services;

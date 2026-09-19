@@ -1,0 +1,85 @@
+using Hyper.SDK.Auth;
+using Hyper.SDK.Clients;
+using Hyper.SDK.Config;
+using Hyper.SDK.Errors;
+using Hyper.SDK.Services;
+using Microsoft.Extensions.Logging;
+
+namespace Hyper.SDK;
+
+public interface IBasalamClient
+{
+    VendorService Vendors { get; }
+    ProductService Products { get; }
+    VariationService Variations { get; }
+    CatalogService Catalog { get; }
+    OrderService Orders { get; }
+    ParcelService Parcels { get; }
+    CustomerService Customers { get; }
+    WebhookService Webhooks { get; }
+    TokenInfo? Token { get; }
+    Task<TokenInfo> RefreshTokenAsync(CancellationToken ct = default);
+}
+
+public sealed class BasalamClient : IBasalamClient, IDisposable
+{
+    private readonly BasalamConfig _config;
+    private readonly ILogger<BasalamClient>? _logger;
+    private readonly System.Net.Http.HttpClient? _httpClient;
+    private readonly IDisposable? _httpClientOwner;
+    private TokenInfo? _token = null;
+    private readonly object _tokenLock = new();
+
+    public BasalamClient(
+        BasalamConfig config,
+        ILogger<object>? logger = null,
+        System.Net.Http.HttpClient? httpClient = null)
+    {
+        _config = config ?? throw new ArgumentNullException(nameof(config));
+        _logger = logger as ILogger<BasalamClient>;
+        _httpClient = httpClient;
+
+        var http = httpClient ?? new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(config.TimeoutSeconds) };
+        if (httpClient == null)
+            _httpClientOwner = http;
+
+        var httpFactory = new Clients.BasalamHttpClient(config, logger as ILogger<Clients.BasalamHttpClient>, http);
+
+        Vendors = new VendorService(httpFactory, logger as ILogger<Services.VendorService>);
+        Products = new ProductService(httpFactory, logger as ILogger<Services.ProductService>);
+        Variations = new VariationService(httpFactory, logger as ILogger<Services.VariationService>);
+        Catalog = new CatalogService(httpFactory, logger as ILogger<Services.CatalogService>);
+        Orders = new OrderService(httpFactory, logger as ILogger<Services.OrderService>);
+        Parcels = new ParcelService(httpFactory, logger as ILogger<Services.ParcelService>);
+        Customers = new CustomerService(httpFactory, logger as ILogger<Services.CustomerService>);
+        Webhooks = new WebhookService(httpFactory, logger as ILogger<Services.WebhookService>);
+    }
+
+    public VendorService Vendors { get; }
+    public ProductService Products { get; }
+    public VariationService Variations { get; }
+    public CatalogService Catalog { get; }
+    public OrderService Orders { get; }
+    public ParcelService Parcels { get; }
+    public CustomerService Customers { get; }
+    public WebhookService Webhooks { get; }
+
+    public TokenInfo? Token
+    {
+        get
+        {
+            lock (_tokenLock) return _token;
+        }
+    }
+
+    public async Task<TokenInfo> RefreshTokenAsync(CancellationToken ct = default)
+    {
+        _logger?.LogInformation("Refreshing Basalam token");
+        throw new InvalidOperationException("Auth client not configured for token refresh");
+    }
+
+    public void Dispose()
+    {
+        _httpClientOwner?.Dispose();
+    }
+}
