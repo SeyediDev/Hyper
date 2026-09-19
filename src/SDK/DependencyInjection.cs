@@ -21,6 +21,7 @@ public static class DependencyInjection
         if (section.Exists())
         {
             services.Configure<BasalamConfig>(section);
+            services.AddSingleton<BasalamConfig>(sp => sp.GetRequiredService<IOptionsMonitor<BasalamConfig>>().CurrentValue);
         }
 
         services.TryAddSingleton<Clients.IBasalamHttpClient, Clients.BasalamHttpClient>();
