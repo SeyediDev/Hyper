@@ -1,9 +1,11 @@
+using System.IO;
 using Hyper.AdminPanel.Web.Infrastructure.Icons;
 using Neo.Bpms.Api;
 using Neo.Bpms.UI.MVC.Controls;
 using Neo.Bpms.UI.MVC.Features;
 using Neo.Endpoint;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace Hyper.AdminPanel.Web;
 
@@ -17,6 +19,12 @@ public static class DependencyInjection
 
         if (environment.IsDevelopment())
         {
+            var keysPath = Path.Combine(environment.ContentRootPath, "DataProtection-keys");
+            Directory.CreateDirectory(keysPath);
+            services.AddDataProtection()
+                .PersistKeysToFileSystem(new DirectoryInfo(keysPath))
+                .SetApplicationName("Hyper.AdminPanel");
+
             // Neo defaults the panel cookie to SecurePolicy.Always. Local HTTP
             // development must be able to send the cookie back to AdminDashboard.
             services.PostConfigure<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme,

@@ -40,6 +40,7 @@ public sealed class OAuthCallbackController(BasalamOAuthService oauth, BasalamOA
         if (request is null) return Notice("زمینه مغازه منقضی شده است.");
         var nonce = BasalamOAuthService.Nonce();
         var url = oauth.CreateAuthorizationUrl(request.Id, selected.Id, admin.Id, nonce);
+        logger.LogInformation("OAuth redirect URL: {Url}", url);
         Response.Cookies.Append(CorrelationCookie, nonce, new CookieOptions
         {
             HttpOnly = true, Secure = Request.IsHttps, SameSite = SameSiteMode.Lax,
