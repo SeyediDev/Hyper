@@ -41,6 +41,7 @@ public sealed class BasalamOAuthService(IOptions<BasalamOAuthSettings> options, 
 {
     private BasalamOAuthSettings Settings => options.Value;
     public string Scopes => Settings.Scopes;
+    public string AuthorizationEndpoint => Settings.AuthorizationEndpoint;
     public string RedirectUri => Settings.RedirectUri;
 
     public string? ConfigurationError()

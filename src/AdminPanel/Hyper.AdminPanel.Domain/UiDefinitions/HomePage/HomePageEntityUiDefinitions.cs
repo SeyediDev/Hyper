@@ -26,61 +26,61 @@ public sealed class HomePageEntityUiDefinitions : CRUDDefinition<HomePageEntity>
         }
 public class BusinessDashboard : DashboardConfigDefinition
         {
-            protected override string Title => "مorig و حسابداری";
+            protected override string Title => "مغازه و حسابداری";
             protected override List<string> Roles => [HyperRoles.Admin];
             protected override bool IsDefault => true;
             public class Widget1 : DashboardDivWidgetDefinition<SqlTblShop, SqlTblShopUiDefinitions.PublicReport, SqlTblShopUiDefinitions.PublicReport.CountConfig>
             {
-                public override string Title => "م.orig‌ها";
+                public override string Title => "مغازه‌ها";
                 public override int Width => 3;
-                protected override int? HeightInPixels => 160;
+                protected override int? HeightInPixels => 110;
                 protected override int? CacheTimeMinutes => 1;
             }
             public class Widget2 : DashboardDivWidgetDefinition<SqlTblProduct, SqlTblProductUiDefinitions.PublicReport, SqlTblProductUiDefinitions.PublicReport.CountConfig>
             {
                 public override string Title => "کالاها";
                 public override int Width => 3;
-                protected override int? HeightInPixels => 160;
+                protected override int? HeightInPixels => 110;
                 protected override int? CacheTimeMinutes => 1;
             }
             public class Widget3 : DashboardDivWidgetDefinition<SqlTblPerson, SqlTblPersonUiDefinitions.PublicReport, SqlTblPersonUiDefinitions.PublicReport.CountConfig>
             {
                 public override string Title => "طرف حساب‌ها";
                 public override int Width => 3;
-                protected override int? HeightInPixels => 160;
+                protected override int? HeightInPixels => 110;
                 protected override int? CacheTimeMinutes => 1;
             }
             public class Widget4 : DashboardDivWidgetDefinition<SqlTblWarehouse, SqlTblWarehouseUiDefinitions.PublicReport, SqlTblWarehouseUiDefinitions.PublicReport.CountConfig>
             {
                 public override string Title => "انبارها";
                 public override int Width => 3;
-                protected override int? HeightInPixels => 160;
+                protected override int? HeightInPixels => 110;
                 protected override int? CacheTimeMinutes => 1;
             }
             public class Widget5 : DashboardDivWidgetDefinition<SqlTblSaleorder, SqlTblSaleorderUiDefinitions.PublicReport, SqlTblSaleorderUiDefinitions.PublicReport.CountConfig>
             {
                 public override string Title => "فاکتورهای فروش";
                 public override int Width => 6;
-                protected override int? HeightInPixels => 300;
+                protected override int? HeightInPixels => 110;
                 protected override int? CacheTimeMinutes => 1;
             }
             public class Widget6 : DashboardDivWidgetDefinition<SqlTblPurchaseorder, SqlTblPurchaseorderUiDefinitions.PublicReport, SqlTblPurchaseorderUiDefinitions.PublicReport.CountConfig>
             {
                 public override string Title => "فاکتورهای خرید";
                 public override int Width => 6;
-                protected override int? HeightInPixels => 300;
+                protected override int? HeightInPixels => 110;
                 protected override int? CacheTimeMinutes => 1;
             }
             public class Widget7 : DashboardDivWidgetDefinition<SqlTblProduct, SqlTblProductUiDefinitions.PublicReport, SqlTblProductUiDefinitions.PublicReport.ByShopidConfig>
             {
-                public override string Title => "کالا به تفکیک م.orig";
+                public override string Title => "کالا به تفکیک مغازه";
                 public override int Width => 6;
                 protected override int? HeightInPixels => 300;
                 protected override int? CacheTimeMinutes => 1;
             }
             public class Widget8 : DashboardDivWidgetDefinition<SqlTblSaleorder, SqlTblSaleorderUiDefinitions.PublicReport, SqlTblSaleorderUiDefinitions.PublicReport.ByShopidConfig>
             {
-                public override string Title => "فروش به تفکیک م.orig";
+                public override string Title => "فروش به تفکیک مغازه";
                 public override int Width => 6;
                 protected override int? HeightInPixels => 300;
                 protected override int? CacheTimeMinutes => 1;

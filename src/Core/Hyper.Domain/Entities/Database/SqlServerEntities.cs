@@ -6565,6 +6565,7 @@ public sealed class SqlViewDetailaccountbalance : SqlServerEntity
 /// </summary>
 [Neo.Bpms.Domain.Models.Attributes.EntityAttributes.View(SqlVwMarketingsubscriptionmonthlyQuery.Sql, true)]
 [DisplayName("تحلیل ماهانه اشتراک بازاریابی")]
+[DbMap("vw_SqlVwMarketingsubscriptionmonthly")]
 public sealed class SqlVwMarketingsubscriptionmonthly : SqlServerEntity
 {
     [DisplayName("ماه")]
@@ -6608,14 +6609,14 @@ WITH MonthSeries AS (
     UNION ALL SELECT CAST(DATEADD(month, 1, MonthStart) AS date) FROM MonthSeries
     WHERE MonthStart < CAST(DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1) AS date)
 ), Tenants AS (
-    SELECT DISTINCT TENANT_ID_ TenantId FROM TBL_ServiceRequest WHERE TENANT_ID_ IS NOT NULL
+    SELECT DISTINCT ISNULL(TENANT_ID_, '') TenantId FROM TBL_ServiceRequest WHERE SHOPID_ IS NOT NULL
 ), Eligible AS (
-    SELECT DISTINCT TENANT_ID_ TenantId, SHOPID_ ShopId, CAST(DATEFROMPARTS(YEAR(REQUESTTIME_), MONTH(REQUESTTIME_), 1) AS date) MonthStart
-    FROM TBL_ServiceRequest WHERE TENANT_ID_ IS NOT NULL AND SHOPID_ IS NOT NULL
+    SELECT DISTINCT ISNULL(TENANT_ID_, '') TenantId, SHOPID_ ShopId, CAST(DATEFROMPARTS(YEAR(REQUESTTIME_), MONTH(REQUESTTIME_), 1) AS date) MonthStart
+    FROM TBL_ServiceRequest WHERE SHOPID_ IS NOT NULL
 ), Paid AS (
-    SELECT r.TENANT_ID_ TenantId, r.SHOPID_ ShopId, r.REQUESTTIME_ RequestTime
+    SELECT ISNULL(r.TENANT_ID_, '') TenantId, r.SHOPID_ ShopId, r.REQUESTTIME_ RequestTime
     FROM TBL_ServiceRequest r LEFT JOIN TBL_ServicePayment p ON p.PAYMENTID_ = r.PAYMENTID_
-    WHERE r.TENANT_ID_ IS NOT NULL AND r.SHOPID_ IS NOT NULL AND r.PRICE_ > 0 AND (r.PAYMENTID_ IS NULL OR p.ISSUCCESS_ = 1)
+    WHERE r.SHOPID_ IS NOT NULL AND r.PRICE_ > 0 AND (r.PAYMENTID_ IS NULL OR p.ISSUCCESS_ = 1)
 ), FirstPaid AS (
     SELECT TenantId, ShopId, MIN(RequestTime) FirstPaidAt FROM Paid GROUP BY TenantId, ShopId
 ), PaidMonths AS (
