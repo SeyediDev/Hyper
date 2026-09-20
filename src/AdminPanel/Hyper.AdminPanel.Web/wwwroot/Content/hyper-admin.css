@@ -4,4 +4,20 @@
 @media(max-width:1200px){.hyper-sidebar{width:220px;padding:28px 17px}.hyper-workspace{margin-right:220px}.hyper-content{padding:24px}.hyper-topbar{padding:0 24px}.metric-grid{gap:12px}.metric-card{padding:14px 14px 0}.metric-foot{margin:0 -14px;padding-right:14px}.dashboard-middle,.dashboard-bottom{grid-template-columns:minmax(0,1fr) 270px;gap:15px}.dashboard-card{padding:18px}.metric-card>div:first-child{font-size:10px}.metric-icon{width:30px;height:30px;padding:7px}.platform-list{gap:10px}}
 @media(max-width:1000px){.metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dashboard-middle,.dashboard-bottom{grid-template-columns:1fr}.queue-card{display:grid;grid-template-columns:1fr 1fr;gap:15px}.queue-card header{grid-column:1/-1}.queue-donut{margin:12px auto}.queue-legend{align-self:center}.platform-list{grid-template-columns:1fr}.platform-time{width:auto;border:0;margin-right:auto}.dashboard-heading{align-items:flex-start}.dashboard-heading h1{font-size:23px}}
 @media(max-width:760px){.hyper-sidebar{transform:translateX(100%);transition:transform .2s;width:240px;top:69px;box-shadow:-10px 0 30px #183e3320}.nav-open .hyper-sidebar{transform:translateX(0)}.hyper-workspace{margin-right:0}.hyper-topbar{height:69px;padding:0 16px;position:sticky;top:0;z-index:30}.mobile-toggle{display:inline-flex}.topbar-heading>span{display:none}.hyper-content{padding:18px 16px}.hyper-topbar .preview-pill{font-size:9px;padding:3px 7px}.topbar-user{gap:8px}.topbar-user small{font-size:8px}.demo-notice{font-size:10px;margin-bottom:20px}.demo-notice a{margin:6px 0 0;display:block}.dashboard-heading{flex-wrap:wrap}.dashboard-heading p:not(.eyebrow){line-height:2}.dashboard-heading .button{font-size:10px;padding:7px 12px}.dashboard-toolbar{flex-wrap:wrap;margin-top:20px}.dashboard-toolbar>div:first-child{flex-wrap:wrap}.metric-card>strong{font-size:28px}.metric-grid{gap:10px}.metric-card>p{font-size:9px}.metric-foot{font-size:8px}.card-heading h2{font-size:12px}.card-heading p{font-size:9px}.card-heading>a{font-size:9px}.dashboard-card{padding:16px}.chart-labels{font-size:8px}.hyper-footer{padding:0 16px 18px;flex-wrap:wrap}.platform-time{font-size:8px}.hyper-workspace>aside{font-size:11px!important}.sidebar-note{margin-top:30px}.sidebar-footer{margin-top:30px}.hyper-sidebar{overflow:auto}}
+
+/* Hyperyek brand refresh — aligned with hyperyek.com */
+body.hyper-admin{--green:#7c3aed;--ink:#181329;--muted:#746d7e;--line:#e9e4ef;--canvas:#f8f5fe}
+.hyper-sidebar{background:#181329;color:#ddd6fe}
+.hyper-sidebar nav a:hover{background:#2e2350}
+.hyper-sidebar nav a.active{background:#ede9fe;color:#6d28d9}
+.brand-mark{width:150px;height:auto;border:0;border-radius:0;background:transparent;color:inherit}
+.brand-mark img{display:block;width:100%;height:auto}
+.brand-caption{display:block;font-size:10px;font-weight:400;color:#c4b5fd;white-space:nowrap}
+.visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.sidebar-note{background:#241b3f;border-color:#3b2c66}.note-line{background:#4c3b78}.sidebar-note small,.small-label,.sidebar-footer small{color:#b8a8d9}
+.status-dot{background:#a78bfa}.user-avatar{background:#ede9fe;color:#6d28d9}
+.button-primary:hover{background:#6d28d9}.button-secondary{border-color:#ddd6fe;background:#faf8ff}
+.period-picker a.selected{color:#6d28d9;background:#ede9fe}.mint{color:#7c3aed;background:#f3e8ff}
+.chart-line{stroke:#7c3aed}.queue-donut{background:conic-gradient(#7c3aed var(--delivered),#eeeaf3 0)}
+@media(max-width:760px){.brand-mark{width:130px}.brand-caption{font-size:9px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}

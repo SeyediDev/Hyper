@@ -175,5 +175,6 @@ public sealed class HyperSqlServerContext(DbContextOptions<HyperSqlServerContext
     public DbSet<SqlTblWarehouse> TblWarehouses => Set<SqlTblWarehouse>();
     public DbSet<SqlViewAccountbalance> ViewAccountbalances => Set<SqlViewAccountbalance>();
     public DbSet<SqlViewDetailaccountbalance> ViewDetailaccountbalances => Set<SqlViewDetailaccountbalance>();
+    public DbSet<SqlVwMarketingsubscriptionmonthly> VwMarketingsubscriptionmonthlies => Set<SqlVwMarketingsubscriptionmonthly>();
     public DbSet<SqlVwIntegrationdashboard> VwIntegrationdashboards => Set<SqlVwIntegrationdashboard>();
 }

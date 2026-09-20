@@ -61,13 +61,8 @@ public static class DependencyInjection
                 client.DefaultRequestHeaders.Add("User-Agent", "HyperIntegration/1.0");
 			});
 
-        // Hyper SDK
-        services.AddBasalamSdk(configuration.GetSection("Basalam"));
-        services.AddSingleton<IBasalamHttpClient>(sp =>
-        {
-            var config = sp.GetRequiredService<IOptionsMonitor<BasalamConfig>>().CurrentValue;
-            return new BasalamHttpClient(config);
-        });
+	// Hyper SDK
+	services.AddBasalamSdk(configuration.GetSection("Basalam"));
 
 	services.AddDataProtection();
 	}

@@ -10,7 +10,7 @@ using Hyper.Domain.Entities.Integrations;
 
 namespace Hyper.Infrastructure.Features.Integrations;
 
-public sealed class BasalamOAuthSettings
+public sealed class BasalamOAuthSettingsئ
 {
     public string ClientId { get; set; } = "";
     public string? ClientSecret { get; set; }

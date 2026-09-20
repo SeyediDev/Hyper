@@ -82,11 +82,11 @@ button {
 
 /* CSS Variables for consistent theming */
 :root {
-  /* Primary Colors - Lime Green Accent */
-  --neo-menu-primary: #c2ef03;
-  --neo-menu-primary-hover: #d4f55a;
-  --neo-menu-primary-active: #a8d400;
-  --neo-menu-primary-light: rgba(194, 239, 3, 0.2);
+  /* Primary Colors - Hyperyek purple */
+  --neo-menu-primary: #7c3aed;
+  --neo-menu-primary-hover: #8b5cf6;
+  --neo-menu-primary-active: #6d28d9;
+  --neo-menu-primary-light: rgba(124, 58, 237, 0.16);
   
   /* Background Colors - Dark Theme */
   --neo-menu-bg-primary: #333333;

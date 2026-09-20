@@ -42,14 +42,21 @@ var pkceQuery=QueryHelpers.ParseQuery(new Uri(service.CreateAuthorizationUrl(req
 Check(pkceQuery["code_challenge_method"]=="S256" && !string.IsNullOrEmpty(service.ReadState(pkceQuery["state"],nonce).CodeVerifier),"optional PKCE");
 handler.Json="""{"access_token":"fake-access","refresh_token":"fake-refresh","expires_in":3600,"token_type":"Bearer"}""";
 var token=await service.ExchangeCodeForTokenAsync("fake-code",state,default);
-Check(handler.LastUri=="https://auth.basalam.com/oauth/token" && handler.Body!.Contains("grant_type=authorization_code")
-    && handler.Body.Contains("client_secret=test-secret") && handler.Body.Contains("code=fake-code"),"confidential server code exchange");
+using (var tokenRequest = JsonDocument.Parse(handler.Body!))
+{
+    Check(handler.LastUri=="https://auth.basalam.com/oauth/token"
+        && handler.ContentType == "application/json; charset=utf-8"
+        && tokenRequest.RootElement.GetProperty("grant_type").GetString() == "authorization_code"
+        && tokenRequest.RootElement.GetProperty("client_secret").GetString() == "test-secret"
+        && tokenRequest.RootElement.GetProperty("code").GetString() == "fake-code",
+        "confidential server JSON code exchange");
+}
 var entity=service.CreateTokenEntity(7,9,"tenant-test",IntegrationProvider.Basalam,token);
 Check(entity.AccessToken!="fake-access" && service.DecryptToken(entity.AccessToken)=="fake-access"
     && service.DecryptToken(entity.RefreshToken!)=="fake-refresh" && entity.RawTokenResponse is null,"encrypted credentials; no raw duplicate");
 handler.Json="""{"vendor":{"id":123,"title":"test booth"}}""";
 var vendor=await service.GetVendorAsync(token,default);
-Check(vendor.Id=="123" && handler.LastUri=="https://openapi.basalam.com/v1/users/me" && handler.Authorization=="Bearer fake-access","vendor identified through token");
+Check(vendor.Id=="123" && handler.LastUri=="https://core.basalam.com/v3/users/me" && handler.Authorization=="Bearer fake-access","vendor identified through token");
 handler.Json="""{"vendor":null}""";
 await RejectAsync(()=>service.GetVendorAsync(token,default),"account without booth rejected");
 handler.Json="""{"access_token":""}""";
@@ -67,13 +74,15 @@ sealed class FakeHttp : HttpMessageHandler
  public string Json {get;set;}="{}";
  public HttpStatusCode Status {get;set;}=HttpStatusCode.OK;
  public string? Body {get;private set;}
+ public string? ContentType {get;private set;}
  public string? LastUri {get;private set;}
  public string? Authorization {get;private set;}
  protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,CancellationToken ct)
  {
   LastUri=request.RequestUri!.AbsoluteUri;
   Authorization=request.Headers.Authorization?.ToString();
-  Body=request.Content is null?null:await request.Content.ReadAsStringAsync(ct);
+ Body=request.Content is null?null:await request.Content.ReadAsStringAsync(ct);
+  ContentType=request.Content?.Headers.ContentType?.ToString();
   return new HttpResponseMessage(Status){Content=new StringContent(Json,Encoding.UTF8,"application/json")};
  }
 }

@@ -18,11 +18,8 @@ public static class DependencyInjection
     public static IServiceCollection AddBasalamSdk(this IServiceCollection services, IConfiguration configuration)
     {
         var section = configuration.GetSection(SectionName);
-        if (section.Exists())
-        {
-            services.Configure<BasalamConfig>(section);
-            services.AddSingleton<BasalamConfig>(sp => sp.GetRequiredService<IOptionsMonitor<BasalamConfig>>().CurrentValue);
-        }
+        services.Configure<BasalamConfig>(section);
+        services.AddSingleton<BasalamConfig>(sp => sp.GetRequiredService<IOptionsMonitor<BasalamConfig>>().CurrentValue);
 
         services.TryAddSingleton<Clients.IBasalamHttpClient, Clients.BasalamHttpClient>();
         services.TryAddSingleton<Clients.IBasalamAuthClient, Clients.BasalamAuthClient>();

@@ -25,12 +25,13 @@
     </defs></svg>
     <a class="skip-link" href="#main-content">رفتن به محتوای اصلی</a>
     <aside class="hyper-sidebar" id="admin-navigation">
-        <a class="hyper-brand" href="@(preview ? Url.Action("Preview", "AdminDashboard") : Url.Action("Index", "AdminDashboard"))"><span class="brand-mark">هـ</span><span>هایپریک<small>پنل مدیریتی کسب‌وکار</small></span></a>
+        <a class="hyper-brand" href="@(preview ? Url.Action("Preview", "AdminDashboard") : Url.Action("Index", "AdminDashboard"))"><span class="brand-mark"><img src="~/Content/images/logo.svg" alt="" /></span><span class="visually-hidden">هایپریک</span><span class="brand-caption">پنل مدیریتی کسب‌وکار</span></a>
         <p class="nav-caption">فضای مدیریت</p>
         <nav aria-label="منوی اصلی">
             <a class="@(controller == "AdminDashboard" ? "active" : "")" href="@(preview ? Url.Action("Preview", "AdminDashboard") : Url.Action("Index", "AdminDashboard"))"><svg><use href="#hi-grid"/></svg>نمای کلی</a>
             <a class="@Active("MerchantSimulation", "Index")" asp-controller="MerchantSimulation" asp-action="Index"><svg><use href="#hi-shop"/></svg>مغازه‌دار و اتصال</a>
             <a class="@Active("MerchantSimulation", "Dashboard")" asp-controller="MerchantSimulation" asp-action="Dashboard"><svg><use href="#hi-sync"/></svg>عملیات یکسان‌سازی</a>
+            <a class="@Active("MerchantSimulation", "Profile")" asp-controller="MerchantSimulation" asp-action="Profile"><svg><use href="#hi-users"/></svg>یکسان‌سازی پروفایل</a>
         </nav>
         <div class="sidebar-note"><span class="small-label">مرجع موجودی غرفه</span><strong>موجودی کل مغازه</strong><p>پس از کسر رزروهای فعال</p><span class="note-line"></span><small>هر اتصال، یک زمینهٔ مشخص برای مغازه‌دار دارد.</small></div>
         <div class="sidebar-footer"><span class="status-dot"></span>پنل مدیریت هایپریک<small>فروشگاه · حسابداری · اتصال‌ها</small></div>

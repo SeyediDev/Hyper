@@ -16,13 +16,7 @@
         root = "/" //Context.Request.GetBaseUrl()
     };
     Func<dynamic, HelperResult> Logo =
-        @<svg width="67" height="30" viewBox="0 0 67 30" fill="none" xmlns="http://www.w3.org/2000/svg" >
-            <rect width="67" height="40" fill="white" />
-          <text x="65" y="25" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#D90006">
-            پنل مدیریت هایپریک
-          </text>
-         </svg>
-        ;
+        @<img src="@Url.Content("~/Content/images/logo.svg")" alt="هایپریک" width="126" height="43" />;
 
     var headerModel = new HeaderModel
     {

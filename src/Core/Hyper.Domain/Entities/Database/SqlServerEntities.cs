@@ -6592,6 +6592,48 @@ public sealed class SqlViewDetailaccountbalance : SqlServerEntity
     [DbMap("cnt")]
     public long? Cnt { get; set; }
 }
+
+/// <summary>
+/// ماهانه‌ی قیف اشتراک برای گزارش‌های بازاریابی داشبورد اصلی.
+/// مشتری جدید فقط اولین درخواست پولی هر مغازه است و retention
+/// مغازه‌هایی را می‌شمارد که در ماه قبل نیز اشتراک پولی داشته‌اند.
+/// </summary>
+[DisplayName("تحلیل ماهانه اشتراک بازاریابی")]
+[DbMap("vw_MarketingSubscriptionMonthly")]
+public sealed class SqlVwMarketingsubscriptionmonthly : SqlServerEntity
+{
+    [DisplayName("ماه")]
+    [DbMap("MonthStart")]
+    public DateOnly Monthstart { get; set; }
+
+    [DisplayName("مستاجر شناسه")]
+    [DbMap("TenantId")]
+    public string Tenantid { get; set; } = null!;
+
+    [DisplayName("مغازه‌های واجد شرایط")]
+    [DbMap("EligibleShopCount")]
+    public long Eligibleshopcount { get; set; }
+
+    [DisplayName("مشتری‌های جدید پولی")]
+    [DbMap("NewPaidShopCount")]
+    public long Newpaidshopcount { get; set; }
+
+    [DisplayName("مغازه‌های فعال پولی")]
+    [DbMap("ActivePaidShopCount")]
+    public long Activepaidshopcount { get; set; }
+
+    [DisplayName("مغازه‌های حفظ‌شده")]
+    [DbMap("RetainedShopCount")]
+    public long Retainedshopcount { get; set; }
+
+    [DisplayName("نرخ تبدیل")]
+    [DbMap("ConversionRate")]
+    public decimal Conversionrate { get; set; }
+
+    [DisplayName("نرخ حفظ")]
+    [DbMap("RetentionRate")]
+    public decimal Retentionrate { get; set; }
+}
 [DisplayName("یکسان‌سازی داشبورد")]
 [DbMap("vw_IntegrationDashboard")]
 public sealed class SqlVwIntegrationdashboard : SqlServerEntity

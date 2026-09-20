@@ -18,14 +18,11 @@
 	</ItemGroup>  <ItemGroup>
     <!-- Club UI definitions are excluded; only Hyper integration definitions are loaded. -->
     <Compile Remove="UiDefinitions\**" />
+    <EmbeddedResource Remove="UiDefinitions\Financial\**" />
+    <None Remove="UiDefinitions\Financial\**" />
     <Compile Include="UiDefinitions\HomePage\HomePageEntityUiDefinitions.cs" />
     <Compile Include="UiDefinitions\Database\**\*.cs" />
   </ItemGroup>
-
-	
-	<ItemGroup>
-	  <Folder Include="UiDefinitions\Financial\" />
-	</ItemGroup>
 	
 </Project>
 

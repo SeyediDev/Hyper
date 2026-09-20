@@ -180,3 +180,7 @@ HomeController به DesktopController استاندارد Neo بازگرداند�
 - این نتایج ادعای دریافت واقعی توکن یا آماده‌بودن worker با توکن رمز‌شده نیست.
 ## تحلیل جاری یکسان‌سازی
 مرجع تفصیلی سناریوهای تغییر مغازه، تغییر غرفه و تطبیق، سند [SYNCHRONIZATION_SCENARIOS.md](SYNCHRONIZATION_SCENARIOS.md) است. ترتیب و محدودیت‌های آن بر توصیف‌های هدف‌گذاری‌شدهٔ قدیمی این فایل تقدم دارد.
+
+## DASH-217 / DASH-218 — قیف اشتراک و retention بازاریابی
+
+در داشبورد اصلی (`DashboardConfigDefinition`) یک تب بازاریابی بعد از `BusinessDashboard` قرار دارد. منبع دو نمودار view متراکم `vw_MarketingSubscriptionMonthly` است؛ بنابراین گزارش به refresh دستی وابسته نیست و همیشه ۱۲ ماه تقویمی اخیر را برمی‌گرداند. مشتری در این گزارش همان `ShopId` است و `NewPaidShopCount` فقط با کمینه‌ی `RequestTime` بین درخواست‌های `Price > 0` برای هر مغازه محاسبه می‌شود؛ در صورت وجود رکورد پرداخت، فقط `ISSUCCESS_ = 1` پرداخت‌شده محسوب می‌شود. `ConversionRate` برابر `NewPaidShopCount / EligibleShopCount` (مغازه‌های دارای درخواست در همان ماه) است. `RetentionRate` نسبت مغازه‌های دارای اشتراک پولی در ماه جاری است که در ماه قبل نیز فعالیت پولی داشته‌اند. نصب/به‌روزرسانی view با `scripts/50_marketing_subscription_dashboard.sql` انجام می‌شود و رکوردهای legacy تغییری نمی‌کنند.

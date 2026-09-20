@@ -27,6 +27,17 @@ public sealed class MerchantSimulationController(IAdminMerchantSimulationService
     }
 
     [HttpGet]
+    public async Task<IActionResult> Profile(CancellationToken ct)
+    {
+        var admin = GetUser();
+        if (!admin.IsAdmin) return StatusCode(403);
+        var selected = ReadTicket(admin.Id, Request.Cookies[CookieName]) is { } id
+            ? await simulations.GetAsync(admin.Id, id, ct) : null;
+        var stats = selected is null ? null : await dashboard.GetAsync(selected.ShopId, selected.TenantId, ct);
+        return View(new IntegrationDashboardViewModel(selected, stats));
+    }
+
+    [HttpGet]
     public async Task<IActionResult> Index(string? search, CancellationToken ct, IntegrationProvider integrationProvider = IntegrationProvider.Basalam)
     {
         var admin = GetUser();

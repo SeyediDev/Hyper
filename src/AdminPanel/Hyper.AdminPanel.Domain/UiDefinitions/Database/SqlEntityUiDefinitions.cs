@@ -2977,9 +2977,27 @@ public sealed class SqlTblServicerequestUiDefinitions : CRUDDefinition<SqlTblSer
         {
             public ByShopidConfig() : base(ChartType.Bar) { }
             protected override List<string> Roles => [HyperRoles.Admin];
-            protected override string Name => "درخواست اشتراک به تفکیک شناسه مغازه";
-            protected override void DefineGroupBy() { GroupBy(nameof(SqlTblServicerequest.Shopid), "شناسه مغازه"); Count(null, "تعداد"); }
+            protected override string Name => "درخواست اشتراک به تفکیک شناسه م.orig";
+            protected override void DefineGroupBy() { GroupBy(nameof(SqlTblServicerequest.Shopid), "شناسه م.orig"); Count(null, "تعداد"); }
         }
+
+        /// <summary>
+        /// نرخ تبدیل ماهانه مشتریان (اولین اشتراک پولی)
+        /// </summary>
+        public class MonthlyConversionRateConfig : ChartConfigDefinition
+        {
+            public MonthlyConversionRateConfig() : base(ChartType.Column) { }
+            protected override List<string> Roles => [HyperRoles.Admin, HyperRoles.MarketingManager, HyperRoles.Analyst];
+            protected override string Name => "نرخ تبدیل ماهانه";
+            protected override string WhereCondition => $"{nameof(SqlTblServicerequest.Price)} > 0 AND {nameof(SqlTblServicerequest.Shopid)} IS NOT NULL";
+
+            protected override void DefineGroupBy()
+            {
+                GroupByFormula($"CONVERT(varchar(7), {nameof(SqlTblServicerequest.Requesttime)}, 120)", "ماه");
+                Count(null, "تبدیل شده");
+            }
+        }
+
     }
 }
 
