@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Hyper.Domain.Entities.Integrations;
 
 namespace Hyper.Infrastructure.Features.Integrations;
 
@@ -169,6 +170,20 @@ public sealed class BasalamOAuthService(IOptions<BasalamOAuthSettings> options, 
         // Never duplicate access/refresh tokens in an unencrypted raw response column.
         RawTokenResponse = null
     };
+
+    public void UpdateTokenEntity(ExternalOAuthToken target, BasalamTokenResponse tokenData)
+    {
+        target.AccessToken = EncryptToken(tokenData.AccessToken);
+        if (!string.IsNullOrWhiteSpace(tokenData.RefreshToken))
+            target.RefreshToken = EncryptToken(tokenData.RefreshToken);
+        target.TokenType = tokenData.TokenType;
+        target.Scopes = tokenData.Scope ?? target.Scopes;
+        target.ExpiresAtUtc = tokenData.ExpiresIn is { } seconds
+            ? DateTime.UtcNow.AddSeconds(seconds) : null;
+        target.IssuedAtUtc = DateTime.UtcNow;
+        target.UpdatedAtUtc = DateTime.UtcNow;
+        target.IsActive = true;
+    }
 
     public string DecryptToken(string token) => protection.CreateProtector("Basalam.OAuth.Token").Unprotect(token);
     private string EncryptToken(string token) => protection.CreateProtector("Basalam.OAuth.Token").Protect(token);

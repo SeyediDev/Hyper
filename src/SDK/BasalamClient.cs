@@ -19,6 +19,7 @@ public interface IBasalamClient
     WebhookService Webhooks { get; }
     TokenInfo? Token { get; }
     Task<TokenInfo> RefreshTokenAsync(CancellationToken ct = default);
+    void SetToken(TokenInfo? token);
 }
 
 public sealed class BasalamClient : IBasalamClient, IDisposable
@@ -76,6 +77,11 @@ public sealed class BasalamClient : IBasalamClient, IDisposable
     {
         _logger?.LogInformation("Refreshing Basalam token");
         throw new InvalidOperationException("Auth client not configured for token refresh");
+    }
+
+    public void SetToken(TokenInfo? token)
+    {
+        lock (_tokenLock) _token = token;
     }
 
     public void Dispose()

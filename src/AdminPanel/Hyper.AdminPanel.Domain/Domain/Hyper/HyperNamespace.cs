@@ -1,4 +1,3 @@
-using Hyper.Domain.Entities.Database;
 using Neo.Bpms.Domain.Models.Cmmn.Partitions;
 
 namespace Hyper.AdminPanel.Domain.Domain.Hyper;
@@ -16,6 +15,7 @@ public class HyperNamespace : ModelDefinition<HyperNamespace>
     protected override void Entities()
     {
         DefineEntity<HomePageEntity>();
+        /*
         DefineEntity<ExternalIntegrationConnection>();
         DefineEntity<ExternalProductMapping>();
         DefineEntity<ExternalOrderMapping>();
@@ -183,7 +183,7 @@ public class HyperNamespace : ModelDefinition<HyperNamespace>
         DefineEntity<SqlViewAccountbalance>();
         DefineEntity<SqlViewDetailaccountbalance>();
         DefineEntity<SqlVwMarketingsubscriptionmonthly>();
-        DefineEntity<SqlVwIntegrationdashboard>();
+        DefineEntity<SqlVwIntegrationdashboard>();*/
     }
     private void AddArchivePartitionScheme(string name) => AddPartitionScheme($"Archive_{name}", "pfArchive", FileGroupSelectionType.FromList, "", name, $"{name}_Archive");
 }

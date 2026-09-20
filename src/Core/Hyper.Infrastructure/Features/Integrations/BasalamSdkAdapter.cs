@@ -7,7 +7,7 @@ using Hyper.Domain.Features.Integrations;
 
 namespace Hyper.Infrastructure.Features.Integrations;
 
-public sealed class BasalamSdkAdapter(IBasalamClient client) : IExternalIntegrationAdapter
+public sealed class BasalamSdkAdapter(IBasalamClient client, BasalamOAuthStore tokenStore) : IExternalIntegrationAdapter
 {
     public IntegrationProvider Provider => IntegrationProvider.Basalam;
     public bool IsImplemented => true;
@@ -18,6 +18,7 @@ public sealed class BasalamSdkAdapter(IBasalamClient client) : IExternalIntegrat
         ExternalIntegrationConnection connection, CancellationToken cancellationToken)
     {
         Validate(connection);
+        await SetTokenAsync(connection, cancellationToken);
         var vendorId = int.Parse(connection.AccountIdentifier, CultureInfo.InvariantCulture);
         var result = new List<ExternalCatalogItem>();
 
@@ -68,6 +69,7 @@ public sealed class BasalamSdkAdapter(IBasalamClient client) : IExternalIntegrat
         CancellationToken cancellationToken)
     {
         Validate(connection);
+        await SetTokenAsync(connection, cancellationToken);
 
         foreach (var update in updates)
         {
@@ -92,6 +94,13 @@ public sealed class BasalamSdkAdapter(IBasalamClient client) : IExternalIntegrat
                 await client.Products.PatchStockAsync(externalProductId, (int)update.Quantity, cancellationToken);
             }
         }
+    }
+
+    private async Task SetTokenAsync(ExternalIntegrationConnection connection, CancellationToken ct)
+    {
+        var token = await tokenStore.GetTokenAsync(connection, ct);
+        if (token is null) throw new IntegrationProviderException("InvalidCredentials", false);
+        client.SetToken(token);
     }
 
     private void Validate(ExternalIntegrationConnection connection)

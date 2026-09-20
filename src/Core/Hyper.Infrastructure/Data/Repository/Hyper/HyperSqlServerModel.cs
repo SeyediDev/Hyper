@@ -3320,20 +3320,6 @@ internal static class HyperSqlServerModel
             entity.HasIndex(new[] { "Accountid", "Detailaccountid" }, "IX_vw_AccountBalance").IsUnique(true).IsClustered(true).HasFilter(null).IsDescending(false, false);
         });
 
-        modelBuilder.Entity<SqlVwMarketingsubscriptionmonthly>(entity =>
-        {
-            entity.ToView("vw_MarketingSubscriptionMonthly", "dbo");
-            entity.HasNoKey();
-            entity.Property(e => e.Monthstart).HasColumnName("MonthStart").HasColumnType("date").IsRequired(true).ValueGeneratedNever();
-            entity.Property(e => e.Tenantid).HasColumnName("TenantId").HasColumnType("nvarchar(30)").IsRequired(true).HasMaxLength(30).IsUnicode(true).UseCollation("SQL_Latin1_General_CP1_CI_AS").ValueGeneratedNever();
-            entity.Property(e => e.Eligibleshopcount).HasColumnName("EligibleShopCount").HasColumnType("bigint").IsRequired(true).ValueGeneratedNever();
-            entity.Property(e => e.Newpaidshopcount).HasColumnName("NewPaidShopCount").HasColumnType("bigint").IsRequired(true).ValueGeneratedNever();
-            entity.Property(e => e.Activepaidshopcount).HasColumnName("ActivePaidShopCount").HasColumnType("bigint").IsRequired(true).ValueGeneratedNever();
-            entity.Property(e => e.Retainedshopcount).HasColumnName("RetainedShopCount").HasColumnType("bigint").IsRequired(true).ValueGeneratedNever();
-            entity.Property(e => e.Conversionrate).HasColumnName("ConversionRate").HasColumnType("decimal(9,2)").IsRequired(true).HasPrecision(9, 2).ValueGeneratedNever();
-            entity.Property(e => e.Retentionrate).HasColumnName("RetentionRate").HasColumnType("decimal(9,2)").IsRequired(true).HasPrecision(9, 2).ValueGeneratedNever();
-        });
-
         modelBuilder.Entity<SqlVwIntegrationdashboard>(entity =>
         {
             entity.ToView("vw_IntegrationDashboard", "dbo");

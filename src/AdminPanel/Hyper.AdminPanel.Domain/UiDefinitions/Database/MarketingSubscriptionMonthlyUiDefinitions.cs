@@ -1,5 +1,6 @@
 using Hyper.Domain.Entities.Database;
 using Neo.Bpms.Domain.Features.MetaDefinitions.Reports;
+using Neo.Bpms.Domain.Models.Cmmn.UI.Reports;
 
 namespace Hyper.AdminPanel.Domain.UiDefinitions.Database;
 

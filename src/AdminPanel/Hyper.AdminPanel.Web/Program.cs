@@ -9,7 +9,10 @@ builder.Services.Configure<TelemetryOptions>(builder.Configuration.GetSection(na
 builder.Host.UseDefaultServiceProvider(
         (_, options) =>
         {
-            options.ValidateOnBuild = true;
+            // The full Neo/Hyper service graph is large. Validating every scoped
+            // descriptor before the first request adds noticeable Development
+            // startup latency; production keeps the stricter validation.
+            options.ValidateOnBuild = builder.Environment.IsProduction();
             options.ValidateScopes = true;
         });
 

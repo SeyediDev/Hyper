@@ -21,7 +21,8 @@ public static class DependencyInjection
         services.Configure<BasalamConfig>(section);
         services.AddSingleton<BasalamConfig>(sp => sp.GetRequiredService<IOptionsMonitor<BasalamConfig>>().CurrentValue);
 
-        services.TryAddSingleton<Clients.IBasalamHttpClient, Clients.BasalamHttpClient>();
+        // The SDK client carries per-connection authentication state; it must not be singleton.
+        services.TryAddScoped<Clients.IBasalamHttpClient, Clients.BasalamHttpClient>();
         services.TryAddSingleton<Clients.IBasalamAuthClient, Clients.BasalamAuthClient>();
         services.TryAddSingleton<Auth.BasalamAuthBase>(sp =>
         {
@@ -33,7 +34,7 @@ public static class DependencyInjection
             }
             return null!;
         });
-        services.TryAddSingleton<IBasalamClient, BasalamClient>();
+        services.TryAddScoped<IBasalamClient, BasalamClient>();
 
         services.TryAddScoped<Services.IVendorService, Services.VendorService>();
         services.TryAddScoped<Services.IProductService, Services.ProductService>();

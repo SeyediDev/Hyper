@@ -1,5 +1,6 @@
 using System.Data;
 using Hyper.Domain.Entities.Integrations;
+using Hyper.SDK.Auth;
 using Hyper.Infrastructure.Data.Repository.Hyper;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +9,17 @@ namespace Hyper.Infrastructure.Features.Integrations;
 // Uses the existing Neo command context; no additional OAuth DbContext.
 public sealed class BasalamOAuthStore(HyperContextCommand db, BasalamOAuthService oauth)
 {
+    public async Task<TokenInfo?> GetTokenAsync(ExternalIntegrationConnection connection, CancellationToken ct)
+    {
+        var row = await db.ExternalOAuthTokens.SingleOrDefaultAsync(x =>
+            x.ConnectionId == connection.Id && x.ShopId == connection.ShopId &&
+            x.TenantId == connection.TenantId && x.Provider == IntegrationProvider.Basalam && x.IsActive, ct);
+        if (row is null || string.IsNullOrWhiteSpace(row.AccessToken)) return null;
+        if (row.ExpiresAtUtc <= DateTime.UtcNow.AddMinutes(1)) return null;
+        var access = oauth.DecryptToken(row.AccessToken);
+        var refresh = string.IsNullOrWhiteSpace(row.RefreshToken) ? null : oauth.DecryptToken(row.RefreshToken);
+        return new TokenInfo { AccessToken = access, TokenType = row.TokenType, RefreshToken = refresh, ExpiresAt = row.ExpiresAtUtc ?? DateTime.UtcNow.AddMinutes(10) };
+    }
     public async Task<bool> TryClaimAsync(BasalamAuthorizationState state, CancellationToken ct)
     {
         var now = DateTime.UtcNow;
