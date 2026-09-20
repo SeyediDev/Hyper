@@ -3,11 +3,14 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Hyper.Infrastructure.Data.Repository.Hyper;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hyper.Infrastructure.Features.Integrations;
 
 // Contract: basalam/python-sdk openapi_data/core.json (see docs/BASALAM_CONTRACT.md).
-public sealed class BasalamIntegrationAdapter(IHttpClientFactory clients) : ExternalIntegrationAdapterBase(clients)
+public sealed class BasalamIntegrationAdapter(IHttpClientFactory clients, HyperContextCommand db,
+    BasalamOAuthService oauth) : ExternalIntegrationAdapterBase(clients)
 {
     private const string Origin = "https://openapi.basalam.com";
     public override IntegrationProvider Provider => IntegrationProvider.Basalam;
@@ -25,8 +28,8 @@ public sealed class BasalamIntegrationAdapter(IHttpClientFactory clients) : Exte
         using var client = Client;
         for (var page = 1; page <= 10000; page++)
         {
-            using var request = Request(connection, HttpMethod.Get,
-                $"/v1/vendors/{vendor}/products?page={page}&per_page=100&variants_flatting=false&sort=id:asc");
+            using var request = await RequestAsync(connection, HttpMethod.Get,
+                $"/v1/vendors/{vendor}/products?page={page}&per_page=100&variants_flatting=false&sort=id:asc", cancellationToken);
             using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             EnsureSuccess(response);
             using var json = await ReadJson(response, cancellationToken);
@@ -87,7 +90,7 @@ public sealed class BasalamIntegrationAdapter(IHttpClientFactory clients) : Exte
         {
             var path = $"/v1/products/{Identifier(update.ExternalProductId)}";
             // Recheck remote ownership and variant membership before publishing a mapping.
-            using (var lookup = Request(connection, HttpMethod.Get, path))
+            using (var lookup = await RequestAsync(connection, HttpMethod.Get, path, cancellationToken))
             using (var read = await client.SendAsync(lookup, HttpCompletionOption.ResponseHeadersRead, cancellationToken))
             {
                 EnsureSuccess(read);
@@ -102,7 +105,7 @@ public sealed class BasalamIntegrationAdapter(IHttpClientFactory clients) : Exte
                     throw new IntegrationProviderException("VariantMismatch", false);
             }
             if (update.VariantId is not null) path += $"/variations/{Identifier(update.VariantId)}";
-            using var request = Request(connection, HttpMethod.Patch, path);
+            using var request = await RequestAsync(connection, HttpMethod.Patch, path, cancellationToken);
             request.Content = JsonContent.Create(new { stock = (int)update.Quantity });
             using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
             EnsureSuccess(response);
@@ -117,12 +120,30 @@ public sealed class BasalamIntegrationAdapter(IHttpClientFactory clients) : Exte
         Identifier(connection.AccountIdentifier);
     }
 
-    private static HttpRequestMessage Request(ExternalIntegrationConnection connection, HttpMethod method, string path)
+    private async Task<HttpRequestMessage> RequestAsync(ExternalIntegrationConnection connection, HttpMethod method,
+        string path, CancellationToken ct = default)
     {
-        using var json = JsonDocument.Parse(connection.CredentialsJson);
-        var token = OptionalString(json.RootElement, "access_token");
+        var stored = await db.ExternalOAuthTokens.SingleOrDefaultAsync(x =>
+            x.ConnectionId == connection.Id && x.ShopId == connection.ShopId
+            && x.TenantId == connection.TenantId && x.Provider == IntegrationProvider.Basalam
+            && x.IsActive, ct);
+        if (stored is null || string.IsNullOrWhiteSpace(stored.AccessToken))
+            throw new IntegrationProviderException("InvalidCredentials", false);
+        if (stored.ExpiresAtUtc <= DateTime.UtcNow.AddMinutes(1))
+        {
+            if (string.IsNullOrWhiteSpace(stored.RefreshToken))
+                throw new IntegrationProviderException("ExpiredCredentials", false);
+            BasalamTokenResponse refreshed;
+            try { refreshed = await oauth.RefreshAccessTokenAsync(oauth.DecryptToken(stored.RefreshToken), ct); }
+            catch (InvalidOperationException) { throw new IntegrationProviderException("ExpiredCredentials", false); }
+            oauth.UpdateTokenEntity(stored, refreshed);
+            await db.SaveChangesAsync(ct);
+        }
+        string token;
+        try { token = oauth.DecryptToken(stored.AccessToken); }
+        catch (Exception) { throw new IntegrationProviderException("InvalidCredentials", false); }
         if (string.IsNullOrWhiteSpace(token) || token.Any(char.IsWhiteSpace)
-            || OptionalString(json.RootElement, "token_type") is { } type && !type.Equals("Bearer", StringComparison.OrdinalIgnoreCase))
+            || !string.Equals(stored.TokenType, "Bearer", StringComparison.OrdinalIgnoreCase))
             throw new IntegrationProviderException("InvalidCredentials", false);
         var request = new HttpRequestMessage(method, Origin + path);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);

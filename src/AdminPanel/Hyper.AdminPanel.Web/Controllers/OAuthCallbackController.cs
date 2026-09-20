@@ -40,7 +40,9 @@ public sealed class OAuthCallbackController(BasalamOAuthService oauth, BasalamOA
         if (request is null) return Notice("زمینه مغازه منقضی شده است.");
         var nonce = BasalamOAuthService.Nonce();
         var url = oauth.CreateAuthorizationUrl(request.Id, selected.Id, admin.Id, nonce);
-        logger.LogInformation("OAuth redirect URL: {Url}", url);
+        // Never log the full URL: it contains the protected state ticket.
+        logger.LogInformation("Basalam OAuth authorization redirect prepared for request {RequestId}; endpoint={Endpoint}; callback={Callback}",
+            request.Id, oauth.AuthorizationEndpoint, oauth.RedirectUri);
         Response.Cookies.Append(CorrelationCookie, nonce, new CookieOptions
         {
             HttpOnly = true, Secure = Request.IsHttps, SameSite = SameSiteMode.Lax,

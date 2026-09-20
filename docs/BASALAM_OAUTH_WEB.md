@@ -37,6 +37,7 @@ callback به cookie ورود ادمین وابسته نیست؛ درخواست 
 - RedirectUri: آدرس دقیق ثبت‌شده برای برنامه؛ برای پروفایل محلی http://localhost:5000/api/auth/basalam/callback. پذیرش localhost را در تنظیمات برنامه باسلام بررسی کنید؛ در صورت نیاز از دامنه HTTPS قابل دسترس استفاده کنید.
 - Scopes: برای شناسایی حساب/غرفه customer.profile.read vendor.profile.read. مجوزهای محصول/سفارش موردنیاز را پس از تأیید در برنامه، مانند vendor.product.read vendor.product.write vendor.parcel.read اضافه کنید. نام‌های inventory.read/orders.read/products.read در تنظیمات قدیمی معتبر فرض نمی‌شوند.
 - UsePkce: پیش‌فرض false مطابق جریان confidential-client در SDK رسمی. روشن‌کردن منوط به تأیید پشتیبانی برنامه باسلام است.
+- تعویض code با token طبق مستند رسمی باسلام با POST و `Content-Type: application/json` به `https://auth.basalam.com/oauth/token` انجام می‌شود؛ secret فقط روی سرور ارسال می‌شود.
 - در چند نمونه یا بعد از تعویض سرور، key ring مشترک و پایدار ASP.NET Data Protection با دسترسی محدود لازم است؛ کلیدها برای بازکردن توکن ذخیره‌شده ضروری‌اند.
 - اجرای پشت reverse proxy باید HTTPS و forwarded headers صحیح داشته باشد تا cookie امن تولید شود.
 
@@ -49,7 +50,7 @@ Migration و snapshot دستی قدیمی با configuration اختلاف نوع
 
 ## مرز این تحویل
 
-دریافت و ذخیره توکن با فعال‌سازی worker یکی نیست. اتصال OAuth جدید/تمدیدشده غیرفعال می‌ماند؛ adapter فعلی CredentialsJson را می‌خواند و هنوز باید به مخزن توکن رمز‌شده متصل شود.
+دریافت و ذخیره توکن با فعال‌سازی worker یکی نیست. اتصال OAuth جدید/تمدیدشده غیرفعال می‌ماند؛ هنگام اجرای اتصال فعال، adapter توکن رمز‌شده را از `ExternalOAuthTokens` می‌خواند و در آستانهٔ انقضا refresh می‌کند.
 جدول فعلی تنها یک توکن به ازای ShopId/Provider می‌پذیرد؛ اتصال غرفه دوم برای همان مغازه رد می‌شود تا مدل چندغرفه‌ای جداگانه تصمیم‌گیری شود.
 تجدید خودکار، لغو دسترسی و تست واقعی با حساب باسلام هنوز معیار پذیرش جداگانه دارند.
 

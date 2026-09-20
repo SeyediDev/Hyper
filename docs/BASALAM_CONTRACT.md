@@ -10,7 +10,7 @@
 
 ## محدودهٔ موجود
 
-Strategy باسلام برای OAuth2 access token و BearerToken فعال است. این موضوع به معنی تکمیل دریافت یا refresh توکن OAuth نیست. CredentialsJson در این مرحله ورودی JSON با access_token و token_type اختیاری Bearer می‌گیرد؛ حفاظت پایدار credential هنوز آیتم باز SEC/INT است.
+Strategy باسلام برای OAuth2 access token و BearerToken فعال است. توکن OAuth از جدول `ExternalOAuthTokens` خوانده و با Data Protection رمزگشایی می‌شود؛ `CredentialsJson` منبع access token نیست. در آستانهٔ انقضا، refresh token روی سرور استفاده و رکورد رمزنگاری‌شده به‌روزرسانی می‌شود.
 
 آدرس ثابت HTTPS: `https://openapi.basalam.com`. redirect HTTP خودکار خاموش است. آدرس دلخواه از credential دریافت نمی‌شود. شناسه‌های غرفه، کالا و تنوع باید عدد صحیح مثبت با نمایش canonical باشند.
 

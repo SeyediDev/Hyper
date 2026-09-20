@@ -23,6 +23,8 @@ var simulationId = Guid.NewGuid();
 var url = new Uri(service.CreateAuthorizationUrl(requestId,simulationId,"admin-test",nonce));
 var query = QueryHelpers.ParseQuery(url.Query);
 Check(url.GetLeftPart(UriPartial.Path)=="https://basalam.com/accounts/sso","official authorize endpoint");
+Check(query["client_id"]=="test-client" && query["redirect_uri"]==settings.RedirectUri
+    && query["response_type"]=="code" && query.ContainsKey("scope"),"standard authorization parameters");
 Check(!query.ContainsKey("encrypted_state") && !query.ContainsKey("client_secret"),"standard state; no secret in URL");
 var state = service.ReadState(query["state"],nonce);
 Check(state.RequestId==requestId && state.SimulationId==simulationId && state.AdminId=="admin-test","shop request binding");

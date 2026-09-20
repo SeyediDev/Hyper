@@ -1,16 +1,15 @@
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.DataProtection;
-using Microsoft.Extensions.Options;
-using Hyper.Domain.Entities.Integrations;
 
 namespace Hyper.Infrastructure.Features.Integrations;
 
-public sealed class BasalamOAuthSettingsئ
+public sealed class BasalamOAuthSettings
 {
     public string ClientId { get; set; } = "";
     public string? ClientSecret { get; set; }
