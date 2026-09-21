@@ -1,4 +1,6 @@
 using System.Net.Http;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using Hyper.SDK.Auth;
 using Hyper.SDK.Clients;
@@ -93,17 +95,47 @@ public sealed class AuthorizationCodeAuth : BasalamAuthBase
             throw new BasalamAuthError("ClientSecret is required for AuthorizationCode auth");
     }
 
-    public string GetAuthorizationUrl(string redirectUri, string state, string codeVerifier, Scope scopes = Scope.CustomerProfileRead | Scope.VendorProfileRead)
+    public string GetAuthorizationUrl(string redirectUri, string state, string codeVerifier, Scope scopes = Scope.VendorProfileRead)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(redirectUri);
+        ArgumentException.ThrowIfNullOrWhiteSpace(state);
+        ArgumentException.ThrowIfNullOrWhiteSpace(codeVerifier);
         var query = System.Web.HttpUtility.ParseQueryString(string.Empty);
         query["response_type"] = "code";
         query["client_id"] = Config.ClientId!;
         query["redirect_uri"] = redirectUri;
         query["state"] = state;
-        query["code_challenge"] = codeVerifier;
+        query["code_challenge"] = Convert.ToBase64String(SHA256.HashData(Encoding.ASCII.GetBytes(codeVerifier)))
+            .TrimEnd('=').Replace('+', '-').Replace('/', '_');
         query["code_challenge_method"] = "S256";
-        query["scope"] = scopes.ToString();
+        query["scope"] = FormatScopes(scopes);
         return $"{Config.AuthorizeEndpoint}?{query}";
+    }
+
+    private static string FormatScopes(Scope scopes)
+    {
+        if (scopes == Scope.All)
+            throw new ArgumentException("Scope.All is not a valid authorization request; select explicit scopes.", nameof(scopes));
+
+        var values = new List<string>();
+        Add(Scope.CustomerProfileRead, "customer.profile.read");
+        Add(Scope.CustomerProfileWrite, "customer.profile.write");
+        Add(Scope.VendorProfileRead, "vendor.profile.read");
+        Add(Scope.VendorProfileWrite, "vendor.profile.write");
+        Add(Scope.ProductRead, "vendor.product.read");
+        Add(Scope.ProductWrite, "vendor.product.write");
+        Add(Scope.ParcelRead, "vendor.parcel.read");
+        Add(Scope.ParcelWrite, "vendor.parcel.write");
+        Add(Scope.OrderRead, "customer.order.read");
+        Add(Scope.OrderWrite, "customer.order.write");
+        Add(Scope.ChatRead, "customer.chat.read");
+        Add(Scope.ChatWrite, "customer.chat.write");
+        return string.Join(' ', values);
+
+        void Add(Scope value, string name)
+        {
+            if ((scopes & value) == value) values.Add(name);
+        }
     }
 
     public override async Task<TokenInfo> GetTokenAsync(CancellationToken ct = default)

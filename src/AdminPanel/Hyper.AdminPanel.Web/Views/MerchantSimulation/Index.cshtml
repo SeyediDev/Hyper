@@ -66,7 +66,16 @@
                         <dt>ادمین انجام‌دهنده</dt><dd>@Model.AdminName</dd>
                         <dt>اعتبار زمینه</dt><dd>۳۰ دقیقه از زمان انتخاب</dd></dl>
                 </div>
-                <form action="@(authorization.StartPath is null ? null : Url.Content("~" + authorization.StartPath))" method="post">
+                @if (authorization.Provider == IntegrationProvider.Basalam && ViewBag.OAuthAuthorizationUrl is string basalamAuthorizationUrl)
+                {
+                    <p>با حساب صاحب غرفه وارد @authorization.Title شوید و مجوزهای نمایش‌داده‌شده را تأیید کنید. نتیجه برای همین مغازه ذخیره می‌شود.</p>
+                    <p class="simulation-help">مجوزهای درخواستی: <bdi>@ViewBag.OAuthScopes</bdi></p>
+                    <a class="simulation-primary" href="@basalamAuthorizationUrl">ورود به @authorization.Title و اعطای مجوز</a>
+                    <p class="simulation-help">این دکمه مستقیماً به صفحه‌ی احراز هویت باسلام می‌رود.</p>
+                }
+                else if (authorization.Provider != IntegrationProvider.Basalam && authorization.StartPath is not null)
+                {
+                <form action="@Url.Content("~" + authorization.StartPath)" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="contextTicket" value="@Model.ContextTicket" />
                     <input type="hidden" name="displayedShopId" value="@selected.ShopId" />
@@ -84,6 +93,11 @@
                     }
                     <p class="simulation-help">پس از تأیید به پنل برمی‌گردید. توکن نمایش داده نمی‌شود و دریافت آن، یکسان‌سازی خودکار را فعال نمی‌کند.</p>
                 </form>
+                }
+                else if (authorization.Provider == IntegrationProvider.Basalam)
+                {
+                    <div class="simulation-notice" role="alert">لینک ورود باسلام ساخته نشد؛ تنظیمات OAuth یا زمینه‌ی انتخاب‌شده را بررسی کنید.</div>
+                }
                 @if (ViewBag.OAuthStatus is Hyper.Infrastructure.Features.Integrations.BasalamTokenStatus tokenStatus)
                 {
                     <div class="simulation-selection" role="status">

@@ -58,8 +58,7 @@ public sealed class BasalamAuthClient : IBasalamAuthClient
             grant_type = refreshTokenOverride != null ? "refresh_token" : "client_credentials",
             client_id = _config.ClientId,
             client_secret = _config.ClientSecret,
-            refresh_token = refreshTokenOverride ?? _config.RefreshToken,
-            scope = "customer.profile.read vendor.profile.read"
+            refresh_token = refreshTokenOverride ?? _config.RefreshToken
         };
 
         _logger.LogInformation("Requesting token from {Endpoint}", _config.TokenEndpoint);

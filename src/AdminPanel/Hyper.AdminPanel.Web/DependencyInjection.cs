@@ -66,6 +66,20 @@ public static class DependencyInjection
         AddFeatureServices(services, configuration);
 
         services.AddBpmsMVC(configuration);
+
+        // Neo's MVC registration forwards every /api request to JWT. The Basalam
+        // OAuth start endpoint is part of the browser/admin flow and must read the
+        // NeoCookies cookie, otherwise GetUser() sees an anonymous JWT request and
+        // the framework sends the browser to /Account/Login before OAuth starts.
+        services.PostConfigure<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme,
+            options =>
+            {
+                var previous = options.ForwardDefaultSelector;
+                options.ForwardDefaultSelector = context =>
+                    context.Request.Path.StartsWithSegments("/api/auth/basalam")
+                        ? null
+                        : previous?.Invoke(context);
+            });
         
         // Add Neo.Bpms.Api services (Monitoring, Dashboard, etc.)
         services.AddNeoBpmsApi(configuration, options =>

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -17,7 +18,7 @@ public sealed class BasalamOAuthSettings
     public string AuthorizationEndpoint { get; set; } = "https://basalam.com/accounts/sso";
     public string TokenEndpoint { get; set; } = "https://auth.basalam.com/oauth/token";
     public string RedirectUri { get; set; } = "";
-    public string Scopes { get; set; } = "customer.profile.read vendor.profile.read";
+    public string Scopes { get; set; } = "vendor.profile.read";
     // The official SDK documents confidential authorization-code flow, without PKCE.
     // Enable only when support is confirmed for the registered application.
     public bool UsePkce { get; set; }
@@ -131,7 +132,12 @@ public sealed class BasalamOAuthService(IOptions<BasalamOAuthSettings> options, 
     private async Task<BasalamTokenResponse> SendTokenAsync(Dictionary<string, string> values, CancellationToken ct)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, Settings.TokenEndpoint)
-            { Content = new FormUrlEncodedContent(values) };
+        {
+            // Basalam's documented token endpoint accepts a JSON object. Sending
+            // form-urlencoded data returns a generic provider error after consent.
+            Content = JsonContent.Create(values)
+        };
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
         if (!response.IsSuccessStatusCode) throw new InvalidOperationException("باسلام درخواست دریافت توکن را نپذیرفت.");
         await response.Content.LoadIntoBufferAsync(1024 * 1024, ct);
@@ -145,7 +151,8 @@ public sealed class BasalamOAuthService(IOptions<BasalamOAuthSettings> options, 
 
     public async Task<BasalamVendor> GetVendorAsync(BasalamTokenResponse token, CancellationToken ct)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Get, "https://openapi.basalam.com/v1/users/me");
+        using var request = new HttpRequestMessage(HttpMethod.Get, "https://core.basalam.com/v3/users/me");
+        request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
         using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
         if (!response.IsSuccessStatusCode) throw new InvalidOperationException("خواندن غرفه حساب باسلام ممکن نشد؛ مجوز پروفایل را بررسی کنید.");

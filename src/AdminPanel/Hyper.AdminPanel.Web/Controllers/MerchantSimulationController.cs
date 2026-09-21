@@ -14,6 +14,7 @@ public sealed class MerchantSimulationController(IAdminMerchantSimulationService
     BasalamOAuthService oauth, BasalamOAuthStore oauthStore, IIntegrationScenarioQueue scenarios) : ControllerBaseMVC
 {
     private const string CookieName = "Hyper.AdminMerchantSimulation";
+    private const string CorrelationCookie = "Hyper.Basalam.Correlation";
 
     [HttpGet]
     public async Task<IActionResult> Dashboard(CancellationToken ct)
@@ -58,8 +59,26 @@ public sealed class MerchantSimulationController(IAdminMerchantSimulationService
         }
         ViewBag.OAuthScopes = oauth.Scopes;
         ViewBag.OAuthRedirectUri = oauth.RedirectUri;
+        ViewBag.OAuthAuthorizationUrl = null;
         if (selected is not null)
         {
+            if (authorization.Provider == IntegrationProvider.Basalam
+                && ViewBag.OAuthConfigurationError is null)
+            {
+                var request = await simulations.RequestTokenAsync(admin.Id, selected.Id, selected.ShopId,
+                    IntegrationProvider.Basalam, IntegrationCredentialType.OAuth2, ct);
+                if (request is not null)
+                {
+                    var nonce = BasalamOAuthService.Nonce();
+                    ViewBag.OAuthAuthorizationUrl = oauth.CreateAuthorizationUrl(
+                        request.Id, selected.Id, admin.Id, nonce);
+                    Response.Cookies.Append(CorrelationCookie, nonce, new CookieOptions
+                    {
+                        HttpOnly = true, Secure = Request.IsHttps, SameSite = SameSiteMode.Lax,
+                        Path = "/api/auth/basalam", MaxAge = TimeSpan.FromMinutes(10), IsEssential = true
+                    });
+                }
+            }
             try { ViewBag.OAuthStatus = await oauthStore.GetStatusAsync(selected.ShopId, selected.TenantId, ct); }
             catch (SqlException ex) when (ex.Number == 208)
             {
