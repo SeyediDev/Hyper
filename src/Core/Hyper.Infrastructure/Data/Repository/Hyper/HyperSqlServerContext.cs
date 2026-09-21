@@ -7,6 +7,7 @@ namespace Hyper.Infrastructure.Data.Repository.Hyper;
 /// <summary>Database-owned accounting schema. Existing tables are excluded from migrations.</summary>
 public sealed class HyperSqlServerContext(DbContextOptions<HyperSqlServerContext> options) : DbContext(options)
 {
+    public DbSet<global::Hyper.Infrastructure.Features.Integrations.IntegrationCustomerMapping> IntegrationCustomerMappings => Set<global::Hyper.Infrastructure.Features.Integrations.IntegrationCustomerMapping>();
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         base.ConfigureConventions(configurationBuilder);
@@ -17,6 +18,15 @@ public sealed class HyperSqlServerContext(DbContextOptions<HyperSqlServerContext
     {
         base.OnModelCreating(modelBuilder);
         HyperSqlServerModel.Configure(modelBuilder);
+        modelBuilder.Entity<global::Hyper.Infrastructure.Features.Integrations.IntegrationCustomerMapping>(entity =>
+        {
+            entity.ToTable("IntegrationCustomerMappings", "dbo");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.TenantId).HasMaxLength(30);
+            entity.Property(x => x.BasalamUserId).HasMaxLength(128);
+            entity.HasIndex(x => new { x.ShopId, x.TenantId, x.BasalamUserId }).IsUnique();
+            entity.HasIndex(x => new { x.ShopId, x.TenantId, x.PersonId }).IsUnique();
+        });
     }
 
     public DbSet<SqlActGeBytearray> ActGeBytearrays => Set<SqlActGeBytearray>();

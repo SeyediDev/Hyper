@@ -1,5 +1,5 @@
-using Hyper.Domain.Entities.Database;
 using Hyper.AdminPanel.Domain.UiDefinitions.Database;
+using Hyper.Domain.Entities.Database;
 namespace Hyper.AdminPanel.Domain.UiDefinitions.HomePage;
 public sealed class HomePageEntityUiDefinitions : CRUDDefinition<HomePageEntity>
 {

@@ -22,37 +22,18 @@ public class BasalamError : Exception
     public override string ToString() => Code != null ? $"{Code}: {ErrorMessage}" : ErrorMessage;
 }
 
-public class BasalamAPIError : BasalamError
+public class BasalamAPIError(string message, int statusCode, string? responseBody = null, string? code = null) : BasalamError(message, code)
 {
-    public int StatusCode { get; }
-    public string? ResponseBody { get; }
-
-    public BasalamAPIError(string message, int statusCode, string? responseBody = null, string? code = null)
-        : base(message, code)
-    {
-        StatusCode = statusCode;
-        ResponseBody = responseBody;
-    }
+    public int StatusCode { get; } = statusCode;
+    public string? ResponseBody { get; } = responseBody;
 }
 
-public class BasalamAuthError : BasalamError
+public class BasalamAuthError(string message, string? responseBody = null) : BasalamError(message, "auth_error")
 {
-    public BasalamAuthError(string message, string? responseBody = null)
-        : base(message, "auth_error")
-    {
-        ResponseBody = responseBody;
-    }
-
-    public string? ResponseBody { get; }
+    public string? ResponseBody { get; } = responseBody;
 }
 
-public class BasalamValidationError : BasalamError
+public class BasalamValidationError(Dictionary<string, IReadOnlyList<string>> errors) : BasalamError("Validation failed", "validation_error")
 {
-    public IReadOnlyDictionary<string, IReadOnlyList<string>> Errors { get; }
-
-    public BasalamValidationError(Dictionary<string, IReadOnlyList<string>> errors)
-        : base("Validation failed", "validation_error")
-    {
-        Errors = errors;
-    }
+    public IReadOnlyDictionary<string, IReadOnlyList<string>> Errors { get; } = errors;
 }

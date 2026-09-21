@@ -13,14 +13,9 @@ using Microsoft.Extensions.Options;
 
 namespace Hyper.SDK.Auth;
 
-public abstract class BasalamAuthBase
+public abstract class BasalamAuthBase(BasalamConfig config)
 {
-    protected readonly BasalamConfig Config;
-
-    protected BasalamAuthBase(BasalamConfig config)
-    {
-        Config = config ?? throw new ArgumentNullException(nameof(config));
-    }
+    protected readonly BasalamConfig Config = config ?? throw new ArgumentNullException(nameof(config));
 
     public abstract GrantType GrantType { get; }
     public abstract Task<TokenInfo> GetTokenAsync(CancellationToken ct = default);
