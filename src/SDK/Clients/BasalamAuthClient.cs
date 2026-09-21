@@ -53,20 +53,20 @@ public sealed class BasalamAuthClient : IBasalamAuthClient
 
     private async Task<TokenInfo> RefreshTokenImpl(CancellationToken ct, string? refreshTokenOverride = null)
     {
-        var requestBody = new
+        var requestBody = new Dictionary<string, string>
         {
-            grant_type = refreshTokenOverride != null ? "refresh_token" : "client_credentials",
-            client_id = _config.ClientId,
-            client_secret = _config.ClientSecret,
-            refresh_token = refreshTokenOverride ?? _config.RefreshToken
+            ["grant_type"] = refreshTokenOverride != null ? "refresh_token" : "client_credentials",
+            ["client_id"] = _config.ClientId!,
+            ["client_secret"] = _config.ClientSecret!
         };
+        var refreshToken = refreshTokenOverride ?? _config.RefreshToken;
+        if (!string.IsNullOrWhiteSpace(refreshToken)) requestBody["refresh_token"] = refreshToken;
 
         _logger.LogInformation("Requesting token from {Endpoint}", _config.TokenEndpoint);
 
-        var json = JsonSerializer.Serialize(requestBody);
         using var request = new HttpRequestMessage(HttpMethod.Post, _config.TokenEndpoint)
         {
-            Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json")
+            Content = new FormUrlEncodedContent(requestBody)
         };
 
         using var response = await _httpClient.SendAsync(request, ct);

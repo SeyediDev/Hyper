@@ -184,6 +184,7 @@ public class HyperNamespace : ModelDefinition<HyperNamespace>
         DefineEntity<SqlViewAccountbalance>();
         DefineEntity<SqlViewDetailaccountbalance>();
         DefineEntity<SqlVwMarketingsubscriptionmonthly>();
+        DefineEntity<SqlVwMarketinggmvmonthly>();
         DefineEntity<SqlVwIntegrationdashboard>();
     }
     private void AddArchivePartitionScheme(string name) => AddPartitionScheme($"Archive_{name}", "pfArchive", FileGroupSelectionType.FromList, "", name, $"{name}_Archive");

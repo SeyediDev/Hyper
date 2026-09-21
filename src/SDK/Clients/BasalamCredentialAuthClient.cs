@@ -51,17 +51,16 @@ public sealed class BasalamCredentialAuthClient : IDisposable
 
     private async Task RefreshTokenImpl(CancellationToken ct)
     {
-        var requestBody = new
+        var requestBody = new Dictionary<string, string>
         {
-            grant_type = "client_credentials",
-            client_id = _config.ClientId,
-            client_secret = _config.ClientSecret
+            ["grant_type"] = "client_credentials",
+            ["client_id"] = _config.ClientId!,
+            ["client_secret"] = _config.ClientSecret!
         };
 
-        var json = JsonSerializer.Serialize(requestBody);
         using var request = new HttpRequestMessage(HttpMethod.Post, _config.TokenEndpoint)
         {
-            Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json")
+            Content = new FormUrlEncodedContent(requestBody)
         };
 
         using var response = await _httpClient.SendAsync(request, ct);

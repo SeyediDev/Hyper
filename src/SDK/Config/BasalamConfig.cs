@@ -59,6 +59,7 @@ public sealed class BasalamConfig
     public string? ClientSecret { get; set; }
     public string? AccessToken { get; set; }
     public string? RefreshToken { get; set; }
+    public string? ApiBaseUrl { get; set; }
 
     public string TokenEndpoint => AuthUrls[Environment];
     public string AuthorizeEndpoint => AuthorizeUrls[Environment];
@@ -92,6 +93,13 @@ public sealed class BasalamConfig
         var config = GetServiceConfig(serviceName);
         var baseUrl = BaseUrls[Environment];
         return $"{baseUrl.TrimEnd('/')}/{config.ApiVersion}/{config.Path.TrimStart('/')}";
+    }
+
+    public string ResolveRequestUrl(string path)
+    {
+        if (Uri.TryCreate(path, UriKind.Absolute, out var absolute)) return absolute.AbsoluteUri;
+        var baseUrl = string.IsNullOrWhiteSpace(ApiBaseUrl) ? BaseUrls[Environment] : ApiBaseUrl;
+        return $"{baseUrl.TrimEnd('/')}/{path.TrimStart('/')}";
     }
 
     public string GetUserAgent()

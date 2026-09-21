@@ -41,17 +41,16 @@ public sealed class ClientCredentialsAuth : BasalamAuthBase
     public override async Task<TokenInfo> GetTokenAsync(CancellationToken ct = default)
     {
         var httpClient = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(Config.TimeoutSeconds) };
-        var requestBody = new
+        var requestBody = new Dictionary<string, string>
         {
-            grant_type = "client_credentials",
-            client_id = Config.ClientId,
-            client_secret = Config.ClientSecret
+            ["grant_type"] = "client_credentials",
+            ["client_id"] = Config.ClientId!,
+            ["client_secret"] = Config.ClientSecret!
         };
 
-        var json = System.Text.Json.JsonSerializer.Serialize(requestBody);
         using var request = new HttpRequestMessage(HttpMethod.Post, Config.TokenEndpoint)
         {
-            Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json")
+            Content = new FormUrlEncodedContent(requestBody)
         };
 
         using var response = await httpClient.SendAsync(request, ct);
@@ -101,7 +100,6 @@ public sealed class AuthorizationCodeAuth : BasalamAuthBase
         ArgumentException.ThrowIfNullOrWhiteSpace(state);
         ArgumentException.ThrowIfNullOrWhiteSpace(codeVerifier);
         var query = System.Web.HttpUtility.ParseQueryString(string.Empty);
-        query["response_type"] = "code";
         query["client_id"] = Config.ClientId!;
         query["redirect_uri"] = redirectUri;
         query["state"] = state;
@@ -145,20 +143,19 @@ public sealed class AuthorizationCodeAuth : BasalamAuthBase
 
     public async Task<TokenInfo> ExchangeCodeAsync(string code, string redirectUri, CancellationToken ct = default)
     {
-        var requestBody = new
+        var requestBody = new Dictionary<string, string>
         {
-            grant_type = "authorization_code",
-            code,
-            client_id = Config.ClientId,
-            client_secret = Config.ClientSecret,
-            redirect_uri = redirectUri
+            ["grant_type"] = "authorization_code",
+            ["code"] = code,
+            ["client_id"] = Config.ClientId!,
+            ["client_secret"] = Config.ClientSecret!,
+            ["redirect_uri"] = redirectUri
         };
 
         var httpClient = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(Config.TimeoutSeconds) };
-        var json = System.Text.Json.JsonSerializer.Serialize(requestBody);
         using var request = new HttpRequestMessage(HttpMethod.Post, Config.TokenEndpoint)
         {
-            Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json")
+            Content = new FormUrlEncodedContent(requestBody)
         };
 
         using var response = await httpClient.SendAsync(request, ct);

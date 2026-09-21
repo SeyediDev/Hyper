@@ -2616,6 +2616,13 @@ public sealed class SqlTblPurchaseorderUiDefinitions : CRUDDefinition<SqlTblPurc
             protected override string Name => "فاکتور خرید به تفکیک وضعیت صورتحساب";
             protected override void DefineGroupBy() { GroupBy(nameof(SqlTblPurchaseorder.Status), "وضعیت صورتحساب"); Count(null, "تعداد"); }
         }
+        public class BySettlementTypeConfig : ChartConfigDefinition
+        {
+            public BySettlementTypeConfig() : base(ChartType.Bar) { }
+            protected override List<string> Roles => [HyperRoles.Admin];
+            protected override string Name => "فاکتور خرید به تفکیک نوع تسویه";
+            protected override void DefineGroupBy() { GroupBy(nameof(SqlTblPurchaseorder.Settlementtypeid), "نوع تسویه"); Count(null, "تعداد فاکتور"); Sum(nameof(SqlTblPurchaseorder.Totalinvoiceamount), "مبلغ فاکتور"); }
+        }
         public class ByShopidConfig : ChartConfigDefinition
         {
             public ByShopidConfig() : base(ChartType.Bar) { }
@@ -2771,6 +2778,13 @@ public sealed class SqlTblSaleorderUiDefinitions : CRUDDefinition<SqlTblSaleorde
             protected override List<string> Roles => [HyperRoles.Admin];
             protected override string Name => "فاکتور فروش به تفکیک وضعیت صورتحساب";
             protected override void DefineGroupBy() { GroupBy(nameof(SqlTblSaleorder.Status), "وضعیت صورتحساب"); Count(null, "تعداد"); }
+        }
+        public class BySettlementTypeConfig : ChartConfigDefinition
+        {
+            public BySettlementTypeConfig() : base(ChartType.Bar) { }
+            protected override List<string> Roles => [HyperRoles.Admin];
+            protected override string Name => "فاکتور فروش به تفکیک نوع تسویه";
+            protected override void DefineGroupBy() { GroupBy(nameof(SqlTblSaleorder.Settlementtypeid), "نوع تسویه"); Count(null, "تعداد فاکتور"); Sum(nameof(SqlTblSaleorder.Totalinvoiceamount), "مبلغ فاکتور"); }
         }
         public class ByShopidConfig : ChartConfigDefinition
         {
@@ -2980,7 +2994,6 @@ public sealed class SqlTblServicerequestUiDefinitions : CRUDDefinition<SqlTblSer
             protected override string Name => "درخواست اشتراک به تفکیک شناسه م.orig";
             protected override void DefineGroupBy() { GroupBy(nameof(SqlTblServicerequest.Shopid), "شناسه م.orig"); Count(null, "تعداد"); }
         }
-
         /// <summary>
         /// نرخ تبدیل ماهانه مشتریان (اولین اشتراک پولی)
         /// </summary>

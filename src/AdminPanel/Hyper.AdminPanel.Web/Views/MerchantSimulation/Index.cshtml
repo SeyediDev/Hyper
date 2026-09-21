@@ -33,14 +33,14 @@
             {
                 <form asp-action="Select" method="post">
                     <label for="selected-shop">مغازه‌دار / مغازه</label>
-                    <select id="selected-shop" name="shopId" required size="7">
+                    <select id="selected-shop" name="shopId" required size="7" title="برای فعال‌کردن سریع، روی مغازه دوبار کلیک کنید">
                         @foreach (var shop in Model.Shops)
                         {
                             <option value="@shop.ShopId" selected="@(Model.Selected?.ShopId == shop.ShopId)">@shop.ShopName — مغازه‌دار: @shop.MerchantIdentifier — مغازه @shop.ShopId</option>
                         }
                     </select>
                     <p class="simulation-help">حداکثر ۱۰۰ نتیجه نمایش داده می‌شود. برای یافتن موارد دیگر جست‌وجو کنید.</p>
-                    <button type="submit" class="simulation-primary">فعال‌کردن این زمینه</button>
+                    <button type="submit" class="simulation-primary">فعال‌کردن این مغازه</button>
                 </form>
             }
         </section>
@@ -68,7 +68,7 @@
                 </div>
                 @if (authorization.Provider == IntegrationProvider.Basalam && ViewBag.OAuthAuthorizationUrl is string basalamAuthorizationUrl)
                 {
-                    <p>با حساب صاحب غرفه وارد @authorization.Title شوید و مجوزهای نمایش‌داده‌شده را تأیید کنید. نتیجه برای همین مغازه ذخیره می‌شود.</p>
+                    <p>با حساب صاحب غرفه وارد @authorization.Title شوید و مجوزهای نمایش‌داده‌شده را تأیید کنید. پس از بازگشت، اتصال و تطبیق اولیه به‌صورت خودکار ثبت می‌شود.</p>
                     <p class="simulation-help">مجوزهای درخواستی: <bdi>@ViewBag.OAuthScopes</bdi></p>
                     <a class="simulation-primary" href="@basalamAuthorizationUrl">ورود به @authorization.Title و اعطای مجوز</a>
                     <p class="simulation-help">این دکمه مستقیماً به صفحه‌ی احراز هویت باسلام می‌رود.</p>
@@ -105,12 +105,12 @@
                         <dl><dt>شناسه غرفه</dt><dd>@tokenStatus.VendorId</dd>
                             <dt>زمان دریافت (UTC)</dt><dd>@tokenStatus.IssuedAtUtc.ToString("yyyy-MM-dd HH:mm")</dd>
                             <dt>انقضا (UTC)</dt><dd>@(tokenStatus.ExpiresAtUtc?.ToString("yyyy-MM-dd HH:mm") ?? "اعلام نشده")</dd>
-                            <dt>وضعیت</dt><dd>@(!tokenStatus.IsActive ? "غیرفعال" : tokenStatus.ExpiresAtUtc <= DateTime.UtcNow ? "منقضی" : "ذخیره‌شده")</dd></dl>
+                            <dt>وضعیت</dt><dd>@(!tokenStatus.IsActive ? "غیرفعال" : tokenStatus.ExpiresAtUtc <= DateTime.UtcNow ? "منقضی" : tokenStatus.ConnectionEnabled ? "آماده اجرای سناریوی دمو" : "ذخیره‌شده؛ در انتظار فعال‌سازی عملیاتی")</dd></dl>
                     </div>
                 }
                 <section class="simulation-selection">
                     <h3>دریافت رویداد آزمایشی</h3>
-                    <p class="simulation-help">این فرم رویداد «تغییر مغازه» یا «تغییر غرفه» را برای اتصال انتخاب‌شده در صف پایدار ثبت می‌کند؛ جایگزین webhook واقعی پلتفرم نیست.</p>
+                    <p class="simulation-help">پس از OAuth، رویدادهای «کالا» و «موجودی» برای تطبیق اولیه خودکار در صف ثبت شده‌اند. این فرم فقط برای شبیه‌سازی رویدادهای بعدی (تغییر کالا، تغییر غرفه یا درخواست دستی) است.</p>
                     @if (ViewBag.ScenarioConnections is IEnumerable<Hyper.Domain.Features.Integrations.IntegrationScenarioConnection> connections && connections.Any())
                     {
                         <form asp-action="ReceiveScenario" method="post">
@@ -143,3 +143,19 @@
         </section>
     </div>
 </section>
+
+<script>
+    // Double-clicking a search result performs the same action as the submit button.
+    (() => {
+        const shopSelect = document.getElementById('selected-shop');
+        if (!shopSelect) return;
+
+        shopSelect.addEventListener('dblclick', () => {
+            const selectedOption = shopSelect.options[shopSelect.selectedIndex];
+            if (!selectedOption || !selectedOption.value) return;
+
+            selectedOption.selected = true;
+            shopSelect.form?.requestSubmit();
+        });
+    })();
+</script>

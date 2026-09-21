@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -13,11 +12,13 @@ namespace Hyper.Infrastructure.Features.Integrations;
 
 public sealed class BasalamOAuthSettings
 {
+    public string Mode { get; set; } = "Real";
     public string ClientId { get; set; } = "";
     public string? ClientSecret { get; set; }
     public string AuthorizationEndpoint { get; set; } = "https://basalam.com/accounts/sso";
     public string TokenEndpoint { get; set; } = "https://auth.basalam.com/oauth/token";
     public string RedirectUri { get; set; } = "";
+    public string ProfileEndpoint { get; set; } = "https://core.basalam.com/v3/users/me";
     public string Scopes { get; set; } = "vendor.profile.read";
     // The official SDK documents confidential authorization-code flow, without PKCE.
     // Enable only when support is confirmed for the registered application.
@@ -52,9 +53,14 @@ public sealed class BasalamOAuthService(IOptions<BasalamOAuthSettings> options, 
             || value.Contains("YOUR_", StringComparison.OrdinalIgnoreCase);
         if (Missing(Settings.ClientId) || Missing(Settings.ClientSecret))
             return "شناسه و رمز برنامه باسلام تنظیم نشده است (Basalam:ClientId / ClientSecret).";
-        if (Settings.AuthorizationEndpoint != "https://basalam.com/accounts/sso"
-            || Settings.TokenEndpoint != "https://auth.basalam.com/oauth/token")
+        if (!IsDemo && (Settings.AuthorizationEndpoint != "https://basalam.com/accounts/sso"
+            || Settings.TokenEndpoint != "https://auth.basalam.com/oauth/token"))
             return "نشانی ورود یا دریافت توکن باسلام با قرارداد رسمی تطابق ندارد.";
+        if (IsDemo && (!Uri.TryCreate(Settings.AuthorizationEndpoint, UriKind.Absolute, out var demoAuth)
+            || !Uri.TryCreate(Settings.TokenEndpoint, UriKind.Absolute, out var demoToken)
+            || !Uri.TryCreate(Settings.ProfileEndpoint, UriKind.Absolute, out var demoProfile)
+            || !demoAuth.IsLoopback || !demoToken.IsLoopback || !demoProfile.IsLoopback))
+            return "نشانی‌های Sandbox باسلام باید روی localhost باشند.";
         if (!Uri.TryCreate(Settings.RedirectUri, UriKind.Absolute, out var uri)
             || (uri.Scheme != "https" && !(uri.Scheme == "http" && uri.IsLoopback))
             || uri.AbsolutePath != "/api/auth/basalam/callback" || uri.Query.Length != 0
@@ -67,6 +73,8 @@ public sealed class BasalamOAuthService(IOptions<BasalamOAuthSettings> options, 
         return null;
     }
 
+    public bool IsDemo => string.Equals(Settings.Mode, "Demo", StringComparison.OrdinalIgnoreCase);
+
     public string CreateAuthorizationUrl(Guid requestId, Guid simulationId, string adminId, string browserNonce)
     {
         if (ConfigurationError() is { } error) throw new InvalidOperationException(error);
@@ -77,7 +85,9 @@ public sealed class BasalamOAuthService(IOptions<BasalamOAuthSettings> options, 
         var parameters = new Dictionary<string, string>
         {
             ["client_id"] = Settings.ClientId, ["redirect_uri"] = Settings.RedirectUri,
-            ["response_type"] = "code", ["scope"] = Settings.Scopes, ["state"] = ticket
+            // Basalam's documented SSO contract (and its official SDKs) uses
+            // client_id, redirect_uri, scope and state for this endpoint.
+            ["scope"] = Settings.Scopes, ["state"] = ticket
         };
         if (verifier is not null)
         {
@@ -133,9 +143,9 @@ public sealed class BasalamOAuthService(IOptions<BasalamOAuthSettings> options, 
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, Settings.TokenEndpoint)
         {
-            // Basalam's documented token endpoint accepts a JSON object. Sending
-            // form-urlencoded data returns a generic provider error after consent.
-            Content = JsonContent.Create(values)
+            // OAuth 2.0 token requests are form encoded (RFC 6749, section 4.1.3).
+            // Basalam's official SDKs use the same format.
+            Content = new FormUrlEncodedContent(values)
         };
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
@@ -151,7 +161,7 @@ public sealed class BasalamOAuthService(IOptions<BasalamOAuthSettings> options, 
 
     public async Task<BasalamVendor> GetVendorAsync(BasalamTokenResponse token, CancellationToken ct)
     {
-        using var request = new HttpRequestMessage(HttpMethod.Get, "https://core.basalam.com/v3/users/me");
+        using var request = new HttpRequestMessage(HttpMethod.Get, Settings.ProfileEndpoint);
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.AccessToken);
         using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);

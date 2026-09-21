@@ -11,7 +11,8 @@ namespace Hyper.AdminPanel.Web.Controllers;
 [Route("api/auth/basalam")]
 public sealed class OAuthCallbackController(BasalamOAuthService oauth, BasalamOAuthStore store,
     IAdminMerchantSimulationService simulations, AdminSimulationTickets tickets,
-    ILogger<OAuthCallbackController> logger) : ControllerBaseMVC
+    ILogger<OAuthCallbackController> logger, IIntegrationScenarioQueue scenarios,
+    BasalamDemoProvisioner demoProvisioner) : ControllerBaseMVC
 {
     private const string CorrelationCookie = "Hyper.Basalam.Correlation";
     private const string SimulationCookie = "Hyper.AdminMerchantSimulation";
@@ -82,8 +83,35 @@ public sealed class OAuthCallbackController(BasalamOAuthService oauth, BasalamOA
         {
             var token = await oauth.ExchangeCodeForTokenAsync(code, data, ct);
             var vendor = await oauth.GetVendorAsync(token, ct);
-            await store.SaveAsync(data, selected, vendor, token, ct);
-            return CallbackNotice($"توکن غرفه «{vendor.Title}» برای مغازه «{selected.ShopName}» ذخیره شد. یکسان‌سازی خودکار هنوز فعال نشده است.");
+            var connectionId = await store.SaveAsync(data, selected, vendor, token, ct);
+            var mappings = 0;
+            if (oauth.IsDemo)
+            {
+                try
+                {
+                    mappings = await demoProvisioner.EnsureProductMappingsAsync(
+                        connectionId, selected.ShopId, selected.TenantId, ct);
+                }
+                catch (Exception mappingError) when (mappingError is not OperationCanceledException || !ct.IsCancellationRequested)
+                {
+                    // Token persistence must not be rolled back because the
+                    // optional demo catalog is temporarily unavailable. The
+                    // durable initial job will retry the provider read.
+                    logger.LogWarning("Basalam demo mapping preparation deferred for connection {ConnectionId}; category {Category}",
+                        connectionId, mappingError.GetType().Name);
+                }
+            }
+            if (!oauth.IsDemo)
+                return CallbackNotice($"توکن غرفه «{vendor.Title}» ذخیره شد و برای فعال‌سازی عملیاتی ثبت شد. پس از فعال‌سازی اتصال، تطبیق اولیه ثبت می‌شود.");
+
+            var shopScope = new OwnedIntegrationShop(selected.ShopId, selected.TenantId);
+            var jobId = await scenarios.EnqueueAsync(shopScope, connectionId,
+                new IntegrationScenarioRequest($"oauth:{data.RequestId:N}", IntegrationSyncItem.Product,
+                    IntegrationSyncTrigger.Initial), ct);
+            var inventoryJobId = await scenarios.EnqueueAsync(shopScope, connectionId,
+                new IntegrationScenarioRequest($"oauth:{data.RequestId:N}:inventory", IntegrationSyncItem.Inventory,
+                    IntegrationSyncTrigger.Initial), ct);
+            return CallbackNotice($"توکن غرفه «{vendor.Title}» ذخیره شد. تطبیق اولیه‌ی کالا و موجودی در صف قرار گرفت (رویدادهای {jobId} و {inventoryJobId}، نگاشت آماده: {mappings}).");
         }
         catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)
         {
@@ -103,5 +131,5 @@ public sealed class OAuthCallbackController(BasalamOAuthService oauth, BasalamOA
     private ContentResult CallbackNotice(string message) =>
         Content($"<!doctype html><meta charset=\"utf-8\"><title>نتیجه اتصال باسلام</title>" +
                 $"<main dir=\"rtl\" style=\"font-family:sans-serif;max-width:640px;margin:4rem auto\"><h2>{System.Net.WebUtility.HtmlEncode(message)}</h2>" +
-                "<p>می‌توانید این صفحه را ببندید و به پنل مدیریت برگردید.</p></main>", "text/html; charset=utf-8");
+                "<p><a href=\"/MerchantSimulation/Index\">بازگشت به صفحه شبیه‌سازی و مشاهده وضعیت jobها</a></p></main>", "text/html; charset=utf-8");
 }

@@ -59,8 +59,7 @@ public sealed class BasalamHttpClient : IBasalamHttpClient, IDisposable
 
         if (request.RequestUri != null && !request.RequestUri.IsAbsoluteUri)
         {
-            var baseUrl = _config.ResolveServiceUrl(request.RequestUri.ToString());
-            request.RequestUri = new Uri(baseUrl + request.RequestUri.ToString());
+            request.RequestUri = new Uri(_config.ResolveRequestUrl(request.RequestUri.ToString()));
         }
 
         request.Headers.UserAgent.ParseAdd(_config.GetUserAgent());

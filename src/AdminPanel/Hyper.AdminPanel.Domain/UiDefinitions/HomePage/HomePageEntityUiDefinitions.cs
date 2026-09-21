@@ -18,6 +18,7 @@ public sealed class HomePageEntityUiDefinitions : CRUDDefinition<HomePageEntity>
             AddReport<SqlTblPurchaseorder>();
             AddReport<SqlTblServicerequest>();
             AddReport<SqlVwMarketingsubscriptionmonthly>();
+            AddReport<SqlVwMarketinggmvmonthly>();
             AddReport<SqlExternalintegrationconnections>();
             AddReport<SqlExternalproductmappings>();
             AddReport<SqlIntegrationoutbox>();
@@ -26,7 +27,7 @@ public sealed class HomePageEntityUiDefinitions : CRUDDefinition<HomePageEntity>
         }
 public class BusinessDashboard : DashboardConfigDefinition
         {
-            protected override string Title => "مغازه و حسابداری";
+            protected override string Title => "نمای کلی کسب‌وکار";
             protected override List<string> Roles => [HyperRoles.Admin];
             protected override bool IsDefault => true;
             public class Widget1 : DashboardDivWidgetDefinition<SqlTblShop, SqlTblShopUiDefinitions.PublicReport, SqlTblShopUiDefinitions.PublicReport.CountConfig>
@@ -71,19 +72,37 @@ public class BusinessDashboard : DashboardConfigDefinition
                 protected override int? HeightInPixels => 110;
                 protected override int? CacheTimeMinutes => 1;
             }
-            public class Widget7 : DashboardDivWidgetDefinition<SqlTblProduct, SqlTblProductUiDefinitions.PublicReport, SqlTblProductUiDefinitions.PublicReport.ByShopidConfig>
+            public class Widget7 : DashboardDivWidgetDefinition<SqlTblSaleorder, SqlTblSaleorderUiDefinitions.PublicReport, SqlTblSaleorderUiDefinitions.PublicReport.ByStatusConfig>
             {
-                public override string Title => "کالا به تفکیک مغازه";
+                public override string Title => "فروش به تفکیک وضعیت";
                 public override int Width => 6;
-                protected override int? HeightInPixels => 300;
-                protected override int? CacheTimeMinutes => 1;
+                protected override int? HeightInPixels => 260;
+                protected override int? MaxRecordCount => 12;
+                protected override int? CacheTimeMinutes => 5;
             }
-            public class Widget8 : DashboardDivWidgetDefinition<SqlTblSaleorder, SqlTblSaleorderUiDefinitions.PublicReport, SqlTblSaleorderUiDefinitions.PublicReport.ByShopidConfig>
+            public class Widget8 : DashboardDivWidgetDefinition<SqlTblPurchaseorder, SqlTblPurchaseorderUiDefinitions.PublicReport, SqlTblPurchaseorderUiDefinitions.PublicReport.ByStatusConfig>
             {
-                public override string Title => "فروش به تفکیک مغازه";
+                public override string Title => "خرید به تفکیک وضعیت";
                 public override int Width => 6;
-                protected override int? HeightInPixels => 300;
-                protected override int? CacheTimeMinutes => 1;
+                protected override int? HeightInPixels => 260;
+                protected override int? MaxRecordCount => 12;
+                protected override int? CacheTimeMinutes => 5;
+            }
+            public class Widget9 : DashboardDivWidgetDefinition<SqlTblSaleorder, SqlTblSaleorderUiDefinitions.PublicReport, SqlTblSaleorderUiDefinitions.PublicReport.BySettlementTypeConfig>
+            {
+                public override string Title => "فروش به تفکیک نوع تسویه";
+                public override int Width => 6;
+                protected override int? HeightInPixels => 260;
+                protected override int? MaxRecordCount => 10;
+                protected override int? CacheTimeMinutes => 5;
+            }
+            public class Widget10 : DashboardDivWidgetDefinition<SqlTblPurchaseorder, SqlTblPurchaseorderUiDefinitions.PublicReport, SqlTblPurchaseorderUiDefinitions.PublicReport.BySettlementTypeConfig>
+            {
+                public override string Title => "خرید به تفکیک نوع تسویه";
+                public override int Width => 6;
+                protected override int? HeightInPixels => 260;
+                protected override int? MaxRecordCount => 10;
+                protected override int? CacheTimeMinutes => 5;
             }
         }
         public class MarketingDashboard : DashboardConfigDefinition
@@ -101,7 +120,6 @@ public class BusinessDashboard : DashboardConfigDefinition
                 protected override int? CacheTimeMinutes => 60;
                 public override int Width => 6;
             }
-
             public class MonthlyRetentionRateWidget : DashboardDivWidgetDefinition<SqlVwMarketingsubscriptionmonthly, SqlVwMarketingsubscriptionmonthlyUiDefinitions.PublicReport, SqlVwMarketingsubscriptionmonthlyUiDefinitions.PublicReport.MonthlyRetentionRateConfig>
             {
                 public override string Title => "نرخ حفظ ماهانه";
@@ -110,6 +128,8 @@ public class BusinessDashboard : DashboardConfigDefinition
                 protected override int? CacheTimeMinutes => 60;
                 public override int Width => 6;
             }
+            public class MonthlyGmvWidget : DashboardDivWidgetDefinition<SqlVwMarketinggmvmonthly, SqlVwMarketinggmvmonthlyUiDefinitions.PublicReport, SqlVwMarketinggmvmonthlyUiDefinitions.PublicReport.GmvConfig> { public override string Title => "GMV ماهانه خرید و فروش"; public override int Width => 6; }
+            public class MonthlyGmvCountWidget : DashboardDivWidgetDefinition<SqlVwMarketinggmvmonthly, SqlVwMarketinggmvmonthlyUiDefinitions.PublicReport, SqlVwMarketinggmvmonthlyUiDefinitions.PublicReport.CountConfig> { public override string Title => "تعداد فاکتور و کالا"; public override int Width => 6; }
         }
         public class SynchronizationDashboard : DashboardConfigDefinition
         {

@@ -24,7 +24,8 @@ var url = new Uri(service.CreateAuthorizationUrl(requestId,simulationId,"admin-t
 var query = QueryHelpers.ParseQuery(url.Query);
 Check(url.GetLeftPart(UriPartial.Path)=="https://basalam.com/accounts/sso","official authorize endpoint");
 Check(query["client_id"]=="test-client" && query["redirect_uri"]==settings.RedirectUri
-    && query["response_type"]=="code" && query.ContainsKey("scope"),"standard authorization parameters");
+    && query.ContainsKey("scope") && query.ContainsKey("state")
+    && !query.ContainsKey("response_type"),"Basalam documented authorization parameters");
 Check(!query.ContainsKey("encrypted_state") && !query.ContainsKey("client_secret"),"standard state; no secret in URL");
 var state = service.ReadState(query["state"],nonce);
 Check(state.RequestId==requestId && state.SimulationId==simulationId && state.AdminId=="admin-test","shop request binding");
@@ -44,15 +45,13 @@ var pkceQuery=QueryHelpers.ParseQuery(new Uri(service.CreateAuthorizationUrl(req
 Check(pkceQuery["code_challenge_method"]=="S256" && !string.IsNullOrEmpty(service.ReadState(pkceQuery["state"],nonce).CodeVerifier),"optional PKCE");
 handler.Json="""{"access_token":"fake-access","refresh_token":"fake-refresh","expires_in":3600,"token_type":"Bearer"}""";
 var token=await service.ExchangeCodeForTokenAsync("fake-code",state,default);
-using (var tokenRequest = JsonDocument.Parse(handler.Body!))
-{
-    Check(handler.LastUri=="https://auth.basalam.com/oauth/token"
-        && handler.ContentType == "application/json; charset=utf-8"
-        && tokenRequest.RootElement.GetProperty("grant_type").GetString() == "authorization_code"
-        && tokenRequest.RootElement.GetProperty("client_secret").GetString() == "test-secret"
-        && tokenRequest.RootElement.GetProperty("code").GetString() == "fake-code",
-        "confidential server JSON code exchange");
-}
+var tokenRequest = QueryHelpers.ParseQuery("?" + handler.Body);
+Check(handler.LastUri=="https://auth.basalam.com/oauth/token"
+    && handler.ContentType == "application/x-www-form-urlencoded"
+    && tokenRequest["grant_type"] == "authorization_code"
+    && tokenRequest["client_secret"] == "test-secret"
+    && tokenRequest["code"] == "fake-code",
+    "standard confidential server code exchange");
 var entity=service.CreateTokenEntity(7,9,"tenant-test",IntegrationProvider.Basalam,token);
 Check(entity.AccessToken!="fake-access" && service.DecryptToken(entity.AccessToken)=="fake-access"
     && service.DecryptToken(entity.RefreshToken!)=="fake-refresh" && entity.RawTokenResponse is null,"encrypted credentials; no raw duplicate");

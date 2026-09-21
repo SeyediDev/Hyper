@@ -131,6 +131,46 @@ LEFT JOIN RetainedByMonth r ON r.TenantId = t.TenantId AND r.MonthStart = m.Mont
 LEFT JOIN ActiveByMonth pa ON pa.TenantId = t.TenantId AND pa.MonthStart = DATEADD(month, -1, m.MonthStart)
 """;
 }
+
+[Neo.Bpms.Domain.Models.Attributes.EntityAttributes.View(SqlVwMarketinggmvmonthlyQuery.Sql, true)]
+[DisplayName("گزارش ماهانه GMV خرید و فروش")]
+[DbMap("vw_SqlVwMarketinggmvmonthly")]
+public sealed class SqlVwMarketinggmvmonthly : SqlServerEntity
+{
+    [DisplayName("ماه")][DbMap("MonthStart")] public DateOnly Monthstart { get; set; }
+    [DisplayName("مستاجر شناسه")][DbMap("TenantId")] public string Tenantid { get; set; } = null!;
+    [DisplayName("GMV خرید")][DbMap("PurchaseGmv")] public decimal Purchasegmv { get; set; }
+    [DisplayName("تعداد فاکتور خرید")][DbMap("PurchaseInvoiceCount")] public long Purchaseinvoicecount { get; set; }
+    [DisplayName("تعداد اقلام خرید")][DbMap("PurchaseItemCount")] public long Purchaseitemcount { get; set; }
+    [DisplayName("حجم کالای خرید")][DbMap("PurchaseQuantity")] public decimal Purchasequantity { get; set; }
+    [DisplayName("GMV فروش")][DbMap("SaleGmv")] public decimal Salegmv { get; set; }
+    [DisplayName("تعداد فاکتور فروش")][DbMap("SaleInvoiceCount")] public long Saleinvoicecount { get; set; }
+    [DisplayName("تعداد اقلام فروش")][DbMap("SaleItemCount")] public long Saleitemcount { get; set; }
+    [DisplayName("حجم کالای فروش")][DbMap("SaleQuantity")] public decimal Salequantity { get; set; }
+}
+
+internal static class SqlVwMarketinggmvmonthlyQuery
+{
+    public const string Sql = """
+WITH MonthSeries AS (
+ SELECT CAST(DATEADD(month,-11,DATEFROMPARTS(YEAR(GETDATE()),MONTH(GETDATE()),1)) AS date) MonthStart
+ UNION ALL SELECT CAST(DATEADD(month,1,MonthStart) AS date) FROM MonthSeries WHERE MonthStart < CAST(DATEFROMPARTS(YEAR(GETDATE()),MONTH(GETDATE()),1) AS date)
+), Tenants AS (
+ SELECT DISTINCT ISNULL(TENANT_ID_,'') TenantId FROM TBL_SaleOrder WHERE SHOPID_ IS NOT NULL
+ UNION SELECT DISTINCT ISNULL(TENANT_ID_,'') FROM TBL_PurchaseOrder WHERE SHOPID_ IS NOT NULL
+), Purchases AS (
+ SELECT ISNULL(o.TENANT_ID_,'') TenantId, CAST(DATEFROMPARTS(YEAR(o.ISSUEDATETIME_),MONTH(o.ISSUEDATETIME_),1) AS date) MonthStart, SUM(o.TOTALINVOICEAMOUNT_) Gmv, COUNT_BIG(*) InvoiceCount, ISNULL(SUM(i.ItemCount),0) ItemCount, ISNULL(SUM(i.Quantity),0) Quantity
+ FROM TBL_PurchaseOrder o LEFT JOIN (SELECT PURCHASEORDERID_,COUNT_BIG(*) ItemCount,SUM(ISNULL(QUANTITY_,0)) Quantity FROM TBL_PurchaseOrderItem GROUP BY PURCHASEORDERID_) i ON i.PURCHASEORDERID_=o.PURCHASEORDERID_
+ WHERE o.SHOPID_ IS NOT NULL GROUP BY ISNULL(o.TENANT_ID_,''),CAST(DATEFROMPARTS(YEAR(o.ISSUEDATETIME_),MONTH(o.ISSUEDATETIME_),1) AS date)
+), Sales AS (
+ SELECT ISNULL(o.TENANT_ID_,'') TenantId, CAST(DATEFROMPARTS(YEAR(o.ISSUEDATETIME_),MONTH(o.ISSUEDATETIME_),1) AS date) MonthStart, SUM(o.TOTALINVOICEAMOUNT_) Gmv, COUNT_BIG(*) InvoiceCount, ISNULL(SUM(i.ItemCount),0) ItemCount, ISNULL(SUM(i.Quantity),0) Quantity
+ FROM TBL_SaleOrder o LEFT JOIN (SELECT SALEORDERID_,COUNT_BIG(*) ItemCount,SUM(ISNULL(QUANTITY_,0)) Quantity FROM TBL_SaleOrderItem GROUP BY SALEORDERID_) i ON i.SALEORDERID_=o.SALEORDERID_
+ WHERE o.SHOPID_ IS NOT NULL GROUP BY ISNULL(o.TENANT_ID_,''),CAST(DATEFROMPARTS(YEAR(o.ISSUEDATETIME_),MONTH(o.ISSUEDATETIME_),1) AS date)
+)
+SELECT m.MonthStart,t.TenantId,ISNULL(p.Gmv,0) PurchaseGmv,ISNULL(p.InvoiceCount,0) PurchaseInvoiceCount,ISNULL(p.ItemCount,0) PurchaseItemCount,ISNULL(p.Quantity,0) PurchaseQuantity,ISNULL(s.Gmv,0) SaleGmv,ISNULL(s.InvoiceCount,0) SaleInvoiceCount,ISNULL(s.ItemCount,0) SaleItemCount,ISNULL(s.Quantity,0) SaleQuantity
+FROM Tenants t CROSS JOIN MonthSeries m LEFT JOIN Purchases p ON p.TenantId=t.TenantId AND p.MonthStart=m.MonthStart LEFT JOIN Sales s ON s.TenantId=t.TenantId AND s.MonthStart=m.MonthStart
+""";
+}
 [DisplayName("یکسان‌سازی داشبورد")]
 [DbMap("vw_IntegrationDashboard")]
 public sealed class SqlVwIntegrationdashboard : SqlServerEntity

@@ -36,7 +36,7 @@ public sealed class BasalamOAuthStore(HyperContextCommand db, BasalamOAuthServic
         await db.Set<IntegrationTokenRequest>().Where(x => x.Id == requestId && x.Status == 1)
             .ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, status), ct);
 
-    public async Task SaveAsync(BasalamAuthorizationState state, IntegrationAdminSimulation selected,
+    public async Task<long> SaveAsync(BasalamAuthorizationState state, IntegrationAdminSimulation selected,
         BasalamVendor vendor, BasalamTokenResponse response, CancellationToken ct)
     {
         await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
@@ -60,7 +60,7 @@ public sealed class BasalamOAuthStore(HyperContextCommand db, BasalamOAuthServic
             {
                 ShopId = selected.ShopId, TenantId = selected.TenantId, Provider = IntegrationProvider.Basalam,
                 DisplayName = vendor.Title, AccountIdentifier = vendor.Id, CredentialType = IntegrationCredentialType.OAuth2,
-                CredentialsJson = "{}", IsEnabled = false
+                CredentialsJson = "{}", IsEnabled = oauth.IsDemo
             };
             db.ExternalIntegrationConnections.Add(connection);
             await db.SaveChangesAsync(ct);
@@ -77,19 +77,37 @@ public sealed class BasalamOAuthStore(HyperContextCommand db, BasalamOAuthServic
             token.UpdatedAtUtc = DateTime.UtcNow;
             db.Entry(previous).CurrentValues.SetValues(token);
         }
-        // Token acquisition alone must not activate accounting/inventory jobs.
-        connection.IsEnabled = false;
+        // Sandbox connections are safe to activate for demo catalog reads. Real
+        // connections still require an explicit operational approval.
+        connection.IsEnabled = oauth.IsDemo;
         request.Status = 2;
         await db.SaveChangesAsync(ct);
         await transaction.CommitAsync(ct);
+        return connection.Id;
     }
 
-    public Task<BasalamTokenStatus?> GetStatusAsync(int shopId, string tenantId, CancellationToken ct) =>
-        (from t in db.ExternalOAuthTokens.AsNoTracking()
+    public async Task<BasalamTokenStatus?> GetStatusAsync(int shopId, string tenantId, CancellationToken ct)
+    {
+        // A token may have been issued before the host switched to Demo mode.
+        // Reconcile only the matching sandbox connection; real connections are
+        // never activated by merely viewing their status.
+        if (oauth.IsDemo)
+        {
+            var connectionId = await db.ExternalOAuthTokens.AsNoTracking().Where(t => t.ShopId == shopId
+                    && t.TenantId == tenantId && t.Provider == IntegrationProvider.Basalam && t.IsActive)
+                .Select(t => (long?)t.ConnectionId).SingleOrDefaultAsync(ct);
+            if (connectionId is not null)
+                await db.ExternalIntegrationConnections.Where(c => c.Id == connectionId && c.ShopId == shopId
+                        && c.TenantId == tenantId && c.Provider == IntegrationProvider.Basalam && !c.IsEnabled)
+                    .ExecuteUpdateAsync(s => s.SetProperty(c => c.IsEnabled, true), ct);
+        }
+        return await (from t in db.ExternalOAuthTokens.AsNoTracking()
          join c in db.ExternalIntegrationConnections.AsNoTracking() on t.ConnectionId equals c.Id
          where t.ShopId == shopId && t.TenantId == tenantId && t.Provider == IntegrationProvider.Basalam
             && c.ShopId == shopId && c.TenantId == tenantId
-         select new BasalamTokenStatus(c.AccountIdentifier, c.DisplayName, t.IssuedAtUtc, t.ExpiresAtUtc, t.IsActive))
+         select new BasalamTokenStatus(c.AccountIdentifier, c.DisplayName, t.IssuedAtUtc, t.ExpiresAtUtc, t.IsActive, c.IsEnabled))
         .SingleOrDefaultAsync(ct);
+    }
 }
-public sealed record BasalamTokenStatus(string VendorId, string VendorName, DateTime IssuedAtUtc, DateTime? ExpiresAtUtc, bool IsActive);
+public sealed record BasalamTokenStatus(string VendorId, string VendorName, DateTime IssuedAtUtc,
+    DateTime? ExpiresAtUtc, bool IsActive, bool ConnectionEnabled);

@@ -32,11 +32,17 @@ public sealed class BasalamSdkAdapter(IBasalamClient client, BasalamOAuthStore t
                 foreach (var variant in product.Variants)
                 {
                     Add(new ExternalCatalogItem(
-                        variant.Id.ToString(),
+                        // A Basalam variation is a sellable child of the product.
+                        // Keep the parent product id as ExternalProductId and use
+                        // the variation id as the discriminator; otherwise stock
+                        // publishing would try to load the variation as a product.
+                        product.Id.ToString(),
                         variant.Sku,
-                        product.Name,
-                        variant.Price,
-                        variant.Stock ?? product.Stock ?? 0,
+                        string.IsNullOrWhiteSpace(variant.Title)
+                            ? product.Name
+                            : $"{product.Name} - {variant.Title}",
+                        variant.Price ?? product.Price,
+                        variant.Stock ?? 0,
                         variant.Id.ToString()));
                 }
 

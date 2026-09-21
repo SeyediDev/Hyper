@@ -12,7 +12,11 @@ public sealed class AdminMerchantSimulationService(HyperSqlServerContext account
         if (!string.IsNullOrWhiteSpace(search))
         {
             search = search.Trim();
-            shops = shops.Where(x => x.Name.Contains(search) || x.Ownerid.Contains(search));
+            shops = shops.Where(x =>
+                x.Shopid.ToString().Contains(search) ||
+                x.Name.Contains(search) ||
+                x.Ownerid.Contains(search) ||
+                x.Mobile!.Contains(search));
         }
         return await shops.OrderBy(x => x.Name).ThenBy(x => x.Shopid).Take(100)
             .Select(x => new SimulationShop(x.Shopid, x.Name, x.Ownerid)).ToListAsync(ct);

@@ -5,7 +5,8 @@ using Microsoft.Extensions.Options;
 namespace Hyper.Infrastructure.Features.Integrations;
 
 public sealed class IntegrationScenarioProcessor(HyperIntegrationContext db, IIntegrationStrategyResolver strategies,
-    IIntegrationInventoryCapture inventory, IOptions<IntegrationInventoryCaptureOptions> options)
+    IIntegrationInventoryCapture inventory, IOptions<IntegrationInventoryCaptureOptions> options,
+    IOptions<BasalamOAuthSettings> basalamOptions, BasalamDemoProvisioner demoProvisioner)
 {
     public async Task<IntegrationScenarioResult> ProcessAsync(IntegrationScenarioJob job, CancellationToken ct)
     {
@@ -15,8 +16,12 @@ public sealed class IntegrationScenarioProcessor(HyperIntegrationContext db, IIn
             x.Id == job.ConnectionId && x.ShopId == job.ShopId && x.TenantId == job.TenantId, ct)
             ?? throw new IntegrationProviderException("ConnectionScopeChanged", false);
         IntegrationConnectionReadiness.Validate(connection, DateTime.UtcNow);
-        if (job.Item == IntegrationSyncItem.Inventory && !options.Value.AccountingStockSourceVerified)
+        var demoBasalam = connection.Provider == IntegrationProvider.Basalam
+            && string.Equals(basalamOptions.Value.Mode, "Demo", StringComparison.OrdinalIgnoreCase);
+        if (job.Item == IntegrationSyncItem.Inventory && !options.Value.AccountingStockSourceVerified && !demoBasalam)
             throw new IntegrationProviderException("AccountingStockSourceUnverified", false);
+        if (demoBasalam)
+            await demoProvisioner.EnsureProductMappingsAsync(connection.Id, connection.ShopId, connection.TenantId, ct);
         // All trigger types re-read both authoritative sources. Simulator/webhook payloads cannot overwrite accounting.
         var adapter = strategies.Resolve(connection.Provider, connection.CredentialType);
         var remote = await adapter.ReadCatalogAsync(connection, ct);

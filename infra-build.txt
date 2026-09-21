@@ -1,0 +1,7 @@
+Stack overflow.
+   at System.Text.RegularExpressions.RegexParser.Parse(System.String, System.Text.RegularExpressions.RegexOptions, System.Globalization.CultureInfo)
+   at System.Text.RegularExpressions.Regex..ctor(System.String, System.Text.RegularExpressions.RegexOptions, System.TimeSpan, System.Globalization.CultureInfo)
+   at System.Text.RegularExpressions.RegexCache.GetOrAdd(System.String, System.Text.RegularExpressions.RegexOptions, System.TimeSpan)
+   at System.Text.RegularExpressions.Regex.IsMatch(System.String, System.String, System.Text.RegularExpressions.RegexOptions)
+   at Microsoft.Build.Shared.BuildEnvironmentHelper.TryFromMSBuildExeUnderVisualStudio(System.String, Boolean)
+   at Microsoft.Build.Shared.BuildEnvironmentHelper.TryFromMSBuildAppHost()

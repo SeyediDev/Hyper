@@ -19,6 +19,7 @@ public static class IntegrationServiceRegistration
         services.AddOptions<IntegrationInventoryCaptureOptions>();
         services.AddScoped<IIntegrationInventoryCapture, IntegrationInventoryCapture>();
         services.AddScoped<IIntegrationStrategyResolver, IntegrationStrategyResolver>();
+        services.AddScoped<BasalamDemoProvisioner>();
         services.AddScoped<IIntegrationShopAccess, IntegrationShopAccess>();
         services.AddScoped<IAdminMerchantSimulationService, AdminMerchantSimulationService>();
         services.AddScoped<IIntegrationDashboardQuery, IntegrationDashboardQuery>();
