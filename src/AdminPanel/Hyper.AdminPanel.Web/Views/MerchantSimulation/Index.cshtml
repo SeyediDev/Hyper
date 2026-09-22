@@ -9,9 +9,8 @@
 <link rel="stylesheet" href="~/Content/merchant-simulation.css" />
 <section class="merchant-simulation" dir="rtl">
     <header class="simulation-heading">
-        <div><span class="simulation-eyebrow">پنل مدیریت هایپریک</span><h1>شبیه‌سازی درخواست مغازه‌دار</h1>
+        <div><h1>شبیه‌سازی درخواست مغازه‌دار</h1>
         <p>مغازه‌دار و مغازه‌ای را انتخاب کنید که می‌خواهید درخواست اتصال را از طرف او بررسی کنید.</p></div>
-        <span class="simulation-admin">ادمین: @Model.AdminName</span>
     </header>
     @if (TempData["SimulationNotice"] is string notice)
     {
@@ -45,7 +44,7 @@
             }
         </section>
         <section class="simulation-card">
-            <h2>۲. درخواست توکن برای زمینه انتخاب‌شده</h2>
+            <h2>۲. درخواست توکن برای مغازه‌دار انتخاب‌شده</h2>
             <form asp-action="Index" method="get">
                 <input type="hidden" name="search" value="@Model.Search" />
                 <label for="integration-provider">پلتفرم غرفه</label>
@@ -64,7 +63,7 @@
                     <dl><dt>شناسه مغازه‌دار</dt><dd>@selected.MerchantIdentifier</dd>
                         <dt>شناسه مغازه</dt><dd>@selected.ShopId</dd>
                         <dt>ادمین انجام‌دهنده</dt><dd>@Model.AdminName</dd>
-                        <dt>اعتبار زمینه</dt><dd>۳۰ دقیقه از زمان انتخاب</dd></dl>
+                        <dt>اعتبار توکن</dt><dd>۳۰ دقیقه از زمان انتخاب</dd></dl>
                 </div>
                 @if (authorization.Provider == IntegrationProvider.Basalam && ViewBag.OAuthAuthorizationUrl is string basalamAuthorizationUrl)
                 {
