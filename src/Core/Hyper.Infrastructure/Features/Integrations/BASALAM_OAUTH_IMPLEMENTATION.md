@@ -73,7 +73,7 @@
 	"ClientSecret": "your-client-secret",
 	"AuthorizationEndpoint": "https://auth.basalam.com/oauth/authorize",
 	"TokenEndpoint": "https://auth.basalam.com/oauth/token",
-	"RedirectUri": "http://localhost:5001/api/auth/basalam/callback",
+	"RedirectUri": "http://hyper-yek.local/api/auth/basalam/callback",
 	"Scopes": "inventory.read orders.read products.read"
   }
 }
