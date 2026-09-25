@@ -44,7 +44,7 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
         {
             IntegrationSyncItem.Counterparty => await CounterpartyAsync(job, root, ct),
             IntegrationSyncItem.Product => await ProductAsync(job, connection, root, ct),
-            IntegrationSyncItem.Sale => await SaleAsync(job, root, ct),
+            IntegrationSyncItem.Sale => await SaleAsync(job, connection, root, ct),
             IntegrationSyncItem.Purchase => await PurchaseAsync(job, root, ct),
             _ => throw new IntegrationProviderException("BusinessItemUnsupported", false)
         };
@@ -101,11 +101,36 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
             LongAny(root, "sourceVersion", "source_version", "version")), ct);
     }
 
-    private Task<BusinessCommandResult> SaleAsync(IntegrationScenarioJob job, JsonElement root, CancellationToken ct)
+    private async Task<BusinessCommandResult> SaleAsync(IntegrationScenarioJob job,
+        ExternalIntegrationConnection connection, JsonElement root, CancellationToken ct)
     {
         root = Envelope(root);
-        var lines = Lines(root);
-        return SaleCoreAsync(job, root, lines, ct);
+        var lines = await ResolveMappedLinesAsync(job, connection, Lines(root), ct);
+        return await SaleCoreAsync(job, root, lines, ct);
+    }
+
+    private async Task<IReadOnlyCollection<IntegrationOrderLineCommand>> ResolveMappedLinesAsync(
+        IntegrationScenarioJob job, ExternalIntegrationConnection connection,
+        IReadOnlyCollection<IntegrationOrderLineCommand> lines, CancellationToken ct)
+    {
+        var externalIds = lines.Select(x => x.ExternalProductId).Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.Ordinal).ToArray();
+        if (externalIds.Length == 0 || lines.Any(x => string.IsNullOrWhiteSpace(x.ExternalProductId)))
+            throw new IntegrationProviderException("OrderLineProductIdentityMissing", false);
+        var mappings = await db.ExternalProductMappings.AsNoTracking().Where(x =>
+            x.ConnectionId == connection.Id && x.ShopId == job.ShopId && x.IsActive
+            && externalIds.Contains(x.ExternalProductId)).ToListAsync(ct);
+        var resolved = new List<IntegrationOrderLineCommand>(lines.Count);
+        foreach (var line in lines)
+        {
+            var matches = mappings.Where(x => x.ExternalProductId == line.ExternalProductId
+                && x.ExternalVariantId == line.ExternalVariantId).ToArray();
+            if (matches.Length != 1 || matches[0].HyperProductId <= 0)
+                throw new IntegrationProviderException(
+                    matches.Length == 0 ? "ProductMappingUnavailable" : "ProductMappingAmbiguous", false);
+            resolved.Add(line with { HyperProductId = matches[0].HyperProductId });
+        }
+        return resolved;
     }
 
     private async Task<BusinessCommandResult> SaleCoreAsync(IntegrationScenarioJob job, JsonElement root,
@@ -134,11 +159,14 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
 
     private static IReadOnlyCollection<IntegrationOrderLineCommand> Lines(JsonElement root) =>
         Array(root, "lines", "items", "order_items", "orderItems").Select(line => new IntegrationOrderLineCommand(
-            IntegerAny(line, "hyperProductId", "product_id", "productId", "id"),
+            IntegerOptional(line, "hyperProductId"),
             OptionalAny(line, "externalProductId", "product_id", "productId"),
             OptionalAny(line, "externalVariantId", "variant_id", "variantId"),
             DecimalAny(line, "quantity", "count", "amount"),
             DecimalAny(line, "unitPrice", "unit_price", "price"))).ToArray();
+
+    private static int IntegerOptional(JsonElement root, params string[] names) =>
+        int.TryParse(OptionalAny(root, names), out var value) ? value : 0;
 
     private static decimal? DecimalOptional(JsonElement root, params string[] names)
     {
