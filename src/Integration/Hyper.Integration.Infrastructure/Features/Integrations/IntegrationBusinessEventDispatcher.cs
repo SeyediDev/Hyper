@@ -18,12 +18,15 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
             ?? throw new IntegrationProviderException("WebhookInboxNotFound", false);
         using var document = JsonDocument.Parse(inbox.PayloadJson);
         var root = document.RootElement;
-        if (inbox.EventType.Contains("parcel", StringComparison.OrdinalIgnoreCase)
-            && inbox.EventType.Contains("status", StringComparison.OrdinalIgnoreCase))
+        if (IsParcelEvent(inbox.EventType))
         {
+            root = Envelope(root);
             var parcel = await commands.ApplyParcelStatusAsync(new(job.EventId, job.ShopId, job.TenantId,
-                job.ConnectionId, Required(root, "externalOrderId"), Required(root, "externalParcelId"),
-                Required(root, "status"), Optional(root, "trackingCode")), ct);
+                job.ConnectionId,
+                RequiredAny(root, "externalOrderId", "order_id", "orderId", "order_item_id"),
+                RequiredAny(root, "externalParcelId", "parcel_id", "parcelId", "id"),
+                RequiredAny(root, "status", "parcel_status", "parcelStatus", "state"),
+                OptionalAny(root, "trackingCode", "tracking_code", "trackingNumber")), ct);
             return Result(parcel);
         }
         if (job.Item is IntegrationSyncItem.Sale or IntegrationSyncItem.Purchase
@@ -113,6 +116,11 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
             if (root.TryGetProperty(name, out var child) && child.ValueKind == JsonValueKind.Object) return child;
         return root;
     }
+
+    private static bool IsParcelEvent(string eventType) =>
+        eventType.Contains("parcel", StringComparison.OrdinalIgnoreCase)
+        && (eventType.Contains("status", StringComparison.OrdinalIgnoreCase)
+            || eventType.Equals("VENDOR_PARCEL_CHANGES", StringComparison.OrdinalIgnoreCase));
 
     private static IEnumerable<JsonElement> Array(JsonElement root, params string[] names)
     {
