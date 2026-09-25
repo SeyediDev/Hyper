@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 var input = Environment.GetEnvironmentVariable("ConnectionStrings__WorkManagement")
     ?? throw new InvalidOperationException("ConnectionStrings__WorkManagement is required.");
 var cs = new SqlConnectionStringBuilder(input) { TrustServerCertificate = true, Encrypt = false };
-if (string.IsNullOrWhiteSpace(cs.InitialCatalog)) cs.InitialCatalog = "HyperWorkManagement_Development";
+if (string.IsNullOrWhiteSpace(cs.InitialCatalog)) cs.InitialCatalog = "WorkManagement";
 var database = cs.InitialCatalog;
 var master = new SqlConnectionStringBuilder(cs.ConnectionString) { InitialCatalog = "master" };
 await using (var c = new SqlConnection(master.ConnectionString))

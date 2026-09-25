@@ -10,6 +10,15 @@ public sealed record ClaimWorkItemRequest(string RoleKey, string AgentId, string
 public sealed record WorkLogRequest(string Author, string Message, string? ChatId = null);
 public sealed record ChatIntakeRequest(string ChatId, string Author, string Message, string? SuggestedTitle = null, string? Domain = null);
 public sealed record ChatIntakeResponse(long IntakeId, long? WorkItemId, string Status);
+public sealed record CreateWorkItemRequest(string ProjectKey, string Key, string Title, string Domain, WorkItemPriority Priority = WorkItemPriority.Normal, string? Description = null);
+public sealed record ChangeWorkItemStatusRequest(WorkItemStatus Status, string Author, string? Message = null);
+public sealed record CommitEvidenceRequest(string Sha, string? Message = null);
+public sealed record TestEvidenceRequest(string TestName, string Result, string? Details = null);
+public sealed record DependencyRequest(long DependsOnWorkItemId);
+public sealed record WorkItemDetails(WorkItemSummary Item, IReadOnlyList<WorkLogView> Logs, IReadOnlyList<CommitEvidenceView> Commits, IReadOnlyList<TestEvidenceView> Tests, IReadOnlyList<long> Dependencies);
+public sealed record WorkLogView(string Author, string Message, string? ChatId, DateTime CreatedAtUtc);
+public sealed record CommitEvidenceView(string Sha, string? Message, DateTime CreatedAtUtc);
+public sealed record TestEvidenceView(string TestName, string Result, string? Details, DateTime CreatedAtUtc);
 public interface IWorkManagementApi
 {
     Task<WorkBoardResponse> GetBoardAsync(string? domain, CancellationToken ct = default);
@@ -17,4 +26,10 @@ public interface IWorkManagementApi
     Task<WorkItemSummary?> ClaimAsync(long workItemId, ClaimWorkItemRequest request, CancellationToken ct = default);
     Task<WorkItemSummary?> AddLogAsync(long workItemId, WorkLogRequest request, CancellationToken ct = default);
     Task<ChatIntakeResponse> IntakeChatAsync(ChatIntakeRequest request, CancellationToken ct = default);
+    Task<WorkItemSummary?> CreateAsync(CreateWorkItemRequest request, CancellationToken ct = default);
+    Task<WorkItemSummary?> ChangeStatusAsync(long workItemId, ChangeWorkItemStatusRequest request, CancellationToken ct = default);
+    Task<WorkItemDetails?> GetDetailsAsync(long workItemId, CancellationToken ct = default);
+    Task<bool> AddCommitAsync(long workItemId, CommitEvidenceRequest request, CancellationToken ct = default);
+    Task<bool> AddTestEvidenceAsync(long workItemId, TestEvidenceRequest request, CancellationToken ct = default);
+    Task<bool> AddDependencyAsync(long workItemId, DependencyRequest request, CancellationToken ct = default);
 }

@@ -18,4 +18,16 @@ public sealed class WorkManagementController(IWorkManagementApi api) : Controlle
     public async Task<IActionResult> Log(long id, [FromBody] WorkLogRequest request, CancellationToken ct) => (await api.AddLogAsync(id, request, ct)) is { } item ? Ok(item) : NotFound();
     [HttpPost("chat-intake")]
     public Task<ChatIntakeResponse> Intake([FromBody] ChatIntakeRequest request, CancellationToken ct) => api.IntakeChatAsync(request, ct);
+    [HttpPost("items")]
+    public async Task<IActionResult> Create([FromBody] CreateWorkItemRequest request, CancellationToken ct) => (await api.CreateAsync(request, ct)) is { } item ? Ok(item) : Conflict(new { error = "ProjectOrKeyUnavailable" });
+    [HttpGet("items/{id:long}")]
+    public async Task<IActionResult> Details(long id, CancellationToken ct) => (await api.GetDetailsAsync(id, ct)) is { } details ? Ok(details) : NotFound();
+    [HttpPost("items/{id:long}/status")]
+    public async Task<IActionResult> Status(long id, [FromBody] ChangeWorkItemStatusRequest request, CancellationToken ct) => (await api.ChangeStatusAsync(id, request, ct)) is { } item ? Ok(item) : Conflict(new { error = "InvalidStatusTransition" });
+    [HttpPost("items/{id:long}/commits")]
+    public async Task<IActionResult> Commit(long id, [FromBody] CommitEvidenceRequest request, CancellationToken ct) => await api.AddCommitAsync(id, request, ct) ? Ok() : NotFound();
+    [HttpPost("items/{id:long}/tests")]
+    public async Task<IActionResult> Test(long id, [FromBody] TestEvidenceRequest request, CancellationToken ct) => await api.AddTestEvidenceAsync(id, request, ct) ? Ok() : NotFound();
+    [HttpPost("items/{id:long}/dependencies")]
+    public async Task<IActionResult> Dependency(long id, [FromBody] DependencyRequest request, CancellationToken ct) => await api.AddDependencyAsync(id, request, ct) ? Ok() : Conflict(new { error = "InvalidDependency" });
 }
