@@ -1,8 +1,10 @@
+using System.Text.Json;
+
 namespace Hyper.SDK.Services;
 
 public interface IWebhookService
 {
-    Task<WebhookResource?> CreateOfficialWebhookAsync(string url, IReadOnlyCollection<int> eventIds,
+    Task CreateOfficialWebhookAsync(string url, IReadOnlyCollection<int> eventIds,
         string? authorizationHeader = null, CancellationToken ct = default);
     Task RegisterWebhookAsync(string url, string[] events, CancellationToken ct = default);
     Task UnregisterWebhookAsync(int webhookId, CancellationToken ct = default);
@@ -21,7 +23,7 @@ public record WebhookResource
 
 public sealed class WebhookService(IBasalamHttpClient client, ILogger<WebhookService>? logger = null) : IWebhookService
 {
-    public Task<WebhookResource?> CreateOfficialWebhookAsync(string url, IReadOnlyCollection<int> eventIds,
+    public async Task CreateOfficialWebhookAsync(string url, IReadOnlyCollection<int> eventIds,
         string? authorizationHeader = null, CancellationToken ct = default)
     {
         if (!Uri.TryCreate(url, UriKind.Absolute, out var callback) || callback.Scheme != Uri.UriSchemeHttps)
@@ -29,7 +31,7 @@ public sealed class WebhookService(IBasalamHttpClient client, ILogger<WebhookSer
         if (eventIds.Count == 0 || eventIds.Any(x => x <= 0))
             throw new ArgumentException("At least one valid Basalam event id is required.", nameof(eventIds));
         var headers = string.IsNullOrWhiteSpace(authorizationHeader) ? null : $"Authorization: {authorizationHeader}";
-        return client.PostAsync<WebhookResource>("https://webhook.basalam.com/v1/webhooks", new
+        await client.PostAsync<JsonElement>("https://webhook.basalam.com/v1/webhooks", new
         {
             event_ids = eventIds,
             request_method = "POST",
