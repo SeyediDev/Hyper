@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Hyper.Infrastructure.Features.Integrations;
 
 /// <summary>Anti-corruption adapter for read-only shop metadata owned by Hyperyek.</summary>
-public sealed class HyperyekPlatformShopAdapter(HyperSqlServerContext accounting) : IIntegrationPlatformShopPort
+public sealed class HyperyekPlatformShopAdapter(HyperSqlServerContext accounting) : IIntegrationPlatformShopPort, IIntegrationPlatformCatalogPort
 {
     public async Task<IReadOnlyList<IntegrationPlatformShop>> SearchAsync(string? search, CancellationToken ct)
     {
@@ -34,4 +34,17 @@ public sealed class HyperyekPlatformShopAdapter(HyperSqlServerContext accounting
             .Select(x => new IntegrationPlatformShop(x.Shopid, x.Name, x.Ownerid,
                 IntegrationConnectionScope.CanonicalTenant(x.Shopid, x.TenantId)))
             .SingleOrDefaultAsync(ct);
+
+    public async Task<IReadOnlyList<IntegrationPlatformProduct>> GetProductsAsync(int shopId, string tenantId,
+        CancellationToken ct)
+    {
+        var tenantless = tenantId == IntegrationConnectionScope.CanonicalTenant(shopId, null);
+        return await accounting.TblProducts.AsNoTracking()
+            .Where(x => x.Shopid == shopId && (x.TenantId == tenantId ||
+                tenantless && (x.TenantId == null || x.TenantId == "")))
+            .OrderBy(x => x.Id)
+            .Select(x => new IntegrationPlatformProduct(x.Id, x.Name, x.Taxcode, x.Saleprice,
+                x.Accountingstock, x.Isenabled, x.Isstockable, x.Minimumstock))
+            .ToListAsync(ct);
+    }
 }

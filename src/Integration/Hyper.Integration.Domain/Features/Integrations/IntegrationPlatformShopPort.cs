@@ -14,3 +14,13 @@ public interface IIntegrationPlatformShopPort
         CancellationToken cancellationToken);
     Task<IntegrationPlatformShop?> GetAsync(int shopId, CancellationToken cancellationToken);
 }
+
+public sealed record IntegrationPlatformProduct(int ProductId, string Name, string? Sku,
+    decimal Price, decimal Stock, bool IsEnabled, bool IsStockable, decimal? MinimumStock);
+
+/// <summary>Read-only platform catalog port; Integration does not know the accounting schema.</summary>
+public interface IIntegrationPlatformCatalogPort
+{
+    Task<IReadOnlyList<IntegrationPlatformProduct>> GetProductsAsync(int shopId, string tenantId,
+        CancellationToken cancellationToken);
+}

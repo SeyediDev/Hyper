@@ -36,6 +36,7 @@ public static class IntegrationServiceRegistration
         services.AddScoped<BasalamDemoProvisioner>();
         services.AddScoped<IIntegrationShopAccess, IntegrationShopAccess>();
         services.AddScoped<IIntegrationPlatformShopPort, HyperyekPlatformShopAdapter>();
+        services.AddScoped<IIntegrationPlatformCatalogPort, HyperyekPlatformShopAdapter>();
         services.AddOptions<IntegrationCustomerOptions>();
         services.AddScoped<IIntegrationAccountingPort, HyperyekAccountingCustomerAdapter>();
         services.AddScoped<IIntegrationCustomerRegistration, IntegrationCustomerRegistration>();
