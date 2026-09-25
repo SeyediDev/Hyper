@@ -11820,3 +11820,97 @@ div.mm-page {
 .min-w-30 {
     min-width: 30% !important;
 }
+
+/* ===== Generated filter layout and popup stacking ===== */
+.filterDiv {
+    position: relative;
+    z-index: 2000;
+    overflow: visible !important;
+    isolation: isolate;
+}
+
+.filterDiv > #main-part,
+.filterDiv .tab-pane > #main-part {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .75rem 1rem;
+    align-items: start;
+    width: 100%;
+    margin: 0 !important;
+}
+
+.filterDiv > #main-part > .neo-control,
+.filterDiv .tab-pane > #main-part > .neo-control {
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    flex: none !important;
+    margin: 0 !important;
+    padding-inline: .5rem !important;
+    position: relative !important;
+}
+
+.filterDiv > #main-part > :is(.col-12, .col-md-12, .col-lg-12, .col-xl-12),
+.filterDiv .tab-pane > #main-part > :is(.col-12, .col-md-12, .col-lg-12, .col-xl-12) {
+    grid-column: 1 / -1;
+}
+
+/* Legacy process filters render a plain Bootstrap row rather than #main-part. */
+.filterDiv .tab-pane > .row {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .5rem 1rem;
+    margin: 0 !important;
+}
+
+.filterDiv .tab-pane > .row > [class*="col-"] {
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    flex: none !important;
+    padding-inline: .5rem !important;
+}
+
+/* The renderer adds this class to Select2 dropdowns opened from filters. */
+.neo-filter-popup,
+.filterDiv .neo-filter-popup {
+    z-index: 100001 !important;
+}
+
+/* Persian Datepicker is appended to body; this keeps it above generated filters. */
+.datepicker-container {
+    z-index: 100002 !important;
+}
+
+@media (max-width: 1199.98px) {
+    .filterDiv > #main-part,
+    .filterDiv .tab-pane > #main-part,
+    .filterDiv .tab-pane > .row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767.98px) {
+    .filterDiv > #main-part,
+    .filterDiv .tab-pane > #main-part,
+    .filterDiv .tab-pane > .row {
+        grid-template-columns: minmax(0, 1fr);
+        gap: .6rem;
+    }
+}
+
+/* Shared filter toolbar, active chips and column filter affordance. */
+.neo-filter-toolbar { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; margin: 0 0 .85rem; min-height: 2rem; }
+.neo-filter-active-summary { display: inline-flex; align-items: center; gap: .35rem; flex-wrap: wrap; min-width: 0; }
+.neo-filter-active-count { color: #475569; font-size: .78rem; font-weight: 700; white-space: nowrap; }
+.neo-filter-chip, .neo-filter-more-toggle { border: 1px solid #cbd5e1; border-radius: 999px; background: #fff; color: #334155; cursor: pointer; font-size: .76rem; line-height: 1.4; padding: .25rem .55rem; }
+.neo-filter-chip:hover, .neo-filter-more-toggle:hover { background: #eff6ff; border-color: #60a5fa; color: #1d4ed8; }
+.neo-filter-chip-clear { display: inline-block; font-size: 1rem; line-height: .8; margin-inline-start: .3rem; }
+.neo-filter-advanced { display: none !important; }
+.neo-filter-expanded .neo-filter-advanced { display: block !important; }
+.neo-filter-focus { border-radius: 8px; box-shadow: 0 0 0 3px rgba(59, 130, 246, .25); }
+.neo-column-header-actions { align-items: center; display: inline-flex; gap: .2rem; justify-content: center; max-width: 100%; width: 100%; }
+.neo-column-header-actions .modern-sort-button { flex: 1 1 auto; min-width: 0; }
+.neo-column-filter { align-items: center; background: transparent; border: 1px solid transparent; border-radius: 5px; color: #64748b; cursor: pointer; display: inline-flex; flex: 0 0 auto; justify-content: center; min-height: 1.8rem; min-width: 1.8rem; padding: .2rem; }
+.neo-column-filter svg { fill: currentColor; height: 1rem; width: 1rem; }
+.neo-column-filter:hover, .neo-column-filter:focus-visible, .neo-column-filter.is-active { background: #eff6ff; border-color: #93c5fd; color: #2563eb; outline: none; }

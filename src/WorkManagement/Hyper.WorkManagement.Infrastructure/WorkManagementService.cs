@@ -11,7 +11,7 @@ public sealed class WorkManagementService(WorkManagementContext db) : IWorkManag
         var items = await db.WorkItems.AsNoTracking().Include(x => x.Project).Where(x => (domain == null || x.Domain == domain) && (project == null || x.Project!.Key == project))
             .OrderBy(x => x.Status).ThenByDescending(x => x.Priority).ThenBy(x => x.Id)
             .ToListAsync(ct);
-        var childCounts = await db.WorkItems.Where(x => x.ParentWorkItemId.HasValue).GroupBy(x => x.ParentWorkItemId!.Value).Select(g => new { ParentId = g.Key, Count = g.Count() }).ToDictionaryAsync(x => x.ParentId, x => x.Count, ct);
+        var childCounts = await db.WorkItems.GroupBy(x => x.ParentWorkItemId??0).Select(g => new { ParentId = g.Key, Count = g.Count() }).ToDictionaryAsync(x => x.ParentId, x => x.Count, ct);
         var roles = await RolesQuery(ct);
         return new(items.Select(x => ToSummary(x, childCounts.GetValueOrDefault(x.Id))).ToList(), roles);
     }
