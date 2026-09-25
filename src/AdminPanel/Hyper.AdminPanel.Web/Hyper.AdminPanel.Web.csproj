@@ -6,7 +6,9 @@
 		<DockerComposeProjectPath>..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
-	<ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\WorkManagement\Hyper.WorkManagement.Contracts\Hyper.WorkManagement.Contracts.csproj" />
+    <ProjectReference Include="..\..\WorkManagement\Hyper.WorkManagement.Infrastructure\Hyper.WorkManagement.Infrastructure.csproj" />
 		<PackageReference Include="AutoMapper" />
 		<PackageReference Include="Ardalis.GuardClauses" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" />

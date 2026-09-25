@@ -11,6 +11,32 @@
 
 ## تصمیم پایه این بک‌لاگ — جداسازی دامین‌ها
 
+## مدیریت چندچت و چندایجنت
+
+دامین `WorkManagement` مرجع عملیاتی مالکیت کار است؛ این دامین از Integration، حسابداری و Neo.Bpms جداست و پنل فقط API آن را مصرف می‌کند.
+
+قواعد:
+
+- هر task یک `Task Key`، یک owner role، یک agent، یک chat/session، یک branch و یک commit evidence دارد.
+- هر role حداکثر یک task با وضعیت `InProgress` دارد؛ اگر کار فعال ندارد، برای task آمادهٔ هم‌دامنه قابل انتخاب است.
+- کار هم‌زمان فقط با branch و worktree جدا انجام می‌شود؛ دو chat نباید روی یک فایل مشترک هم‌زمان کار کنند.
+- تغییرات معماری، قرارداد، schema و فایل‌های مشترک با role `architecture-lead` هماهنگ می‌شود.
+- پیام چت فقط با `POST /api/work-management/v1/chat-intake` به task تبدیل می‌شود؛ متن اولیه در Description و log حفظ می‌شود.
+- هر مرحله پس از build/test باید commit شود و SHA آن در task ثبت شود.
+
+Roleهای پایه:
+
+| Role Key | مسئولیت | وضعیت پیش‌فرض |
+|---|---|---|
+| architecture-lead | معماری، قرارداد، schema و handoff بین دامین‌ها | آماده |
+| basalam-integration | OAuth، وب‌هوک و adapter باسلام | آماده |
+| accounting-platform | API و handlerهای حسابداری | آماده |
+| worker-operations | queue، outbox، retry و worker | آماده |
+| quality | تست‌های domain، integration و E2E | آماده |
+| panel-operations | dashboard، کارتابل، کانبان و CRUD پنل | آماده |
+
+وضعیت‌ها: `Backlog → Ready → InProgress → Review → Done`؛ `Blocked` فقط با ثبت علت و وابستگی استفاده می‌شود.
+
 این پروژه با مرزبندی صریح دامین‌ها ادامه پیدا می‌کند. دامین Integration مالک کد، مدل، persistence و API خودش است و با دامین‌های اصلی Hyperyek، پنل ادمین و providerها قاطی نمی‌شود.
 
 قواعد الزام‌آور:

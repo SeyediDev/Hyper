@@ -8,6 +8,9 @@ using Neo.Bpms.UI.MVC.Features;
 using Neo.Endpoint;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
+using Hyper.WorkManagement.Infrastructure;
+using Microsoft.EntityFrameworkCore;
+using Hyper.WorkManagement.Contracts;
 
 namespace Hyper.AdminPanel.Web;
 
@@ -67,6 +70,12 @@ public static class DependencyInjection
             ?? configuration.GetConnectionString("DomainCommandConnection");
         if (!string.IsNullOrWhiteSpace(integrationConnection))
             services.AddHyperIntegrations(configuration.GetConnectionString("DomainCommandConnection")!, integrationConnection, configuration);
+        var workConnection = configuration.GetConnectionString("WorkManagementConnection") ?? integrationConnection;
+        if (!string.IsNullOrWhiteSpace(workConnection))
+        {
+            services.AddDbContext<WorkManagementContext>(o => o.UseSqlServer(workConnection));
+            services.AddScoped<IWorkManagementApi, WorkManagementService>();
+        }
 
         // Feature Services (SMS, Jobs, etc.)
         AddFeatureServices(services, configuration);
