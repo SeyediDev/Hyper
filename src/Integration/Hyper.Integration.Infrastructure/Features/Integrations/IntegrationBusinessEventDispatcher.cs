@@ -30,12 +30,12 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
             return Result(parcel);
         }
         if (job.Item is IntegrationSyncItem.Sale or IntegrationSyncItem.Purchase
-            && (inbox.EventType.Contains("cancel", StringComparison.OrdinalIgnoreCase)
-                || inbox.EventType.Contains("return", StringComparison.OrdinalIgnoreCase)))
+            && IsCancellationEvent(inbox.EventType, root))
         {
+            root = Envelope(root);
             var cancellation = await commands.CancelOrderAsync(new(job.EventId, job.ShopId, job.TenantId,
-                job.ConnectionId, Required(root, "externalOrderId"),
-                Optional(root, "reason") ?? inbox.EventType), ct);
+                job.ConnectionId, RequiredAny(root, "externalOrderId", "order_id", "orderId", "id"),
+                OptionalAny(root, "reason", "cancel_reason", "cancelReason", "status") ?? inbox.EventType), ct);
             return Result(cancellation);
         }
         if (job.Item is IntegrationSyncItem.Subscription or IntegrationSyncItem.Review or IntegrationSyncItem.Chat)
@@ -121,6 +121,18 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
         eventType.Contains("parcel", StringComparison.OrdinalIgnoreCase)
         && (eventType.Contains("status", StringComparison.OrdinalIgnoreCase)
             || eventType.Equals("VENDOR_PARCEL_CHANGES", StringComparison.OrdinalIgnoreCase));
+
+    private static bool IsCancellationEvent(string eventType, JsonElement root)
+    {
+        if (eventType.Contains("cancel", StringComparison.OrdinalIgnoreCase)
+            || eventType.Contains("return", StringComparison.OrdinalIgnoreCase)) return true;
+        if (!eventType.Equals("VENDOR_ORDER_ITEM_CHANGES", StringComparison.OrdinalIgnoreCase)) return false;
+        root = Envelope(root);
+        var status = OptionalAny(root, "status", "item_status", "itemStatus", "state");
+        return status is not null && (status.Contains("cancel", StringComparison.OrdinalIgnoreCase)
+            || status.Contains("return", StringComparison.OrdinalIgnoreCase)
+            || status.Contains("reject", StringComparison.OrdinalIgnoreCase));
+    }
 
     private static IEnumerable<JsonElement> Array(JsonElement root, params string[] names)
     {
