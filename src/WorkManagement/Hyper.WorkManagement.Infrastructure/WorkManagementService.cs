@@ -37,8 +37,11 @@ public sealed class WorkManagementService(WorkManagementContext db) : IWorkManag
     {
         var intake = new ChatWorkIntake { ChatId = request.ChatId, Author = request.Author, Message = request.Message, Status = 1 };
         db.ChatWorkIntakes.Add(intake);
+        var project = await db.WorkProjects.FirstOrDefaultAsync(x => x.Key == "HYPER", ct)
+            ?? new WorkProject { Key = "HYPER", Name = "Hyper", IsEnabled = true };
+        if (project.Id == 0) { db.WorkProjects.Add(project); await db.SaveChangesAsync(ct); }
         var key = $"CHAT-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid():N}"[..30];
-        var item = new WorkItem { Key = key, Title = request.SuggestedTitle ?? request.Message[..Math.Min(120, request.Message.Length)], Domain = request.Domain ?? "Untriaged", Description = request.Message, Status = WorkItemStatus.Backlog, Priority = WorkItemPriority.Normal, ChatId = request.ChatId };
+        var item = new WorkItem { ProjectId = project.Id, Key = key, Title = request.SuggestedTitle ?? request.Message[..Math.Min(120, request.Message.Length)], Domain = request.Domain ?? "Untriaged", Description = request.Message, Status = WorkItemStatus.Backlog, Priority = WorkItemPriority.Normal, ChatId = request.ChatId };
         db.WorkItems.Add(item); await db.SaveChangesAsync(ct); intake.WorkItemId = item.Id; await db.SaveChangesAsync(ct);
         return new(intake.Id, item.Id, "Created");
     }

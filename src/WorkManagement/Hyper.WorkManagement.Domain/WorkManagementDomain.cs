@@ -5,6 +5,7 @@ namespace Hyper.WorkManagement.Domain;
 public sealed class WorkItem
 {
     public long Id { get; set; }
+    public long ProjectId { get; set; }
     public string Key { get; set; } = null!;
     public string Title { get; set; } = null!;
     public string Domain { get; set; } = null!;
@@ -19,6 +20,13 @@ public sealed class WorkItem
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
 }
+public sealed class WorkProject
+{
+    public long Id { get; set; }
+    public string Key { get; set; } = null!;
+    public string Name { get; set; } = null!;
+    public bool IsEnabled { get; set; } = true;
+}
 public sealed class WorkRole
 {
     public long Id { get; set; }
@@ -26,6 +34,30 @@ public sealed class WorkRole
     public string Name { get; set; } = null!;
     public string Scope { get; set; } = null!;
     public bool IsEnabled { get; set; } = true;
+}
+public sealed class WorkItemDependency
+{
+    public long Id { get; set; }
+    public long WorkItemId { get; set; }
+    public long DependsOnWorkItemId { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+}
+public sealed class WorkItemCommit
+{
+    public long Id { get; set; }
+    public long WorkItemId { get; set; }
+    public string Sha { get; set; } = null!;
+    public string? Message { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+}
+public sealed class WorkItemTestEvidence
+{
+    public long Id { get; set; }
+    public long WorkItemId { get; set; }
+    public string TestName { get; set; } = null!;
+    public string Result { get; set; } = null!;
+    public string? Details { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 }
 public sealed class WorkItemLog
 {
