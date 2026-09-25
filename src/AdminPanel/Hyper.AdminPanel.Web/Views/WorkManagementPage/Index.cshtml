@@ -1,0 +1,28 @@
+@model Hyper.WorkManagement.Contracts.WorkBoardResponse
+@using Hyper.WorkManagement.Contracts
+@{
+    Layout = "_HyperAdminLayout";
+    ViewBag.Title = "مدیریت کار | پنل مدیریت هایپریک";
+    var columns = new[] { WorkItemStatus.Backlog, WorkItemStatus.Ready, WorkItemStatus.InProgress, WorkItemStatus.Blocked, WorkItemStatus.Review, WorkItemStatus.Done };
+    string StatusText(WorkItemStatus status) => status switch { WorkItemStatus.Backlog => "بک‌لاگ", WorkItemStatus.Ready => "آماده اجرا", WorkItemStatus.InProgress => "در حال انجام", WorkItemStatus.Blocked => "مسدود", WorkItemStatus.Review => "بازبینی", WorkItemStatus.Done => "تکمیل‌شده", _ => "لغوشده" };
+    string PriorityText(WorkItemPriority priority) => priority switch { WorkItemPriority.Critical => "بحرانی", WorkItemPriority.High => "بالا", WorkItemPriority.Low => "پایین", _ => "عادی" };
+}
+<link rel="stylesheet" href="~/Content/work-management.css" asp-append-version="true" />
+<section class="work-management-page" dir="rtl">
+    <header class="work-management-heading">
+        <div><span class="simulation-eyebrow">فضای توسعه و عملیات</span><h1>مدیریت کار</h1><p>کانبان مرکزی بک‌لاگ، Roleها، مالکیت تسک و شواهد تحویل.</p></div>
+        <a class="simulation-secondary" asp-action="Index">تازه‌سازی</a>
+    </header>
+    <div class="work-management-summary">
+        <article><span>کل آیتم‌ها</span><strong>@Model.Items.Count</strong></article>
+        <article><span>در حال انجام</span><strong>@Model.Items.Count(x => x.Status == WorkItemStatus.InProgress)</strong></article>
+        <article><span>مسدود</span><strong>@Model.Items.Count(x => x.Status == WorkItemStatus.Blocked)</strong></article>
+        <article><span>Role آزاد</span><strong>@Model.Roles.Count(x => x.IsAvailable)</strong></article>
+    </div>
+    <section class="work-management-card"><header><h2>کارتابل Roleها</h2><span>هر Role حداکثر یک تسک فعال دارد</span></header>
+        <div class="work-role-grid">@foreach (var role in Model.Roles) { <div class="work-role @(role.IsAvailable ? "available" : "busy")"><span class="role-dot"></span><div><strong>@role.Name</strong><small>@role.Key</small></div><b>@(role.IsAvailable ? "آماده" : $"تسک #{role.ActiveWorkItemId}")</b></div> }</div>
+    </section>
+    <section class="work-management-card"><header><h2>کانبان بک‌لاگ</h2><span>منبع داده: WorkManagement</span></header>
+        <div class="work-kanban">@foreach (var status in columns) { <div class="work-column"><header><h3>@StatusText(status)</h3><b>@Model.Items.Count(x => x.Status == status)</b></header><div class="work-column-items">@foreach (var item in Model.Items.Where(x => x.Status == status)) { <article class="work-item-card"><div class="work-item-top"><strong>@item.Key</strong><span class="priority-@item.Priority.ToString().ToLowerInvariant()">@PriorityText(item.Priority)</span></div><h4>@item.Title</h4><p>@item.Domain</p><footer><span>@(item.OwnerRole ?? "بدون مالک")</span>@if (item.Branch is not null) { <span dir="ltr">@item.Branch</span> }</footer></article>}</div></div> }</div>
+    </section>
+</section>
