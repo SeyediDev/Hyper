@@ -12,6 +12,18 @@ public sealed record ValidateCustomerCommand(AccountingScope Scope, int PersonId
     AccountingCustomerIdentity Customer);
 public sealed record ResolveCustomerCommand(AccountingScope Scope, AccountingCustomerIdentity Customer);
 
+public sealed record AccountingShopRead(int ShopId, string ShopName, string MerchantIdentifier, string TenantId);
+public sealed record AccountingProductRead(int ProductId, string Name, string? Sku, decimal Price,
+    decimal Stock, bool IsEnabled, bool IsStockable, decimal? MinimumStock);
+
+public interface IAccountingPlatformReadHandler
+{
+    Task<IReadOnlyList<AccountingShopRead>> SearchShopsAsync(string? search, CancellationToken ct);
+    Task<IReadOnlyList<AccountingShopRead>> GetShopsAsync(IReadOnlyCollection<int> shopIds, CancellationToken ct);
+    Task<AccountingShopRead?> GetShopAsync(int shopId, CancellationToken ct);
+    Task<IReadOnlyList<AccountingProductRead>> GetProductsAsync(AccountingScope scope, CancellationToken ct);
+}
+
 public sealed record OrderLineCommand(
     int HyperProductId, decimal Quantity, decimal UnitPrice,
     string? ExternalProductId = null, string? ExternalVariantId = null);

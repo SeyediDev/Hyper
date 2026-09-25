@@ -19,8 +19,44 @@ public sealed class HyperyekAccountingApiOptions
 
 /// <summary>HTTP adapter for the platform-owned accounting API.</summary>
 public sealed class HyperyekAccountingApiClient(
-    HttpClient client) : IIntegrationBusinessCommandPort, IIntegrationAccountingPort
+    HttpClient client) : IIntegrationBusinessCommandPort, IIntegrationAccountingPort,
+    IIntegrationPlatformShopPort, IIntegrationPlatformCatalogPort
 {
+    public async Task<IReadOnlyList<IntegrationPlatformShop>> SearchAsync(string? search, CancellationToken ct)
+    {
+        var route = string.IsNullOrWhiteSpace(search) ? "api/hyperyek/v1/accounting/platform/shops"
+            : $"api/hyperyek/v1/accounting/platform/shops?search={Uri.EscapeDataString(search.Trim())}";
+        var result = await GetAsync<List<AccountingShopRead>>(route, ct);
+        return result.Select(ToShop).ToArray();
+    }
+
+    public async Task<IReadOnlyList<IntegrationPlatformShop>> GetByIdsAsync(IReadOnlyCollection<int> shopIds,
+        CancellationToken ct)
+    {
+        var result = await client.PostAsJsonAsync("api/hyperyek/v1/accounting/platform/shops/by-ids", shopIds, ct);
+        result.EnsureSuccessStatusCode();
+        var shops = await result.Content.ReadFromJsonAsync<List<AccountingShopRead>>(cancellationToken: ct) ?? [];
+        return shops.Select(ToShop).ToArray();
+    }
+
+    public async Task<IntegrationPlatformShop?> GetAsync(int shopId, CancellationToken ct)
+    {
+        using var response = await client.GetAsync($"api/hyperyek/v1/accounting/platform/shops/{shopId}", ct);
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return null;
+        response.EnsureSuccessStatusCode();
+        var shop = await response.Content.ReadFromJsonAsync<AccountingShopRead>(cancellationToken: ct);
+        return shop is null ? null : ToShop(shop);
+    }
+
+    public async Task<IReadOnlyList<IntegrationPlatformProduct>> GetProductsAsync(int shopId, string tenantId,
+        CancellationToken ct)
+    {
+        var route = $"api/hyperyek/v1/accounting/platform/shops/{shopId}/products?tenantId={Uri.EscapeDataString(tenantId)}";
+        var products = await GetAsync<List<AccountingProductRead>>(route, ct);
+        return products.Select(x => new IntegrationPlatformProduct(x.ProductId, x.Name, x.Sku, x.Price,
+            x.Stock, x.IsEnabled, x.IsStockable, x.MinimumStock)).ToArray();
+    }
+
     public async Task<bool> ValidateLinkedCustomerAsync(IntegrationCustomerIdentity customer, int personId,
         CancellationToken ct)
     {
@@ -85,6 +121,17 @@ public sealed class HyperyekAccountingApiClient(
             ? new(IntegrationCommandStatus.Rejected, ErrorCode: "AccountingApiEmptyResponse")
             : new((IntegrationCommandStatus)(byte)result.Status, result.InternalReference, result.ErrorCode);
     }
+
+    private async Task<T> GetAsync<T>(string route, CancellationToken ct)
+    {
+        using var response = await client.GetAsync(route, ct);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<T>(cancellationToken: ct)
+            ?? throw new InvalidOperationException("AccountingApiEmptyResponse");
+    }
+
+    private static IntegrationPlatformShop ToShop(AccountingShopRead shop) =>
+        new(shop.ShopId, shop.ShopName, shop.MerchantIdentifier, shop.TenantId);
 
     private static OrderLineCommand ToLine(IntegrationOrderLineCommand line) =>
         new(line.HyperProductId, line.Quantity, line.UnitPrice, line.ExternalProductId, line.ExternalVariantId);

@@ -31,8 +31,44 @@ public sealed class AccountingCustomerOptions
 }
 
 public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db,
-    IOptions<AccountingCustomerOptions> customerOptions) : IAccountingCommandHandler
+    IOptions<AccountingCustomerOptions> customerOptions) : IAccountingCommandHandler, IAccountingPlatformReadHandler
 {
+    public async Task<IReadOnlyList<AccountingShopRead>> SearchShopsAsync(string? search, CancellationToken ct)
+    {
+        var shops = db.TblShops.AsNoTracking();
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.Trim();
+            shops = shops.Where(x => x.Shopid.ToString().Contains(search) || x.Name.Contains(search)
+                || x.Ownerid.Contains(search) || (x.Mobile != null && x.Mobile.Contains(search)));
+        }
+        return await shops.OrderBy(x => x.Name).ThenBy(x => x.Shopid).Take(100)
+            .Select(x => new AccountingShopRead(x.Shopid, x.Name, x.Ownerid,
+                CanonicalTenant(x.Shopid, x.TenantId))).ToListAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<AccountingShopRead>> GetShopsAsync(IReadOnlyCollection<int> shopIds, CancellationToken ct)
+    {
+        if (shopIds.Count == 0) return [];
+        return await db.TblShops.AsNoTracking().Where(x => shopIds.Contains(x.Shopid))
+            .Select(x => new AccountingShopRead(x.Shopid, x.Name, x.Ownerid,
+                CanonicalTenant(x.Shopid, x.TenantId))).ToListAsync(ct);
+    }
+
+    public async Task<AccountingShopRead?> GetShopAsync(int shopId, CancellationToken ct) =>
+        await db.TblShops.AsNoTracking().Where(x => x.Shopid == shopId)
+            .Select(x => new AccountingShopRead(x.Shopid, x.Name, x.Ownerid,
+                CanonicalTenant(x.Shopid, x.TenantId))).SingleOrDefaultAsync(ct);
+
+    public async Task<IReadOnlyList<AccountingProductRead>> GetProductsAsync(AccountingScope scope, CancellationToken ct)
+    {
+        var tenantless = scope.TenantId == CanonicalTenant(scope.ShopId, null);
+        return await db.TblProducts.AsNoTracking().Where(x => x.Shopid == scope.ShopId
+                && (x.TenantId == scope.TenantId || tenantless && (x.TenantId == null || x.TenantId == "")))
+            .OrderBy(x => x.Id).Select(x => new AccountingProductRead(x.Id, x.Name, x.Taxcode,
+                x.Saleprice, x.Accountingstock, x.Isenabled, x.Isstockable, x.Minimumstock)).ToListAsync(ct);
+    }
+
     public async Task<AccountingCommandResult> ValidateCustomerAsync(ValidateCustomerCommand command, CancellationToken ct)
     {
         var policy = Policy();
@@ -110,6 +146,9 @@ public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db,
 
     private static bool HasRole(string? roles, string role) => roles?.Split(',', StringSplitOptions.TrimEntries)
         .Contains(role, StringComparer.OrdinalIgnoreCase) == true;
+
+    private static string CanonicalTenant(int shopId, string? tenantId) =>
+        string.IsNullOrWhiteSpace(tenantId) ? $"shop:{shopId}" : tenantId.Trim();
 
     public async Task<AccountingCommandResult> ApplyVendorOrderAsync(VendorOrderCommand command, CancellationToken ct)
     {

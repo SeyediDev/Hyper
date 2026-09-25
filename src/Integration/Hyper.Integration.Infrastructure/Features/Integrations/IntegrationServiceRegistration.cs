@@ -35,8 +35,6 @@ public static class IntegrationServiceRegistration
         services.AddScoped<IIntegrationStrategyResolver, IntegrationStrategyResolver>();
         services.AddScoped<BasalamDemoProvisioner>();
         services.AddScoped<IIntegrationShopAccess, IntegrationShopAccess>();
-        services.AddScoped<IIntegrationPlatformShopPort, HyperyekPlatformShopAdapter>();
-        services.AddScoped<IIntegrationPlatformCatalogPort, HyperyekPlatformShopAdapter>();
         services.AddScoped<IIntegrationPlatformOverviewPort, HyperyekPlatformShopAdapter>();
         services.AddOptions<IntegrationCustomerOptions>();
         services.AddScoped<IIntegrationCustomerRegistration, IntegrationCustomerRegistration>();
@@ -60,6 +58,18 @@ public static class IntegrationServiceRegistration
             client.Timeout = TimeSpan.FromSeconds(30);
         });
         services.AddHttpClient<IIntegrationAccountingPort, HyperyekAccountingApiClient>((provider, client) =>
+        {
+            var options = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<HyperyekAccountingApiOptions>>().Value;
+            client.BaseAddress = new Uri(options.BaseAddress, UriKind.Absolute);
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
+        services.AddHttpClient<IIntegrationPlatformShopPort, HyperyekAccountingApiClient>((provider, client) =>
+        {
+            var options = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<HyperyekAccountingApiOptions>>().Value;
+            client.BaseAddress = new Uri(options.BaseAddress, UriKind.Absolute);
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
+        services.AddHttpClient<IIntegrationPlatformCatalogPort, HyperyekAccountingApiClient>((provider, client) =>
         {
             var options = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<HyperyekAccountingApiOptions>>().Value;
             client.BaseAddress = new Uri(options.BaseAddress, UriKind.Absolute);
