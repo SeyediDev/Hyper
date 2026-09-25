@@ -1,7 +1,5 @@
 using Hyper.Infrastructure.Features.Integrations;
-using Hyper.Infrastructure.Data.Repository.Hyper;
 using Basalam.SDK;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -25,9 +23,8 @@ if (string.IsNullOrWhiteSpace(connection))
     throw new InvalidOperationException("Configure ConnectionStrings__Domain or HYPER_SETTINGS_FILE for the integration worker.");
 var integrationConnection = builder.Configuration.GetConnectionString("IntegrationConnection") ?? connection;
 builder.Services.AddBasalamSdk(builder.Configuration.GetSection("Basalam"));
-// The worker does not use the full AdminPanel repository registration, but the
-// Basalam adapter still needs the encrypted OAuth token store.
-builder.Services.AddDbContext<HyperContextCommand>(options => options.UseSqlServer(connection));
+// The worker does not use AdminPanel/Neo.Bpms registration. Integration
+// persistence and the platform adapter registrations are composed below.
 builder.Services.Configure<BasalamOAuthSettings>(builder.Configuration.GetSection("Basalam"));
 builder.Services.AddDataProtection();
 builder.Services.AddHttpClient<BasalamOAuthService>();
