@@ -9,35 +9,41 @@ namespace Hyper.Infrastructure.Features.Integrations;
 public sealed class IntegrationManagementApi(HyperIntegrationContext db) : IIntegrationManagementApi
 {
     public async Task<IReadOnlyList<IntegrationConnectionSummary>> ListConnectionsAsync(
-        IntegrationConnectionListRequest request, CancellationToken cancellationToken = default) =>
-        await db.ExternalIntegrationConnections.AsNoTracking()
-            .Where(x => x.ShopId == request.ShopId && x.TenantId == request.TenantId)
+        IntegrationConnectionListRequest request, CancellationToken cancellationToken = default)
+    {
+        var tenantId = NormalizeTenant(request.TenantId);
+        if (request.ShopId <= 0 || tenantId is null) return [];
+
+        return await db.ExternalIntegrationConnections.AsNoTracking()
+            .Where(x => x.ShopId == request.ShopId && x.TenantId == tenantId)
             .OrderBy(x => x.Provider).ThenBy(x => x.DisplayName)
             .Select(x => new IntegrationConnectionSummary(x.Id, x.ShopId, x.TenantId,
                 ToContractProvider(x.Provider), x.DisplayName, x.IsEnabled, x.ExpiresAtUtc, x.LastSyncAtUtc))
             .ToListAsync(cancellationToken);
+    }
 
     public async Task<IntegrationConnectionResponse?> CreateConnectionAsync(
         IntegrationConnectionCreateRequest request, CancellationToken cancellationToken = default)
     {
-        if (request.ShopId <= 0 || string.IsNullOrWhiteSpace(request.TenantId) || request.TenantId.Length > 30
-            || string.IsNullOrWhiteSpace(request.DisplayName) || request.DisplayName.Length > 200
-            || string.IsNullOrWhiteSpace(request.AccountIdentifier) || request.AccountIdentifier.Length > 200
+        var tenantId = NormalizeTenant(request.TenantId);
+        var displayName = NormalizeText(request.DisplayName, 200);
+        var accountIdentifier = NormalizeText(request.AccountIdentifier, 200);
+        if (request.ShopId <= 0 || tenantId is null || displayName is null || accountIdentifier is null
             || !Enum.IsDefined(request.Provider) || !Enum.IsDefined(typeof(IntegrationCredentialType), request.CredentialType))
             return null;
         var provider = ToDomainProvider(request.Provider);
         if (provider is null) return null;
         var exists = await db.ExternalIntegrationConnections.AnyAsync(x =>
-            x.ShopId == request.ShopId && x.Provider == provider.Value
-            && x.AccountIdentifier == request.AccountIdentifier, cancellationToken);
+            x.ShopId == request.ShopId && x.Provider == provider.Value && x.AccountIdentifier == accountIdentifier,
+            cancellationToken);
         if (exists) return null;
         var connection = new ExternalIntegrationConnection
         {
             ShopId = request.ShopId,
-            TenantId = request.TenantId.Trim(),
+            TenantId = tenantId,
             Provider = provider.Value,
-            DisplayName = request.DisplayName.Trim(),
-            AccountIdentifier = request.AccountIdentifier.Trim(),
+            DisplayName = displayName,
+            AccountIdentifier = accountIdentifier,
             CredentialType = (IntegrationCredentialType)request.CredentialType,
             // Credentials are provisioned by OAuth/vault flows, never through this DTO.
             CredentialsJson = "{}",
@@ -52,8 +58,10 @@ public sealed class IntegrationManagementApi(HyperIntegrationContext db) : IInte
     public async Task<bool> SetConnectionEnabledAsync(IntegrationConnectionCommandRequest request, bool enabled,
         CancellationToken cancellationToken = default)
     {
+        var tenantId = NormalizeTenant(request.TenantId);
+        if (request.ShopId <= 0 || request.ConnectionId <= 0 || tenantId is null) return false;
         var changed = await db.ExternalIntegrationConnections
-            .Where(x => x.Id == request.ConnectionId && x.ShopId == request.ShopId && x.TenantId == request.TenantId)
+            .Where(x => x.Id == request.ConnectionId && x.ShopId == request.ShopId && x.TenantId == tenantId)
             .ExecuteUpdateAsync(s => s.SetProperty(x => x.IsEnabled, enabled), cancellationToken);
         return changed == 1;
     }
@@ -61,14 +69,25 @@ public sealed class IntegrationManagementApi(HyperIntegrationContext db) : IInte
     public async Task<IntegrationReplayResponse?> ReplayWebhookAsync(IntegrationConnectionCommandRequest request,
         long inboxId, CancellationToken cancellationToken = default)
     {
-        if (inboxId <= 0) return null;
+        var tenantId = NormalizeTenant(request.TenantId);
+        if (inboxId <= 0 || request.ShopId <= 0 || request.ConnectionId <= 0 || tenantId is null) return null;
         var changed = await db.IntegrationWebhookInbox
             .Where(x => x.Id == inboxId && x.ConnectionId == request.ConnectionId
                 && db.ExternalIntegrationConnections.Any(c => c.Id == x.ConnectionId
-                    && c.ShopId == request.ShopId && c.TenantId == request.TenantId))
+                    && c.ShopId == request.ShopId && c.TenantId == tenantId))
             .ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, (byte)0)
                 .SetProperty(x => x.Error, (string?)null).SetProperty(x => x.ProcessedAtUtc, (DateTime?)null), cancellationToken);
         return changed == 1 ? new IntegrationReplayResponse(inboxId, "Queued") : null;
+    }
+
+    private static string? NormalizeTenant(string? value) => NormalizeText(value, 30);
+
+    private static string? NormalizeText(string? value, int maxLength)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return null;
+        var normalized = value.Trim();
+        return normalized.Length == 0 || normalized.Length > maxLength || normalized.Any(char.IsControl)
+            ? null : normalized;
     }
 
     private static IntegrationConnectionSummary ToSummary(ExternalIntegrationConnection x) =>

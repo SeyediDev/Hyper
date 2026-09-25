@@ -12,7 +12,8 @@ public sealed class IntegrationScopeAuthorization : IIntegrationScopeAuthorizati
     public Task<bool> CanAccessAsync(ClaimsPrincipal principal, int shopId, string tenantId,
         CancellationToken cancellationToken = default)
     {
-        if (shopId <= 0 || string.IsNullOrWhiteSpace(tenantId) || tenantId.Length > 128
+        tenantId = tenantId?.Trim()!;
+        if (shopId <= 0 || string.IsNullOrWhiteSpace(tenantId) || tenantId.Length > 30
             || principal.Identity?.IsAuthenticated != true)
             return Task.FromResult(false);
         var expected = $"shop:{shopId};tenant:{tenantId}";

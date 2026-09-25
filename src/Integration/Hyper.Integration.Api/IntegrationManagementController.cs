@@ -15,7 +15,8 @@ public sealed class IntegrationManagementController(IIntegrationManagementApi ma
         [FromQuery] int shopId, [FromHeader(Name = "X-Tenant-Id")] string tenantId,
         CancellationToken cancellationToken)
     {
-        if (shopId <= 0 || string.IsNullOrWhiteSpace(tenantId)) return BadRequest("InvalidScope");
+        tenantId = tenantId?.Trim()!;
+        if (shopId <= 0 || string.IsNullOrWhiteSpace(tenantId) || tenantId.Length > 30) return BadRequest("InvalidScope");
         if (!await scope.CanAccessAsync(User, shopId, tenantId, cancellationToken)) return Forbid();
         return Ok(await management.ListConnectionsAsync(new(shopId, tenantId), cancellationToken));
     }
@@ -24,6 +25,7 @@ public sealed class IntegrationManagementController(IIntegrationManagementApi ma
     public async Task<IActionResult> Create([FromBody] IntegrationConnectionCreateRequest request,
         CancellationToken cancellationToken)
     {
+        request = request with { TenantId = request.TenantId?.Trim() ?? string.Empty };
         if (!await scope.CanAccessAsync(User, request.ShopId, request.TenantId, cancellationToken)) return Forbid();
         var created = await management.CreateConnectionAsync(request, cancellationToken);
         return created is null ? BadRequest(new { error = "InvalidConnection" })
@@ -45,6 +47,9 @@ public sealed class IntegrationManagementController(IIntegrationManagementApi ma
         [FromHeader(Name = "X-Shop-Id")] int shopId,
         [FromHeader(Name = "X-Tenant-Id")] string tenantId, CancellationToken cancellationToken)
     {
+        tenantId = tenantId?.Trim()!;
+        if (shopId <= 0 || connectionId <= 0 || inboxId <= 0 || string.IsNullOrWhiteSpace(tenantId)
+            || tenantId.Length > 30) return BadRequest("InvalidScope");
         if (!await scope.CanAccessAsync(User, shopId, tenantId, cancellationToken)) return Forbid();
         var result = await management.ReplayWebhookAsync(new(shopId, tenantId, connectionId), inboxId, cancellationToken);
         return result is null ? NotFound(new { error = "WebhookNotFound" }) : Accepted(result);
@@ -53,6 +58,7 @@ public sealed class IntegrationManagementController(IIntegrationManagementApi ma
     private async Task<IActionResult> SetEnabled(long connectionId, int shopId, string tenantId, bool enabled,
         CancellationToken cancellationToken)
     {
+        tenantId = tenantId?.Trim()!;
         if (shopId <= 0 || string.IsNullOrWhiteSpace(tenantId)) return BadRequest("InvalidScope");
         if (!await scope.CanAccessAsync(User, shopId, tenantId, cancellationToken)) return Forbid();
         var changed = await management.SetConnectionEnabledAsync(new(shopId, tenantId, connectionId), enabled, cancellationToken);
