@@ -110,13 +110,14 @@ public sealed class IntegrationWebhookIngress(
     {
         item = eventType.Trim().ToLowerInvariant() switch
         {
-            "product.created" or "product.updated" or "product.changed" => IntegrationSyncItem.Product,
+            "product.created" or "product.updated" or "product.changed" or "product_create_changes" => IntegrationSyncItem.Product,
             "inventory.updated" or "stock.updated" or "inventory.changed" => IntegrationSyncItem.Inventory,
             "customer.created" or "customer.updated" or "customer.changed" => IntegrationSyncItem.Counterparty,
             "order.vendor.created" or "order.vendor.updated" or "order.vendor.cancelled"
-                or "order.vendor.returned" or "parcel.created" or "parcel.status_changed" => IntegrationSyncItem.Sale,
+                or "order.vendor.returned" or "parcel.created" or "parcel.status_changed"
+                or "vendor_new_order" or "vendor_order_item_changes" or "vendor_parcel_changes" => IntegrationSyncItem.Sale,
             "order.customer.created" or "order.customer.updated" or "order.customer.cancelled"
-                or "order.customer.returned" => IntegrationSyncItem.Purchase,
+                or "order.customer.returned" or "new_order" or "order_item_changes" => IntegrationSyncItem.Purchase,
             "subscription.created" or "subscription.renewed" or "subscription.cancelled" => IntegrationSyncItem.Subscription,
             "review.created" or "review.updated" => IntegrationSyncItem.Review,
             "chat.message.received" or "chat.message.sent" => IntegrationSyncItem.Chat,
