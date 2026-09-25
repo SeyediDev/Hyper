@@ -35,7 +35,7 @@ var local = new[]
 };
 var remote = new[]
 {
-    new ExternalCatalogItem("11", null, "Changed", null, 8, null),
+    new ExternalCatalogItem("11", "SKU-2", "Changed", 90, 8, null),
     new ExternalCatalogItem("12", null, "Remote", null, 1, null)
 };
 var mapping = new ExternalProductMapping { Id = 1, HyperProductId = 1, ExternalProductId = "11" };
