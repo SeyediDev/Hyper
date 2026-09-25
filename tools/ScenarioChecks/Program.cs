@@ -11,6 +11,19 @@ var checks = 0;
 void Check(bool result, string name) { if (!result) throw new Exception(name); checks++; Console.WriteLine("PASS " + name); }
 async Task Reject(Func<Task> act, string name) { try { await act(); } catch (ArgumentException) { Check(true, name); return; } catch (InvalidOperationException) { Check(true, name); return; } throw new Exception(name); }
 var scope = new OwnedIntegrationShop(100, "shop:100");
+var webhookConnection = new ExternalIntegrationConnection
+{
+    Id = 7, ShopId = 100, TenantId = "shop:100", Provider = IntegrationProvider.Basalam,
+    AccountIdentifier = "9001", CredentialsJson = "{\"webhookSecret\":\"secret-1\"}", IsEnabled = true
+};
+var webhookVerifier = new IntegrationWebhookVerifier();
+var validWebhook = new IntegrationWebhookRequest([], "evt-1", "VENDOR_NEW_ORDER", null, null, "Bearer secret-1");
+Check(webhookVerifier.Verify(webhookConnection, validWebhook, DateTimeOffset.UtcNow) == WebhookValidationResult.Valid,
+    "Basalam webhook authorization accepted");
+Check(webhookVerifier.Verify(webhookConnection, validWebhook with { Authorization = "Bearer wrong" }, DateTimeOffset.UtcNow)
+    == WebhookValidationResult.Invalid, "Basalam webhook authorization rejected");
+Check(webhookVerifier.Verify(webhookConnection with { CredentialsJson = "{}" }, validWebhook, DateTimeOffset.UtcNow)
+    == WebhookValidationResult.Invalid, "Basalam webhook without connection secret rejected");
 await Reject(() => { IntegrationScenarioRules.Validate(scope, 1, new("event", (IntegrationSyncItem)99, IntegrationSyncTrigger.Manual)); return Task.CompletedTask; }, "unknown item rejected");
 await Reject(() => { IntegrationScenarioRules.Validate(scope, 1, new(" event", IntegrationSyncItem.Product, IntegrationSyncTrigger.Manual)); return Task.CompletedTask; }, "noncanonical event rejected");
 var local = new[] { new IntegrationLocalProduct(1, "One", 4), new IntegrationLocalProduct(2, "Two", 0) };
