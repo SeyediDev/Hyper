@@ -80,25 +80,64 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
 
     private Task<BusinessCommandResult> SaleAsync(IntegrationScenarioJob job, JsonElement root, CancellationToken ct)
     {
+        root = Envelope(root);
         var lines = Lines(root);
         return commands.ApplyVendorOrderAsync(new(job.EventId, job.ShopId, job.TenantId, job.ConnectionId,
-            Required(root, "externalOrderId"), Optional(root, "externalParcelId"),
-            Required(root, "externalCustomerId"), lines, Decimal(root, "totalAmount"),
-            (SalePaymentStatus)Integer(root, "paymentStatus")), ct);
+            RequiredAny(root, "externalOrderId", "order_id", "orderId", "id"),
+            OptionalAny(root, "externalParcelId", "parcel_id", "parcelId"),
+            RequiredAny(root, "externalCustomerId", "customer_id", "customerId", "user_id", "userId"),
+            lines, DecimalAny(root, "totalAmount", "total_amount", "total", "amount"),
+            PaymentStatus(root)), ct);
     }
 
     private Task<BusinessCommandResult> PurchaseAsync(IntegrationScenarioJob job, JsonElement root, CancellationToken ct)
     {
+        root = Envelope(root);
         var lines = Lines(root);
         return commands.ApplyCustomerOrderAsync(new(job.EventId, job.ShopId, job.TenantId, job.ConnectionId,
-            Required(root, "externalOrderId"), lines, Decimal(root, "totalAmount"),
-            (SalePaymentStatus)Integer(root, "paymentStatus")), ct);
+            RequiredAny(root, "externalOrderId", "order_id", "orderId", "id"), lines,
+            DecimalAny(root, "totalAmount", "total_amount", "total", "amount"), PaymentStatus(root)), ct);
     }
 
     private static IReadOnlyCollection<IntegrationOrderLineCommand> Lines(JsonElement root) =>
-        root.GetProperty("lines").EnumerateArray().Select(line => new IntegrationOrderLineCommand(
-            Integer(line, "hyperProductId"), Optional(line, "externalProductId"),
-            Optional(line, "externalVariantId"), Decimal(line, "quantity"), Decimal(line, "unitPrice"))).ToArray();
+        Array(root, "lines", "items", "order_items", "orderItems").Select(line => new IntegrationOrderLineCommand(
+            IntegerAny(line, "hyperProductId", "product_id", "productId", "id"),
+            OptionalAny(line, "externalProductId", "product_id", "productId"),
+            OptionalAny(line, "externalVariantId", "variant_id", "variantId"),
+            DecimalAny(line, "quantity", "count", "amount"),
+            DecimalAny(line, "unitPrice", "unit_price", "price"))).ToArray();
+
+    private static JsonElement Envelope(JsonElement root)
+    {
+        foreach (var name in new[] { "data", "order", "payload" })
+            if (root.TryGetProperty(name, out var child) && child.ValueKind == JsonValueKind.Object) return child;
+        return root;
+    }
+
+    private static IEnumerable<JsonElement> Array(JsonElement root, params string[] names)
+    {
+        foreach (var name in names)
+            if (root.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.Array)
+                return value.EnumerateArray();
+        throw new ArgumentException("MissingOrderLines");
+    }
+
+    private static string RequiredAny(JsonElement root, params string[] names) =>
+        OptionalAny(root, names) ?? throw new ArgumentException($"Missing{names[0]}");
+    private static string? OptionalAny(JsonElement root, params string[] names)
+    {
+        foreach (var name in names)
+            if (root.TryGetProperty(name, out var value) && value.ValueKind is not JsonValueKind.Null)
+                return value.ValueKind == JsonValueKind.String ? value.GetString() : value.ToString();
+        return null;
+    }
+    private static int IntegerAny(JsonElement root, params string[] names) =>
+        int.TryParse(OptionalAny(root, names), out var value) ? value : throw new ArgumentException($"Missing{names[0]}");
+    private static decimal DecimalAny(JsonElement root, params string[] names) =>
+        decimal.TryParse(OptionalAny(root, names), out var value) ? value : throw new ArgumentException($"Missing{names[0]}");
+    private static SalePaymentStatus PaymentStatus(JsonElement root) =>
+        Enum.TryParse<SalePaymentStatus>(OptionalAny(root, "paymentStatus", "payment_status", "paymentState") ?? "", true, out var status)
+            ? status : (SalePaymentStatus)IntegerAny(root, "paymentStatus", "payment_status");
 
     private static string Required(JsonElement element, string name) =>
         Optional(element, name) ?? throw new ArgumentException($"Missing{char.ToUpperInvariant(name[0])}{name.Substring(1)}");
