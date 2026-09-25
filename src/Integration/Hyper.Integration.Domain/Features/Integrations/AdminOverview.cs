@@ -1,6 +1,9 @@
 namespace Hyper.Integration.Domain.Features.Integrations;
 
 public sealed record AdminOverviewDay(DateTime Date, int Invoices, int SuccessfulRuns, int FailedRuns);
+public sealed record PlatformOverviewDay(DateTime Date, int Invoices);
+public sealed record PlatformOverviewData(int Shops, int Products, int ActiveProducts, int People,
+    int Invoices, int LowStockProducts, IReadOnlyList<PlatformOverviewDay> InvoiceTrend);
 public sealed record AdminProviderOverview(IntegrationProvider Provider, int Connections, int Enabled, DateTime? LastSyncAtUtc);
 public sealed record AdminOverviewSnapshot(DateTime GeneratedAtUtc, int Days, int Shops, int Products, int ActiveProducts,
     int People, int Invoices, int LowStockProducts, int Connections, int EnabledConnections, int ExpiredConnections,
@@ -11,5 +14,11 @@ public sealed record AdminOverviewSnapshot(DateTime GeneratedAtUtc, int Days, in
 public interface IAdminOverviewQuery
 {
     Task<AdminOverviewSnapshot> GetAsync(int days, int? shopId, string? tenantId, CancellationToken ct);
+}
+
+public interface IIntegrationPlatformOverviewPort
+{
+    Task<PlatformOverviewData> GetAsync(int days, int? shopId, string? tenantId,
+        CancellationToken cancellationToken);
 }
 
