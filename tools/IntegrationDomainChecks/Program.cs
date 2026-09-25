@@ -121,6 +121,14 @@ Reject(() => workflow.Transition("sale-1", SaleWorkflowStatus.Reserved), "unpaid
 workflow.ConfirmPayment("sale-1");
 Check(workflow.Transition("sale-1", SaleWorkflowStatus.Reserved).Status == SaleWorkflowStatus.Reserved,
     "paid booth sale can reserve stock");
+var eventCountBeforeCancel = workflow.Events.Count;
+Check(workflow.Transition("sale-1", SaleWorkflowStatus.Cancelled).Status == SaleWorkflowStatus.Cancelled
+    && workflow.Events.Skip(eventCountBeforeCancel).Any(x => x.Type == "ReservationReleased"),
+    "cancelled reserved sale emits a release event");
+var eventCountAfterCancel = workflow.Events.Count;
+Check(ReferenceEquals(workflow.Transition("sale-1", SaleWorkflowStatus.Cancelled), workflow.Transition("sale-1", SaleWorkflowStatus.Cancelled))
+    && workflow.Events.Count == eventCountAfterCancel,
+    "repeated cancellation does not release the reservation twice");
 Reject(() => workflow.Create(new CreateIntegratedSale("sale-public", SaleChannel.Booth, null,
     "order-public", [new SaleLine(10, 1, 10)], 10, SalePaymentStatus.Paid)),
     "booth sale requires identified customer");

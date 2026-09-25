@@ -58,11 +58,16 @@ public sealed class IntegratedSaleWorkflow
     public IntegratedSale Transition(string eventId, SaleWorkflowStatus next)
     {
         var sale = Get(eventId);
+        if (sale.Status == next) return sale;
         if (sale.Channel == SaleChannel.Booth && next is SaleWorkflowStatus.Reserved or SaleWorkflowStatus.Preparing or SaleWorkflowStatus.HandedToLogistics or SaleWorkflowStatus.Shipped
             && sale.PaymentStatus != SalePaymentStatus.Paid) throw new InvalidOperationException("BoothSaleMustBePaidBeforeFulfilment");
         if (next < sale.Status && next is not (SaleWorkflowStatus.Cancelled or SaleWorkflowStatus.Returned))
             throw new InvalidOperationException("InvalidSaleTransition");
+        var wasReserved = sale.Status is SaleWorkflowStatus.Reserved or SaleWorkflowStatus.Preparing
+            or SaleWorkflowStatus.HandedToLogistics or SaleWorkflowStatus.Shipped;
         sale = sale with { Status = next }; _salesByEvent[eventId] = sale;
+        if (wasReserved && (next is SaleWorkflowStatus.Cancelled or SaleWorkflowStatus.Returned))
+            Emit(sale, "ReservationReleased");
         Emit(sale, next switch { SaleWorkflowStatus.HandedToLogistics => "DeliveryCreated", SaleWorkflowStatus.Delivered => "SaleDelivered", SaleWorkflowStatus.Closed => "SaleClosed", _ => "SaleStatusChanged" });
         return sale;
     }
