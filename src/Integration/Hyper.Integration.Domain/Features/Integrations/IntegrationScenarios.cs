@@ -39,7 +39,8 @@ public static class IntegrationScenarioRules
     }
 }
 
-public sealed record IntegrationLocalProduct(int Id, string Title, decimal AvailableInventory);
+public sealed record IntegrationLocalProduct(int Id, string Title, decimal AvailableInventory,
+    string? Sku = null, decimal? Price = null);
 
 /// <summary>Approved mappings only. Missing or duplicate identities require action, never automatic merging.</summary>
 public static class IntegrationCatalogComparison
@@ -64,6 +65,12 @@ public static class IntegrationCatalogComparison
             compared++;
             if (item == IntegrationSyncItem.Product && !string.Equals(source.Title.Trim(), target.Title.Trim(), StringComparison.Ordinal))
                 Add("ProductTitleMismatch");
+            if (item == IntegrationSyncItem.Product && !string.IsNullOrWhiteSpace(source.Sku)
+                && !string.Equals(source.Sku.Trim(), target.Sku?.Trim(), StringComparison.OrdinalIgnoreCase))
+                Add("ProductSkuMismatch");
+            if (item == IntegrationSyncItem.Product && source.Price is { } localPrice
+                && target.Price is { } remotePrice && localPrice != remotePrice)
+                Add("ProductPriceMismatch");
             if (item == IntegrationSyncItem.Inventory && source.AvailableInventory != target.Inventory)
                 Add(target.Inventory is null ? "ExternalInventoryUnknown" : "InventoryMismatch");
             void Add(string code) => differences.Add(new(mapping.HyperProductId, mapping.ExternalProductId, mapping.ExternalVariantId, code));

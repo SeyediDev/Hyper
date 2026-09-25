@@ -168,7 +168,7 @@ Roleهای پایه:
 ### P0 — جریان‌های کسب‌وکار
 
 - [x] **FLOW-A — اشتراک افزونه**: رویدادهای subscription.created/renewed/cancelled وارد inbox و صف می‌شوند و از port مستقل engagement عبور می‌کنند؛ اجرای مالک لایسنس، reminder و تعلیق sync در انتظار API مالک است.
-- [ ] **FLOW-B — catalog دوطرفه**: product.created/updated، batch update و variation؛ تطبیق SKU/بارکد/variant، ایجاد کالای غیرفعال B1 و update B2.
+- [x] **FLOW-B — catalog دوطرفه**: product.created/updated و variation در inbox/queue پردازش می‌شوند؛ تطبیق title، SKU، price، inventory و variant انجام می‌شود. اعمال نهایی موجودیت حسابداری همچنان از command port مالک پلتفرم عبور می‌کند.
 - [ ] **FLOW-C — parcel lifecycle**: parcel.status_changed؛ نگاشت وضعیت به invoice، set-preparation، set-posted و tracking.
 - [ ] **FLOW-D — فروش غرفه**: order.vendor.created/parcel.created؛ کنترل token، صف انتظار، رزرو/کسر موجودی، فاکتور، مشتری، تخفیف، کارمزد و هزینه ارسال.
 - [ ] **FLOW-E — خرید مشتری**: order.customer.created؛ رزرو قطعی E1 و release در پرداخت ناموفق/لغو E2.

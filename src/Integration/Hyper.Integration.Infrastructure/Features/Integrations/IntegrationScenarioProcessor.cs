@@ -29,7 +29,7 @@ public sealed class IntegrationScenarioProcessor(HyperIntegrationContext db, IIn
         var mappings = await db.ExternalProductMappings.AsNoTracking().Where(x => x.ConnectionId == connection.Id
             && x.ShopId == connection.ShopId && x.IsActive).ToListAsync(ct);
         var rows = await db.Database.SqlQuery<LocalProductRow>($"""
-            SELECT p.ID_ AS Id, p.NAME_ AS Title, p.ACCOUNTINGSTOCK_ AS Stock,
+            SELECT p.ID_ AS Id, p.NAME_ AS Title, p.TAXCODE_ AS Sku, p.SALEPRICE_ AS Price, p.ACCOUNTINGSTOCK_ AS Stock,
               CAST(CASE WHEN p.ISENABLED_=1 AND p.ISSELLABLE_=1 AND p.ISONLINESELLABLE_=1
                 AND p.ISSTOCKABLE_=1 AND p.ISSERVICE_=0 THEN 1 ELSE 0 END AS bit) AS CanSell,
               COALESCE((SELECT SUM(r.Quantity) FROM dbo.InventoryReservationLogs r
@@ -40,7 +40,8 @@ public sealed class IntegrationScenarioProcessor(HyperIntegrationContext db, IIn
               AND COALESCE(NULLIF(LTRIM(RTRIM(s.TENANT_ID_)),''),CONCAT('shop:',s.SHOPID_))={job.TenantId}
             """).ToListAsync(ct);
         var local = rows.Select(x => new IntegrationLocalProduct(x.Id, x.Title,
-            job.Item == IntegrationSyncItem.Inventory ? IntegrationAvailableInventory.Calculate(x.Stock, x.Reserved, x.CanSell) : 0)).ToArray();
+            job.Item == IntegrationSyncItem.Inventory ? IntegrationAvailableInventory.Calculate(x.Stock, x.Reserved, x.CanSell) : 0,
+            x.Sku, x.Price)).ToArray();
         var result = IntegrationCatalogComparison.Compare(local, remote, mappings, job.Item);
         var enqueued = 0;
         if (job.Item == IntegrationSyncItem.Inventory)
@@ -59,6 +60,8 @@ public sealed class IntegrationScenarioProcessor(HyperIntegrationContext db, IIn
     {
         public int Id { get; set; }
         public string Title { get; set; } = null!;
+        public string? Sku { get; set; }
+        public decimal? Price { get; set; }
         public decimal Stock { get; set; }
         public decimal Reserved { get; set; }
         public bool CanSell { get; set; }

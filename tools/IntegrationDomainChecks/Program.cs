@@ -30,7 +30,7 @@ Reject(() => IntegrationScenarioRules.Validate(shop, 1,
 
 var local = new[]
 {
-    new IntegrationLocalProduct(1, "One", 4),
+    new IntegrationLocalProduct(1, "One", 4, "SKU-1", 100),
     new IntegrationLocalProduct(2, "Two", 0)
 };
 var remote = new[]
@@ -42,6 +42,9 @@ var mapping = new ExternalProductMapping { Id = 1, HyperProductId = 1, ExternalP
 var comparison = IntegrationCatalogComparison.Compare(local, remote, [mapping], IntegrationSyncItem.Product);
 Check(comparison.Compared == 1 && comparison.Differences.Any(x => x.Code == "ProductTitleMismatch"),
     "product drift detected");
+Check(comparison.Differences.Any(x => x.Code == "ProductSkuMismatch")
+    && comparison.Differences.Any(x => x.Code == "ProductPriceMismatch"),
+    "catalog sku and price drift detected");
 Check(comparison.Differences.Any(x => x.Code == "LocalProductUnmapped")
     && comparison.Differences.Any(x => x.Code == "ExternalProductUnmapped"),
     "unmapped records detected on both sides");
