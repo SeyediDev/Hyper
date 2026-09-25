@@ -24,4 +24,9 @@ public sealed class AccountingPlatformReadController(IAccountingPlatformReadHand
     [HttpGet("shops/{shopId:int}/products")]
     public Task<IReadOnlyList<AccountingProductRead>> GetProducts(int shopId, [FromQuery] string tenantId,
         CancellationToken ct) => handler.GetProductsAsync(new(shopId, tenantId), ct);
+
+    [HttpGet("overview")]
+    public Task<AccountingPlatformOverview> Overview([FromQuery] int days = 7, [FromQuery] int? shopId = null,
+        [FromQuery] string? tenantId = null, CancellationToken ct = default) =>
+        handler.GetOverviewAsync(days, shopId.HasValue ? new(shopId.Value, tenantId ?? "") : null, ct);
 }

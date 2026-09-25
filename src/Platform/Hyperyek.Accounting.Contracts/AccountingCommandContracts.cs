@@ -15,6 +15,9 @@ public sealed record ResolveCustomerCommand(AccountingScope Scope, AccountingCus
 public sealed record AccountingShopRead(int ShopId, string ShopName, string MerchantIdentifier, string TenantId);
 public sealed record AccountingProductRead(int ProductId, string Name, string? Sku, decimal Price,
     decimal Stock, bool IsEnabled, bool IsStockable, decimal? MinimumStock);
+public sealed record AccountingOverviewDay(DateTime Date, int Invoices);
+public sealed record AccountingPlatformOverview(int Shops, int Products, int ActiveProducts, int People,
+    int Invoices, int LowStockProducts, IReadOnlyList<AccountingOverviewDay> InvoiceTrend);
 
 public interface IAccountingPlatformReadHandler
 {
@@ -22,6 +25,7 @@ public interface IAccountingPlatformReadHandler
     Task<IReadOnlyList<AccountingShopRead>> GetShopsAsync(IReadOnlyCollection<int> shopIds, CancellationToken ct);
     Task<AccountingShopRead?> GetShopAsync(int shopId, CancellationToken ct);
     Task<IReadOnlyList<AccountingProductRead>> GetProductsAsync(AccountingScope scope, CancellationToken ct);
+    Task<AccountingPlatformOverview> GetOverviewAsync(int days, AccountingScope? scope, CancellationToken ct);
 }
 
 public sealed record OrderLineCommand(

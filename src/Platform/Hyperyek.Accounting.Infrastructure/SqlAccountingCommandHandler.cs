@@ -69,6 +69,40 @@ public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db,
                 x.Saleprice, x.Accountingstock, x.Isenabled, x.Isstockable, x.Minimumstock)).ToListAsync(ct);
     }
 
+    public async Task<AccountingPlatformOverview> GetOverviewAsync(int days, AccountingScope? scope, CancellationToken ct)
+    {
+        if (days is not (7 or 30)) throw new ArgumentOutOfRangeException(nameof(days));
+        if (scope is not null && (scope.ShopId <= 0 || string.IsNullOrWhiteSpace(scope.TenantId)))
+            throw new ArgumentException("Shop requires tenant scope.", nameof(scope));
+        var now = DateTime.UtcNow;
+        var start = now.Date.AddDays(1 - days);
+        var until = now.Date.AddDays(1);
+        var shops = db.TblShops.AsNoTracking();
+        var products = db.TblProducts.AsNoTracking();
+        var people = db.TblPersons.AsNoTracking();
+        var invoices = db.TblSaleorders.AsNoTracking();
+        if (scope is not null)
+        {
+            var tenantless = scope.TenantId == CanonicalTenant(scope.ShopId, null);
+            shops = shops.Where(x => x.Shopid == scope.ShopId &&
+                (x.TenantId == scope.TenantId || tenantless && (x.TenantId == null || x.TenantId == "")));
+            products = products.Where(x => x.Shopid == scope.ShopId &&
+                (x.TenantId == scope.TenantId || tenantless && (x.TenantId == null || x.TenantId == "")));
+            people = people.Where(x => x.Shopid == scope.ShopId &&
+                (x.TenantId == scope.TenantId || tenantless && (x.TenantId == null || x.TenantId == "")));
+            invoices = invoices.Where(x => x.Shopid == scope.ShopId &&
+                (x.TenantId == scope.TenantId || tenantless && (x.TenantId == null || x.TenantId == "")));
+        }
+        var periodInvoices = invoices.Where(x => x.Issuedatetime >= start && x.Issuedatetime < until);
+        var trend = await periodInvoices.GroupBy(x => x.Issuedatetime.Date)
+            .Select(x => new AccountingOverviewDay(x.Key, x.Count())).ToListAsync(ct);
+        return new(await shops.CountAsync(ct), await products.CountAsync(ct),
+            await products.CountAsync(x => x.Isenabled, ct), await people.CountAsync(ct),
+            await periodInvoices.CountAsync(ct),
+            await products.CountAsync(x => x.Isenabled && x.Isstockable && x.Minimumstock != null
+                && x.Accountingstock < x.Minimumstock, ct), trend);
+    }
+
     public async Task<AccountingCommandResult> ValidateCustomerAsync(ValidateCustomerCommand command, CancellationToken ct)
     {
         var policy = Policy();

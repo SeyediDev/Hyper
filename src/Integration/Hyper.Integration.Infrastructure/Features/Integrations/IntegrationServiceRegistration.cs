@@ -14,7 +14,6 @@ public static class IntegrationServiceRegistration
         string platformConnectionString, string? integrationConnectionString = null,
         IConfiguration? configuration = null)
     {
-        services.AddDbContext<HyperSqlServerContext>(options => options.UseSqlServer(platformConnectionString));
         services.AddDbContext<HyperIntegrationContext>(options => options.UseSqlServer(
             string.IsNullOrWhiteSpace(integrationConnectionString) ? platformConnectionString : integrationConnectionString));
         services.AddScoped<IIntegrationSynchronizationService, IntegrationSynchronizationService>();
@@ -35,8 +34,6 @@ public static class IntegrationServiceRegistration
         services.AddScoped<IIntegrationStrategyResolver, IntegrationStrategyResolver>();
         services.AddScoped<BasalamDemoProvisioner>();
         services.AddScoped<IIntegrationShopAccess, IntegrationShopAccess>();
-        services.AddScoped<IIntegrationPlatformOverviewPort, HyperyekPlatformShopAdapter>();
-        services.AddOptions<IntegrationCustomerOptions>();
         services.AddScoped<IIntegrationCustomerRegistration, IntegrationCustomerRegistration>();
         services.AddScoped<IAdminMerchantSimulationService, AdminMerchantSimulationService>();
         services.AddScoped<IIntegrationDashboardQuery, IntegrationDashboardQuery>();
@@ -70,6 +67,12 @@ public static class IntegrationServiceRegistration
             client.Timeout = TimeSpan.FromSeconds(30);
         });
         services.AddHttpClient<IIntegrationPlatformCatalogPort, HyperyekAccountingApiClient>((provider, client) =>
+        {
+            var options = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<HyperyekAccountingApiOptions>>().Value;
+            client.BaseAddress = new Uri(options.BaseAddress, UriKind.Absolute);
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
+        services.AddHttpClient<IIntegrationPlatformOverviewPort, HyperyekAccountingApiClient>((provider, client) =>
         {
             var options = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<HyperyekAccountingApiOptions>>().Value;
             client.BaseAddress = new Uri(options.BaseAddress, UriKind.Absolute);

@@ -20,8 +20,18 @@ public sealed class HyperyekAccountingApiOptions
 /// <summary>HTTP adapter for the platform-owned accounting API.</summary>
 public sealed class HyperyekAccountingApiClient(
     HttpClient client) : IIntegrationBusinessCommandPort, IIntegrationAccountingPort,
-    IIntegrationPlatformShopPort, IIntegrationPlatformCatalogPort
+    IIntegrationPlatformShopPort, IIntegrationPlatformCatalogPort, IIntegrationPlatformOverviewPort
 {
+    public async Task<PlatformOverviewData> GetAsync(int days, int? shopId, string? tenantId, CancellationToken ct)
+    {
+        var route = $"api/hyperyek/v1/accounting/platform/overview?days={days}";
+        if (shopId.HasValue) route += $"&shopId={shopId.Value}&tenantId={Uri.EscapeDataString(tenantId ?? "")}";
+        var overview = await GetAsync<AccountingPlatformOverview>(route, ct);
+        return new(overview.Shops, overview.Products, overview.ActiveProducts, overview.People,
+            overview.Invoices, overview.LowStockProducts,
+            overview.InvoiceTrend.Select(x => new PlatformOverviewDay(x.Date, x.Invoices)).ToArray());
+    }
+
     public async Task<IReadOnlyList<IntegrationPlatformShop>> SearchAsync(string? search, CancellationToken ct)
     {
         var route = string.IsNullOrWhiteSpace(search) ? "api/hyperyek/v1/accounting/platform/shops"
