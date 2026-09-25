@@ -108,8 +108,8 @@ public static class DependencyInjection
         
         // اضافه کردن MonitoringController از Neo.Endpoint برای API endpoints
         // این لازم است تا API endpoints (/api/monitoring/*) در دسترس باشند
-        services.AddNeoControllerServices(configuration, "Hyper Admin Panel", includeViews: true, existingMvcBuilder: mvcBuilder)
-            .AddApplicationPart(typeof(IntegrationWebhookController).Assembly);
+        services.AddNeoControllerServices(configuration, "Hyper Admin Panel", includeViews: true, existingMvcBuilder: mvcBuilder);
+        mvcBuilder.AddApplicationPart(typeof(IntegrationWebhookController).Assembly);
         
         // Custom Icon Provider for Hyper platform
         services.AddSingleton<ICustomIconProvider, CustomIconProvider>();
