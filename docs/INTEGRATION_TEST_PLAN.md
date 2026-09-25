@@ -81,7 +81,7 @@ WHERE schema_id = SCHEMA_ID(N'dbo')
 
 ### Webhook
 
-- scopeهای Basalam برای مسیر اصلی باید شامل `vendor.profile.read`، `vendor.parcel.read` و `vendor.product.read` باشند؛ اولی برای تشخیص غرفه و دومی/سومی برای `VENDOR_NEW_ORDER`، `VENDOR_PARCEL_CHANGES` و `PRODUCT_CREATE_CHANGES` لازم‌اند.
+- scopeهای Basalam باید شامل `vendor.profile.read`، `vendor.parcel.read`، `vendor.product.read`، `customer.order.read` و `customer.chat.read` باشند تا eventهای فروش، خرید، parcel، catalog، review و chat پوشش داده شوند.
 - secret وب‌هوک برای هر connection باسلام هنگام OAuth تولید و در همان رکورد نگهداری می‌شود؛ secret global در appsettings استفاده نمی‌شود.
 
 - payload معتبر و signature معتبر: پاسخ `202 Accepted` و ایجاد یک inbox و audit.

@@ -120,8 +120,8 @@ public sealed class IntegrationWebhookIngress(
             "order.customer.created" or "order.customer.updated" or "order.customer.cancelled"
                 or "order.customer.returned" or "new_order" or "order_item_changes" => IntegrationSyncItem.Purchase,
             "subscription.created" or "subscription.renewed" or "subscription.cancelled" => IntegrationSyncItem.Subscription,
-            "review.created" or "review.updated" => IntegrationSyncItem.Review,
-            "chat.message.received" or "chat.message.sent" => IntegrationSyncItem.Chat,
+            "review.created" or "review.updated" or "review_create_changes" => IntegrationSyncItem.Review,
+            "chat.message.received" or "chat.message.sent" or "chat_received_message" or "chat_send_message" => IntegrationSyncItem.Chat,
             _ => default
         };
         return item != default;
