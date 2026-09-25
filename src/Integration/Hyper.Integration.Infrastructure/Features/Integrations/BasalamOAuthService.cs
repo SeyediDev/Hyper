@@ -204,6 +204,7 @@ public sealed class BasalamOAuthService(IOptions<BasalamOAuthSettings> options, 
     }
 
     public string DecryptToken(string token) => protection.CreateProtector("Basalam.OAuth.Token").Unprotect(token);
+    public static string CreateWebhookSecret() => Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
     private string EncryptToken(string token) => protection.CreateProtector("Basalam.OAuth.Token").Protect(token);
     public static string Nonce() => Base64Url(RandomNumberGenerator.GetBytes(32));
     private static string Base64Url(byte[] value) => Convert.ToBase64String(value).TrimEnd('=').Replace('+', '-').Replace('/', '_');

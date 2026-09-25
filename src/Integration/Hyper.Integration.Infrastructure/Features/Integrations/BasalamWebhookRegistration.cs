@@ -2,6 +2,9 @@ using Hyper.Integration.Domain.Entities.Integrations;
 using Hyper.SDK;
 using Hyper.SDK.Auth;
 using Microsoft.Extensions.Options;
+using System.Text.Json;
+using Hyper.Infrastructure.Data.Repository.Hyper;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hyper.Infrastructure.Features.Integrations;
 
@@ -11,8 +14,7 @@ public interface IBasalamWebhookRegistration
         string vendorId, string callbackBaseUri, CancellationToken ct);
 }
 
-public sealed class BasalamWebhookRegistration(BasalamOAuthStore tokens, IBasalamClient client,
-    IOptions<BasalamOAuthSettings> settings)
+public sealed class BasalamWebhookRegistration(HyperIntegrationContext db, BasalamOAuthStore tokens, IBasalamClient client)
     : IBasalamWebhookRegistration
 {
     // Official Basalam event ids: vendor order, vendor parcel and product changes.
@@ -37,9 +39,13 @@ public sealed class BasalamWebhookRegistration(BasalamOAuthStore tokens, IBasala
             ?? throw new InvalidOperationException("Basalam token is unavailable after OAuth.");
         client.SetToken(token);
         var callback = new Uri(baseUri, $"/api/integrations/v1/webhooks/basalam/{parsedVendor}");
-        if (string.IsNullOrWhiteSpace(settings.Value.WebhookAuthorization))
-            throw new InvalidOperationException("Basalam webhook authorization is not configured.");
+        var stored = await db.ExternalIntegrationConnections.AsNoTracking()
+            .SingleAsync(x => x.Id == connectionId && x.ShopId == shopId && x.TenantId == tenantId, ct);
+        using var credentials = JsonDocument.Parse(stored.CredentialsJson);
+        if (!credentials.RootElement.TryGetProperty("webhookSecret", out var secret)
+            || secret.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(secret.GetString()))
+            throw new InvalidOperationException("Basalam webhook authorization is not configured for connection.");
         await client.Webhooks.CreateOfficialWebhookAsync(callback.AbsoluteUri, EventIds,
-            settings.Value.WebhookAuthorization, ct);
+            $"Bearer {secret.GetString()}", ct);
     }
 }

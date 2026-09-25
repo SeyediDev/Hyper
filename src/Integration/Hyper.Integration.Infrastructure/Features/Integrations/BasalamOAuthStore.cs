@@ -3,6 +3,7 @@ using Hyper.Integration.Domain.Entities.Integrations;
 using Hyper.SDK.Auth;
 using Hyper.Infrastructure.Data.Repository.Hyper;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace Hyper.Infrastructure.Features.Integrations;
 
@@ -91,7 +92,7 @@ public sealed class BasalamOAuthStore(HyperIntegrationContext db, BasalamOAuthSe
             {
                 ShopId = selected.ShopId, TenantId = selected.TenantId, Provider = IntegrationProvider.Basalam,
                 DisplayName = vendor.Title, AccountIdentifier = vendor.Id, CredentialType = IntegrationCredentialType.OAuth2,
-                CredentialsJson = "{}", IsEnabled = true
+                CredentialsJson = JsonSerializer.Serialize(new { webhookSecret = BasalamOAuthService.CreateWebhookSecret() }), IsEnabled = true
             };
             db.ExternalIntegrationConnections.Add(connection);
             await db.SaveChangesAsync(ct);
@@ -100,6 +101,9 @@ public sealed class BasalamOAuthStore(HyperIntegrationContext db, BasalamOAuthSe
             x.ShopId == selected.ShopId && x.Provider == IntegrationProvider.Basalam, ct);
         if (previous is not null && (previous.TenantId != selected.TenantId || previous.ConnectionId != connection.Id))
             throw new InvalidOperationException("برای این مغازه توکن غرفه دیگری ثبت شده است؛ ابتدا اتصال قبلی را تعیین تکلیف کنید.");
+        if (string.IsNullOrWhiteSpace(connection.CredentialsJson)
+            || !connection.CredentialsJson.Contains("webhookSecret", StringComparison.Ordinal))
+            connection.CredentialsJson = JsonSerializer.Serialize(new { webhookSecret = BasalamOAuthService.CreateWebhookSecret() });
         var token = oauth.CreateTokenEntity(connection.Id, selected.ShopId, selected.TenantId, IntegrationProvider.Basalam, response);
         if (previous is null) db.ExternalOAuthTokens.Add(token);
         else

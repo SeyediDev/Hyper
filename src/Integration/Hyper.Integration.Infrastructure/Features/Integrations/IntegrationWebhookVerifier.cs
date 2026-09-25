@@ -2,19 +2,18 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Options;
 
 namespace Hyper.Infrastructure.Features.Integrations;
 
 /// <summary>Hyper's explicit custom webhook protocol. Not a Basalam/Digikala/Torob protocol.</summary>
-public sealed class IntegrationWebhookVerifier(IOptions<BasalamOAuthSettings> basalamOptions) : IIntegrationWebhookVerifier
+public sealed class IntegrationWebhookVerifier : IIntegrationWebhookVerifier
 {
     public const string Scheme = "hyper-hmac-v1";
     public WebhookValidationResult Verify(ExternalIntegrationConnection connection,
         IntegrationWebhookRequest request, DateTimeOffset utcNow)
     {
         if (connection.Provider == IntegrationProvider.Basalam)
-            return VerifyBasalam(connection, request, basalamOptions.Value.WebhookAuthorization);
+            return VerifyBasalam(connection, request);
         if (connection.Provider != IntegrationProvider.Custom)
             return WebhookValidationResult.Unsupported;
         if (!connection.IsEnabled || connection.Id <= 0 || !ValidHeader(request.EventId)
@@ -56,8 +55,17 @@ public sealed class IntegrationWebhookVerifier(IOptions<BasalamOAuthSettings> ba
     }
 
     private static WebhookValidationResult VerifyBasalam(ExternalIntegrationConnection connection,
-        IntegrationWebhookRequest request, string? expectedAuthorization)
+        IntegrationWebhookRequest request)
     {
+        string? expectedAuthorization = null;
+        try
+        {
+            using var credentials = JsonDocument.Parse(connection.CredentialsJson);
+            if (credentials.RootElement.TryGetProperty("webhookSecret", out var secret)
+                && secret.ValueKind == JsonValueKind.String)
+                expectedAuthorization = $"Bearer {secret.GetString()}";
+        }
+        catch (JsonException) { return WebhookValidationResult.Invalid; }
         if (!connection.IsEnabled || !ValidHeader(request.EventId) || !ValidHeader(request.EventType)
             || string.IsNullOrWhiteSpace(expectedAuthorization) || string.IsNullOrWhiteSpace(request.Authorization))
             return WebhookValidationResult.Invalid;
