@@ -26,6 +26,10 @@ public static class IntegrationServiceRegistration
         services.AddScoped<IIntegrationOutbox, IntegrationOutbox>();
         services.AddScoped<IIntegrationAccountingEventIngress, IntegrationAccountingEventIngress>();
         services.AddScoped<IBasalamWebhookRegistration, BasalamWebhookRegistration>();
+        // The admin OAuth/simulation controllers consume this concrete store.
+        // Keep it registered here with the rest of the Integration composition
+        // so AdminPanel and the independent worker resolve the same boundary.
+        services.AddScoped<BasalamOAuthStore>();
         services.AddOptions<IntegrationInventoryCaptureOptions>();
         services.AddScoped<IIntegrationInventoryCapture, IntegrationInventoryCapture>();
         services.AddScoped<IIntegrationStrategyResolver, IntegrationStrategyResolver>();
