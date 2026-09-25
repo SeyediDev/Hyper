@@ -22,7 +22,13 @@ Check(webhookVerifier.Verify(webhookConnection, validWebhook, DateTimeOffset.Utc
     "Basalam webhook authorization accepted");
 Check(webhookVerifier.Verify(webhookConnection, validWebhook with { Authorization = "Bearer wrong" }, DateTimeOffset.UtcNow)
     == WebhookValidationResult.Invalid, "Basalam webhook authorization rejected");
-Check(webhookVerifier.Verify(webhookConnection with { CredentialsJson = "{}" }, validWebhook, DateTimeOffset.UtcNow)
+var missingSecretConnection = new ExternalIntegrationConnection
+{
+    Id = webhookConnection.Id, ShopId = webhookConnection.ShopId, TenantId = webhookConnection.TenantId,
+    Provider = webhookConnection.Provider, AccountIdentifier = webhookConnection.AccountIdentifier,
+    CredentialsJson = "{}", IsEnabled = webhookConnection.IsEnabled
+};
+Check(webhookVerifier.Verify(missingSecretConnection, validWebhook, DateTimeOffset.UtcNow)
     == WebhookValidationResult.Invalid, "Basalam webhook without connection secret rejected");
 await Reject(() => { IntegrationScenarioRules.Validate(scope, 1, new("event", (IntegrationSyncItem)99, IntegrationSyncTrigger.Manual)); return Task.CompletedTask; }, "unknown item rejected");
 await Reject(() => { IntegrationScenarioRules.Validate(scope, 1, new(" event", IntegrationSyncItem.Product, IntegrationSyncTrigger.Manual)); return Task.CompletedTask; }, "noncanonical event rejected");
