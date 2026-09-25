@@ -1,4 +1,4 @@
-namespace Hyper.SDK.Extensions;
+namespace Basalam.SDK.Extensions;
 
 public static class StringExtensions
 {

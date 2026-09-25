@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace Hyper.SDK.Services;
+namespace Basalam.SDK.Services;
 
 public interface IWebhookService
 {

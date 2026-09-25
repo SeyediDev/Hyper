@@ -1,14 +1,14 @@
 using System.Net.Http;
 using System.Text.Json;
-using Hyper.SDK.Auth;
-using Hyper.SDK.Clients;
-using Hyper.SDK.Config;
-using Hyper.SDK.Errors;
+using Basalam.SDK.Auth;
+using Basalam.SDK.Clients;
+using Basalam.SDK.Config;
+using Basalam.SDK.Errors;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
-namespace Hyper.SDK.Clients;
+namespace Basalam.SDK.Clients;
 
 public interface IBasalamAuthClient
 {

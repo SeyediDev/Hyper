@@ -1,11 +1,11 @@
-using Hyper.SDK.Auth;
-using Hyper.SDK.Clients;
-using Hyper.SDK.Config;
-using Hyper.SDK.Errors;
-using Hyper.SDK.Services;
+using Basalam.SDK.Auth;
+using Basalam.SDK.Clients;
+using Basalam.SDK.Config;
+using Basalam.SDK.Errors;
+using Basalam.SDK.Services;
 using Microsoft.Extensions.Logging;
 
-namespace Hyper.SDK;
+namespace Basalam.SDK;
 
 public interface IBasalamClient
 {

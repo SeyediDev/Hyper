@@ -1,4 +1,4 @@
-namespace Hyper.SDK.Errors;
+namespace Basalam.SDK.Errors;
 
 public class BasalamError : Exception
 {

@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
 VisualStudioVersion = 18.0.11205.157
@@ -83,7 +83,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hyper.CallCenter.Api", "src
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SDK", "SDK", "{4922D958-470B-2CE6-AC1E-A52CE8B7242E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hyper.SDK", "src\SDK\Hyper.SDK.csproj", "{8FE42C7E-87AC-4519-8173-DAC454F9BBD7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Basalam.SDK", "src\SDK\BasalamSdk\Basalam.SDK.csproj", "{8FE42C7E-87AC-4519-8173-DAC454F9BBD7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Integration", "Integration", "{CC898937-F06F-1C29-5A93-42D1EB415447}"
 EndProject

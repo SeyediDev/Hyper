@@ -1,15 +1,15 @@
-using Hyper.SDK.Auth;
-using Hyper.SDK.Config;
-using Hyper.SDK.Errors;
-using Hyper.SDK.Clients;
-using Hyper.SDK.Services;
+using Basalam.SDK.Auth;
+using Basalam.SDK.Config;
+using Basalam.SDK.Errors;
+using Basalam.SDK.Clients;
+using Basalam.SDK.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Hyper.SDK;
+namespace Basalam.SDK;
 
 public static class DependencyInjection
 {

@@ -1,6 +1,6 @@
 using Hyper.Integration.Domain.Entities.Integrations;
-using Hyper.SDK;
-using Hyper.SDK.Auth;
+using Basalam.SDK;
+using Basalam.SDK.Auth;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 using Hyper.Infrastructure.Data.Repository.Hyper;

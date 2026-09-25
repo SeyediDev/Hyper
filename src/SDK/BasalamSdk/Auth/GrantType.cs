@@ -1,4 +1,4 @@
-namespace Hyper.SDK.Auth;
+namespace Basalam.SDK.Auth;
 
 public enum GrantType
 {

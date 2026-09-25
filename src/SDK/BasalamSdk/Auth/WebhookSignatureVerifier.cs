@@ -1,7 +1,7 @@
-using Hyper.SDK.Auth;
-using Hyper.SDK.Errors;
+using Basalam.SDK.Auth;
+using Basalam.SDK.Errors;
 
-namespace Hyper.SDK.Auth;
+namespace Basalam.SDK.Auth;
 
 public sealed class WebhookSignatureVerifier
 {

@@ -5,9 +5,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <RootNamespace>Hyper.SDK</RootNamespace>
-    <AssemblyName>Hyper.SDK</AssemblyName>
-    <PackageId>Hyper.SDK</PackageId>
+    <RootNamespace>Basalam.SDK</RootNamespace>
+    <AssemblyName>Basalam.SDK</AssemblyName>
+    <PackageId>Basalam.SDK</PackageId>
   </PropertyGroup>
 
   <ItemGroup>

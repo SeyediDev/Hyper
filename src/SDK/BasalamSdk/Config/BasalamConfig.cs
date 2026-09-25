@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace Hyper.SDK.Config;
+namespace Basalam.SDK.Config;
 
 public enum BasalamEnvironment
 {

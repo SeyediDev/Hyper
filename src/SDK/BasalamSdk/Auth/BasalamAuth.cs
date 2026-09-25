@@ -2,16 +2,16 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using Hyper.SDK.Auth;
-using Hyper.SDK.Clients;
-using Hyper.SDK.Config;
-using Hyper.SDK.Errors;
-using Hyper.SDK.Extensions;
+using Basalam.SDK.Auth;
+using Basalam.SDK.Clients;
+using Basalam.SDK.Config;
+using Basalam.SDK.Errors;
+using Basalam.SDK.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
-namespace Hyper.SDK.Auth;
+namespace Basalam.SDK.Auth;
 
 public abstract class BasalamAuthBase(BasalamConfig config)
 {

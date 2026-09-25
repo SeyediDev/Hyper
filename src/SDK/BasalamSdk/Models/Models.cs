@@ -1,6 +1,6 @@
-using Hyper.SDK.Auth;
+using Basalam.SDK.Auth;
 
-namespace Hyper.SDK.Models;
+namespace Basalam.SDK.Models;
 
 public record Vendor
 {

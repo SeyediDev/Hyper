@@ -1,7 +1,7 @@
 using System.Globalization;
-using Hyper.SDK;
-using Hyper.SDK.Clients;
-using Hyper.SDK.Models;
+using Basalam.SDK;
+using Basalam.SDK.Clients;
+using Basalam.SDK.Models;
 using Hyper.Integration.Domain.Entities.Integrations;
 using Hyper.Integration.Domain.Features.Integrations;
 

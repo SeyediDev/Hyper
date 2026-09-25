@@ -1,6 +1,6 @@
 using Hyper.Infrastructure.Features.Integrations;
 using Hyper.Infrastructure.Data.Repository.Hyper;
-using Hyper.SDK;
+using Basalam.SDK;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

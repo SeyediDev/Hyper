@@ -32,7 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\Neo\src\Neo.Infrastructure\Neo.Infrastructure.csproj" />
-    <ProjectReference Include="..\..\SDK\Hyper.SDK.csproj" />
+    <ProjectReference Include="..\..\SDK\BasalamSdk\Basalam.SDK.csproj" />
     <ProjectReference Include="..\Hyper.Domain\Hyper.Domain.csproj" />
     <ProjectReference Include="..\..\Integration\Hyper.Integration.Contracts\Hyper.Integration.Contracts.csproj" />
     <ProjectReference Include="..\..\Integration\Hyper.Integration.Domain\Hyper.Integration.Domain.csproj" />
