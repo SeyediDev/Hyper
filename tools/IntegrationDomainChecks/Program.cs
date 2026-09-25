@@ -57,6 +57,31 @@ Check(IntegrationCatalogComparison.Compare([], remote, [mapping], IntegrationSyn
     .Differences.Any(x => x.Code == "LocalProductMissing"), "local deletion detected");
 Check(IntegrationCatalogComparison.Compare(local, remote, [mapping, mapping], IntegrationSyncItem.Product)
     .Differences.Any(x => x.Code == "DuplicateMapping"), "duplicate mapping is not merged");
+var variantLocal = new[]
+{
+    new IntegrationLocalProduct(10, "T-Shirt", 12, "SKU-RED", 125),
+    new IntegrationLocalProduct(11, "T-Shirt", 8, "SKU-BLUE", 130)
+};
+var variantRemote = new[]
+{
+    new ExternalCatalogItem("shirt", "sku-red", " T-Shirt ", 125, 12, "red"),
+    new ExternalCatalogItem("shirt", "sku-blue", "T-Shirt", 131, null, "blue")
+};
+var variantMappings = new[]
+{
+    new ExternalProductMapping { HyperProductId = 10, ExternalProductId = "shirt", ExternalVariantId = "red" },
+    new ExternalProductMapping { HyperProductId = 11, ExternalProductId = "shirt", ExternalVariantId = "blue" }
+};
+var variantComparison = IntegrationCatalogComparison.Compare(variantLocal, variantRemote, variantMappings, IntegrationSyncItem.Product);
+Check(variantComparison.Compared == 2 && variantComparison.Differences.Any(x => x.Code == "ProductPriceMismatch"),
+    "catalog variants compare independently and detect price drift");
+Check(!variantComparison.Differences.Any(x => x.Code == "ProductSkuMismatch"),
+    "catalog SKU comparison is case-insensitive and trims values");
+Check(IntegrationCatalogComparison.Compare(variantLocal, variantRemote, variantMappings, IntegrationSyncItem.Inventory)
+    .Differences.Any(x => x.Code == "ExternalInventoryUnknown"), "unknown remote inventory is not treated as zero");
+Check(IntegrationCatalogComparison.Compare(variantLocal, variantRemote, variantMappings, IntegrationSyncItem.Product)
+    .Differences.All(x => x.VariantId is not null || x.Code is "LocalProductUnmapped" or "ExternalProductUnmapped"),
+    "variant differences retain identity for safe reconciliation");
 
 Check(IntegrationAvailableInventory.Calculate(3, 5, true) == 0
     && IntegrationAvailableInventory.Calculate(3, 0, false) == 0,
