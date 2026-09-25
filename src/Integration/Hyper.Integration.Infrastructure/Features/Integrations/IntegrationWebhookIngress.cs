@@ -24,7 +24,8 @@ public sealed class IntegrationWebhookIngress(
             return new(WebhookIngressStatus.Invalid, ErrorCode: "PayloadTooLargeOrEmpty");
         if (!Valid(request.ConnectionKey) || !Valid(request.EventId) || !Valid(request.EventType))
             return new(WebhookIngressStatus.Invalid, ErrorCode: "InvalidHeader");
-        try { using var _ = JsonDocument.Parse(request.Body); }
+        JsonDocument payload;
+        try { payload = JsonDocument.Parse(request.Body); }
         catch (JsonException) { return new(WebhookIngressStatus.Invalid, ErrorCode: "InvalidJson"); }
 
         // Hyperyek owns the internal hyper-hmac-v1 protocol. Its public contract
@@ -73,7 +74,8 @@ public sealed class IntegrationWebhookIngress(
         db.IntegrationEventAudits.Add(audit);
         db.IntegrationWebhookInbox.Add(inbox);
         IntegrationScenarioJob? scenarioJob = null;
-        if (TryMapScenario(request.EventType, out var item))
+        var isLoopback = IntegrationSourceRules.IsLoopback(IntegrationSourceRules.ReadSource(payload.RootElement));
+        if (!isLoopback && TryMapScenario(request.EventType, out var item))
         {
             // Keep ingress atomic: the durable inbox and the worker job are committed
             // together. The worker remains the only component that applies business work.
@@ -102,6 +104,7 @@ public sealed class IntegrationWebhookIngress(
             if (duplicate is not null) return new(WebhookIngressStatus.Duplicate, duplicate.Id);
             throw;
         }
+        finally { payload.Dispose(); }
     }
 
     private static bool Valid(string value) => !string.IsNullOrWhiteSpace(value)

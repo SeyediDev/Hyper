@@ -1,5 +1,6 @@
 using Hyper.Integration.Domain.Entities.Integrations;
 using Hyper.Integration.Domain.Features.Integrations;
+using System.Text.Json;
 
 var checks = 0;
 void Check(bool condition, string name)
@@ -90,6 +91,12 @@ Check(IntegrationRetryPolicy.Delay(1, TimeSpan.FromMinutes(4)) == TimeSpan.FromM
     "provider retry-after is honored");
 Check(IntegrationRetryPolicy.Delay(4, null) > IntegrationRetryPolicy.Delay(1, null),
     "retry delay uses exponential backoff");
+Check(IntegrationSourceRules.IsLoopback(" Hyperyek ")
+    && !IntegrationSourceRules.IsLoopback("Basalam"),
+    "Hyperyek source is recognized as loopback only");
+using var sourceDocument = JsonDocument.Parse("{\"metadata\":{\"sync_source\":\"Hyperyek\"}}");
+Check(IntegrationSourceRules.ReadSource(sourceDocument.RootElement) == "Hyperyek",
+    "nested sync source metadata is extracted");
 
 var resolver = new IntegrationStrategyResolver([new ResolverAdapter(IntegrationProvider.Basalam, true, true)]);
 Check(ReferenceEquals(resolver.Resolve(IntegrationProvider.Basalam, IntegrationCredentialType.OAuth2),

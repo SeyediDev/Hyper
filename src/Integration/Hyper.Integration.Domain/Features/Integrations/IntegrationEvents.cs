@@ -1,8 +1,28 @@
+using System.Text.Json;
+
 namespace Hyper.Integration.Domain.Features.Integrations;
 
 public sealed record IntegrationEventEnvelope(
     string EventId, string EventType, string Provider, string TenantId, int ShopId,
     string PayloadJson, string Source, string? CorrelationId, DateTime OccurredAtUtc);
+
+public static class IntegrationSourceRules
+{
+    public const string HyperyekSource = "Hyperyek";
+
+    public static bool IsLoopback(string? source) =>
+        string.Equals(source?.Trim(), HyperyekSource, StringComparison.OrdinalIgnoreCase);
+
+    public static string? ReadSource(JsonElement root)
+    {
+        foreach (var name in new[] { "source", "syncSource", "sync_source" })
+            if (root.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String)
+                return value.GetString();
+        if (root.TryGetProperty("metadata", out var metadata) && metadata.ValueKind == JsonValueKind.Object)
+            return ReadSource(metadata);
+        return null;
+    }
+}
 
 public interface IIntegrationStrategyResolver
 {
