@@ -23,6 +23,7 @@ var connection = builder.Configuration.GetConnectionString("Domain")
     ?? builder.Configuration.GetConnectionString("default");
 if (string.IsNullOrWhiteSpace(connection))
     throw new InvalidOperationException("Configure ConnectionStrings__Domain or HYPER_SETTINGS_FILE for the integration worker.");
+var integrationConnection = builder.Configuration.GetConnectionString("IntegrationConnection") ?? connection;
 builder.Services.AddBasalamSdk(builder.Configuration.GetSection("Basalam"));
 // The worker does not use the full AdminPanel repository registration, but the
 // Basalam adapter still needs the encrypted OAuth token store.
@@ -31,7 +32,7 @@ builder.Services.Configure<BasalamOAuthSettings>(builder.Configuration.GetSectio
 builder.Services.AddDataProtection();
 builder.Services.AddHttpClient<BasalamOAuthService>();
 builder.Services.AddScoped<BasalamOAuthStore>();
-builder.Services.AddHyperIntegrations(connection);
+builder.Services.AddHyperIntegrations(connection, integrationConnection, builder.Configuration);
 builder.Services.Configure<IntegrationInventoryCaptureOptions>(builder.Configuration.GetSection("IntegrationInventoryCapture"));
 builder.Services.AddHostedService<Hyper.IntegrationWorker.Application.IntegrationWorker>();
 await builder.Build().RunAsync();

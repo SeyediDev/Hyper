@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <!-- Keep this verifier independent from the full solution graph. Build the
+       Integration.Domain project first, then execute its pure rules in isolation. -->
+  <ItemGroup>
+    <Reference Include="Hyper.Integration.Domain">
+      <HintPath>../../src/Integration/Hyper.Integration.Domain/bin/Debug/net10.0/Hyper.Integration.Domain.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Neo.Domain">
+      <HintPath>../../../../Neo/src/Neo.Domain/bin/Debug/net10.0/Neo.Domain.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+    <Reference Include="Neo.Common">
+      <HintPath>../../../../Neo/src/Neo.Common/bin/Debug/net10.0/Neo.Common.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

@@ -1,4 +1,4 @@
-using Hyper.Domain.Features.Integrations;
+using Hyper.Integration.Domain.Features.Integrations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -43,3 +43,4 @@ public sealed class IntegrationWorker(IServiceScopeFactory scopes, ILogger<Integ
         }
     }
 }
+

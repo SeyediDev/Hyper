@@ -1,5 +1,5 @@
 using Hyper.AdminPanel.Web.ViewModels;
-using Hyper.Domain.Features.Integrations;
+using Hyper.Integration.Domain.Features.Integrations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Neo.Bpms.UI.MVC.Controllers.Public;
@@ -32,3 +32,4 @@ public sealed class AdminDashboardController(IAdminOverviewQuery overview, IAdmi
         return View("Index", AdminOverviewViewModel.Preview(days));
     }
 }
+

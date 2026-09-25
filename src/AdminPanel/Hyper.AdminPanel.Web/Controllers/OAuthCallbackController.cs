@@ -1,5 +1,5 @@
-using Hyper.Domain.Entities.Integrations;
-using Hyper.Domain.Features.Integrations;
+using Hyper.Integration.Domain.Entities.Integrations;
+using Hyper.Integration.Domain.Features.Integrations;
 using Hyper.Infrastructure.Features.Integrations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +11,7 @@ namespace Hyper.AdminPanel.Web.Controllers;
 [Route("api/auth/basalam")]
 public sealed class OAuthCallbackController(BasalamOAuthService oauth, BasalamOAuthStore store,
     IAdminMerchantSimulationService simulations, AdminSimulationTickets tickets,
+    IBasalamWebhookRegistration webhookRegistration,
     ILogger<OAuthCallbackController> logger) : ControllerBaseMVC
 {
     private const string CorrelationCookie = "Hyper.Basalam.Correlation";
@@ -82,8 +83,10 @@ public sealed class OAuthCallbackController(BasalamOAuthService oauth, BasalamOA
         {
             var token = await oauth.ExchangeCodeForTokenAsync(code, data, ct);
             var vendor = await oauth.GetVendorAsync(token, ct);
-            await store.SaveAsync(data, selected, vendor, token, ct);
-            return CallbackNotice($"توکن غرفه «{vendor.Title}» برای مغازه «{selected.ShopName}» ذخیره شد. یکسان‌سازی خودکار هنوز فعال نشده است.");
+            var connectionId = await store.SaveAsync(data, selected, vendor, token, ct);
+            await webhookRegistration.RegisterForConnectionAsync(connectionId, selected.ShopId,
+                selected.TenantId, vendor.Id, oauth.RedirectUri, ct);
+            return CallbackNotice($"اتصال غرفه «{vendor.Title}» برقرار شد و وب‌هوک‌های باسلام ثبت شدند.");
         }
         catch (Exception ex) when (ex is not OperationCanceledException || !ct.IsCancellationRequested)
         {
@@ -105,3 +108,4 @@ public sealed class OAuthCallbackController(BasalamOAuthService oauth, BasalamOA
                 $"<main dir=\"rtl\" style=\"font-family:sans-serif;max-width:640px;margin:4rem auto\"><h2>{System.Net.WebUtility.HtmlEncode(message)}</h2>" +
                 "<p>می‌توانید این صفحه را ببندید و به پنل مدیریت برگردید.</p></main>", "text/html; charset=utf-8");
 }
+

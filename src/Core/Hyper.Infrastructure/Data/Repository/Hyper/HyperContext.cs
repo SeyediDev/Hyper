@@ -24,20 +24,14 @@ public abstract partial class HyperContext<TContext>(DbContextOptions<TContext> 
     public virtual DbSet<Faq> Faq { get; set; }
     public virtual DbSet<Help> Help { get; set; }
 
-    public virtual DbSet<ExternalIntegrationConnection> ExternalIntegrationConnections { get; set; }
-    public virtual DbSet<ExternalOAuthToken> ExternalOAuthTokens { get; set; }
-    public virtual DbSet<ExternalProductMapping> ExternalProductMappings { get; set; }
-    public virtual DbSet<IntegrationSyncRun> IntegrationSyncRuns { get; set; }
-    public virtual DbSet<IntegrationWebhookInbox> IntegrationWebhookInbox { get; set; }
-    public virtual DbSet<ExternalOrderMapping> ExternalOrderMappings { get; set; }
-    public virtual DbSet<InventoryReservationLog> InventoryReservationLogs { get; set; }
-    public virtual DbSet<IntegrationEventAudit> IntegrationEventAudits { get; set; }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        
-        // Apply all entity configurations from assembly
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(HyperContext<>).Assembly);
+
+        // Integration owns a separate DbContext/database. Its configurations must
+        // never be discovered by Hyperyek's core command/query contexts.
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(HyperContext<>).Assembly,
+            type => !typeof(global::Hyper.Infrastructure.Data.Configurations.IIntegrationEntityConfiguration)
+                .IsAssignableFrom(type));
     }
 }

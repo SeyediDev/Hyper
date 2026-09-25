@@ -1,5 +1,5 @@
-using Hyper.Domain.Entities.Integrations;
-using Hyper.Domain.Features.Integrations;
+using Hyper.Integration.Domain.Entities.Integrations;
+using Hyper.Integration.Domain.Features.Integrations;
 
 namespace Hyper.AdminPanel.Web.ViewModels;
 
@@ -23,3 +23,4 @@ public sealed record AdminOverviewViewModel(AdminOverviewSnapshot Statistics, st
             "همهٔ مغازه‌ها",true,false);
     }
 }
+

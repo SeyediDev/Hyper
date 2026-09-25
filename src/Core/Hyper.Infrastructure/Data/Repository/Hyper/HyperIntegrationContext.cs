@@ -13,6 +13,8 @@ public sealed class HyperIntegrationContext(DbContextOptions<HyperIntegrationCon
     public DbSet<IntegrationAdminSimulation> IntegrationAdminSimulations => Set<IntegrationAdminSimulation>();
     public DbSet<IntegrationTokenRequest> IntegrationTokenRequests => Set<IntegrationTokenRequest>();
     public DbSet<ExternalIntegrationConnection> ExternalIntegrationConnections => Set<ExternalIntegrationConnection>();
+    public DbSet<ExternalOAuthToken> ExternalOAuthTokens => Set<ExternalOAuthToken>();
+    public DbSet<IntegrationCustomerMapping> IntegrationCustomerMappings => Set<IntegrationCustomerMapping>();
     public DbSet<ExternalProductMapping> ExternalProductMappings => Set<ExternalProductMapping>();
     public DbSet<IntegrationSyncRun> IntegrationSyncRuns => Set<IntegrationSyncRun>();
     public DbSet<IntegrationWebhookInbox> IntegrationWebhookInbox => Set<IntegrationWebhookInbox>();
@@ -46,6 +48,18 @@ public sealed class HyperIntegrationContext(DbContextOptions<HyperIntegrationCon
         modelBuilder.ApplyConfiguration(new IntegrationAdminSimulationConfiguration());
         modelBuilder.ApplyConfiguration(new IntegrationTokenRequestConfiguration());
         modelBuilder.ApplyConfiguration(new ExternalIntegrationConnectionConfiguration());
+        modelBuilder.ApplyConfiguration(new ExternalOAuthTokenConfiguration());
+        modelBuilder.Entity<IntegrationCustomerMapping>(entity =>
+        {
+            entity.ToTable("IntegrationCustomerMappings", "dbo");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.TenantId).HasMaxLength(30).IsRequired();
+            entity.Property(x => x.ExternalCustomerId).HasMaxLength(128).IsRequired();
+            entity.HasIndex(x => new { x.ShopId, x.TenantId, x.ExternalCustomerId }).IsUnique()
+                .HasDatabaseName("UX_IntegrationCustomerMappings_ExternalIdentity");
+            entity.HasIndex(x => new { x.ShopId, x.TenantId, x.PersonId }).IsUnique()
+                .HasDatabaseName("UX_IntegrationCustomerMappings_Person");
+        });
         modelBuilder.ApplyConfiguration(new ExternalProductMappingConfiguration());
         modelBuilder.ApplyConfiguration(new IntegrationSyncRunConfiguration());
         modelBuilder.ApplyConfiguration(new IntegrationWebhookInboxConfiguration());

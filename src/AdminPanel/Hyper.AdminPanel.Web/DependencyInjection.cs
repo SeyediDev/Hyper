@@ -1,5 +1,7 @@
 using System.IO;
 using Hyper.AdminPanel.Web.Infrastructure.Icons;
+using Hyper.Integration.Api;
+using Hyper.Infrastructure.Features.Integrations;
 using Neo.Bpms.Api;
 using Neo.Bpms.UI.MVC.Controls;
 using Neo.Bpms.UI.MVC.Features;
@@ -61,6 +63,10 @@ public static class DependencyInjection
 
         // Database & Repositories
         services.AddHyperRepositories(configuration);
+        var integrationConnection = configuration.GetConnectionString("IntegrationConnection")
+            ?? configuration.GetConnectionString("DomainCommandConnection");
+        if (!string.IsNullOrWhiteSpace(integrationConnection))
+            services.AddHyperIntegrations(configuration.GetConnectionString("DomainCommandConnection")!, integrationConnection, configuration);
 
         // Feature Services (SMS, Jobs, etc.)
         AddFeatureServices(services, configuration);
@@ -93,7 +99,8 @@ public static class DependencyInjection
         
         // اضافه کردن MonitoringController از Neo.Endpoint برای API endpoints
         // این لازم است تا API endpoints (/api/monitoring/*) در دسترس باشند
-        services.AddNeoControllerServices(configuration, "Hyper Admin Panel", includeViews: true, existingMvcBuilder: mvcBuilder);
+        services.AddNeoControllerServices(configuration, "Hyper Admin Panel", includeViews: true, existingMvcBuilder: mvcBuilder)
+            .AddApplicationPart(typeof(IntegrationWebhookController).Assembly);
         
         // Custom Icon Provider for Hyper platform
         services.AddSingleton<ICustomIconProvider, CustomIconProvider>();

@@ -6,7 +6,8 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	
-	<ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Integration\Hyper.Integration.Domain\Hyper.Integration.Domain.csproj" />
 		<ProjectReference Include="..\..\Core\Hyper.Application\Hyper.Application.csproj" />
 		<ProjectReference Include="..\..\Core\Hyper.Domain\Hyper.Domain.csproj" />
 	</ItemGroup>

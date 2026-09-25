@@ -81,6 +81,8 @@
 	  <ProjectReference Include="..\Hyper.AdminPanel.Domain\Hyper.AdminPanel.Domain.csproj" />
 	  <ProjectReference Include="..\..\Core\Hyper.Application\Hyper.Application.csproj" />
 	  <ProjectReference Include="..\..\Core\Hyper.Infrastructure\Hyper.Infrastructure.csproj" />
+	  <ProjectReference Include="..\..\Integration\Hyper.Integration.Api\Hyper.Integration.Api.csproj" />
+	  <ProjectReference Include="..\..\Integration\Hyper.Integration.Infrastructure\Hyper.Integration.Infrastructure.csproj" />
 	</ItemGroup>
 	
 	<ItemGroup>

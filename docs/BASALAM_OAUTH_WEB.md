@@ -20,7 +20,7 @@
 - OAuthCallbackController.Login: GetUser/IsAdmin مطابق Neo، antiforgery، تطبیق بلیت فرم با cookie انتخاب فعلی، ثبت IntegrationTokenRequests و redirect واقعی.
 - BasalamOAuthService: قرارداد HTTP باسلام، state حفاظت‌شده با عمر ۱۰ دقیقه، تبادل code، تشخیص غرفه و حفاظت access/refresh token.
 - OAuthCallbackController.Callback: بررسی cookie همبستگی مرورگر و state، بررسی اعتبار زمینه، مصرف یک‌باره درخواست، ذخیره و redirect به صفحه شبیه‌ساز.
-- BasalamOAuthStore: عملیات SQL و EF روی HyperContextCommand موجود Neo؛ DbContext جدیدی اضافه نشده است. تراکنش اتصال/توکن/نتیجه یک‌جا commit می‌شود.
+- BasalamOAuthStore: عملیات SQL و EF روی `HyperIntegrationContext` و دیتابیس مستقل Integration؛ جداول Integration از context اصلی Hyperyek جدا هستند. تراکنش اتصال/توکن/نتیجه یک‌جا commit می‌شود.
 - ExternalOAuthTokenConfiguration: نگاشت جدول جدید dbo.ExternalOAuthTokens.
 
 وضعیت درخواست‌ها: 0 آماده، 1 در حال پردازش و مصرف‌شده، 2 ذخیره موفق، 3 عدم اعطای مجوز، 4 شکست.

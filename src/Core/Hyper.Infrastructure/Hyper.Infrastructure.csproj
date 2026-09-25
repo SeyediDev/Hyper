@@ -34,11 +34,17 @@
     <ProjectReference Include="..\..\..\..\..\Neo\src\Neo.Infrastructure\Neo.Infrastructure.csproj" />
     <ProjectReference Include="..\..\SDK\Hyper.SDK.csproj" />
     <ProjectReference Include="..\Hyper.Domain\Hyper.Domain.csproj" />
+    <ProjectReference Include="..\..\Integration\Hyper.Integration.Contracts\Hyper.Integration.Contracts.csproj" />
+    <ProjectReference Include="..\..\Integration\Hyper.Integration.Domain\Hyper.Integration.Domain.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\Interceptors\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Integration implementations compile in Hyper.Integration.Infrastructure. -->
+    <Compile Remove="Features\Integrations\**\*.cs" />
+  </ItemGroup>
   <ItemGroup>
     <!-- Club persistence is retired from Hyper. Keep only shared account primitives and integration mappings. -->
     <Compile Remove="Data\Configurations\Customer*.cs" />

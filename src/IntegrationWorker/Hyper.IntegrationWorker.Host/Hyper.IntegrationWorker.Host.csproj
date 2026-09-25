@@ -4,6 +4,7 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="../Hyper.IntegrationWorker.Application/Hyper.IntegrationWorker.Application.csproj" />
     <ProjectReference Include="../../Core/Hyper.Infrastructure/Hyper.Infrastructure.csproj" />
+    <ProjectReference Include="../../Integration/Hyper.Integration.Infrastructure/Hyper.Integration.Infrastructure.csproj" />
     <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

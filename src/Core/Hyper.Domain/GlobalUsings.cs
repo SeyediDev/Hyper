@@ -1,4 +1,3 @@
-global using Hyper.Domain.Entities.Integrations;
 global using Hyper.Domain.Enums;
 global using Neo.Common.Attributes;
 global using Neo.Domain.Entities.Base;
@@ -9,3 +8,4 @@ global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
 global using System.ComponentModel.DataAnnotations.Schema;
 global using Neo.Bpms.Domain.Models.Attributes.FieldAndEntityAttributes;
+

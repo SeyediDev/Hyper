@@ -7,7 +7,6 @@ namespace Hyper.Infrastructure.Data.Repository.Hyper;
 /// <summary>Database-owned accounting schema. Existing tables are excluded from migrations.</summary>
 public sealed class HyperSqlServerContext(DbContextOptions<HyperSqlServerContext> options) : DbContext(options)
 {
-    public DbSet<global::Hyper.Infrastructure.Features.Integrations.IntegrationCustomerMapping> IntegrationCustomerMappings => Set<global::Hyper.Infrastructure.Features.Integrations.IntegrationCustomerMapping>();
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         base.ConfigureConventions(configurationBuilder);
@@ -18,15 +17,23 @@ public sealed class HyperSqlServerContext(DbContextOptions<HyperSqlServerContext
     {
         base.OnModelCreating(modelBuilder);
         HyperSqlServerModel.Configure(modelBuilder);
-        modelBuilder.Entity<global::Hyper.Infrastructure.Features.Integrations.IntegrationCustomerMapping>(entity =>
-        {
-            entity.ToTable("IntegrationCustomerMappings", "dbo");
-            entity.HasKey(x => x.Id);
-            entity.Property(x => x.TenantId).HasMaxLength(30);
-            entity.Property(x => x.BasalamUserId).HasMaxLength(128);
-            entity.HasIndex(x => new { x.ShopId, x.TenantId, x.BasalamUserId }).IsUnique();
-            entity.HasIndex(x => new { x.ShopId, x.TenantId, x.PersonId }).IsUnique();
-        });
+
+        // These legacy scaffold types are retained only so the generated model
+        // remains reviewable. Integration owns their tables through
+        // HyperIntegrationContext and the core accounting context must not map
+        // or expose them.
+        modelBuilder.Ignore<SqlExternalintegrationconnections>();
+        modelBuilder.Ignore<SqlExternalordermappings>();
+        modelBuilder.Ignore<SqlExternalproductmappings>();
+        modelBuilder.Ignore<SqlIntegrationadminsimulations>();
+        modelBuilder.Ignore<SqlIntegrationeventaudits>();
+        modelBuilder.Ignore<SqlIntegrationmerchantaccess>();
+        modelBuilder.Ignore<SqlIntegrationoutbox>();
+        modelBuilder.Ignore<SqlIntegrationsyncruns>();
+        modelBuilder.Ignore<SqlIntegrationtokenrequests>();
+        modelBuilder.Ignore<SqlIntegrationwebhookinbox>();
+        modelBuilder.Ignore<SqlInventoryreservationlogs>();
+        modelBuilder.Ignore<SqlVwIntegrationdashboard>();
     }
 
     public DbSet<SqlActGeBytearray> ActGeBytearrays => Set<SqlActGeBytearray>();
@@ -104,17 +111,6 @@ public sealed class HyperSqlServerContext(DbContextOptions<HyperSqlServerContext
     public DbSet<SqlActRuTask> ActRuTasks => Set<SqlActRuTask>();
     public DbSet<SqlActRuTaskMeterLog> ActRuTaskMeterLogs => Set<SqlActRuTaskMeterLog>();
     public DbSet<SqlActRuVariable> ActRuVariables => Set<SqlActRuVariable>();
-    public DbSet<SqlExternalintegrationconnections> Externalintegrationconnectionss => Set<SqlExternalintegrationconnections>();
-    public DbSet<SqlExternalordermappings> Externalordermappingss => Set<SqlExternalordermappings>();
-    public DbSet<SqlExternalproductmappings> Externalproductmappingss => Set<SqlExternalproductmappings>();
-    public DbSet<SqlIntegrationadminsimulations> Integrationadminsimulationss => Set<SqlIntegrationadminsimulations>();
-    public DbSet<SqlIntegrationeventaudits> Integrationeventauditss => Set<SqlIntegrationeventaudits>();
-    public DbSet<SqlIntegrationmerchantaccess> Integrationmerchantaccesss => Set<SqlIntegrationmerchantaccess>();
-    public DbSet<SqlIntegrationoutbox> Integrationoutboxs => Set<SqlIntegrationoutbox>();
-    public DbSet<SqlIntegrationsyncruns> Integrationsyncrunss => Set<SqlIntegrationsyncruns>();
-    public DbSet<SqlIntegrationtokenrequests> Integrationtokenrequestss => Set<SqlIntegrationtokenrequests>();
-    public DbSet<SqlIntegrationwebhookinbox> Integrationwebhookinboxs => Set<SqlIntegrationwebhookinbox>();
-    public DbSet<SqlInventoryreservationlogs> Inventoryreservationlogss => Set<SqlInventoryreservationlogs>();
     public DbSet<SqlTblAccount> TblAccounts => Set<SqlTblAccount>();
     public DbSet<SqlTblAccountingarticle> TblAccountingarticles => Set<SqlTblAccountingarticle>();
     public DbSet<SqlTblAccountingdocument> TblAccountingdocuments => Set<SqlTblAccountingdocument>();
@@ -185,5 +181,4 @@ public sealed class HyperSqlServerContext(DbContextOptions<HyperSqlServerContext
     public DbSet<SqlTblWarehouse> TblWarehouses => Set<SqlTblWarehouse>();
     public DbSet<SqlViewAccountbalance> ViewAccountbalances => Set<SqlViewAccountbalance>();
     public DbSet<SqlViewDetailaccountbalance> ViewDetailaccountbalances => Set<SqlViewDetailaccountbalance>();
-    public DbSet<SqlVwIntegrationdashboard> VwIntegrationdashboards => Set<SqlVwIntegrationdashboard>();
 }

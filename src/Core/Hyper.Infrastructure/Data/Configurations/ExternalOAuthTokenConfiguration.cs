@@ -1,11 +1,11 @@
 // Auto-generated
-using Hyper.Domain.Entities.Integrations;
+using Hyper.Integration.Domain.Entities.Integrations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Hyper.Infrastructure.Data.Configurations;
 
-public sealed class ExternalOAuthTokenConfiguration : IEntityTypeConfiguration<ExternalOAuthToken>
+public sealed class ExternalOAuthTokenConfiguration : IEntityTypeConfiguration<ExternalOAuthToken>, IIntegrationEntityConfiguration
 {
     public void Configure(EntityTypeBuilder<ExternalOAuthToken> entity)
     {
@@ -125,3 +125,5 @@ public sealed class ExternalOAuthTokenConfiguration : IEntityTypeConfiguration<E
             .HasDatabaseName("IX_ExternalOAuthTokens_ExpiresAtUtc");
     }
 }
+
+

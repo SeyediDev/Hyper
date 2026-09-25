@@ -1,6 +1,6 @@
 using System.Text.Json;
-using Hyper.Domain.Entities.Integrations;
-using Hyper.Domain.Features.Integrations;
+using Hyper.Integration.Domain.Entities.Integrations;
+using Hyper.Integration.Domain.Features.Integrations;
 using Hyper.Infrastructure.Data.Repository.Hyper;
 using Hyper.Infrastructure.Features.Integrations;
 using Microsoft.Data.SqlClient;
@@ -33,7 +33,9 @@ if (args.Length > 0)
     await using var db = new HyperIntegrationContext(new DbContextOptionsBuilder<HyperIntegrationContext>().UseSqlServer(builder.ConnectionString).Options);
     await using var tx = await db.Database.BeginTransactionAsync();
     var adapter = new FakeAdapter();
-    var processor = new IntegrationScenarioProcessor(db, new IntegrationStrategyResolver([adapter]), new FakeInventory(), Options.Create(new IntegrationInventoryCaptureOptions()));
+    var processor = new IntegrationScenarioProcessor(db, new IntegrationStrategyResolver([adapter]), new FakeInventory(),
+        Options.Create(new IntegrationInventoryCaptureOptions()), Options.Create(new BasalamOAuthSettings()),
+        null!, null!);
     var queue = new IntegrationScenarioQueue(db, processor);
     var conn = new ExternalIntegrationConnection { ShopId=int.MaxValue-1, TenantId="scenario-test", Provider=IntegrationProvider.Custom,
         DisplayName="Rollback scenario test", AccountIdentifier=Guid.NewGuid().ToString("N"), CredentialType=IntegrationCredentialType.BearerToken, CredentialsJson="{}", IsEnabled=true };
@@ -85,3 +87,4 @@ sealed class FakeAdapter : IExternalIntegrationAdapter
     { Calls++; if(Fail)throw new IntegrationProviderException("Http429",true); return Task.FromResult<IReadOnlyCollection<ExternalCatalogItem>>([]); }
     public Task PublishInventoryAsync(ExternalIntegrationConnection c,IReadOnlyCollection<ExternalInventoryUpdate> u,CancellationToken ct)=>throw new Exception("Unexpected external write");
 }
+

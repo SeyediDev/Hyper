@@ -165,7 +165,7 @@ HomeController به DesktopController استاندارد Neo بازگرداند�
 - پیاده‌سازی وب: دکمه POST در MerchantSimulation/Index، شروع احرازشده با antiforgery، redirect واقعی، callback استاندارد code/state، ذخیره امن و بازگشت به پنل.
 - state ده‌دقیقه‌ای حفاظت‌شده، correlation cookie، مصرف اتمیک درخواست SQL و کنترل زمینه پایان‌یافته. Session/IMemoryCache استفاده نمی‌شود.
 - آدرس ورود و scopeها با SDK رسمی تطبیق داده شد؛ پورت callback نمونه با پروفایل محلی 5000 یکسان شد.
-- RawTokenResponse دیگر توکن خام ذخیره نمی‌کند. ذخیره از HyperContextCommand موجود Neo انجام می‌شود.
+- RawTokenResponse دیگر توکن خام ذخیره نمی‌کند. ذخیره از `HyperIntegrationContext` در دیتابیس مستقل Integration انجام می‌شود.
 - راهنمای مرجع: [BASALAM_OAUTH_WEB.md](BASALAM_OAUTH_WEB.md).
 - build پیش از اصلاح: موفق با صفر هشدار/خطا. build و تست پس از اصلاح: در حال بررسی.
 - پذیرش واقعی هنوز باز: ClientId/ClientSecret واقعی و redirect ثبت‌شده در باسلام، schema توکن و آزمون اجازه/انصراف با حساب واقعی.

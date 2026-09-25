@@ -19,4 +19,11 @@
     <ProjectReference Include="..\..\..\..\..\Neo-Bpms\src\Neo.Bpms.Domain\Neo.Bpms.Domain.csproj" />
   </ItemGroup>
 
+  <!-- Integration owns its own domain assembly. These legacy files remain in place
+       temporarily for source history but are no longer compiled here. -->
+  <ItemGroup>
+    <Compile Remove="Entities\Integrations\**\*.cs" />
+    <Compile Remove="Features\Integrations\**\*.cs" />
+  </ItemGroup>
+
 </Project>

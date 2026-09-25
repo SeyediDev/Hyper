@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <ProjectReference Include="../../Core/Hyper.Domain/Hyper.Domain.csproj" />
+    <ProjectReference Include="../../Integration/Hyper.Integration.Domain/Hyper.Integration.Domain.csproj" />
   </ItemGroup>
 </Project>

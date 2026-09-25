@@ -1,8 +1,8 @@
 using Hyper.AdminPanel.Web.ViewModels;
 using Hyper.Infrastructure.Features.Integrations;
 using Microsoft.Data.SqlClient;
-using Hyper.Domain.Entities.Integrations;
-using Hyper.Domain.Features.Integrations;
+using Hyper.Integration.Domain.Entities.Integrations;
+using Hyper.Integration.Domain.Features.Integrations;
 using Microsoft.AspNetCore.Mvc;
 using Neo.Bpms.UI.MVC.Controllers.Public;
 
@@ -182,3 +182,4 @@ public sealed class MerchantSimulationController(IAdminMerchantSimulationService
 
     private Guid? ReadTicket(string adminId, string? ticket) => tickets.Read(adminId, ticket);
 }
+

@@ -1,0 +1,2 @@
+namespace Hyper.Integration.Domain.Entities.Integrations; public sealed class IntegrationWebhookInbox { public long Id {get;set;} public long ConnectionId {get;set;} public string ExternalEventId {get;set;}=null!; public string EventType {get;set;}=null!; public string PayloadJson {get;set;}=null!; public DateTime ReceivedAtUtc {get;set;}=DateTime.UtcNow; public DateTime? ProcessedAtUtc {get;set;} public byte Status {get;set;} public string? Error {get;set;} }
+

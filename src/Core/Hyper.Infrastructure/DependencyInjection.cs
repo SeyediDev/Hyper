@@ -1,17 +1,12 @@
 using Ardalis.GuardClauses;
 using Hyper.Infrastructure.Data.Repository;
 using Hyper.Infrastructure.Data.Repository.Hyper;
-using Hyper.Infrastructure.Features.Integrations;
-using Hyper.SDK;
-using Hyper.SDK.Clients;
-using Hyper.SDK.Config;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using Neo.Domain.Entities.Base;
 using Neo.Infrastructure.Features.Queue.Hangfire;
 using Quartz;
@@ -30,8 +25,6 @@ public static class DependencyInjection
             options.UseSqlServer(commandConnectionString);
             options.AddInterceptors(serviceProvider.GetServices<ISaveChangesInterceptor>());
         });
-        services.AddHyperIntegrations(commandConnectionString);
-        services.Configure<IntegrationInventoryCaptureOptions>(configuration.GetSection("IntegrationInventoryCapture"));
         services.AddScoped<IHyperUnitOfWorkCommand>(serviceProvider => serviceProvider.GetRequiredService<HyperContextCommand>());
 
         var queryConnectionString = configuration.GetConnectionString($"{nameof(DomainProvider.Domain)}QueryConnection");
@@ -50,21 +43,6 @@ public static class DependencyInjection
 		services.AddScoped<IUserQueryRepository, UserQueryRepository>();
 		services.AddScoped<ICultureTermQueryRepository, CultureTermQueryRepository>();
 
-	// Basalam OAuth2
-	services.Configure<BasalamOAuthSettings>(configuration.GetSection("Basalam"));
-	services.AddScoped<BasalamOAuthStore>();
-	services.AddHttpClient<BasalamOAuthService>()
-            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false })
-			.ConfigureHttpClient(client =>
-			{
-				client.Timeout = TimeSpan.FromSeconds(30);
-                client.DefaultRequestHeaders.Add("User-Agent", "HyperIntegration/1.0");
-			});
-
-	// Hyper SDK
-	services.AddBasalamSdk(configuration.GetSection("Basalam"));
-
-	services.AddDataProtection();
 	}
 
     public static void UseHyper(this IApplicationBuilder app,

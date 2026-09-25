@@ -2,7 +2,7 @@ using System.Net;
 using System.Text;
 using System.Text.Json;
 using Hyper.Infrastructure.Features.Integrations;
-using Hyper.Domain.Entities.Integrations;
+using Hyper.Integration.Domain.Entities.Integrations;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
@@ -87,3 +87,4 @@ sealed class FakeHttp : HttpMessageHandler
   return new HttpResponseMessage(Status){Content=new StringContent(Json,Encoding.UTF8,"application/json")};
  }
 }
+

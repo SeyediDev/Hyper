@@ -57,7 +57,7 @@
    stateData = IDataProtection.Unprotect(encrypted_state)
    tokenResponse = POST to token endpoint with code + codeVerifier
    token = Create ExternalOAuthToken(encrypted accessToken/refreshToken)
-   DbContext.ExternalOAuthTokens.Add(token)
+   HyperIntegrationContext.ExternalOAuthTokens.Add(token)
    SaveChanges()
    ↓
    Response: {message: "توکن با موفقیت ذخیره شد", shopId, connectionId}
@@ -141,13 +141,13 @@ entity.Property(e => e.IsActive).HasDefaultValue(true);
 
 ### فایلات Migration
 - `src/Core/Hyper.Infrastructure/Migrations/20260914_AddExternalOAuthToken.cs`
-- `src/Core/Hyper.Infrastructure/Migrations/HyperContextCommandModelSnapshot.cs`
+- `src/Core/Hyper.Infrastructure/Data/Repository/Hyper/HyperIntegrationContext.cs`
 
 ### اعمال Migration
 ```bash
 dotnet ef database update --project src/Core/Hyper.Infrastructure \
 	--startup-project src/AdminPanel/Hyper.AdminPanel.Web \
-	--context HyperContextCommand
+	--context HyperIntegrationContext
 ```
 
 **⚠️ مسئله فعلی:** EF Core version mismatch (8.0 vs 10.0)
@@ -215,7 +215,7 @@ ngrok http 5001
 - `src/AdminPanel/Hyper.AdminPanel.Web/appsettings.json` (MODIFIED - added Basalam config)
 - `src/Core/Hyper.Infrastructure/DependencyInjection.cs` (MODIFIED - added DI registrations)
 - `src/Core/Hyper.Infrastructure/Migrations/20260914_AddExternalOAuthToken.cs` (NEW)
-- `src/Core/Hyper.Infrastructure/Migrations/HyperContextCommandModelSnapshot.cs` (NEW)
+- `src/Core/Hyper.Infrastructure/Data/Repository/Hyper/HyperIntegrationContext.cs` (updated)
 
 ## References
 

@@ -1,5 +1,5 @@
 global using Hyper.AdminPanel.Domain.Domain.Hyper;
-global using Hyper.Domain.Entities.Integrations;
+global using Hyper.Integration.Domain.Entities.Integrations;
 global using Hyper.Domain.Constants;
 global using Neo.Bpms.Domain.Features.Definitions.Entities;
 global using Neo.Bpms.Domain.Features.MetaDefinitions.Dashboards;
@@ -9,3 +9,4 @@ global using Neo.Bpms.Domain.Model.Project;
 global using Neo.Bpms.Domain.Model.UI.Forms;
 global using Neo.Bpms.Domain.Models.Cmmn.Common;
 global using Neo.Domain.Entities.Base;
+

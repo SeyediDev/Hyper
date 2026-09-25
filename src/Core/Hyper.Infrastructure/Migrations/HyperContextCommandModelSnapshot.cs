@@ -21,89 +21,11 @@ namespace Hyper.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            // Note: This is a simplified snapshot. Full snapshot would include all other entities.
-            // This is just showing the ExternalOAuthToken entity configuration.
-
-            modelBuilder.Entity("Hyper.Domain.Entities.Integrations.ExternalOAuthToken", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("AccessToken")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<long>("ConnectionId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("ExpiresAtUtc")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<DateTime>("IssuedAtUtc")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("SYSUTCDATETIME()");
-
-                    b.Property<string>("Provider")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("RawTokenResponse")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("RefreshToken")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ShopId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Scopes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TenantId")
-                        .IsRequired()
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("TokenType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime>("UpdatedAtUtc")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("SYSUTCDATETIME()");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ConnectionId")
-                        .HasDatabaseName("IX_ExternalOAuthTokens_ConnectionId");
-
-                    b.HasIndex("ExpiresAtUtc")
-                        .HasDatabaseName("IX_ExternalOAuthTokens_ExpiresAtUtc");
-
-                    b.HasIndex("TenantId")
-                        .HasDatabaseName("IX_ExternalOAuthTokens_TenantId");
-
-                    b.HasIndex("ShopId", "Provider")
-                        .IsUnique()
-                        .HasDatabaseName("UX_ExternalOAuthTokens_ShopId_Provider");
-
-                    b.ToTable("ExternalOAuthTokens", "dbo");
-                });
+            // Integration persistence is owned by HyperIntegrationContext and is intentionally absent from the Hyperyek command model snapshot.
 
 #pragma warning restore 612, 618
         }
     }
 }
+
+

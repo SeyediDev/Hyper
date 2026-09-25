@@ -1,8 +1,75 @@
+# به نام خدا
+
+## تصمیم معماری Neo و Neo.Bpms — 2026-09-25
+
+- [x] `Neo.Bpms` به‌عنوان وابستگی مجاز پنل ادمین (`AdminPanel.Domain` و `AdminPanel.Web`) شناسایی شد.
+- [x] نبود reference مستقیم `Neo.Bpms` در پروژه‌های `Hyper.Integration.*` بررسی شد.
+- [ ] **ARCH-NEO-001 — حذف وابستگی غیرمستقیم خارج از پنل**: مسیر `Hyper.Integration.Infrastructure → Hyper.Infrastructure → Hyper.Domain → Neo.Bpms.Domain` باید با جداکردن metadata/attributeهای پنل از `Hyper.Domain` حذف شود. این تغییر پیش از اجرا نیازمند تأیید مالک است، چون روی metadata و UI legacy اثر بالقوه دارد.
+- [ ] **PLATFORM-API-001 — Hyperyek.Accounting.Api**: API مالک commandهای طرف‌حساب، رزرو، سفارش، سند حسابداری، لغو و مرجوعی ایجاد شود؛ Integration فقط قرارداد versioned آن را مصرف کند و هیچ دسترسی مستقیمی به جداول حسابداری نداشته باشد. این API برای تحویل آینده به تیم پلتفرم طراحی می‌شود.
+
 # بک‌لاگ یکپارچه‌سازی هایپریک و کانال‌های فروش
+
+## تصمیم پایه این بک‌لاگ — جداسازی دامین‌ها
+
+این پروژه با مرزبندی صریح دامین‌ها ادامه پیدا می‌کند. دامین Integration مالک کد، مدل، persistence و API خودش است و با دامین‌های اصلی Hyperyek، پنل ادمین و providerها قاطی نمی‌شود.
+
+قواعد الزام‌آور:
+
+- [x] **ARCH-DOMAIN-001 — مرزبندی دامین Integration**: entityها و ruleهای Integration به پروژه مستقل `Hyper.Integration.Domain` منتقل شدند و دیگر در `Hyper.Domain` compile نمی‌شوند.
+- [ ] **ARCH-DOMAIN-002 — persistence مستقل**: `HyperIntegrationContext`، مدل OAuth و configuration marker جدا شده‌اند؛ انتقال کامل migrationها و حذف باقی‌مانده‌ی generated legacy mappings هنوز باز است.
+- [ ] **ARCH-DOMAIN-003 — قرارداد بین دامین‌ها**: ارتباط Integration با Hyperyek فقط از طریق API/contract، شناسه‌های خارجی، event/outbox یا adapter انجام شود؛ reference مستقیم به entity، DbContext یا repository دامین دیگر ممنوع است.
+- [ ] **ARCH-DOMAIN-004 — API و Worker مستقل**: endpointهای Integration و پردازشگرهای آن در لایه‌های API/Application/Worker خودشان قرار بگیرند؛ پنل ادمین فقط مصرف‌کننده API باشد و منطق Integration داخل Controller یا View قرار نگیرد.
+- [ ] **ARCH-DOMAIN-005 — واگذاری‌پذیری**: API مدیریت اتصال، رویداد، token، mapping، replay و simulation با قرارداد versioned و مستند طراحی شود تا بعداً بدون انتقال دامین‌های دیگر قابل واگذاری به تیم پلتفرم باشد.
+- [ ] **ARCH-DOMAIN-006 — جلوگیری از آلودگی دامین**: هر PR جدید باید dependency graph، namespace، DbContext و migration خود را بررسی کند؛ استفاده از entityهای دامین دیگر در Integration باید در تست معماری رد شود.
+
+معیار عبور از این بخش: هیچ feature جدید Integration قبل از تعیین owner دامین، محل کد، قرارداد ارتباطی، مالکیت داده و تست معماری وارد مرحله پیاده‌سازی نشود.
+
+### خط مبنای بررسی معماری — 2026-09-24
+
+- [ ] **ARCH-DOMAIN-007 — انتقال تدریجی کد Integration**: کدهای فعلی `Hyper.Domain.Features.Integrations`، پس از استخراج contractهای لازم، به دامین/پروژه مستقل Integration منتقل شوند؛ تا آن زمان این مسیرها «وضعیت legacy» محسوب می‌شوند و feature جدید نباید در آن‌ها اضافه شود.
+- [ ] **ARCH-DOMAIN-008 — حذف دسترسی مستقیم به دامین Hyperyek**: وابستگی `IntegrationCustomerRegistration` به `Hyper.Domain.Entities.Database` و `HyperSqlServerContext` حذف و با contract/API یا adapter رسمی جایگزین شود.
+- [ ] **ARCH-DOMAIN-009 — تفکیک API و پنل**: endpointها و queryهای Integration از host پنل استخراج یا پشت API contract مستقل قرار گیرند؛ Controller/View نباید persistence یا orchestration Integration را انجام دهد.
+- [ ] **ARCH-DOMAIN-010 — تست معماری dependency**: تستی اضافه شود که reference مستقیم Integration به entity، DbContext و repository دامین‌های دیگر را رد کند.
+
+### وضعیت اجرای معماری — 2026-09-24
+
+- [x] **ARCH-CONTRACT-001 — قرارداد مستقل Integration**: پروژه `Hyper.Integration.Contracts` ایجاد و به solution اضافه شد؛ قرارداد ingress وب‌هوک، نتیجه idempotency، connection summary، replay و simulation در آن ثبت شد.
+- [x] **ARCH-API-001 — ورودی مستقل webhook**: endpoint `POST /api/integrations/v1/webhooks/{provider}/{connectionKey}` ایجاد شد؛ controller فقط contract را مصرف می‌کند و persistence/validation در سرویس Integration انجام می‌شود.
+- [x] **ARCH-API-002 — پروژه API مستقل**: `Hyper.Integration.Api` ایجاد و به هر دو solution اضافه شد؛ پنل فقط assembly API را به Neo MVC host معرفی می‌کند.
+- [x] **ARCH-INGRESS-001 — inbox/audit atomic ingress**: دریافت وب‌هوک معتبر به inbox و audit می‌رود و duplicate بر اساس `(ConnectionId, ExternalEventId)` اثر دوم ایجاد نمی‌کند.
+- [x] **ARCH-OAUTH-001 — OAuth persistence isolation**: `BasalamOAuthStore`، token، request و simulation فقط از `HyperIntegrationContext` استفاده می‌کنند؛ جداول Integration از `HyperSqlServerContext` حذف/Ignore شدند.
+- [x] **ARCH-MAPPING-001 — customer mapping isolation**: `IntegrationCustomerMapping` به مدل و schema مستقل Integration منتقل شد و `PersonId` فقط به‌صورت شناسه‌ی قراردادی باقی ماند.
+- [x] **ARCH-PANEL-001 — سازگاری پنل legacy**: دسترسی پنل به entityها، CRUDها و گزارش/داشبوردهای قدیمی Integration فعلاً عمداً حفظ شد تا UI موجود از کار نیفتد؛ این دسترسی مسیر مرجع توسعه جدید نیست و حذف آن به migration کامل پنل/API موکول است.
+- [x] **TEST-BASELINE-001 — build لایه‌های قرارداد و API**: `Hyper.Integration.Contracts` و `Hyper.Integration.Api` با `0 warning / 0 error` build شدند.
+- [x] **TEST-DOMAIN-001 — آزمون مستقل دامین Integration**: ابزار `tools/IntegrationDomainChecks` بدون SQL Server، ۱۹ assertion برای scope/event، catalog، inventory، mapping، retry و workflow فروش را با موفقیت اجرا کرد.
+- [x] **ARCH-INFRA-001 — استخراج Infrastructure Integration**: پروژه‌ی `Hyper.Integration.Infrastructure` ایجاد شد؛ sourceهای Integration از compile پروژه‌ی مشترک حذف و توسط پروژه‌ی مستقل مالکیت compile گرفتند.
+- [x] **DB-SCHEMA-001 — provisioner ساختار دیتابیس**: ابزار `tools/IntegrationSchemaProvisioner` برای ایجاد database، اجرای schema و verify چهارده جدول اضافه و با موفقیت build شد؛ اجرای نهایی روی SQL Server به‌صورت دستی قابل انجام است.
+- [ ] **TEST-BASELINE-002 — build کامل زیرساخت**: به‌دلیل دسترسی نوشتن dependencyهای Neo.Bpms و سپس خطای artifacts/duplicate generated files هنوز تأیید نشده است.
+- [ ] **ARCH-TRANSFER-001 — انتقال کامل کدهای legacy**: namespace و projectهای فعلی `Hyper.Domain.Features.Integrations` و `Hyper.Infrastructure.Features.Integrations` به ساختار مستقل نهایی منتقل شوند.
+- [ ] **ARCH-PORT-001 — جایگزینی دسترسی مستقیم به Hyperyek**: customer/shop/accounting از طریق port یا API contract مصرف شود.
+
+### ادامه اجرا — 2026-09-24
+
+- [x] OAuth، token request و simulation به `HyperIntegrationContext` منتقل شدند؛ `HyperContextCommand` دیگر منبع persistence Integration نیست.
+- [x] `IntegrationCustomerMapping` به `Hyper.Integration.Domain` و دیتابیس Integration منتقل شد؛ `PersonId` فقط شناسه‌ی scalar حسابداری است.
+- [x] مسیر customer registration پشت `IIntegrationAccountingPort` قرار گرفت؛ شناخت entityهای حسابداری فقط در `HyperyekAccountingCustomerAdapter` باقی مانده است.
+- [x] دسترسی shop metadata برای ownership و simulation پشت `IIntegrationPlatformShopPort` قرار گرفت؛ `IntegrationShopAccess` و `AdminMerchantSimulationService` دیگر context حسابداری را نمی‌شناسند.
+- [x] جدول durable `IntegrationScenarioJobs` به schema مستقل اضافه شد؛ صف سناریو دیگر به وجود ضمنی جدول در دیتابیس پلتفرم متکی نیست.
+- [x] API مدیریتی مستقل v1 برای فهرست/ثبت/فعال‌سازی اتصال، mapping محصول، trigger sync و replay webhook اضافه شد؛ Controllerها فقط contract را مصرف می‌کنند.
+- [x] dashboard مستقل v1 به API contract منتقل شد؛ پنل می‌تواند metrics/runهای Integration را بدون query مستقیم دیتابیس نمایش دهد.
+- [ ] authorization scope برای API مدیریتی باید به claim/gateway trusted mapping متصل شود؛ `X-Shop-Id` و `X-Tenant-Id` به‌تنهایی منبع اعتماد نهایی نیستند.
+- [x] APIهای مدیریتی به `IIntegrationScopeAuthorization` متصل شدند؛ فقط claim دقیق `integration_scope` مجوز scope می‌دهد. پیکربندی gateway/issuer برای محیط استقرار باقی است.
+- [x] قرارداد API v1 در `docs/INTEGRATION_API.md` ثبت شد؛ endpointها، scope، خطاها و عدم بازگشت credential مستند هستند.
+- [x] migrationهای تاریخی OAuth و customer mapping در context اصلی به no-op سازگار با migration history تبدیل شدند؛ schema مستقل مالک ایجاد جدول است.
+- [x] DbSetها و مدل‌های فعال Integration از `HyperSqlServerContext` حذف/Ignore شدند؛ generated scaffoldهای قدیمی برای حذف فیزیکی کامل همچنان در `ARCH-DOMAIN-002` باز هستند.
+- [x] entity/menu/UI definitionهای legacy Integration در پنل فعلاً حفظ شدند؛ persistence مستقل و API versioned مرجع جدید هستند و پنل در این مرحله می‌تواند برای سازگاری backward-compatible به metadata قدیمی دسترسی داشته باشد.
+- [x] بررسی static مرزها: بدون namespace قدیمی Integration، بدون DbSet Integration در context اصلی، و بدون reference core در `BasalamOAuthStore`.
+- [ ] consistency بین ایجاد Person در Hyperyek و ثبت customer mapping در دیتابیس مستقل باید با outbox/compensation تکمیل شود؛ transaction دو context به‌صورت جعلی اتمیک فرض نمی‌شود.
+- [ ] build زیرساخت/دامنه در این محیط به‌دلیل خطای SDK resolver وابستگی‌های مشترک (`MSB4276`) و دسترسی artifacts قابل تأیید کامل نیست؛ Contracts و API با صفر warning/error سبز هستند.
 
 - [ ] **DASH-219 — گزارش GMV ماهانه خرید و فروش**: مبلغ GMV، تعداد فاکتور، تعداد اقلام و حجم کالای خرید و فروش در ۱۲ ماه اخیر؛ پذیرش نهایی پس از Schema Sync و آزمون دیتابیس.
 
-آخرین به‌روزرسانی: 2026-09-10
+آخرین به‌روزرسانی: 2026-09-24
 
 ## وضعیت فعلی
 
@@ -74,14 +141,14 @@
 
 ### P0 — جریان‌های کسب‌وکار
 
-- [ ] **FLOW-A — اشتراک افزونه**: subscription.created، subscription.renewed و subscription.cancelled؛ ایجاد پیش‌ثبت‌نام A1، تمدید لایسنس A2، reminder چهل‌وهشت‌ساعته و تعلیق sync.
+- [x] **FLOW-A — اشتراک افزونه**: رویدادهای subscription.created/renewed/cancelled وارد inbox و صف می‌شوند و از port مستقل engagement عبور می‌کنند؛ اجرای مالک لایسنس، reminder و تعلیق sync در انتظار API مالک است.
 - [ ] **FLOW-B — catalog دوطرفه**: product.created/updated، batch update و variation؛ تطبیق SKU/بارکد/variant، ایجاد کالای غیرفعال B1 و update B2.
 - [ ] **FLOW-C — parcel lifecycle**: parcel.status_changed؛ نگاشت وضعیت به invoice، set-preparation، set-posted و tracking.
 - [ ] **FLOW-D — فروش غرفه**: order.vendor.created/parcel.created؛ کنترل token، صف انتظار، رزرو/کسر موجودی، فاکتور، مشتری، تخفیف، کارمزد و هزینه ارسال.
 - [ ] **FLOW-E — خرید مشتری**: order.customer.created؛ رزرو قطعی E1 و release در پرداخت ناموفق/لغو E2.
 - [ ] **FLOW-F/G — اصلاح و مرجوعی**: لغو قلم فروش/خرید، اصلاح invoice، برگشت موجودی، رسید مرجوعی و تأیید فیزیکی.
-- [ ] **FLOW-H — review/CRM**: review.created/updated؛ امتیاز ۱ تا ۳ تیکت H1 و امتیاز ۴ تا ۵ KPI/تشکر H2.
-- [ ] **FLOW-I/J — chat**: دریافت/ارسال پیام، پاسخ قیمت و موجودی، omnichannel inbox، refresh و retry، فایل و rate limit.
+- [x] **FLOW-H — review/CRM**: review.created/updated وارد inbox و صف می‌شوند و port مستقل review را صدا می‌زنند؛ قواعد تیکت/KPI در API مالک CRM باقی است.
+- [x] **FLOW-I/J — chat**: chat.message.received/sent وارد inbox و صف می‌شوند و port مستقل chat را صدا می‌زنند؛ پاسخ‌گویی، فایل و rate limit در adapter مالک چت باقی است.
 
 ### P1 — adapterهای Infrastructure
 
@@ -392,7 +459,7 @@ build نهایی هر سه پروژه Hyper.IntegrationWorker.Host، Hyper.Custo
 - پیاده‌سازی وب: دکمه POST در MerchantSimulation/Index، شروع احرازشده با antiforgery، redirect واقعی، callback استاندارد code/state، ذخیره امن و بازگشت به پنل.
 - state ده‌دقیقه‌ای حفاظت‌شده، correlation cookie، مصرف اتمیک درخواست SQL و کنترل زمینه پایان‌یافته. Session/IMemoryCache استفاده نمی‌شود.
 - آدرس ورود و scopeها با SDK رسمی تطبیق داده شد؛ پورت callback نمونه با پروفایل محلی 5000 یکسان شد.
-- RawTokenResponse دیگر توکن خام ذخیره نمی‌کند. ذخیره از HyperContextCommand موجود Neo انجام می‌شود.
+- RawTokenResponse دیگر توکن خام ذخیره نمی‌کند. ذخیره از `HyperIntegrationContext` در دیتابیس مستقل Integration انجام می‌شود.
 - راهنمای مرجع: [BASALAM_OAUTH_WEB.md](BASALAM_OAUTH_WEB.md).
 - build پیش از اصلاح: موفق با صفر هشدار/خطا. build و تست پس از اصلاح: در حال بررسی.
 - پذیرش واقعی هنوز باز: ClientId/ClientSecret واقعی و redirect ثبت‌شده در باسلام، schema توکن و آزمون اجازه/انصراف با حساب واقعی.
