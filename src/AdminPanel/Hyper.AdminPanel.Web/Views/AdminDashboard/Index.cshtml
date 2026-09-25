@@ -41,6 +41,19 @@
         @if(totalQueue==0){<p class="empty-caption">هنوز پیامی برای ارسال ثبت نشده است.</p>}
     </article>
 </section>
+<style>
+    .queue-health-card{margin-top:20px}.queue-health-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:18px}.queue-health-item{border:1px solid #e6ede9;border-radius:9px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}.queue-health-label{font-size:10px;color:#718477}.queue-health-item strong{font-size:18px;color:#425c4d}
+    @@media(max-width:1000px){.queue-health-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+<section class="dashboard-card queue-health-card" aria-labelledby="queue-health-title">
+    <header class="card-heading"><div><h2 id="queue-health-title">سلامت صف یکسان‌سازی</h2><p>وضعیت پیام‌های ورودی و خروجی در محدودهٔ انتخاب‌شده</p></div><svg class="heading-icon"><use href="#hi-sync"/></svg></header>
+    <div class="queue-health-grid">
+        <div class="queue-health-item"><span class="queue-health-label"><i class="mini-dot blue-dot"></i>وب‌هوک‌های در انتظار</span><strong>@N(s.PendingWebhooks)</strong></div>
+        <div class="queue-health-item"><span class="queue-health-label"><i class="mini-dot red-dot"></i>وب‌هوک‌های ناموفق</span><strong>@N(s.FailedWebhooks)</strong></div>
+        <div class="queue-health-item"><span class="queue-health-label"><i class="mini-dot amber-dot"></i>پیام‌های خروجی در انتظار</span><strong>@N(s.PendingOutbox)</strong></div>
+        <div class="queue-health-item"><span class="queue-health-label"><i class="mini-dot red-dot"></i>پیام‌های خروجی ناموفق</span><strong>@N(s.FailedOutbox)</strong></div>
+    </div>
+</section>
 <section class="dashboard-bottom">
     <article class="dashboard-card recent-card"><header class="card-heading"><div><h2>آخرین اجراهای یکسان‌سازی</h2><p>دریافت و تطبیق کاتالوگ در بازه انتخابی</p></div><a asp-controller="MerchantSimulation" asp-action="Dashboard">جزئیات اجراها ←</a></header>
         <div class="table-scroll"><table><thead><tr><th>مغازه / اتصال</th><th>پلتفرم</th><th>وضعیت</th><th>کالای خوانده‌شده</th><th>زمان UTC</th></tr></thead><tbody>
