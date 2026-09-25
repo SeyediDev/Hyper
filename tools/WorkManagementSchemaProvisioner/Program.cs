@@ -119,5 +119,22 @@ await using (var c = new SqlConnection(cs.ConnectionString))
         while (await children.ReadAsync())
             Console.WriteLine($"  {children.GetString(0)} | status={children.GetByte(1)} | priority={children.GetByte(2)} | {children.GetString(3)}");
     }
+
+    if (Environment.GetEnvironmentVariable("WORK_MANAGEMENT_QUERY_DOMAIN") is { Length: > 0 } domain)
+    {
+        await using var query = c.CreateCommand();
+        query.CommandText = """
+            SELECT TOP (@limit) w.[Key],w.Status,w.Priority,w.OwnerRole,w.Title
+            FROM dbo.WorkItems w JOIN dbo.Projects p ON p.Id=w.ProjectId
+            WHERE p.[Key]=N'HYPER' AND w.Domain=@domain AND w.Status NOT IN (6,7)
+            ORDER BY w.Priority DESC,w.Status,w.Id;
+            """;
+        query.Parameters.AddWithValue("@limit", int.TryParse(Environment.GetEnvironmentVariable("WORK_MANAGEMENT_QUERY_LIMIT"), out var limit) ? limit : 50);
+        query.Parameters.AddWithValue("@domain", domain);
+        await using var rows = await query.ExecuteReaderAsync();
+        Console.WriteLine($"Open items in domain {domain}:");
+        while (await rows.ReadAsync())
+            Console.WriteLine($"  {rows.GetString(0)} | status={rows.GetByte(1)} | priority={rows.GetByte(2)} | role={rows.GetString(3)} | {rows.GetString(4)}");
+    }
 }
 Console.WriteLine($"WorkManagement database '{database}' is ready; verified 9 tables.");

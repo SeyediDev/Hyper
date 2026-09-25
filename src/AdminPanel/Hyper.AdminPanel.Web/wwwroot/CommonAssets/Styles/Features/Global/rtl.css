@@ -12061,6 +12061,7 @@ div.mm-page {
 .neo-filter-focus { border-radius: 8px; box-shadow: 0 0 0 3px rgba(59, 130, 246, .25); }
 .neo-column-header-actions { align-items: center; display: inline-flex; gap: .2rem; justify-content: center; max-width: 100%; width: 100%; }
 .neo-column-header-actions .modern-sort-button { flex: 1 1 auto; min-width: 0; }
-.neo-column-filter { align-items: center; background: transparent; border: 1px solid transparent; border-radius: 5px; color: #64748b; cursor: pointer; display: inline-flex; flex: 0 0 auto; justify-content: center; min-height: 1.8rem; min-width: 1.8rem; padding: .2rem; }
-.neo-column-filter svg { fill: currentColor; height: 1rem; width: 1rem; }
+.neo-column-filter { align-items: center; appearance: none; -webkit-appearance: none; background: transparent; background-image: none; border: 1px solid transparent; border-radius: 5px; box-sizing: border-box; color: #64748b; cursor: pointer; display: inline-flex; flex: 0 0 auto; font: inherit; justify-content: center; line-height: 1; min-height: 1.8rem; min-width: 1.8rem; overflow: hidden; padding: .2rem; transition: background-color .15s ease, border-color .15s ease, color .15s ease; vertical-align: middle; }
+.neo-column-filter-icon { display: block; fill: none; height: 1rem; pointer-events: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; width: 1rem; }
+.neo-column-filter-icon path { fill: none; }
 .neo-column-filter:hover, .neo-column-filter:focus-visible, .neo-column-filter.is-active { background: #eff6ff; border-color: #93c5fd; color: #2563eb; outline: none; }
