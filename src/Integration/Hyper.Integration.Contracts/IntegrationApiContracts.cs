@@ -19,7 +19,8 @@ public sealed record WebhookIngressRequest(
     string? Timestamp,
     string? Signature,
     byte[] Body,
-    string? CorrelationId = null);
+    string? CorrelationId = null,
+    string? Authorization = null);
 
 public enum WebhookIngressStatus : byte { Accepted = 1, Duplicate = 2, Invalid = 3, Unsupported = 4 }
 
