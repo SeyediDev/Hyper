@@ -28,6 +28,11 @@ public sealed record ParcelStatusCommand(
     string EventId, AccountingScope Scope, long ConnectionId,
     string ExternalOrderId, string ExternalParcelId, string Status, string? TrackingCode);
 
+public sealed record ExternalProductChangedCommand(
+    string EventId, AccountingScope Scope, long ConnectionId,
+    int HyperProductId, string ExternalProductId, string? ExternalVariantId,
+    string? Sku, string Title, decimal? Price, decimal? Inventory, long SourceVersion);
+
 public enum AccountingCommandStatus : byte
 {
     Applied = 1,

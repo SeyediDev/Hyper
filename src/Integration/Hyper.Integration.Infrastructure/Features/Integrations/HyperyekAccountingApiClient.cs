@@ -7,6 +7,7 @@ using IntegrationVendorOrder = Hyper.Integration.Domain.Features.Integrations.In
 using IntegrationCustomerOrder = Hyper.Integration.Domain.Features.Integrations.IntegrationCustomerOrderCommand;
 using IntegrationCancelOrder = Hyper.Integration.Domain.Features.Integrations.IntegrationOrderCancellationCommand;
 using IntegrationParcelStatus = Hyper.Integration.Domain.Features.Integrations.IntegrationParcelStatusCommand;
+using IntegrationExternalProductChanged = Hyper.Integration.Domain.Features.Integrations.IntegrationExternalProductChangedCommand;
 using Hyper.Integration.Domain.Features.Integrations;
 
 namespace Hyper.Infrastructure.Features.Integrations;
@@ -44,6 +45,12 @@ public sealed class HyperyekAccountingApiClient(
         PostAsync("api/hyperyek/v1/accounting/parcels/status", new ParcelStatusCommand(command.EventId,
             new(command.ShopId, command.TenantId), command.ConnectionId, command.ExternalOrderId,
             command.ExternalParcelId, command.Status, command.TrackingCode), ct);
+
+    public Task<IntegrationCommandResult> ApplyExternalProductChangedAsync(IntegrationExternalProductChanged command, CancellationToken ct) =>
+        PostAsync("api/hyperyek/v1/accounting/products/external-changed", new ExternalProductChangedCommand(
+            command.EventId, new(command.ShopId, command.TenantId), command.ConnectionId,
+            command.HyperProductId, command.ExternalProductId, command.ExternalVariantId,
+            command.Sku, command.Title, command.Price, command.Inventory, command.SourceVersion), ct);
 
     private async Task<IntegrationCommandResult> PostAsync<T>(string route, T command, CancellationToken ct)
     {

@@ -21,6 +21,8 @@ public interface IIntegrationBusinessCommandPort
         IntegrationOrderCancellationCommand command, CancellationToken cancellationToken);
     Task<BusinessCommandResult> ApplyParcelStatusAsync(
         IntegrationParcelStatusCommand command, CancellationToken cancellationToken);
+    Task<BusinessCommandResult> ApplyExternalProductChangedAsync(
+        IntegrationExternalProductChangedCommand command, CancellationToken cancellationToken);
 }
 
 public sealed record IntegrationCounterpartyCommand(
@@ -49,6 +51,11 @@ public sealed record IntegrationOrderCancellationCommand(
 public sealed record IntegrationParcelStatusCommand(
     string EventId, int ShopId, string TenantId, long ConnectionId,
     string ExternalOrderId, string ExternalParcelId, string Status, string? TrackingCode);
+
+public sealed record IntegrationExternalProductChangedCommand(
+    string EventId, int ShopId, string TenantId, long ConnectionId,
+    int HyperProductId, string ExternalProductId, string? ExternalVariantId,
+    string? Sku, string Title, decimal? Price, decimal? Inventory, long SourceVersion);
 
 public enum BusinessCommandStatus : byte
 {

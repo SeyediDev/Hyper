@@ -34,6 +34,10 @@ public sealed class AccountingCommandsController(IAccountingCommandHandler handl
     public Task<IActionResult> ParcelStatus([FromBody] ParcelStatusCommand command, CancellationToken ct) =>
         Execute(handler.ApplyParcelStatusAsync(command, ct));
 
+    [HttpPost("products/external-changed")]
+    public Task<IActionResult> ExternalProductChanged([FromBody] ExternalProductChangedCommand command, CancellationToken ct) =>
+        Execute(handler.ApplyExternalProductChangedAsync(command, ct));
+
     private async Task<IActionResult> Execute(Task<AccountingCommandResult> operation)
     {
         var result = await operation;

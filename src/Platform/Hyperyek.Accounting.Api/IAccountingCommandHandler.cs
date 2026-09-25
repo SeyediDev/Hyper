@@ -27,6 +27,7 @@ public interface IAccountingCommandHandler
     Task<AccountingCommandResult> ApplyCustomerOrderAsync(CustomerOrderCommand command, CancellationToken ct);
     Task<AccountingCommandResult> CancelOrderAsync(CancelOrderCommand command, CancellationToken ct);
     Task<AccountingCommandResult> ApplyParcelStatusAsync(ParcelStatusCommand command, CancellationToken ct);
+    Task<AccountingCommandResult> ApplyExternalProductChangedAsync(ExternalProductChangedCommand command, CancellationToken ct);
 }
 
 internal sealed class UnregisteredAccountingCommandHandler : IAccountingCommandHandler
@@ -39,6 +40,7 @@ internal sealed class UnregisteredAccountingCommandHandler : IAccountingCommandH
     public Task<AccountingCommandResult> ApplyCustomerOrderAsync(CustomerOrderCommand command, CancellationToken ct) => Result(command, ct);
     public Task<AccountingCommandResult> CancelOrderAsync(CancelOrderCommand command, CancellationToken ct) => Result(command, ct);
     public Task<AccountingCommandResult> ApplyParcelStatusAsync(ParcelStatusCommand command, CancellationToken ct) => Result(command, ct);
+    public Task<AccountingCommandResult> ApplyExternalProductChangedAsync(ExternalProductChangedCommand command, CancellationToken ct) => Result(command, ct);
 
     private static Task<AccountingCommandResult> Result<T>(T command, CancellationToken ct)
     {
@@ -60,6 +62,7 @@ internal static class AccountingCommandValidation
             CustomerOrderCommand x => x.Scope,
             CancelOrderCommand x => x.Scope,
             ParcelStatusCommand x => x.Scope,
+            ExternalProductChangedCommand x => x.Scope,
             _ => throw new ArgumentException("UnsupportedAccountingCommand")
         };
         if (scope.ShopId <= 0 || string.IsNullOrWhiteSpace(scope.TenantId) || scope.TenantId.Length > 128)
@@ -71,6 +74,7 @@ internal static class AccountingCommandValidation
             CustomerOrderCommand x => x.EventId,
             CancelOrderCommand x => x.EventId,
             ParcelStatusCommand x => x.EventId,
+            ExternalProductChangedCommand x => x.EventId,
             _ => ""
         };
         if (string.IsNullOrWhiteSpace(eventId) || eventId.Length > 128 || eventId.Any(char.IsControl))
