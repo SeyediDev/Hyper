@@ -13,6 +13,8 @@ public sealed record IntegrationDashboardSnapshot(int Connections, int EnabledCo
     public int OutboxCount(byte status) => Outbox.Where(x => x.Status == status).Sum(x => x.Count);
     public int RunCount(byte status) => Runs.Where(x => x.Status == status).Sum(x => x.Count);
     public int WebhookCount(byte status) => Webhooks.Where(x => x.Status == status).Sum(x => x.Count);
+    public int PriceDifferenceCount { get; init; }
+    public int InventoryDifferenceCount { get; init; }
 }
 
 public sealed record IntegrationRecentOutbox(long Id, string ConnectionName, byte Status, int Attempts,

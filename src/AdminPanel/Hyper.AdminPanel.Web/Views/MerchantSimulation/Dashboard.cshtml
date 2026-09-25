@@ -26,6 +26,12 @@
             <article><span>وب‌هوک در انتظار</span><strong>@stats.WebhookCount(0)</strong></article>
             <article><span>وب‌هوک ناموفق</span><strong>@stats.WebhookCount(2)</strong></article>
         </div>
+        <div class="sync-stat-grid sync-stat-secondary">
+            <article><span>اختلاف قیمت</span><strong>@stats.PriceDifferenceCount</strong></article>
+            <article><span>اختلاف موجودی</span><strong>@stats.InventoryDifferenceCount</strong></article>
+            <article><span>نگاشت‌های بررسی‌شده</span><strong>@stats.MappedProducts</strong></article>
+            <article><span>اتصال‌های دارای خطا</span><strong>@stats.ConnectionsHealth.Count(x => x.HasError)</strong></article>
+        </div>
         <div class="sync-stat-grid">
             <article><span>صف ارسال / تلاش مجدد</span><strong>@stats.OutboxCount(0)</strong></article>
             <article><span>در حال ارسال به پلتفرم</span><strong>@stats.OutboxCount(1)</strong></article>

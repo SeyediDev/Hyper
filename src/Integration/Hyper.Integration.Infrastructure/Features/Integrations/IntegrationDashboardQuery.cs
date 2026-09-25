@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Hyper.Infrastructure.Features.Integrations;
 
-public sealed class IntegrationDashboardQuery(HyperIntegrationContext db) : IIntegrationDashboardQuery
+public sealed class IntegrationDashboardQuery(HyperIntegrationContext db, IIntegrationPlatformCatalogPort catalog) : IIntegrationDashboardQuery
 {
     public async Task<IntegrationDashboardSnapshot> GetAsync(int shopId, string tenantId, CancellationToken ct)
     {
@@ -22,6 +22,18 @@ public sealed class IntegrationDashboardQuery(HyperIntegrationContext db) : IInt
                                   join connection in connections on mapping.ConnectionId equals connection.Id
                                   where mapping.ShopId == shopId && mapping.IsActive && mapping.HyperProductId > 0
                                   select mapping.Id).CountAsync(ct);
+        var mappings = await (from mapping in db.ExternalProductMappings.AsNoTracking()
+                              join connection in connections on mapping.ConnectionId equals connection.Id
+                              where mapping.ShopId == shopId && mapping.IsActive && mapping.HyperProductId > 0
+                              select mapping).ToListAsync(ct);
+        var products = await catalog.GetProductsAsync(shopId, tenantId, ct);
+        var productById = products.ToDictionary(x => x.ProductId);
+        var priceDifferences = mappings.Count(x => x.LastExternalPrice is not null
+            && productById.TryGetValue(x.HyperProductId, out var product)
+            && x.LastExternalPrice.Value != product.Price);
+        var inventoryDifferences = mappings.Count(x => x.LastExternalInventory is not null
+            && productById.TryGetValue(x.HyperProductId, out var product)
+            && x.LastExternalInventory.Value != product.Stock);
         var runCounts = await runs.GroupBy(x => x.Run.Status)
             .Select(x => new IntegrationStatusCount(x.Key, x.Count())).ToListAsync(ct);
         var webhookCounts = await inbox.GroupBy(x => x.Status)
@@ -46,6 +58,7 @@ public sealed class IntegrationDashboardQuery(HyperIntegrationContext db) : IInt
                     x.ExpiresAtUtc != null && x.ExpiresAtUtc <= now ? "TokenExpired" : "Healthy"))
             .ToListAsync(ct);
         return new(connectionCount, enabledCount, mappingCount, runCounts, webhookCounts, recent)
-            { Outbox = outboxCounts, RecentOutbox = recentOutbox, ConnectionsHealth = health };
+            { Outbox = outboxCounts, RecentOutbox = recentOutbox, ConnectionsHealth = health,
+              PriceDifferenceCount = priceDifferences, InventoryDifferenceCount = inventoryDifferences };
     }
 }
