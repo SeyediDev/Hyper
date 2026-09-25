@@ -9,6 +9,7 @@ public partial class HyperMenuDefinitions : MenuDefinition
         AddMenu("مغازه‌دار و اتصال", "building-organization", "MerchantSimulation", "Index");
         AddMenu("عملیات یکسان‌سازی", "activity-monitor", "MerchantSimulation", "Dashboard");
         AddMenu("یکسان‌سازی پروفایل", "user-circle", "MerchantSimulation", "Profile");
+        AddMenu("مدیریت کار", "task-list", "WorkManagementPage", "Index");
         AddMenu("اطلاعات پایه مغازه", "database", "HyperCategory0", "");
         {
             StartSubMenus();
