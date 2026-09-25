@@ -20,16 +20,6 @@ public static class AccountingApiServiceCollectionExtensions
     }
 }
 
-public interface IAccountingCommandHandler
-{
-    Task<AccountingCommandResult> ApplyCounterpartyAsync(CounterpartyCommand command, CancellationToken ct);
-    Task<AccountingCommandResult> ApplyVendorOrderAsync(VendorOrderCommand command, CancellationToken ct);
-    Task<AccountingCommandResult> ApplyCustomerOrderAsync(CustomerOrderCommand command, CancellationToken ct);
-    Task<AccountingCommandResult> CancelOrderAsync(CancelOrderCommand command, CancellationToken ct);
-    Task<AccountingCommandResult> ApplyParcelStatusAsync(ParcelStatusCommand command, CancellationToken ct);
-    Task<AccountingCommandResult> ApplyExternalProductChangedAsync(ExternalProductChangedCommand command, CancellationToken ct);
-}
-
 internal sealed class UnregisteredAccountingCommandHandler : IAccountingCommandHandler
 {
     private static readonly AccountingCommandResult NotRegistered = new(
@@ -50,7 +40,7 @@ internal sealed class UnregisteredAccountingCommandHandler : IAccountingCommandH
     }
 }
 
-internal static class AccountingCommandValidation
+public static class AccountingCommandValidation
 {
     public static void Validate<T>(T command)
     {
@@ -85,6 +75,7 @@ internal static class AccountingCommandValidation
             case VendorOrderCommand vendor:
                 ValidateOrder(vendor.ConnectionId, vendor.ExternalOrderId, vendor.ExternalCustomerId,
                     vendor.Lines, vendor.TotalAmount);
+                if (vendor.AccountingCustomerId is <= 0) throw new ArgumentException("InvalidAccountingCustomerId");
                 if (vendor.PaymentStatus > 4) throw new ArgumentException("InvalidPaymentStatus");
                 break;
             case CustomerOrderCommand customer:

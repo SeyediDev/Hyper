@@ -105,12 +105,22 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
     {
         root = Envelope(root);
         var lines = Lines(root);
-        return commands.ApplyVendorOrderAsync(new(job.EventId, job.ShopId, job.TenantId, job.ConnectionId,
+        return SaleCoreAsync(job, root, lines, ct);
+    }
+
+    private async Task<BusinessCommandResult> SaleCoreAsync(IntegrationScenarioJob job, JsonElement root,
+        IReadOnlyCollection<IntegrationOrderLineCommand> lines, CancellationToken ct)
+    {
+        var externalCustomerId = RequiredAny(root, "externalCustomerId", "customer_id", "customerId", "user_id", "userId");
+        var mapping = await db.IntegrationCustomerMappings.AsNoTracking().SingleOrDefaultAsync(x =>
+            x.ShopId == job.ShopId && x.TenantId == job.TenantId && x.ExternalCustomerId == externalCustomerId, ct);
+        if (mapping is null || mapping.PersonId <= 0)
+            throw new IntegrationProviderException("AccountingCustomerMappingUnavailable", false);
+        return await commands.ApplyVendorOrderAsync(new(job.EventId, job.ShopId, job.TenantId, job.ConnectionId,
             RequiredAny(root, "externalOrderId", "order_id", "orderId", "id"),
-            OptionalAny(root, "externalParcelId", "parcel_id", "parcelId"),
-            RequiredAny(root, "externalCustomerId", "customer_id", "customerId", "user_id", "userId"),
+            OptionalAny(root, "externalParcelId", "parcel_id", "parcelId"), externalCustomerId,
             lines, DecimalAny(root, "totalAmount", "total_amount", "total", "amount"),
-            PaymentStatus(root)), ct);
+            PaymentStatus(root), mapping.PersonId), ct);
     }
 
     private Task<BusinessCommandResult> PurchaseAsync(IntegrationScenarioJob job, JsonElement root, CancellationToken ct)

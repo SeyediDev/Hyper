@@ -37,7 +37,7 @@ public sealed record IntegrationVendorOrderCommand(
     string EventId, int ShopId, string TenantId, long ConnectionId,
     string ExternalOrderId, string? ExternalParcelId, string ExternalCustomerId,
     IReadOnlyCollection<IntegrationOrderLineCommand> Lines, decimal TotalAmount,
-    SalePaymentStatus PaymentStatus);
+    SalePaymentStatus PaymentStatus, int? AccountingCustomerId = null);
 
 public sealed record IntegrationCustomerOrderCommand(
     string EventId, int ShopId, string TenantId, long ConnectionId,

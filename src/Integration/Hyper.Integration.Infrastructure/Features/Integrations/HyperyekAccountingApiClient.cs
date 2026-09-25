@@ -30,7 +30,7 @@ public sealed class HyperyekAccountingApiClient(
         PostAsync("api/hyperyek/v1/accounting/vendor-orders", new VendorOrderCommand(command.EventId,
             new(command.ShopId, command.TenantId), command.ConnectionId, command.ExternalOrderId,
             command.ExternalParcelId, command.ExternalCustomerId, command.Lines.Select(ToLine).ToArray(),
-            command.TotalAmount, (byte)command.PaymentStatus), ct);
+            command.TotalAmount, (byte)command.PaymentStatus, command.AccountingCustomerId), ct);
 
     public Task<IntegrationCommandResult> ApplyCustomerOrderAsync(IntegrationCustomerOrder command, CancellationToken ct) =>
         PostAsync("api/hyperyek/v1/accounting/customer-orders", new CustomerOrderCommand(command.EventId,

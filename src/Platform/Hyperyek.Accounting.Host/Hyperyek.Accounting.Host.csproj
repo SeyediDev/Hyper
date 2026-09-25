@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup><TargetFramework>net10.0</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Hyperyek.Accounting.Api\Hyperyek.Accounting.Api.csproj" />
+    <ProjectReference Include="..\Hyperyek.Accounting.Infrastructure\Hyperyek.Accounting.Infrastructure.csproj" />
+  </ItemGroup>
+</Project>

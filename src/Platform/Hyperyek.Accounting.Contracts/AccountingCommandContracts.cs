@@ -13,7 +13,8 @@ public sealed record OrderLineCommand(
 public sealed record VendorOrderCommand(
     string EventId, AccountingScope Scope, long ConnectionId,
     string ExternalOrderId, string? ExternalParcelId, string ExternalCustomerId,
-    IReadOnlyCollection<OrderLineCommand> Lines, decimal TotalAmount, byte PaymentStatus);
+    IReadOnlyCollection<OrderLineCommand> Lines, decimal TotalAmount, byte PaymentStatus,
+    int? AccountingCustomerId = null);
 
 public sealed record CustomerOrderCommand(
     string EventId, AccountingScope Scope, long ConnectionId,
@@ -44,3 +45,13 @@ public enum AccountingCommandStatus : byte
 public sealed record AccountingCommandResult(
     AccountingCommandStatus Status, string? InternalReference = null,
     string? ErrorCode = null);
+
+public interface IAccountingCommandHandler
+{
+    Task<AccountingCommandResult> ApplyCounterpartyAsync(CounterpartyCommand command, CancellationToken ct);
+    Task<AccountingCommandResult> ApplyVendorOrderAsync(VendorOrderCommand command, CancellationToken ct);
+    Task<AccountingCommandResult> ApplyCustomerOrderAsync(CustomerOrderCommand command, CancellationToken ct);
+    Task<AccountingCommandResult> CancelOrderAsync(CancelOrderCommand command, CancellationToken ct);
+    Task<AccountingCommandResult> ApplyParcelStatusAsync(ParcelStatusCommand command, CancellationToken ct);
+    Task<AccountingCommandResult> ApplyExternalProductChangedAsync(ExternalProductChangedCommand command, CancellationToken ct);
+}
