@@ -43,6 +43,7 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
         var result = job.Item switch
         {
             IntegrationSyncItem.Counterparty => await CounterpartyAsync(job, root, ct),
+            IntegrationSyncItem.Product => await ProductAsync(job, connection, root, ct),
             IntegrationSyncItem.Sale => await SaleAsync(job, root, ct),
             IntegrationSyncItem.Purchase => await PurchaseAsync(job, root, ct),
             _ => throw new IntegrationProviderException("BusinessItemUnsupported", false)
@@ -81,6 +82,25 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
             Required(root, "externalCustomerId"), Optional(root, "displayName"), Optional(root, "mobile"),
             Optional(root, "nationalCode")), ct);
 
+    private async Task<BusinessCommandResult> ProductAsync(IntegrationScenarioJob job,
+        ExternalIntegrationConnection connection, JsonElement root, CancellationToken ct)
+    {
+        root = Envelope(root);
+        var externalProductId = RequiredAny(root, "externalProductId", "product_id", "productId", "id");
+        var variantId = OptionalAny(root, "externalVariantId", "variant_id", "variantId");
+        var mapping = await db.ExternalProductMappings.AsNoTracking().SingleOrDefaultAsync(x =>
+            x.ConnectionId == connection.Id && x.ShopId == connection.ShopId
+            && x.ExternalProductId == externalProductId && x.ExternalVariantId == variantId && x.IsActive, ct);
+        if (mapping is null || mapping.HyperProductId <= 0)
+            throw new IntegrationProviderException("ProductMappingUnavailable", false);
+        return await commands.ApplyExternalProductChangedAsync(new(job.EventId, job.ShopId, job.TenantId,
+            job.ConnectionId, mapping.HyperProductId, externalProductId, variantId,
+            OptionalAny(root, "sku", "barcode", "tax_code"), RequiredAny(root, "title", "name", "product_name"),
+            DecimalOptional(root, "price", "sale_price", "salePrice"),
+            DecimalOptional(root, "inventory", "stock", "quantity"),
+            LongAny(root, "sourceVersion", "source_version", "version")), ct);
+    }
+
     private Task<BusinessCommandResult> SaleAsync(IntegrationScenarioJob job, JsonElement root, CancellationToken ct)
     {
         root = Envelope(root);
@@ -109,6 +129,12 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
             OptionalAny(line, "externalVariantId", "variant_id", "variantId"),
             DecimalAny(line, "quantity", "count", "amount"),
             DecimalAny(line, "unitPrice", "unit_price", "price"))).ToArray();
+
+    private static decimal? DecimalOptional(JsonElement root, params string[] names)
+    {
+        var value = OptionalAny(root, names);
+        return value is null ? null : decimal.TryParse(value, out var parsed) ? parsed : throw new ArgumentException($"Invalid{names[0]}");
+    }
 
     private static JsonElement Envelope(JsonElement root)
     {
@@ -155,6 +181,8 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
         int.TryParse(OptionalAny(root, names), out var value) ? value : throw new ArgumentException($"Missing{names[0]}");
     private static decimal DecimalAny(JsonElement root, params string[] names) =>
         decimal.TryParse(OptionalAny(root, names), out var value) ? value : throw new ArgumentException($"Missing{names[0]}");
+    private static long LongAny(JsonElement root, params string[] names) =>
+        long.TryParse(OptionalAny(root, names), out var value) && value > 0 ? value : throw new ArgumentException($"Missing{names[0]}");
     private static SalePaymentStatus PaymentStatus(JsonElement root) =>
         Enum.TryParse<SalePaymentStatus>(OptionalAny(root, "paymentStatus", "payment_status", "paymentState") ?? "", true, out var status)
             ? status : (SalePaymentStatus)IntegerAny(root, "paymentStatus", "payment_status");
