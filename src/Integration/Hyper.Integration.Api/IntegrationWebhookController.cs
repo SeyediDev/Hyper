@@ -41,7 +41,8 @@ public sealed class IntegrationWebhookController(IIntegrationWebhookIngress ingr
             HeaderOrPayload("X-Event-Type", "event", "event_type", "eventType", "name"),
             Request.Headers["X-Event-Timestamp"].ToString(),
             Request.Headers["X-Event-Signature"].ToString(),
-            body, Request.Headers["X-Correlation-Id"].ToString()), cancellationToken);
+            body, Request.Headers["X-Correlation-Id"].ToString(),
+            Request.Headers.Authorization.ToString()), cancellationToken);
 
         return result.Status switch
         {

@@ -38,7 +38,8 @@ public sealed class IntegrationWebhookIngress(
 
         var validation = verifier.Verify(connection,
             new Hyper.Integration.Domain.Features.Integrations.IntegrationWebhookRequest(
-                request.Body, request.EventId, request.EventType, request.Timestamp, request.Signature),
+                request.Body, request.EventId, request.EventType, request.Timestamp, request.Signature,
+                request.Authorization),
             DateTimeOffset.UtcNow);
         if (validation == Hyper.Integration.Domain.Features.Integrations.WebhookValidationResult.Unsupported)
             return new(WebhookIngressStatus.Unsupported, ErrorCode: "ProviderWebhookUnsupported");

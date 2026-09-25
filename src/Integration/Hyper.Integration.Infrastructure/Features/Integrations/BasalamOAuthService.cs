@@ -22,6 +22,7 @@ public sealed class BasalamOAuthSettings
     // The official SDK documents confidential authorization-code flow, without PKCE.
     // Enable only when support is confirmed for the registered application.
     public bool UsePkce { get; set; }
+    public string? WebhookAuthorization { get; set; }
 }
 
 public sealed class BasalamTokenResponse

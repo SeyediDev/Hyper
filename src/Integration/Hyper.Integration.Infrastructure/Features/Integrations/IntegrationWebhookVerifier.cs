@@ -2,18 +2,19 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
 
 namespace Hyper.Infrastructure.Features.Integrations;
 
 /// <summary>Hyper's explicit custom webhook protocol. Not a Basalam/Digikala/Torob protocol.</summary>
-public sealed class IntegrationWebhookVerifier : IIntegrationWebhookVerifier
+public sealed class IntegrationWebhookVerifier(IOptions<BasalamOAuthSettings> basalamOptions) : IIntegrationWebhookVerifier
 {
     public const string Scheme = "hyper-hmac-v1";
     public WebhookValidationResult Verify(ExternalIntegrationConnection connection,
         IntegrationWebhookRequest request, DateTimeOffset utcNow)
     {
         if (connection.Provider == IntegrationProvider.Basalam)
-            return VerifyBasalam(connection, request);
+            return VerifyBasalam(connection, request, basalamOptions.Value.WebhookAuthorization);
         if (connection.Provider != IntegrationProvider.Custom)
             return WebhookValidationResult.Unsupported;
         if (!connection.IsEnabled || connection.Id <= 0 || !ValidHeader(request.EventId)
@@ -55,15 +56,14 @@ public sealed class IntegrationWebhookVerifier : IIntegrationWebhookVerifier
     }
 
     private static WebhookValidationResult VerifyBasalam(ExternalIntegrationConnection connection,
-        IntegrationWebhookRequest request)
+        IntegrationWebhookRequest request, string? expectedAuthorization)
     {
-        if (!connection.IsEnabled || !ValidHeader(request.EventId) || !ValidHeader(request.EventType))
+        if (!connection.IsEnabled || !ValidHeader(request.EventId) || !ValidHeader(request.EventType)
+            || string.IsNullOrWhiteSpace(expectedAuthorization) || string.IsNullOrWhiteSpace(request.Authorization))
             return WebhookValidationResult.Invalid;
-        // Basalam webhook security is configured as an Authorization request header
-        // when the webhook is created. The callback route is private to the registered
-        // HTTPS endpoint; deployments may additionally set an ingress/gateway policy.
-        // Basalam does not use Hyper's internal HMAC scheme.
-        return WebhookValidationResult.Valid;
+        return CryptographicOperations.FixedTimeEquals(
+            Encoding.UTF8.GetBytes(expectedAuthorization), Encoding.UTF8.GetBytes(request.Authorization))
+            ? WebhookValidationResult.Valid : WebhookValidationResult.Invalid;
     }
     private static bool ValidHeader(string value) => !string.IsNullOrWhiteSpace(value)
         && value.Length <= 200 && !value.Any(char.IsControl);

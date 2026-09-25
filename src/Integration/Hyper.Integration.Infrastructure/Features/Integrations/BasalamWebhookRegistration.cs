@@ -1,6 +1,7 @@
 using Hyper.Integration.Domain.Entities.Integrations;
 using Hyper.SDK;
 using Hyper.SDK.Auth;
+using Microsoft.Extensions.Options;
 
 namespace Hyper.Infrastructure.Features.Integrations;
 
@@ -10,7 +11,8 @@ public interface IBasalamWebhookRegistration
         string vendorId, string callbackBaseUri, CancellationToken ct);
 }
 
-public sealed class BasalamWebhookRegistration(BasalamOAuthStore tokens, IBasalamClient client)
+public sealed class BasalamWebhookRegistration(BasalamOAuthStore tokens, IBasalamClient client,
+    IOptions<BasalamOAuthSettings> settings)
     : IBasalamWebhookRegistration
 {
     // Official Basalam event ids: vendor order, vendor parcel and product changes.
@@ -35,6 +37,9 @@ public sealed class BasalamWebhookRegistration(BasalamOAuthStore tokens, IBasala
             ?? throw new InvalidOperationException("Basalam token is unavailable after OAuth.");
         client.SetToken(token);
         var callback = new Uri(baseUri, $"/api/integrations/v1/webhooks/basalam/{parsedVendor}");
-        await client.Webhooks.CreateOfficialWebhookAsync(callback.AbsoluteUri, EventIds, null, ct);
+        if (string.IsNullOrWhiteSpace(settings.Value.WebhookAuthorization))
+            throw new InvalidOperationException("Basalam webhook authorization is not configured.");
+        await client.Webhooks.CreateOfficialWebhookAsync(callback.AbsoluteUri, EventIds,
+            settings.Value.WebhookAuthorization, ct);
     }
 }
