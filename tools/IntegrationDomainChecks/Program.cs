@@ -14,6 +14,7 @@ void Reject(Action action, string name)
     try { action(); }
     catch (ArgumentException) { Check(true, name); return; }
     catch (InvalidOperationException) { Check(true, name); return; }
+    catch (NotSupportedException) { Check(true, name); return; }
     throw new InvalidOperationException(name);
 }
 
@@ -65,6 +66,18 @@ Check(IntegrationRetryPolicy.Delay(1, TimeSpan.FromMinutes(4)) == TimeSpan.FromM
 Check(IntegrationRetryPolicy.Delay(4, null) > IntegrationRetryPolicy.Delay(1, null),
     "retry delay uses exponential backoff");
 
+var resolver = new IntegrationStrategyResolver([new ResolverAdapter(IntegrationProvider.Basalam, true, true)]);
+Check(ReferenceEquals(resolver.Resolve(IntegrationProvider.Basalam, IntegrationCredentialType.OAuth2),
+    resolver.Resolve(IntegrationProvider.Basalam, IntegrationCredentialType.OAuth2)),
+    "provider strategy resolves supported credential");
+Reject(() => resolver.Resolve(IntegrationProvider.Digikala, IntegrationCredentialType.ApiKey),
+    "unsupported provider strategy rejected");
+Reject(() => new IntegrationStrategyResolver([
+    new ResolverAdapter(IntegrationProvider.Basalam, true, true),
+    new ResolverAdapter(IntegrationProvider.Basalam, true, true)])
+    .Resolve(IntegrationProvider.Basalam, IntegrationCredentialType.OAuth2),
+    "ambiguous provider strategy rejected");
+
 var workflow = new IntegratedSaleWorkflow();
 var boothCommand = new CreateIntegratedSale("sale-1", SaleChannel.Booth,
     new SaleCustomerIdentity(42, "basalam-user-42", "09120000000", null, false),
@@ -86,3 +99,17 @@ Check(storeSale.Customer.CustomerId == IntegratedSaleWorkflow.PublicCustomerId
 Check(workflow.Events.Any(x => x.Type == "SaleConfirmed"), "sale workflow emits domain events");
 
 Console.WriteLine($"{checks} integration-domain checks passed.");
+
+sealed class ResolverAdapter(IntegrationProvider provider, bool oauth, bool implemented) : IExternalIntegrationAdapter
+{
+    public IntegrationProvider Provider => provider;
+    public bool IsImplemented => implemented;
+    public bool SupportsCredentialType(IntegrationCredentialType credentialType) =>
+        oauth && credentialType == IntegrationCredentialType.OAuth2;
+    public Task<IReadOnlyCollection<ExternalCatalogItem>> ReadCatalogAsync(
+        ExternalIntegrationConnection connection, CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyCollection<ExternalCatalogItem>>([]);
+    public Task PublishInventoryAsync(ExternalIntegrationConnection connection,
+        IReadOnlyCollection<ExternalInventoryUpdate> updates, CancellationToken cancellationToken) =>
+        Task.CompletedTask;
+}
