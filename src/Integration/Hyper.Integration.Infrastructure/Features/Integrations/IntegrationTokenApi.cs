@@ -18,17 +18,23 @@ public sealed class IntegrationTokenApi(
         return request is null ? null : new(request.Id, request.Status, request.RequestedAtUtc);
     }
 
-    public async Task<IReadOnlyList<IntegrationTokenStatus>> ListAsync(int shopId, string tenantId, CancellationToken ct) =>
-        await (from token in db.ExternalOAuthTokens.AsNoTracking()
+    public async Task<IReadOnlyList<IntegrationTokenStatus>> ListAsync(int shopId, string tenantId, CancellationToken ct)
+    {
+        tenantId = NormalizeTenant(tenantId);
+        if (shopId <= 0 || tenantId.Length == 0) return [];
+        return await (from token in db.ExternalOAuthTokens.AsNoTracking()
                join connection in db.ExternalIntegrationConnections.AsNoTracking()
                    on token.ConnectionId equals connection.Id
                where token.ShopId == shopId && token.TenantId == tenantId
                    && connection.ShopId == shopId && connection.TenantId == tenantId
                select new IntegrationTokenStatus(connection.Id, (Hyper.Integration.Contracts.IntegrationProvider)(byte)token.Provider,
                    token.IsActive, connection.IsEnabled, token.ExpiresAtUtc)).ToListAsync(ct);
+    }
 
     public async Task<bool> RevokeAsync(int shopId, string tenantId, long connectionId, CancellationToken ct)
     {
+        tenantId = NormalizeTenant(tenantId);
+        if (shopId <= 0 || connectionId <= 0 || tenantId.Length == 0) return false;
         var changed = await db.ExternalOAuthTokens.Where(x => x.ConnectionId == connectionId
                 && x.ShopId == shopId && x.TenantId == tenantId)
             .ExecuteUpdateAsync(x => x.SetProperty(t => t.IsActive, false), ct);
@@ -37,5 +43,12 @@ public sealed class IntegrationTokenApi(
                 && x.ShopId == shopId && x.TenantId == tenantId)
             .ExecuteUpdateAsync(x => x.SetProperty(c => c.IsEnabled, false), ct);
         return true;
+    }
+
+    private static string NormalizeTenant(string? tenantId)
+    {
+        if (string.IsNullOrWhiteSpace(tenantId)) return string.Empty;
+        var normalized = tenantId.Trim();
+        return normalized.Length <= 30 && !normalized.Any(char.IsControl) ? normalized : string.Empty;
     }
 }
