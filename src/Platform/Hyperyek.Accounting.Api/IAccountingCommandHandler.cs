@@ -79,5 +79,59 @@ internal static class AccountingCommandValidation
         };
         if (string.IsNullOrWhiteSpace(eventId) || eventId.Length > 128 || eventId.Any(char.IsControl))
             throw new ArgumentException("InvalidAccountingEventId");
+
+        switch (command)
+        {
+            case VendorOrderCommand vendor:
+                ValidateOrder(vendor.ConnectionId, vendor.ExternalOrderId, vendor.ExternalCustomerId,
+                    vendor.Lines, vendor.TotalAmount);
+                if (vendor.PaymentStatus > 4) throw new ArgumentException("InvalidPaymentStatus");
+                break;
+            case CustomerOrderCommand customer:
+                ValidateOrder(customer.ConnectionId, customer.ExternalOrderId, null,
+                    customer.Lines, customer.TotalAmount);
+                if (customer.PaymentStatus > 4) throw new ArgumentException("InvalidPaymentStatus");
+                break;
+            case CancelOrderCommand cancel:
+                ValidateIdentity(cancel.ConnectionId, cancel.ExternalOrderId, "InvalidExternalOrderId");
+                if (string.IsNullOrWhiteSpace(cancel.Reason) || cancel.Reason.Length > 500)
+                    throw new ArgumentException("InvalidCancellationReason");
+                break;
+            case ParcelStatusCommand parcel:
+                ValidateIdentity(parcel.ConnectionId, parcel.ExternalOrderId, "InvalidExternalOrderId");
+                if (string.IsNullOrWhiteSpace(parcel.ExternalParcelId) || parcel.ExternalParcelId.Length > 128
+                    || string.IsNullOrWhiteSpace(parcel.Status) || parcel.Status.Length > 80)
+                    throw new ArgumentException("InvalidParcelStatus");
+                break;
+            case ExternalProductChangedCommand product:
+                ValidateIdentity(product.ConnectionId, product.ExternalProductId, "InvalidExternalProductId");
+                if (product.HyperProductId <= 0 || product.SourceVersion <= 0
+                    || string.IsNullOrWhiteSpace(product.Title) || product.Title.Length > 500
+                    || product.Price is < 0 || product.Inventory is < 0)
+                    throw new ArgumentException("InvalidExternalProduct");
+                break;
+        }
+    }
+
+    private static void ValidateOrder(long connectionId, string externalOrderId, string? customerId,
+        IReadOnlyCollection<OrderLineCommand> lines, decimal totalAmount)
+    {
+        ValidateIdentity(connectionId, externalOrderId, "InvalidExternalOrderId");
+        if (customerId is not null && (string.IsNullOrWhiteSpace(customerId) || customerId.Length > 128))
+            throw new ArgumentException("InvalidExternalCustomerId");
+        if (lines is null || lines.Count == 0 || lines.Count > 1000 || totalAmount < 0)
+            throw new ArgumentException("InvalidOrderLines");
+        foreach (var line in lines)
+        {
+            if (line.HyperProductId <= 0 || line.Quantity <= 0 || line.UnitPrice < 0
+                || line.Quantity > 1_000_000 || line.UnitPrice > 1_000_000_000)
+                throw new ArgumentException("InvalidOrderLine");
+        }
+    }
+
+    private static void ValidateIdentity(long connectionId, string value, string error)
+    {
+        if (connectionId <= 0 || string.IsNullOrWhiteSpace(value) || value.Length > 128 || value.Any(char.IsControl))
+            throw new ArgumentException(error);
     }
 }
