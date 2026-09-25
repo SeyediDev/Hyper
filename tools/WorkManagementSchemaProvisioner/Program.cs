@@ -31,7 +31,7 @@ await using (var c = new SqlConnection(cs.ConnectionString))
     if (count != 8) throw new InvalidOperationException($"Expected 8 work-management tables, found {count}.");
     cmd.CommandText = "SELECT COUNT(*) FROM dbo.WorkItems WHERE ProjectId = (SELECT Id FROM dbo.Projects WHERE [Key]=N'HYPER')";
     var workItemCount = Convert.ToInt32(await cmd.ExecuteScalarAsync());
-    if (workItemCount < 40) throw new InvalidOperationException($"Expected seeded backlog, found {workItemCount} work items.");
+    if (workItemCount < 60) throw new InvalidOperationException($"Expected seeded backlog, found {workItemCount} work items.");
     Console.WriteLine($"Seeded backlog items: {workItemCount}.");
 }
 Console.WriteLine($"WorkManagement database '{database}' is ready; verified 8 tables.");

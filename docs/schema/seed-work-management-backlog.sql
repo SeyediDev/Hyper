@@ -43,7 +43,30 @@ INSERT @Items VALUES
 (N'E2E-101',N'تست فروش غرفه و جلوگیری از overselling',N'quality',4,N'quality'),
 (N'E2E-102',N'تست catalog دوطرفه و loop prevention',N'quality',3,N'quality'),
 (N'E2E-103',N'تست رزرو و release',N'quality',4,N'quality'),
-(N'E2E-104',N'تست parcel و tracking',N'quality',3,N'quality');
+(N'E2E-104',N'تست parcel و tracking',N'quality',3,N'quality'),
+(N'Task100',N'API اتصال، token، catalog، mapping و sync',N'integration',4,N'basalam-integration'),
+(N'Task101',N'همگام‌سازی تغییرات Hyperyek با غرفه',N'worker',4,N'worker-operations'),
+(N'Task102',N'وب‌هوک غرفه و اعمال تغییر در Hyperyek',N'integration',4,N'basalam-integration'),
+(N'Task103',N'داشبورد اتصال، mapping، اجرا و خطا',N'panel',3,N'panel-operations'),
+(N'Task104',N'پاک‌سازی دامنه‌های صرفاً کلابی',N'architecture',2,N'architecture-lead'),
+(N'Task105',N'تطبیق entityهای SQL با migration و Neo',N'architecture',2,N'architecture-lead'),
+(N'ACC-201',N'mapper سفارش خارجی به SaleOrder و SaleOrderItem',N'accounting',4,N'accounting-platform'),
+(N'ACC-202',N'محاسبه تخفیف، کارمزد و هزینه ارسال',N'accounting',3,N'accounting-platform'),
+(N'ACC-203',N'ایجاد سند حسابداری فروش غرفه',N'accounting',4,N'accounting-platform'),
+(N'INV-201',N'رزرو اتمیک موجودی و جلوگیری از overselling',N'accounting',4,N'accounting-platform'),
+(N'INV-202',N'release رزرو در لغو و مرجوعی',N'accounting',3,N'accounting-platform'),
+(N'INV-203',N'انتشار تغییر موجودی به outbox',N'worker',3,N'worker-operations'),
+(N'ORD-201',N'پردازش D1/D2 و ExternalOrderMappings',N'accounting',4,N'accounting-platform'),
+(N'ORD-202',N'پردازش C1/C2 و lifecycle مرسوله',N'accounting',3,N'accounting-platform'),
+(N'ORD-203',N'پردازش اصلاح فاکتور و مرجوعی',N'accounting',4,N'accounting-platform'),
+(N'API-101',N'OAuth start/callback و اتصال خودکار',N'integration',3,N'basalam-integration'),
+(N'API-102',N'CRUD mapping دستی و پیشنهاد SKU/barcode',N'integration',2,N'basalam-integration'),
+(N'API-103',N'sync full/incremental و cancel/retry',N'integration',3,N'worker-operations'),
+(N'E2E-105',N'تست اصلاح و مرجوعی با سند حسابداری',N'quality',4,N'quality'),
+(N'E2E-106',N'تست review و chat با rate limit',N'quality',2,N'quality'),
+(N'SEC-101',N'تست HMAC، replay، redaction و tenant isolation',N'security',4,N'quality'),
+(N'ADMIN-SIM-001',N'صفحه انتخاب مغازه‌دار و زمینه شبیه‌سازی',N'panel',3,N'panel-operations'),
+(N'ACCESS-REGISTRY-001',N'نگاشت هویت معتبر حسابداری به مغازه',N'security',4,N'architecture-lead');
 
 INSERT dbo.WorkItems(ProjectId,[Key],Title,Domain,Status,Priority,OwnerRole,CreatedAtUtc,UpdatedAtUtc)
 SELECT @ProjectId,i.[Key],i.Title,i.Domain,2,i.Priority,i.OwnerRole,SYSUTCDATETIME(),SYSUTCDATETIME()
