@@ -10,6 +10,14 @@ Each chat starts with: `Role Key`, `Agent Id`, `Chat Id`, active `Task Key`, bra
 
 Every new chat follows this order: select exactly one available role, claim one Ready item, record the chat and branch, append progress logs, attach the commit SHA and test evidence, then move the item to Review/Done or Blocked with a reason. A new request becomes a task only through `chat-intake`.
 
+## Concurrency gate
+
+Before editing, query the board for the exact `Task Key` and its `OwnerRole`, `OwnerAgent`, `ChatId`, `Branch` and status. If the item is `InProgress` for another chat/agent, do not start it, do not edit its files and do not claim it; choose another Ready item or request a handoff. Also inspect the other task's branch/worktree for file overlap. A task may be reassigned only after an explicit handoff log or `Blocked`/`Review` transition.
+
+Each item carries both `ProjectKey` and `Domain`. A work item may have a `ParentWorkItemId`; subtasks use the same claim, status, dependency, evidence and time-tracking rules as their parent. Time is recorded as start/stop entries in `WorkItemTimeEntries`, while the API exposes accumulated and currently running seconds.
+
+Time endpoints: `POST /api/work-management/v1/items/{id}/time/start` and `POST /api/work-management/v1/items/{id}/time/stop`. Starting time requires an owned `InProgress` item; stopping time closes the open entry and adds its duration to the item total.
+
 ## Statuses
 
 `Backlog → Ready → InProgress → Review → Done`; use `Blocked` when an external dependency prevents progress and `Cancelled` only with an explicit decision. A role has at most one `InProgress` item.

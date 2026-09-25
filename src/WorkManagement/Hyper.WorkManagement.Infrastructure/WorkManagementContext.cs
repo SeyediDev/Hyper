@@ -13,9 +13,12 @@ public sealed class WorkManagementContext(DbContextOptions<WorkManagementContext
     public DbSet<WorkItemDependency> WorkItemDependencies => Set<WorkItemDependency>();
     public DbSet<WorkItemCommit> WorkItemCommits => Set<WorkItemCommit>();
     public DbSet<WorkItemTestEvidence> WorkItemTestEvidence => Set<WorkItemTestEvidence>();
+    public DbSet<WorkItemTimeEntry> WorkItemTimeEntries => Set<WorkItemTimeEntry>();
     protected override void OnModelCreating(ModelBuilder b)
     {
         b.Entity<WorkItem>().ToTable("WorkItems").HasKey(x => x.Id);
+        b.Entity<WorkItem>().HasOne(x => x.Project).WithMany().HasForeignKey(x => x.ProjectId).OnDelete(DeleteBehavior.Restrict);
+        b.Entity<WorkItem>().HasOne<WorkItem>().WithMany().HasForeignKey(x => x.ParentWorkItemId).OnDelete(DeleteBehavior.Restrict);
         b.Entity<WorkProject>().ToTable("Projects").HasKey(x => x.Id);
         b.Entity<WorkProject>().HasIndex(x => x.Key).IsUnique();
         b.Entity<WorkProject>().Property(x => x.Key).HasMaxLength(80).IsRequired();
@@ -30,5 +33,7 @@ public sealed class WorkManagementContext(DbContextOptions<WorkManagementContext
         b.Entity<WorkItemDependency>().ToTable("WorkItemDependencies").HasKey(x => x.Id);
         b.Entity<WorkItemCommit>().ToTable("WorkItemCommits").HasKey(x => x.Id);
         b.Entity<WorkItemTestEvidence>().ToTable("WorkItemTestEvidence").HasKey(x => x.Id);
+        b.Entity<WorkItemTimeEntry>().ToTable("WorkItemTimeEntries").HasKey(x => x.Id);
+        b.Entity<WorkItemTimeEntry>().HasIndex(x => new { x.WorkItemId, x.EndedAtUtc });
     }
 }

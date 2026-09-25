@@ -30,4 +30,8 @@ public sealed class WorkManagementController(IWorkManagementApi api) : Controlle
     public async Task<IActionResult> Test(long id, [FromBody] TestEvidenceRequest request, CancellationToken ct) => await api.AddTestEvidenceAsync(id, request, ct) ? Ok() : NotFound();
     [HttpPost("items/{id:long}/dependencies")]
     public async Task<IActionResult> Dependency(long id, [FromBody] DependencyRequest request, CancellationToken ct) => await api.AddDependencyAsync(id, request, ct) ? Ok() : Conflict(new { error = "InvalidDependency" });
+    [HttpPost("items/{id:long}/time/start")]
+    public async Task<IActionResult> StartTime(long id, [FromBody] TimeTrackingRequest request, CancellationToken ct) => (await api.StartTrackingAsync(id, request, ct)) is { } item ? Ok(item) : NotFound();
+    [HttpPost("items/{id:long}/time/stop")]
+    public async Task<IActionResult> StopTime(long id, [FromBody] TimeTrackingRequest request, CancellationToken ct) => (await api.StopTrackingAsync(id, request, ct)) is { } item ? Ok(item) : NotFound();
 }

@@ -26,9 +26,9 @@ await using (var c = new SqlConnection(cs.ConnectionString))
         await using var batchCommand = c.CreateCommand(); batchCommand.CommandText = batch; batchCommand.CommandTimeout = 180; await batchCommand.ExecuteNonQueryAsync();
     }
     await using var cmd = c.CreateCommand();
-    cmd.CommandText = "SELECT COUNT(*) FROM sys.tables WHERE name IN ('Projects','WorkItems','WorkRoles','WorkItemLogs','ChatWorkIntakes','WorkItemDependencies','WorkItemCommits','WorkItemTestEvidence')";
+    cmd.CommandText = "SELECT COUNT(*) FROM sys.tables WHERE name IN ('Projects','WorkItems','WorkRoles','WorkItemLogs','ChatWorkIntakes','WorkItemDependencies','WorkItemCommits','WorkItemTestEvidence','WorkItemTimeEntries')";
     var count = Convert.ToInt32(await cmd.ExecuteScalarAsync());
-    if (count != 8) throw new InvalidOperationException($"Expected 8 work-management tables, found {count}.");
+    if (count != 9) throw new InvalidOperationException($"Expected 9 work-management tables, found {count}.");
     cmd.CommandText = "SELECT COUNT(*) FROM dbo.WorkItems WHERE ProjectId = (SELECT Id FROM dbo.Projects WHERE [Key]=N'HYPER')";
     var workItemCount = Convert.ToInt32(await cmd.ExecuteScalarAsync());
     if (workItemCount < 60) throw new InvalidOperationException($"Expected seeded backlog, found {workItemCount} work items.");
@@ -101,4 +101,4 @@ await using (var c = new SqlConnection(cs.ConnectionString))
         }
     }
 }
-Console.WriteLine($"WorkManagement database '{database}' is ready; verified 8 tables.");
+Console.WriteLine($"WorkManagement database '{database}' is ready; verified 9 tables.");

@@ -6,6 +6,8 @@ public sealed class WorkItem
 {
     public long Id { get; set; }
     public long ProjectId { get; set; }
+    public WorkProject? Project { get; set; }
+    public long? ParentWorkItemId { get; set; }
     public string Key { get; set; } = null!;
     public string Title { get; set; } = null!;
     public string Domain { get; set; } = null!;
@@ -19,6 +21,9 @@ public sealed class WorkItem
     public string? CommitSha { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime? StartedAtUtc { get; set; }
+    public DateTime? CompletedAtUtc { get; set; }
+    public long AccumulatedSeconds { get; set; }
 }
 public sealed class WorkProject
 {
@@ -58,6 +63,15 @@ public sealed class WorkItemTestEvidence
     public string Result { get; set; } = null!;
     public string? Details { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+}
+public sealed class WorkItemTimeEntry
+{
+    public long Id { get; set; }
+    public long WorkItemId { get; set; }
+    public DateTime StartedAtUtc { get; set; }
+    public DateTime? EndedAtUtc { get; set; }
+    public long DurationSeconds { get; set; }
+    public string? Note { get; set; }
 }
 public sealed class WorkItemLog
 {

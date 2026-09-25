@@ -6,12 +6,14 @@ CREATE TABLE dbo.Projects(
  Name nvarchar(200) NOT NULL, IsEnabled bit NOT NULL);
 CREATE TABLE dbo.WorkItems(
  Id bigint IDENTITY(1,1) NOT NULL CONSTRAINT PK_WorkItems PRIMARY KEY,
- ProjectId bigint NOT NULL, [Key] nvarchar(40) NOT NULL,
+ ProjectId bigint NOT NULL, ParentWorkItemId bigint NULL, [Key] nvarchar(40) NOT NULL,
  Title nvarchar(300) NOT NULL, Domain nvarchar(80) NOT NULL, Status tinyint NOT NULL,
  Priority tinyint NOT NULL, Description nvarchar(max) NULL, OwnerRole nvarchar(120) NULL,
  OwnerAgent nvarchar(200) NULL, ChatId nvarchar(200) NULL, Branch nvarchar(300) NULL,
  CommitSha nvarchar(80) NULL, CreatedAtUtc datetime2(3) NOT NULL, UpdatedAtUtc datetime2(3) NOT NULL,
+ StartedAtUtc datetime2(3) NULL, CompletedAtUtc datetime2(3) NULL, AccumulatedSeconds bigint NOT NULL CONSTRAINT DF_WorkItems_AccumulatedSeconds DEFAULT(0),
  CONSTRAINT FK_WorkItems_Projects FOREIGN KEY(ProjectId) REFERENCES dbo.Projects(Id),
+ CONSTRAINT FK_WorkItems_Parent FOREIGN KEY(ParentWorkItemId) REFERENCES dbo.WorkItems(Id),
  CONSTRAINT UQ_WorkItems_Project_Key UNIQUE(ProjectId,[Key]));
 CREATE TABLE dbo.WorkRoles(
  Id bigint IDENTITY(1,1) NOT NULL CONSTRAINT PK_WorkRoles PRIMARY KEY,
@@ -41,6 +43,25 @@ CREATE TABLE dbo.WorkItemTestEvidence(
  WorkItemId bigint NOT NULL, TestName nvarchar(300) NOT NULL, Result nvarchar(40) NOT NULL,
  Details nvarchar(max) NULL, CreatedAtUtc datetime2(3) NOT NULL,
  CONSTRAINT FK_WorkItemTestEvidence_WorkItems FOREIGN KEY(WorkItemId) REFERENCES dbo.WorkItems(Id));
+CREATE TABLE dbo.WorkItemTimeEntries(
+ Id bigint IDENTITY(1,1) NOT NULL CONSTRAINT PK_WorkItemTimeEntries PRIMARY KEY,
+ WorkItemId bigint NOT NULL, StartedAtUtc datetime2(3) NOT NULL, EndedAtUtc datetime2(3) NULL,
+ DurationSeconds bigint NOT NULL CONSTRAINT DF_WorkItemTimeEntries_DurationSeconds DEFAULT(0), Note nvarchar(1000) NULL,
+ CONSTRAINT FK_WorkItemTimeEntries_WorkItems FOREIGN KEY(WorkItemId) REFERENCES dbo.WorkItems(Id));
+END
+GO
+IF COL_LENGTH(N'dbo.WorkItems',N'ParentWorkItemId') IS NULL ALTER TABLE dbo.WorkItems ADD ParentWorkItemId bigint NULL;
+IF COL_LENGTH(N'dbo.WorkItems',N'StartedAtUtc') IS NULL ALTER TABLE dbo.WorkItems ADD StartedAtUtc datetime2(3) NULL;
+IF COL_LENGTH(N'dbo.WorkItems',N'CompletedAtUtc') IS NULL ALTER TABLE dbo.WorkItems ADD CompletedAtUtc datetime2(3) NULL;
+IF COL_LENGTH(N'dbo.WorkItems',N'AccumulatedSeconds') IS NULL ALTER TABLE dbo.WorkItems ADD AccumulatedSeconds bigint NOT NULL CONSTRAINT DF_WorkItems_AccumulatedSeconds DEFAULT(0);
+IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name=N'FK_WorkItems_Parent') ALTER TABLE dbo.WorkItems ADD CONSTRAINT FK_WorkItems_Parent FOREIGN KEY(ParentWorkItemId) REFERENCES dbo.WorkItems(Id);
+IF OBJECT_ID(N'dbo.WorkItemTimeEntries',N'U') IS NULL
+BEGIN
+ CREATE TABLE dbo.WorkItemTimeEntries(
+  Id bigint IDENTITY(1,1) NOT NULL CONSTRAINT PK_WorkItemTimeEntries PRIMARY KEY,
+  WorkItemId bigint NOT NULL, StartedAtUtc datetime2(3) NOT NULL, EndedAtUtc datetime2(3) NULL,
+  DurationSeconds bigint NOT NULL CONSTRAINT DF_WorkItemTimeEntries_DurationSeconds DEFAULT(0), Note nvarchar(1000) NULL,
+  CONSTRAINT FK_WorkItemTimeEntries_WorkItems FOREIGN KEY(WorkItemId) REFERENCES dbo.WorkItems(Id));
 END
 GO
 IF NOT EXISTS (SELECT 1 FROM dbo.Projects WHERE [Key]=N'HYPER') INSERT dbo.Projects([Key],Name,IsEnabled) VALUES(N'HYPER',N'Hyper',1);
