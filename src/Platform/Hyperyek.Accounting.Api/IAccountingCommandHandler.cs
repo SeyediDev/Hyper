@@ -31,6 +31,8 @@ internal sealed class UnregisteredAccountingCommandHandler : IAccountingCommandH
     public Task<AccountingCommandResult> CancelOrderAsync(CancelOrderCommand command, CancellationToken ct) => Result(command, ct);
     public Task<AccountingCommandResult> ApplyParcelStatusAsync(ParcelStatusCommand command, CancellationToken ct) => Result(command, ct);
     public Task<AccountingCommandResult> ApplyExternalProductChangedAsync(ExternalProductChangedCommand command, CancellationToken ct) => Result(command, ct);
+    public Task<AccountingCommandResult> ValidateCustomerAsync(ValidateCustomerCommand command, CancellationToken ct) => Result(command, ct);
+    public Task<AccountingCommandResult> ResolveCustomerAsync(ResolveCustomerCommand command, CancellationToken ct) => Result(command, ct);
 
     private static Task<AccountingCommandResult> Result<T>(T command, CancellationToken ct)
     {

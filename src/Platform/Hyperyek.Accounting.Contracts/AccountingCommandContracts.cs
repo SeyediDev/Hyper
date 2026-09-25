@@ -6,6 +6,12 @@ public sealed record CounterpartyCommand(
     string EventId, AccountingScope Scope, string ExternalCustomerId,
     string? DisplayName, string? Mobile, string? NationalCode);
 
+public sealed record AccountingCustomerIdentity(string Name, string? Mobile,
+    string? IdentifierNumber, string ExternalCustomerId);
+public sealed record ValidateCustomerCommand(AccountingScope Scope, int PersonId,
+    AccountingCustomerIdentity Customer);
+public sealed record ResolveCustomerCommand(AccountingScope Scope, AccountingCustomerIdentity Customer);
+
 public sealed record OrderLineCommand(
     int HyperProductId, decimal Quantity, decimal UnitPrice,
     string? ExternalProductId = null, string? ExternalVariantId = null);
@@ -48,6 +54,8 @@ public sealed record AccountingCommandResult(
 
 public interface IAccountingCommandHandler
 {
+    Task<AccountingCommandResult> ValidateCustomerAsync(ValidateCustomerCommand command, CancellationToken ct);
+    Task<AccountingCommandResult> ResolveCustomerAsync(ResolveCustomerCommand command, CancellationToken ct);
     Task<AccountingCommandResult> ApplyCounterpartyAsync(CounterpartyCommand command, CancellationToken ct);
     Task<AccountingCommandResult> ApplyVendorOrderAsync(VendorOrderCommand command, CancellationToken ct);
     Task<AccountingCommandResult> ApplyCustomerOrderAsync(CustomerOrderCommand command, CancellationToken ct);

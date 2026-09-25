@@ -18,6 +18,14 @@ public sealed class AccountingCommandsController(IAccountingCommandHandler handl
     public Task<IActionResult> Counterparty([FromBody] CounterpartyCommand command, CancellationToken ct) =>
         Execute(handler.ApplyCounterpartyAsync(command, ct));
 
+    [HttpPost("counterparties/validate")]
+    public Task<IActionResult> ValidateCustomer([FromBody] ValidateCustomerCommand command, CancellationToken ct) =>
+        Execute(handler.ValidateCustomerAsync(command, ct));
+
+    [HttpPost("counterparties/resolve")]
+    public Task<IActionResult> ResolveCustomer([FromBody] ResolveCustomerCommand command, CancellationToken ct) =>
+        Execute(handler.ResolveCustomerAsync(command, ct));
+
     [HttpPost("vendor-orders")]
     public Task<IActionResult> VendorOrder([FromBody] VendorOrderCommand command, CancellationToken ct) =>
         Execute(handler.ApplyVendorOrderAsync(command, ct));

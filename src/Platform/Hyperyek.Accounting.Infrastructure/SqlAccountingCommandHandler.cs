@@ -3,6 +3,8 @@ using Hyper.Infrastructure.Data.Repository.Hyper;
 using Hyperyek.Accounting.Contracts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using System.Data;
 
 namespace Hyperyek.Accounting.Infrastructure;
 
@@ -11,6 +13,7 @@ public static class AccountingInfrastructureServiceCollectionExtensions
     public static IServiceCollection AddHyperyekSqlAccounting(this IServiceCollection services, string connectionString)
     {
         services.AddDbContext<HyperSqlServerContext>(options => options.UseSqlServer(connectionString));
+        services.AddOptions<AccountingCustomerOptions>().BindConfiguration("IntegrationCustomer");
         services.AddScoped<IAccountingCommandHandler, SqlAccountingCommandHandler>();
         return services;
     }
@@ -20,8 +23,70 @@ public static class AccountingInfrastructureServiceCollectionExtensions
 /// Platform-owned implementation of the accounting command boundary.
 /// Integration supplies only contract identifiers; this layer owns accounting tables.
 /// </summary>
-public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db) : IAccountingCommandHandler
+public sealed class AccountingCustomerOptions
 {
+    public byte? PersonType { get; set; }
+    public string? CustomerRole { get; set; }
+    public string? DetailAccountEntityType { get; set; }
+}
+
+public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db,
+    IOptions<AccountingCustomerOptions> customerOptions) : IAccountingCommandHandler
+{
+    public async Task<AccountingCommandResult> ValidateCustomerAsync(ValidateCustomerCommand command, CancellationToken ct)
+    {
+        var policy = Policy();
+        var person = await db.TblPersons.SingleOrDefaultAsync(x => x.Id == command.PersonId
+            && x.Shopid == command.Scope.ShopId && x.TenantId == command.Scope.TenantId && x.Isenabled, ct);
+        if (person is null || person.Type != policy.PersonType || !HasRole(person.Roles, policy.CustomerRole)
+            || (command.Customer.Mobile != null && person.Mobilenumber != null && person.Mobilenumber != command.Customer.Mobile)
+            || (command.Customer.IdentifierNumber != null && person.Identifiernumber != null
+                && person.Identifiernumber != command.Customer.IdentifierNumber))
+            return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingCustomerMappingNeedsReview");
+        var account = await db.TblDetailaccounts.AnyAsync(a => a.Detailaccountid == person.Detailaccountid
+            && a.Shopid == command.Scope.ShopId && a.TenantId == command.Scope.TenantId, ct);
+        return account ? new(AccountingCommandStatus.Applied, person.Id.ToString())
+            : new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingCustomerDetailAccountMismatch");
+    }
+
+    public async Task<AccountingCommandResult> ResolveCustomerAsync(ResolveCustomerCommand command, CancellationToken ct)
+    {
+        var policy = Policy();
+        await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        var matches = await db.TblPersons.Where(p => p.Shopid == command.Scope.ShopId
+                && (p.TenantId == command.Scope.TenantId || p.TenantId == null || p.TenantId == "")
+                && ((command.Customer.Mobile != null && p.Mobilenumber == command.Customer.Mobile)
+                    || (command.Customer.IdentifierNumber != null && p.Identifiernumber == command.Customer.IdentifierNumber)))
+            .ToListAsync(ct);
+        if (matches.Count > 1) return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AmbiguousAccountingCustomer");
+        if (matches.Count == 1)
+        {
+            var person = matches[0];
+            if (command.Customer.IdentifierNumber is null || person.Identifiernumber != command.Customer.IdentifierNumber
+                || !person.Isenabled || (command.Customer.Mobile != null && person.Mobilenumber != null
+                    && person.Mobilenumber != command.Customer.Mobile)
+                || person.Type != policy.PersonType || !HasRole(person.Roles, policy.CustomerRole))
+                return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingCustomerNeedsReview");
+            await transaction.CommitAsync(ct);
+            return new(AccountingCommandStatus.Applied, person.Id.ToString());
+        }
+        var account = new SqlTblDetailaccount { Shopid = command.Scope.ShopId, TenantId = command.Scope.TenantId,
+            Entitytype = policy.DetailAccountEntityType, Name = command.Customer.Name.Trim() };
+        db.TblDetailaccounts.Add(account);
+        await db.SaveChangesAsync(ct);
+        var name = command.Customer.Name.Trim();
+        var personNew = new SqlTblPerson { Shopid = command.Scope.ShopId, TenantId = command.Scope.TenantId,
+            Detailaccountid = account.Detailaccountid, Name = name[..Math.Min(50, name.Length)], Nickname = name,
+            Type = policy.PersonType, Roles = policy.CustomerRole, Isenabled = true,
+            Mobilenumber = command.Customer.Mobile, Identifiernumber = command.Customer.IdentifierNumber };
+        db.TblPersons.Add(personNew);
+        await db.SaveChangesAsync(ct);
+        account.Referenceid = personNew.Id;
+        await db.SaveChangesAsync(ct);
+        await transaction.CommitAsync(ct);
+        return new(AccountingCommandStatus.Applied, personNew.Id.ToString());
+    }
+
     public async Task<AccountingCommandResult> ApplyCounterpartyAsync(CounterpartyCommand command, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(command);
@@ -32,6 +97,19 @@ public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db) : IAcc
             ? new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingCustomerMustBeRegistered")
             : new(AccountingCommandStatus.Applied, match.Id.ToString());
     }
+
+    private AccountingCustomerPolicy Policy()
+    {
+        var value = customerOptions.Value;
+        if (value.PersonType is null || string.IsNullOrWhiteSpace(value.CustomerRole)
+            || value.CustomerRole.Length > 20 || string.IsNullOrWhiteSpace(value.DetailAccountEntityType)
+            || value.DetailAccountEntityType.Length > 50)
+            throw new InvalidOperationException("AccountingCustomerConventionNotConfigured");
+        return new(value.PersonType.Value, value.CustomerRole, value.DetailAccountEntityType);
+    }
+
+    private static bool HasRole(string? roles, string role) => roles?.Split(',', StringSplitOptions.TrimEntries)
+        .Contains(role, StringComparer.OrdinalIgnoreCase) == true;
 
     public async Task<AccountingCommandResult> ApplyVendorOrderAsync(VendorOrderCommand command, CancellationToken ct)
     {
@@ -133,3 +211,6 @@ public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db) : IAcc
     private static string Marker(string eventId, string externalOrderId) => $"integration-event:{eventId};external-order:{externalOrderId};";
     private static byte ParcelState(string status) => status.Contains("deliv", StringComparison.OrdinalIgnoreCase) ? (byte)2 : (byte)1;
 }
+
+internal sealed record AccountingCustomerPolicy(byte PersonType, string CustomerRole,
+    string DetailAccountEntityType);

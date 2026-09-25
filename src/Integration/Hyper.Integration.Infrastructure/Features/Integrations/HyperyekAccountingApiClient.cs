@@ -19,8 +19,27 @@ public sealed class HyperyekAccountingApiOptions
 
 /// <summary>HTTP adapter for the platform-owned accounting API.</summary>
 public sealed class HyperyekAccountingApiClient(
-    HttpClient client) : IIntegrationBusinessCommandPort
+    HttpClient client) : IIntegrationBusinessCommandPort, IIntegrationAccountingPort
 {
+    public async Task<bool> ValidateLinkedCustomerAsync(IntegrationCustomerIdentity customer, int personId,
+        CancellationToken ct)
+    {
+        var result = await PostAsync("api/hyperyek/v1/accounting/counterparties/validate",
+            new ValidateCustomerCommand(new(customer.ShopId, customer.TenantId), personId,
+                new(customer.Name, customer.Mobile, customer.IdentifierNumber, customer.ExternalCustomerId)), ct);
+        return result.Status == IntegrationCommandStatus.Applied;
+    }
+
+    public async Task<int> ResolveOrCreateCustomerAsync(IntegrationCustomerIdentity customer,
+        CancellationToken ct)
+    {
+        var result = await PostAsync("api/hyperyek/v1/accounting/counterparties/resolve",
+            new ResolveCustomerCommand(new(customer.ShopId, customer.TenantId),
+                new(customer.Name, customer.Mobile, customer.IdentifierNumber, customer.ExternalCustomerId)), ct);
+        if (result.Status != IntegrationCommandStatus.Applied || !int.TryParse(result.InternalReference, out var id))
+            throw new InvalidOperationException(result.ErrorCode ?? "AccountingCustomerResolveFailed");
+        return id;
+    }
     public Task<IntegrationCommandResult> ApplyCounterpartyAsync(IntegrationCounterparty command, CancellationToken ct) =>
         PostAsync("api/hyperyek/v1/accounting/counterparties", new CounterpartyCommand(command.EventId,
             new(command.ShopId, command.TenantId), command.ExternalCustomerId, command.DisplayName,

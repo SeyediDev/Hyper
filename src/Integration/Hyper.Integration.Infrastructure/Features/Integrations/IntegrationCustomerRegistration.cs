@@ -16,7 +16,7 @@ public interface IIntegrationCustomerRegistration
 
 /// <summary>
 /// Integration-side mapping orchestration. Accounting entity access belongs to
-/// <see cref="HyperyekAccountingCustomerAdapter"/> behind the domain port.
+/// <see cref="IIntegrationAccountingPort"/> behind the platform API boundary.
 /// </summary>
 public sealed class IntegrationCustomerRegistration(
     HyperIntegrationContext integrations,
