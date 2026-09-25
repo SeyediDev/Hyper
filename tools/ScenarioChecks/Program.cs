@@ -1,4 +1,6 @@
 using System.Text.Json;
+using System.Security.Cryptography;
+using System.Text;
 using Hyper.Integration.Domain.Entities.Integrations;
 using Hyper.Integration.Domain.Features.Integrations;
 using Hyper.Infrastructure.Data.Repository.Hyper;
@@ -10,6 +12,70 @@ using Microsoft.Extensions.Options;
 var checks = 0;
 void Check(bool result, string name) { if (!result) throw new Exception(name); checks++; Console.WriteLine("PASS " + name); }
 async Task Reject(Func<Task> act, string name) { try { await act(); } catch (ArgumentException) { Check(true, name); return; } catch (InvalidOperationException) { Check(true, name); return; } throw new Exception(name); }
+
+static string SignCustomWebhook(long connectionId, string secret, string timestamp, string eventId, string eventType, byte[] body)
+{
+    var prefix = $"{IntegrationWebhookVerifier.Scheme}\n{connectionId}\n{timestamp}\n{eventId}\n{eventType}\n";
+    using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secret));
+    using var payload = new MemoryStream(Encoding.UTF8.GetBytes(prefix).Length + body.Length);
+    payload.Write(Encoding.UTF8.GetBytes(prefix));
+    payload.Write(body);
+    return Convert.ToHexString(hmac.ComputeHash(payload.ToArray())).ToLowerInvariant();
+}
+
+var customSecret = "01234567890123456789012345678901";
+var customConnection = new ExternalIntegrationConnection
+{
+    Id = 42, ShopId = 100, TenantId = "tenant-a", Provider = IntegrationProvider.Custom,
+    AccountIdentifier = "custom-42", CredentialsJson = $"{{\"webhookSignatureScheme\":\"{IntegrationWebhookVerifier.Scheme}\",\"webhookSecret\":\"{customSecret}\"}}",
+    IsEnabled = true
+};
+var customBody = Encoding.UTF8.GetBytes("{\"productId\":7}");
+var customTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
+var customEventId = "security-event-1";
+var customEventType = "product.updated";
+var customSignature = SignCustomWebhook(customConnection.Id, customSecret, customTimestamp, customEventId, customEventType, customBody);
+var customVerifier = new IntegrationWebhookVerifier();
+var customRequest = new IntegrationWebhookRequest(customBody, customEventId, customEventType, customTimestamp, customSignature, null);
+Check(customVerifier.Verify(customConnection, customRequest, DateTimeOffset.UtcNow) == WebhookValidationResult.Valid,
+    "custom HMAC signature accepted");
+Check(customVerifier.Verify(customConnection, customRequest with { Body = Encoding.UTF8.GetBytes("{\"productId\":8}") }, DateTimeOffset.UtcNow)
+    == WebhookValidationResult.Invalid, "tampered webhook body rejected");
+Check(customVerifier.Verify(customConnection, customRequest with { EventId = "security-event-2" }, DateTimeOffset.UtcNow)
+    == WebhookValidationResult.Invalid, "event-id replay substitution rejected");
+Check(customVerifier.Verify(customConnection, customRequest with { Timestamp = (DateTimeOffset.UtcNow.ToUnixTimeSeconds() - 301).ToString() }, DateTimeOffset.UtcNow)
+    == WebhookValidationResult.Invalid, "expired webhook timestamp rejected");
+Check(customVerifier.Verify(new ExternalIntegrationConnection
+{
+    Id = 43, ShopId = customConnection.ShopId, TenantId = "tenant-b", Provider = customConnection.Provider,
+    AccountIdentifier = customConnection.AccountIdentifier, CredentialsJson = customConnection.CredentialsJson, IsEnabled = true
+}, customRequest, DateTimeOffset.UtcNow)
+    == WebhookValidationResult.Invalid, "signature cannot cross connection or tenant boundary");
+Check(customVerifier.Verify(new ExternalIntegrationConnection
+{
+    Id = customConnection.Id, ShopId = customConnection.ShopId, TenantId = customConnection.TenantId,
+    Provider = customConnection.Provider, AccountIdentifier = customConnection.AccountIdentifier,
+    CredentialsJson = customConnection.CredentialsJson, IsEnabled = false
+}, customRequest, DateTimeOffset.UtcNow)
+    == WebhookValidationResult.Invalid, "disabled connection webhook rejected");
+Check(customVerifier.Verify(new ExternalIntegrationConnection
+{
+    Id = customConnection.Id, ShopId = customConnection.ShopId, TenantId = customConnection.TenantId,
+    Provider = customConnection.Provider, AccountIdentifier = customConnection.AccountIdentifier,
+    CredentialsJson = "{\"webhookSignatureScheme\":\"other\",\"webhookSecret\":\"01234567890123456789012345678901\"}", IsEnabled = true
+}, customRequest, DateTimeOffset.UtcNow)
+    == WebhookValidationResult.Unsupported, "unknown webhook scheme rejected as unsupported");
+Check(customVerifier.Verify(new ExternalIntegrationConnection
+{
+    Id = customConnection.Id, ShopId = customConnection.ShopId, TenantId = customConnection.TenantId,
+    Provider = customConnection.Provider, AccountIdentifier = customConnection.AccountIdentifier,
+    CredentialsJson = "{\"webhookSignatureScheme\":\"hyper-hmac-v1\",\"webhookSecret\":\"short\"}", IsEnabled = true
+}, customRequest, DateTimeOffset.UtcNow)
+    == WebhookValidationResult.Invalid, "short webhook secret rejected");
+Check(typeof(IntegrationConnectionCreateRequest).GetProperty("CredentialsJson") is null
+    && typeof(IntegrationConnectionSummary).GetProperty("CredentialsJson") is null,
+    "management contracts do not expose credentials");
+
 var scope = new OwnedIntegrationShop(100, "shop:100");
 var webhookConnection = new ExternalIntegrationConnection
 {
