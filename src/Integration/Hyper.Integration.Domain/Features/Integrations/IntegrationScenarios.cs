@@ -19,7 +19,7 @@ public interface IIntegrationScenarioQueue
 
 // Neo publisher notifications hand off to durable SQL; callers must await publication and publish after commit.
 public sealed class IntegrationScenarioRequested(OwnedIntegrationShop shop, long connectionId,
-    IntegrationScenarioRequest request) : Neo.Domain.Entities.Base.BaseEvent
+    IntegrationScenarioRequest request) : MediatR.INotification
 {
     public OwnedIntegrationShop Shop { get; } = shop;
     public long ConnectionId { get; } = connectionId;

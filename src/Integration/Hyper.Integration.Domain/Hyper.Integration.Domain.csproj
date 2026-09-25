@@ -10,8 +10,4 @@
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\Neo\src\Neo.Common\Neo.Common.csproj" />
-    <ProjectReference Include="..\..\..\..\..\Neo\src\Neo.Domain\Neo.Domain.csproj" />
-  </ItemGroup>
 </Project>
