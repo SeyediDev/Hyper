@@ -38,7 +38,14 @@ public sealed class IntegrationDashboardQuery(HyperIntegrationContext db) : IInt
         var recentOutbox = await outbox.OrderByDescending(x => x.Message.Id).Take(30)
             .Select(x => new IntegrationRecentOutbox(x.Message.Id, x.DisplayName, x.Message.Status, x.Message.Attempts,
                 x.Message.CreatedAtUtc, x.Message.NextAttemptAtUtc, x.Message.LastError)).ToListAsync(ct);
+        var now = DateTime.UtcNow;
+        var health = await connections.OrderBy(x => x.Id)
+            .Select(x => new IntegrationConnectionHealth(x.Id, x.DisplayName, x.Provider, x.IsEnabled,
+                x.ExpiresAtUtc != null && x.ExpiresAtUtc <= now, x.LastError != null,
+                x.LastSyncAtUtc, !x.IsEnabled ? "Disabled" : x.LastError != null ? "Error" :
+                    x.ExpiresAtUtc != null && x.ExpiresAtUtc <= now ? "TokenExpired" : "Healthy"))
+            .ToListAsync(ct);
         return new(connectionCount, enabledCount, mappingCount, runCounts, webhookCounts, recent)
-            { Outbox = outboxCounts, RecentOutbox = recentOutbox };
+            { Outbox = outboxCounts, RecentOutbox = recentOutbox, ConnectionsHealth = health };
     }
 }

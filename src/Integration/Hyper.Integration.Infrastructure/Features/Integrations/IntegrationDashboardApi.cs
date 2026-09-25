@@ -15,7 +15,14 @@ public sealed class IntegrationDashboardApi(IIntegrationDashboardQuery query) : 
             snapshot.RecentRuns.Select(x => new IntegrationDashboardRun(x.Id, x.ConnectionName,
                 ToContractProvider(x.Provider), x.Status, x.StartedAtUtc, x.FinishedAtUtc, x.ItemsRead,
                 x.ItemsWritten, x.ItemsFailed, x.Error)).ToArray(),
-            snapshot.Outbox.Select(x => new IntegrationDashboardStatusCount(x.Status, x.Count)).ToArray());
+            snapshot.Outbox.Select(x => new IntegrationDashboardStatusCount(x.Status, x.Count)).ToArray())
+        {
+            ConnectionsHealth = snapshot.ConnectionsHealth.Select(x => new IntegrationDashboardConnectionHealth(
+                x.ConnectionId, x.ConnectionName, ToContractProvider(x.Provider), x.Enabled, x.TokenExpired,
+                x.HasError, x.LastSyncAtUtc, x.Status)).ToArray(),
+            RecentOutbox = snapshot.RecentOutbox.Select(x => new IntegrationDashboardOutbox(x.Id, x.ConnectionName,
+                x.Status, x.Attempts, x.CreatedAtUtc, x.NextAttemptAtUtc, x.LastError)).ToArray()
+        };
     }
 
     private static Hyper.Integration.Contracts.IntegrationProvider ToContractProvider(

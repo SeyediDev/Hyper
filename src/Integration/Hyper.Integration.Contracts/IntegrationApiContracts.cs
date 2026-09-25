@@ -105,7 +105,16 @@ public sealed record IntegrationDashboardResponse(int Connections, int EnabledCo
     IReadOnlyList<IntegrationDashboardStatusCount> Runs,
     IReadOnlyList<IntegrationDashboardStatusCount> Webhooks,
     IReadOnlyList<IntegrationDashboardRun> RecentRuns,
-    IReadOnlyList<IntegrationDashboardStatusCount> Outbox);
+    IReadOnlyList<IntegrationDashboardStatusCount> Outbox)
+{
+    public IReadOnlyList<IntegrationDashboardConnectionHealth> ConnectionsHealth { get; init; } = [];
+    public IReadOnlyList<IntegrationDashboardOutbox> RecentOutbox { get; init; } = [];
+}
+public sealed record IntegrationDashboardConnectionHealth(long ConnectionId, string ConnectionName,
+    IntegrationProvider Provider, bool Enabled, bool TokenExpired, bool HasError,
+    DateTime? LastSyncAtUtc, string Status);
+public sealed record IntegrationDashboardOutbox(long Id, string ConnectionName, byte Status, int Attempts,
+    DateTime CreatedAtUtc, DateTime NextAttemptAtUtc, string? LastError);
 public interface IIntegrationDashboardApi
 {
     Task<IntegrationDashboardResponse> GetDashboardAsync(int shopId, string tenantId,
