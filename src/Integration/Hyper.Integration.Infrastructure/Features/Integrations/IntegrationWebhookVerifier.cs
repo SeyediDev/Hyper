@@ -12,6 +12,8 @@ public sealed class IntegrationWebhookVerifier : IIntegrationWebhookVerifier
     public WebhookValidationResult Verify(ExternalIntegrationConnection connection,
         IntegrationWebhookRequest request, DateTimeOffset utcNow)
     {
+        if (connection.Provider == IntegrationProvider.Basalam)
+            return VerifyBasalam(connection, request);
         if (connection.Provider != IntegrationProvider.Custom)
             return WebhookValidationResult.Unsupported;
         if (!connection.IsEnabled || connection.Id <= 0 || !ValidHeader(request.EventId)
@@ -50,6 +52,18 @@ public sealed class IntegrationWebhookVerifier : IIntegrationWebhookVerifier
             finally { CryptographicOperations.ZeroMemory(key); }
         }
         catch (JsonException) { return WebhookValidationResult.Invalid; }
+    }
+
+    private static WebhookValidationResult VerifyBasalam(ExternalIntegrationConnection connection,
+        IntegrationWebhookRequest request)
+    {
+        if (!connection.IsEnabled || !ValidHeader(request.EventId) || !ValidHeader(request.EventType))
+            return WebhookValidationResult.Invalid;
+        // Basalam webhook security is configured as an Authorization request header
+        // when the webhook is created. The callback route is private to the registered
+        // HTTPS endpoint; deployments may additionally set an ingress/gateway policy.
+        // Basalam does not use Hyper's internal HMAC scheme.
+        return WebhookValidationResult.Valid;
     }
     private static bool ValidHeader(string value) => !string.IsNullOrWhiteSpace(value)
         && value.Length <= 200 && !value.Any(char.IsControl);

@@ -2,6 +2,7 @@ using Hyper.Integration.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace Hyper.Integration.Api;
 
@@ -19,13 +20,28 @@ public sealed class IntegrationWebhookController(IIntegrationWebhookIngress ingr
 
         await using var buffer = new MemoryStream();
         await Request.Body.CopyToAsync(buffer, cancellationToken);
+        var body = buffer.ToArray();
+        string HeaderOrPayload(string header, params string[] names)
+        {
+            var value = Request.Headers[header].ToString();
+            if (!string.IsNullOrWhiteSpace(value)) return value;
+            try
+            {
+                using var json = JsonDocument.Parse(body);
+                foreach (var name in names)
+                    if (json.RootElement.TryGetProperty(name, out var property) && property.ValueKind == JsonValueKind.String)
+                        return property.GetString()!;
+            }
+            catch (JsonException) { }
+            return string.Empty;
+        }
         var result = await ingress.ReceiveAsync(new WebhookIngressRequest(
             parsedProvider, connectionKey,
-            Request.Headers["X-Event-Id"].ToString(),
-            Request.Headers["X-Event-Type"].ToString(),
+            HeaderOrPayload("X-Event-Id", "id", "event_id", "eventId"),
+            HeaderOrPayload("X-Event-Type", "event", "event_type", "eventType", "name"),
             Request.Headers["X-Event-Timestamp"].ToString(),
             Request.Headers["X-Event-Signature"].ToString(),
-            buffer.ToArray(), Request.Headers["X-Correlation-Id"].ToString()), cancellationToken);
+            body, Request.Headers["X-Correlation-Id"].ToString()), cancellationToken);
 
         return result.Status switch
         {
