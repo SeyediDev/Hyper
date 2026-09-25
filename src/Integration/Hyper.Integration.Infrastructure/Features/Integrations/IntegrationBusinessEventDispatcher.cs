@@ -8,6 +8,7 @@ namespace Hyper.Infrastructure.Features.Integrations;
 /// <summary>Translates provider-neutral inbox payloads into platform command contracts.</summary>
 public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessCommandPort commands,
     IIntegrationEngagementPort engagement,
+    IIntegrationInventoryReservation reservations,
     HyperIntegrationContext db)
 {
     public async Task<IntegrationScenarioResult> DispatchAsync(IntegrationScenarioJob job,
@@ -33,9 +34,13 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
             && IsCancellationEvent(inbox.EventType, root))
         {
             root = Envelope(root);
+            var externalOrderId = RequiredAny(root, "externalOrderId", "order_id", "orderId", "id");
             var cancellation = await commands.CancelOrderAsync(new(job.EventId, job.ShopId, job.TenantId,
-                job.ConnectionId, RequiredAny(root, "externalOrderId", "order_id", "orderId", "id"),
+                job.ConnectionId, externalOrderId,
                 OptionalAny(root, "reason", "cancel_reason", "cancelReason", "status") ?? inbox.EventType), ct);
+            if (cancellation.Status is BusinessCommandStatus.Applied or BusinessCommandStatus.Duplicate)
+                await reservations.ReleaseAsync(new OwnedIntegrationShop(job.ShopId, job.TenantId),
+                    $"order:{externalOrderId}", ct);
             return Result(cancellation);
         }
         if (job.Item is IntegrationSyncItem.Subscription or IntegrationSyncItem.Review or IntegrationSyncItem.Chat)
@@ -141,11 +146,26 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
             x.ShopId == job.ShopId && x.TenantId == job.TenantId && x.ExternalCustomerId == externalCustomerId, ct);
         if (mapping is null || mapping.PersonId <= 0)
             throw new IntegrationProviderException("AccountingCustomerMappingUnavailable", false);
-        return await commands.ApplyVendorOrderAsync(new(job.EventId, job.ShopId, job.TenantId, job.ConnectionId,
-            RequiredAny(root, "externalOrderId", "order_id", "orderId", "id"),
-            OptionalAny(root, "externalParcelId", "parcel_id", "parcelId"), externalCustomerId,
-            lines, DecimalAny(root, "totalAmount", "total_amount", "total", "amount"),
-            PaymentStatus(root), mapping.PersonId), ct);
+        var externalOrderId = RequiredAny(root, "externalOrderId", "order_id", "orderId", "id");
+        var reservationKey = $"order:{externalOrderId}";
+        var shop = new OwnedIntegrationShop(job.ShopId, job.TenantId);
+        await reservations.ReserveAsync(shop, reservationKey, lines, ct);
+        try
+        {
+            var result = await commands.ApplyVendorOrderAsync(new(job.EventId, job.ShopId, job.TenantId, job.ConnectionId,
+                externalOrderId,
+                OptionalAny(root, "externalParcelId", "parcel_id", "parcelId"), externalCustomerId,
+                lines, DecimalAny(root, "totalAmount", "total_amount", "total", "amount"),
+                PaymentStatus(root), mapping.PersonId), ct);
+            if (result.Status is not (BusinessCommandStatus.Applied or BusinessCommandStatus.Duplicate))
+                await reservations.ReleaseAsync(shop, reservationKey, ct);
+            return result;
+        }
+        catch
+        {
+            await reservations.ReleaseAsync(shop, reservationKey, ct);
+            throw;
+        }
     }
 
     private Task<BusinessCommandResult> PurchaseAsync(IntegrationScenarioJob job, JsonElement root, CancellationToken ct)

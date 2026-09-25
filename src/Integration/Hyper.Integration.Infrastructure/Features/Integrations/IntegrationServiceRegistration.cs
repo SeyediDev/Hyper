@@ -31,6 +31,7 @@ public static class IntegrationServiceRegistration
         services.AddScoped<BasalamOAuthStore>();
         services.AddOptions<IntegrationInventoryCaptureOptions>();
         services.AddScoped<IIntegrationInventoryCapture, IntegrationInventoryCapture>();
+        services.AddScoped<IIntegrationInventoryReservation, IntegrationInventoryReservation>();
         services.AddScoped<IIntegrationStrategyResolver, IntegrationStrategyResolver>();
         services.AddScoped<BasalamDemoProvisioner>();
         services.AddScoped<IIntegrationShopAccess, IntegrationShopAccess>();

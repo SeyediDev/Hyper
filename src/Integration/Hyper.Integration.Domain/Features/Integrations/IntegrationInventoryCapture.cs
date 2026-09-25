@@ -6,6 +6,13 @@ public interface IIntegrationInventoryCapture
     Task<bool> ReconcileOneAsync(long connectionId, long mappingId, CancellationToken ct);
 }
 
+public interface IIntegrationInventoryReservation
+{
+    Task ReserveAsync(OwnedIntegrationShop shop, string reservationKey,
+        IReadOnlyCollection<IntegrationOrderLineCommand> lines, CancellationToken ct);
+    Task ReleaseAsync(OwnedIntegrationShop shop, string reservationKey, CancellationToken ct);
+}
+
 public static class IntegrationAvailableInventory
 {
     // DEC-005: whole-shop stock less outstanding reservations, in the product's base unit.
