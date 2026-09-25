@@ -6,9 +6,9 @@ namespace Hyper.WorkManagement.Infrastructure;
 
 public sealed class WorkManagementService(WorkManagementContext db) : IWorkManagementApi
 {
-    public async Task<WorkBoardResponse> GetBoardAsync(string? domain, CancellationToken ct = default)
+    public async Task<WorkBoardResponse> GetBoardAsync(string? domain, string? project = null, CancellationToken ct = default)
     {
-        var items = await db.WorkItems.AsNoTracking().Include(x => x.Project).Where(x => domain == null || x.Domain == domain)
+        var items = await db.WorkItems.AsNoTracking().Include(x => x.Project).Where(x => (domain == null || x.Domain == domain) && (project == null || x.Project!.Key == project))
             .OrderBy(x => x.Status).ThenByDescending(x => x.Priority).ThenBy(x => x.Id)
             .ToListAsync(ct);
         var childCounts = await db.WorkItems.GroupBy(x => x.ParentWorkItemId).Select(g => new { ParentId = g.Key, Count = g.Count() }).ToDictionaryAsync(x => x.ParentId, x => x.Count, ct);

@@ -23,7 +23,7 @@ public sealed record TimeEntryView(DateTime StartedAtUtc, DateTime? EndedAtUtc, 
 public sealed record TimeTrackingRequest(string? Note = null);
 public interface IWorkManagementApi
 {
-    Task<WorkBoardResponse> GetBoardAsync(string? domain, CancellationToken ct = default);
+    Task<WorkBoardResponse> GetBoardAsync(string? domain, string? project = null, CancellationToken ct = default);
     Task<IReadOnlyList<WorkRoleSummary>> GetRolesAsync(CancellationToken ct = default);
     Task<WorkItemSummary?> ClaimAsync(long workItemId, ClaimWorkItemRequest request, CancellationToken ct = default);
     Task<WorkItemSummary?> AddLogAsync(long workItemId, WorkLogRequest request, CancellationToken ct = default);

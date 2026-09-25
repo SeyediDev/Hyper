@@ -9,7 +9,7 @@ namespace Hyper.AdminPanel.Web.Controllers;
 public sealed class WorkManagementController(IWorkManagementApi api) : ControllerBase
 {
     [HttpGet("board")]
-    public Task<WorkBoardResponse> Board([FromQuery] string? domain, CancellationToken ct) => api.GetBoardAsync(domain, ct);
+    public Task<WorkBoardResponse> Board([FromQuery] string? domain, [FromQuery] string? project, CancellationToken ct) => api.GetBoardAsync(domain, project, ct);
     [HttpGet("roles")]
     public Task<IReadOnlyList<WorkRoleSummary>> Roles(CancellationToken ct) => api.GetRolesAsync(ct);
     [HttpPost("items/{id:long}/claim")]
