@@ -72,3 +72,22 @@ INSERT dbo.WorkItems(ProjectId,[Key],Title,Domain,Status,Priority,OwnerRole,Crea
 SELECT @ProjectId,i.[Key],i.Title,i.Domain,2,i.Priority,i.OwnerRole,SYSUTCDATETIME(),SYSUTCDATETIME()
 FROM @Items i
 WHERE NOT EXISTS (SELECT 1 FROM dbo.WorkItems w WHERE w.ProjectId=@ProjectId AND w.[Key]=i.[Key]);
+
+-- CMD-102 implementation breakdown. These children are operational work items,
+-- not documentation: their status is deliberately explicit so the parent shows
+-- the remaining implementation volume.
+DECLARE @Cmd102Id bigint = (SELECT Id FROM dbo.WorkItems WHERE ProjectId=@ProjectId AND [Key]=N'CMD-102');
+DECLARE @SubItems TABLE ([Key] nvarchar(40), Title nvarchar(300), Domain nvarchar(80), Priority tinyint,
+    Status tinyint, OwnerRole nvarchar(120), Description nvarchar(max));
+INSERT @SubItems ([Key],Title,Domain,Priority,Status,OwnerRole,Description) VALUES
+(N'CMD-102.1',N'قرارداد و mapping مشتری حسابداری',N'accounting',4,6,N'accounting-platform',N'AccountingCustomerId و mapping مشتری به command اضافه و build شد.'),
+(N'CMD-102.2',N'ثبت SQL فروش غرفه و اقلام',N'accounting',4,5,N'accounting-platform',N'handler واقعی TBL_SaleOrder و TBL_SaleOrderItem پیاده شده؛ آزمون دیتابیس واقعی باقی است.'),
+(N'CMD-102.3',N'idempotency و تراکنش سفارش',N'accounting',4,5,N'accounting-platform',N'marker رویداد، تشخیص Duplicate و تراکنش درج سند پیاده شده؛ تست همزمانی باقی است.'),
+(N'CMD-102.4',N'لغو سفارش، parcel و tracking',N'accounting',3,5,N'accounting-platform',N'handlerهای لغو و وضعیت مرسوله پیاده شده؛ تطبیق وضعیت‌های نهایی باسلام باقی است.'),
+(N'CMD-102.5',N'آزمون واقعی با دیتابیس حسابداری',N'quality',4,2,N'quality',N'داده آزمون کنترل‌شده و اجرای end-to-end باید انجام شود.'),
+(N'CMD-102.6',N'استقرار host مالک حسابداری',N'accounting',3,4,N'accounting-platform',N'به‌دلیل قفل فایل Neo در restore محیط، build host باید در محیط آزاد تکرار شود.');
+INSERT dbo.WorkItems(ProjectId,ParentWorkItemId,[Key],Title,Domain,Status,Priority,OwnerRole,Description,CreatedAtUtc,UpdatedAtUtc)
+SELECT @ProjectId,@Cmd102Id,s.[Key],s.Title,s.Domain,s.Status,s.Priority,s.OwnerRole,s.Description,SYSUTCDATETIME(),SYSUTCDATETIME()
+FROM @SubItems s
+WHERE @Cmd102Id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM dbo.WorkItems w WHERE w.ProjectId=@ProjectId AND w.[Key]=s.[Key]);

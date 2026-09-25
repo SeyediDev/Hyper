@@ -20,10 +20,13 @@ var backlogSeed = await File.ReadAllTextAsync(Path.GetFullPath(Path.Combine(AppC
 await using (var c = new SqlConnection(cs.ConnectionString))
 {
     await c.OpenAsync();
+    var batchNo = 0;
     foreach (var batch in Regex.Split(script + Environment.NewLine + backlogSeed, @"^\s*GO\s*$", RegexOptions.Multiline | RegexOptions.IgnoreCase)
         .Where(x => !string.IsNullOrWhiteSpace(x)))
     {
-        await using var batchCommand = c.CreateCommand(); batchCommand.CommandText = batch; batchCommand.CommandTimeout = 180; await batchCommand.ExecuteNonQueryAsync();
+        try { await using var batchCommand = c.CreateCommand(); batchCommand.CommandText = batch; batchCommand.CommandTimeout = 180; await batchCommand.ExecuteNonQueryAsync(); }
+        catch (Exception ex) { throw new InvalidOperationException($"WorkManagement schema batch {batchNo} failed. Start: {batch.Trim()[..Math.Min(160, batch.Trim().Length)]}", ex); }
+        batchNo++;
     }
     await using var cmd = c.CreateCommand();
     cmd.CommandText = "SELECT COUNT(*) FROM sys.tables WHERE name IN ('Projects','WorkItems','WorkRoles','WorkItemLogs','ChatWorkIntakes','WorkItemDependencies','WorkItemCommits','WorkItemTestEvidence','WorkItemTimeEntries')";
@@ -99,6 +102,22 @@ await using (var c = new SqlConnection(cs.ConnectionString))
             await test.ExecuteNonQueryAsync();
             Console.WriteLine($"Recorded test evidence for {claimKey}: {testName}.");
         }
+    }
+
+    if (Environment.GetEnvironmentVariable("WORK_MANAGEMENT_PARENT_KEY") is { Length: > 0 } parentKey)
+    {
+        await using var board = c.CreateCommand();
+        board.CommandText = """
+            SELECT w.[Key], w.Status, w.Priority, w.Title, w.Description
+            FROM dbo.WorkItems w
+            WHERE w.ParentWorkItemId=(SELECT Id FROM dbo.WorkItems WHERE ProjectId=(SELECT Id FROM dbo.Projects WHERE [Key]=N'HYPER') AND [Key]=@key)
+            ORDER BY w.Priority DESC, w.[Key];
+            """;
+        board.Parameters.AddWithValue("@key", parentKey);
+        await using var children = await board.ExecuteReaderAsync();
+        Console.WriteLine($"Subtasks for {parentKey}:");
+        while (await children.ReadAsync())
+            Console.WriteLine($"  {children.GetString(0)} | status={children.GetByte(1)} | priority={children.GetByte(2)} | {children.GetString(3)}");
     }
 }
 Console.WriteLine($"WorkManagement database '{database}' is ready; verified 9 tables.");
