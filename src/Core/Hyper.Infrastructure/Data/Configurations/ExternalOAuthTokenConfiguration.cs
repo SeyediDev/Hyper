@@ -111,7 +111,7 @@ public sealed class ExternalOAuthTokenConfiguration : IEntityTypeConfiguration<E
             .UseCollation("SQL_Latin1_General_CP1_CI_AS");
 
         // Indices
-        entity.HasIndex(e => new { e.ShopId, e.Provider })
+        entity.HasIndex(e => new { e.ShopId, e.TenantId, e.Provider })
             .HasDatabaseName("UX_ExternalOAuthTokens_ShopId_Provider")
             .IsUnique();
 

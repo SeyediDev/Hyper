@@ -32,6 +32,24 @@ integration_scope=shop:{ShopId};tenant:{TenantId}
 
 Credential و token در هیچ DTO این API ارسال یا بازگردانده نمی‌شود. OAuth و Vault مسیر مالک مدیریت credential هستند.
 
+## هویت اتصال و توکن در scope
+
+کلید یکتای اتصال `(ShopId, TenantId, Provider, AccountIdentifier)` است. ثبت همان
+غرفه برای tenant دیگر مستقل است؛ ثبت تکراری در همان scope رد می‌شود. اتصال تازه
+غیرفعال است و callback موفق OAuth اتصال منطبق را فعال می‌کند.
+
+توکن OAuth با `(ShopId, TenantId, Provider)` یکتا است. callback و تمدید فقط توکن
+همان tenant را پیدا و به‌روزرسانی می‌کنند. محدودیت یک غرفه برای هر shop/tenant/provider
+حفظ می‌شود؛ اتصال غرفه دیگر در همان scope نیازمند تعیین تکلیف اتصال قبلی است.
+
+`docs/schema/ensure-integration-database.sql` کلیدهای قدیمی اتصال و توکن را داخل
+تراکنش ارتقا می‌دهد. `docs/schema/ensure-external-oauth-tokens.sql` همان ارتقای
+index توکن را مستقل انجام می‌دهد. اجرای دوباره داده‌ها را حفظ می‌کند. پیش از
+استقرار کد جدید، schema دیتابیس مستقل Integration باید ارتقا داده شود.
+
+آزمون SQL و callback این رفتار در `tools/IntegrationRegistryChecks` قرار دارد؛
+این ابزار دیتابیس موقت خودش را ایجاد و پس از اجرا حذف می‌کند.
+
 ## کدهای پذیرش
 
 - `202`: وب‌هوک یا replay در صف ثبت شد.

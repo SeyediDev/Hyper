@@ -34,7 +34,8 @@ public sealed class IntegrationManagementApi(HyperIntegrationContext db) : IInte
         var provider = ToDomainProvider(request.Provider);
         if (provider is null) return null;
         var exists = await db.ExternalIntegrationConnections.AnyAsync(x =>
-            x.ShopId == request.ShopId && x.Provider == provider.Value && x.AccountIdentifier == accountIdentifier,
+            x.ShopId == request.ShopId && x.TenantId == tenantId && x.Provider == provider.Value
+            && x.AccountIdentifier == accountIdentifier,
             cancellationToken);
         if (exists) return null;
         var connection = new ExternalIntegrationConnection

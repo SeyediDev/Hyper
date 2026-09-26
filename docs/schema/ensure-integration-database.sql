@@ -24,8 +24,47 @@ BEGIN
         ConnectedAtUtc datetime2 NOT NULL CONSTRAINT DF_ExternalIntegrationConnections_ConnectedAtUtc DEFAULT (sysutcdatetime()),
         LastSyncAtUtc datetime2 NULL,
         LastError nvarchar(2000) NULL,
-        CONSTRAINT UQ_ExternalIntegrationConnections UNIQUE (ShopId, Provider, AccountIdentifier)
+        CONSTRAINT UQ_ExternalIntegrationConnections UNIQUE (ShopId, TenantId, Provider, AccountIdentifier)
     );
+END;
+
+-- Align an existing installation with the tenant-aware connection scope.
+IF EXISTS (
+    SELECT 1
+    FROM sys.key_constraints kc
+    INNER JOIN sys.tables t ON t.object_id = kc.parent_object_id
+    INNER JOIN sys.schemas s ON s.schema_id = t.schema_id
+    WHERE kc.name = N'UQ_ExternalIntegrationConnections'
+      AND t.name = N'ExternalIntegrationConnections'
+      AND s.name = N'dbo'
+      AND NOT EXISTS (
+          SELECT 1
+          FROM sys.indexes i
+          INNER JOIN sys.index_columns ic ON ic.object_id = i.object_id AND ic.index_id = i.index_id
+          INNER JOIN sys.columns c ON c.object_id = ic.object_id AND c.column_id = ic.column_id
+          WHERE i.object_id = kc.parent_object_id
+            AND i.name = kc.name
+            AND c.name = N'TenantId'
+      )
+)
+BEGIN
+    ALTER TABLE dbo.ExternalIntegrationConnections
+        DROP CONSTRAINT UQ_ExternalIntegrationConnections;
+END;
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM sys.key_constraints kc
+    INNER JOIN sys.tables t ON t.object_id = kc.parent_object_id
+    INNER JOIN sys.schemas s ON s.schema_id = t.schema_id
+    WHERE kc.name = N'UQ_ExternalIntegrationConnections'
+      AND t.name = N'ExternalIntegrationConnections'
+      AND s.name = N'dbo'
+)
+BEGIN
+    ALTER TABLE dbo.ExternalIntegrationConnections
+        ADD CONSTRAINT UQ_ExternalIntegrationConnections
+        UNIQUE (ShopId, TenantId, Provider, AccountIdentifier);
 END;
 
 IF OBJECT_ID(N'dbo.ExternalOAuthTokens', N'U') IS NULL
@@ -47,10 +86,33 @@ BEGIN
         IsActive bit NOT NULL CONSTRAINT DF_ExternalOAuthTokens_IsActive DEFAULT (1),
         RawTokenResponse nvarchar(max) NULL
     );
-    CREATE UNIQUE INDEX UX_ExternalOAuthTokens_ShopId_Provider ON dbo.ExternalOAuthTokens(ShopId, Provider);
+    CREATE UNIQUE INDEX UX_ExternalOAuthTokens_ShopId_Provider ON dbo.ExternalOAuthTokens(ShopId, TenantId, Provider);
     CREATE INDEX IX_ExternalOAuthTokens_ConnectionId ON dbo.ExternalOAuthTokens(ConnectionId);
     CREATE INDEX IX_ExternalOAuthTokens_ExpiresAtUtc ON dbo.ExternalOAuthTokens(ExpiresAtUtc);
     CREATE INDEX IX_ExternalOAuthTokens_TenantId ON dbo.ExternalOAuthTokens(TenantId);
+END;
+
+-- Align existing OAuth tokens with the same tenant scope as connections.
+IF EXISTS (
+    SELECT 1
+    FROM sys.indexes i
+    WHERE i.object_id = OBJECT_ID(N'dbo.ExternalOAuthTokens')
+      AND i.name = N'UX_ExternalOAuthTokens_ShopId_Provider'
+      AND NOT EXISTS (
+          SELECT 1
+          FROM sys.index_columns ic
+          INNER JOIN sys.columns c ON c.object_id = ic.object_id AND c.column_id = ic.column_id
+          WHERE ic.object_id = i.object_id AND ic.index_id = i.index_id AND c.name = N'TenantId'
+      )
+)
+BEGIN
+    DROP INDEX UX_ExternalOAuthTokens_ShopId_Provider ON dbo.ExternalOAuthTokens;
+END;
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE object_id = OBJECT_ID(N'dbo.ExternalOAuthTokens')
+    AND name = N'UX_ExternalOAuthTokens_ShopId_Provider')
+BEGIN
+    CREATE UNIQUE INDEX UX_ExternalOAuthTokens_ShopId_Provider
+        ON dbo.ExternalOAuthTokens(ShopId, TenantId, Provider);
 END;
 
 IF OBJECT_ID(N'dbo.IntegrationCustomerMappings', N'U') IS NULL

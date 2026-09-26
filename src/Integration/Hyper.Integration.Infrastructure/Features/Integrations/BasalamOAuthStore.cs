@@ -83,7 +83,8 @@ public sealed class BasalamOAuthStore(HyperIntegrationContext db, BasalamOAuthSe
         var request = await db.Set<IntegrationTokenRequest>().SingleAsync(x => x.Id == state.RequestId, ct);
         if (request.Status != 1) throw new InvalidOperationException("این درخواست قبلاً پردازش شده است.");
         var connection = await db.ExternalIntegrationConnections.SingleOrDefaultAsync(x =>
-            x.ShopId == selected.ShopId && x.Provider == IntegrationProvider.Basalam && x.AccountIdentifier == vendor.Id, ct);
+            x.ShopId == selected.ShopId && x.TenantId == selected.TenantId
+            && x.Provider == IntegrationProvider.Basalam && x.AccountIdentifier == vendor.Id, ct);
         if (connection is not null && connection.TenantId != selected.TenantId)
             throw new InvalidOperationException("زمینه اتصال با مغازه تطابق ندارد.");
         if (connection is null)
@@ -98,7 +99,8 @@ public sealed class BasalamOAuthStore(HyperIntegrationContext db, BasalamOAuthSe
             await db.SaveChangesAsync(ct);
         }
         var previous = await db.ExternalOAuthTokens.SingleOrDefaultAsync(x =>
-            x.ShopId == selected.ShopId && x.Provider == IntegrationProvider.Basalam, ct);
+            x.ShopId == selected.ShopId && x.TenantId == selected.TenantId
+            && x.Provider == IntegrationProvider.Basalam, ct);
         if (previous is not null && (previous.TenantId != selected.TenantId || previous.ConnectionId != connection.Id))
             throw new InvalidOperationException("برای این مغازه توکن غرفه دیگری ثبت شده است؛ ابتدا اتصال قبلی را تعیین تکلیف کنید.");
         if (string.IsNullOrWhiteSpace(connection.CredentialsJson)

@@ -23,7 +23,9 @@ public sealed class ExternalIntegrationConnectionConfiguration : IEntityTypeConf
             entity.Property(e => e.ConnectedAtUtc).HasColumnName("ConnectedAtUtc").HasColumnType("datetime2(7)").IsRequired(true).HasDefaultValueSql("(sysutcdatetime())", "DF__ExternalI__Conne__71CB2167");
             entity.Property(e => e.LastSyncAtUtc).HasColumnName("LastSyncAtUtc").HasColumnType("datetime2(7)").IsRequired(false).ValueGeneratedNever();
             entity.Property(e => e.LastError).HasColumnName("LastError").HasColumnType("nvarchar(2000)").IsRequired(false).HasMaxLength(2000).IsUnicode(true).UseCollation("SQL_Latin1_General_CP1_CI_AS").ValueGeneratedNever();
-            entity.HasAlternateKey("ShopId", "Provider", "AccountIdentifier").HasName("UQ_ExternalIntegrationConnections").IsClustered(false);
+            // Keep connection identity within the shop/tenant scope used by
+            // the management API and authorization.
+            entity.HasAlternateKey("ShopId", "TenantId", "Provider", "AccountIdentifier").HasName("UQ_ExternalIntegrationConnections").IsClustered(false);
             entity.Property(e => e.IsEnabled).HasSentinel(true);
     }
 }

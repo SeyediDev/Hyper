@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <!-- Compile the production persistence/services directly, without unrelated legacy hosts. -->
+    <ProjectReference Include="../../src/Integration/Hyper.Integration.Domain/Hyper.Integration.Domain.csproj" />
+    <ProjectReference Include="../../src/Integration/Hyper.Integration.Contracts/Hyper.Integration.Contracts.csproj" />
+    <ProjectReference Include="../../src/SDK/BasalamSdk/Basalam.SDK.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <Using Include="Hyper.Integration.Domain.Entities.Integrations" />
+    <Using Include="Hyper.Integration.Domain.Features.Integrations" />
+    <Compile Include="../../src/Core/Hyper.Infrastructure/Data/Repository/Hyper/HyperIntegrationContext.cs" Link="Production/HyperIntegrationContext.cs" />
+    <Compile Include="../../src/Core/Hyper.Infrastructure/Data/Configurations/External*Configuration.cs;../../src/Core/Hyper.Infrastructure/Data/Configurations/Integration*Configuration.cs;../../src/Core/Hyper.Infrastructure/Data/Configurations/InventoryReservationLogConfiguration.cs;../../src/Core/Hyper.Infrastructure/Data/Configurations/IIntegrationEntityConfiguration.cs" Link="Production/%(Filename)%(Extension)" />
+    <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationManagementApi.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/BasalamOAuthStore.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/BasalamOAuthService.cs" Link="Production/%(Filename)%(Extension)" />
+    <None Include="../../docs/schema/ensure-integration-database.sql" Link="schema/integration.sql" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../docs/schema/ensure-external-oauth-tokens.sql" Link="schema/oauth.sql" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
