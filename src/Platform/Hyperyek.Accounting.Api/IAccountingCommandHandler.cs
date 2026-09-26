@@ -8,6 +8,7 @@ public static class AccountingApiServiceCollectionExtensions
     public static IServiceCollection AddHyperyekAccountingApi(this IServiceCollection services)
     {
         services.AddScoped<IAccountingCommandHandler, UnregisteredAccountingCommandHandler>();
+        services.AddSingleton<Hyperyek.Accounting.Domain.FinancialPreviewCalculator>();
         return services;
     }
 

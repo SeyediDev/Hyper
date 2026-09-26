@@ -7,6 +7,9 @@ using System.Security.Cryptography;
 using Hyper.Infrastructure.Features.Integrations;
 using Hyper.Integration.Domain.Features.Integrations;
 using Hyperyek.Accounting.Host;
+using Hyperyek.Accounting.Api;
+using Hyperyek.Accounting.Contracts;
+using Hyperyek.Accounting.Domain;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
@@ -55,6 +58,8 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions { Args = []
 builder.Logging.ClearProviders();
 builder.WebHost.UseUrls("http://127.0.0.1:0");
 builder.Services.AddAccountingServiceSecurity(Config(values));
+builder.Services.AddHyperyekAccountingApi();
+builder.Services.AddControllers().AddApplicationPart(typeof(AccountingFinancialPreviewController).Assembly);
 builder.Services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
 {
     var metadata = new OpenIdConnectConfiguration { Issuer = values["IdpSetting:Authority"] };
@@ -65,6 +70,7 @@ await using var app = builder.Build();
 app.UseAuthentication(); app.UseAuthorization();
 app.MapGet("/probe", () => Results.Ok()).RequireAuthorization();
 app.MapGet("/fallback", () => Results.Ok());
+app.MapControllers();
 await app.StartAsync();
 try
 {
@@ -94,6 +100,36 @@ try
     var configured = app.Services.GetRequiredService<IOptionsMonitor<JwtBearerOptions>>().Get(JwtBearerDefaults.AuthenticationScheme);
     Check(configured.RequireHttpsMetadata && !configured.IncludeErrorDetails && !configured.MapInboundClaims,
         "Neo JWT integration uses HTTPS metadata and minimal error details");
+    var preview = new FinancialPreviewRequest(new(7, "tenant-a"), 10, "order", "billing-group", 1,
+        FinancialPreviewCalculator.PolicyVersion, FinancialSourceUnit.IRR, true,
+        [new("line", 1, 10_000_000, 1_000_000, true)], 0, 600_000, 0, 0, 500_000, 9_100_000, 900_000, 0, 0, 0);
+    const string previewRoute = "/api/hyperyek/v2/accounting/financial-preview";
+    using (var anonymous = await http.PostAsJsonAsync(previewRoute, preview))
+        Check(anonymous.StatusCode == HttpStatusCode.Unauthorized, "financial preview rejects anonymous requests");
+    http.DefaultRequestHeaders.Authorization = new("Bearer", Issue(scope: "other"));
+    using (var forbidden = await http.PostAsJsonAsync(previewRoute, preview))
+        Check(forbidden.StatusCode == HttpStatusCode.Forbidden, "financial preview requires accounting scope");
+    http.DefaultRequestHeaders.Authorization = new("Bearer", Issue());
+    using (var response = await http.PostAsJsonAsync(previewRoute, preview))
+    {
+        var body = await response.Content.ReadFromJsonAsync<FinancialPreviewResult>();
+        Check(response.StatusCode == HttpStatusCode.OK && body is { PreviewOnly: true, ExpectedSettlement: 8_700_000 }
+            && body.Status == FinancialPreviewStatus.Validated, "authenticated preview computes without any registered SQL or persistence handler");
+    }
+    using (var response = await http.PostAsJsonAsync(previewRoute, preview with { PlatformCommission = null }))
+    {
+        var body = await response.Content.ReadFromJsonAsync<FinancialPreviewResult>();
+        Check(response.StatusCode == HttpStatusCode.OK && body is { InvoiceTotal: 9_600_000, ExpectedSettlement: null }
+            && body.Status == FinancialPreviewStatus.AwaitingEvidence, "HTTP preview preserves unknown fee rather than defaulting zero");
+    }
+    using (var response = await http.PostAsJsonAsync(previewRoute, preview with { BuyerPayment = 0 }))
+    {
+        var body = await response.Content.ReadFromJsonAsync<FinancialPreviewResult>();
+        Check(response.StatusCode == HttpStatusCode.OK && body?.Status == FinancialPreviewStatus.NeedsReview,
+            "HTTP 200 calculation result can contain review issues and is not posting acceptance");
+    }
+    using (var response = await http.PostAsync(previewRoute, new StringContent("{bad", System.Text.Encoding.UTF8, "application/json")))
+        Check(response.StatusCode == HttpStatusCode.BadRequest, "malformed preview body is rejected by API binding");
 }
 finally { await app.StopAsync(); }
 

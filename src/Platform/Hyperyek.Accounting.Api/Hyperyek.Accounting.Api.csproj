@@ -6,5 +6,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Hyperyek.Accounting.Contracts\Hyperyek.Accounting.Contracts.csproj" />
+    <ProjectReference Include="..\Hyperyek.Accounting.Domain\Hyperyek.Accounting.Domain.csproj" />
   </ItemGroup>
 </Project>
