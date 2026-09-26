@@ -23,6 +23,7 @@ public interface IBasalamHttpClient
     Task<T?> PutAsync<T>(string url, object? body, CancellationToken ct = default);
     Task<T?> PatchAsync<T>(string url, object? body, CancellationToken ct = default);
     Task<T?> DeleteAsync<T>(string url, CancellationToken ct = default);
+    Task<T?> DeleteAsync<T>(string url, object? body, CancellationToken ct = default);
 }
 
 public sealed class BasalamHttpClient : IBasalamHttpClient, IDisposable
@@ -174,6 +175,21 @@ public sealed class BasalamHttpClient : IBasalamHttpClient, IDisposable
     public async Task<T?> DeleteAsync<T>(string url, CancellationToken ct = default)
     {
         using var request = new HttpRequestMessage(HttpMethod.Delete, url);
+        using var response = await SendAsync(request, ct);
+        return await DeserializeResponseAsync<T>(response);
+    }
+
+    public async Task<T?> DeleteAsync<T>(string url, object? body, CancellationToken ct = default)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Delete, url);
+        if (body is not null)
+        {
+            request.Content = JsonContent.Create(body, options: new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+        }
         using var response = await SendAsync(request, ct);
         return await DeserializeResponseAsync<T>(response);
     }
