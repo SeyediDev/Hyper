@@ -11,6 +11,10 @@ public interface IProductService
     Task PatchDetailsAsync(int productId, string? name, long? primaryPrice, CancellationToken ct = default);
     Task<JsonElement> UpdateBulkProductsAsync(int vendorId, ProductBatchUpdateRequest request,
         bool? continueOnError = null, CancellationToken ct = default);
+    Task<JsonElement> CreateStockReminderAsync(int productId, CancellationToken ct = default);
+    Task<JsonElement> DeleteStockReminderAsync(int productId, CancellationToken ct = default);
+    Task<JsonElement> GetPriceHistoryAsync(int productId, string? startTime = null,
+        string? endTime = null, CancellationToken ct = default);
 }
 
 public sealed class ProductService(IBasalamHttpClient client, ILogger<ProductService>? logger = null) : IProductService
@@ -86,6 +90,26 @@ public sealed class ProductService(IBasalamHttpClient client, ILogger<ProductSer
             }) }, ct);
     }
 
+    public Task<JsonElement> CreateStockReminderAsync(int productId, CancellationToken ct = default)
+    {
+        ValidateId(productId);
+        return client.PostAsync<JsonElement>($"/v1/products/{productId}/reminders", null, ct);
+    }
+
+    public Task<JsonElement> DeleteStockReminderAsync(int productId, CancellationToken ct = default)
+    {
+        ValidateId(productId);
+        return client.DeleteAsync<JsonElement>($"/v1/products/{productId}/reminders", ct);
+    }
+
+    public Task<JsonElement> GetPriceHistoryAsync(int productId, string? startTime = null,
+        string? endTime = null, CancellationToken ct = default)
+    {
+        ValidateId(productId);
+        var query = Query(("start_time", startTime), ("end_time", endTime));
+        return client.GetAsync<JsonElement>($"/v1/products/{productId}/price-history{query}", ct);
+    }
+
     private static void ValidateProduct(ProductWriteRequest product)
     {
         if (string.IsNullOrWhiteSpace(product.Name) || product.Name.Length > 500 || product.VendorId <= 0)
@@ -98,5 +122,13 @@ public sealed class ProductService(IBasalamHttpClient client, ILogger<ProductSer
     {
         if (id <= 0) throw new BasalamValidationError(new Dictionary<string, IReadOnlyList<string>>
             { ["id"] = ["Identifier must be positive"] });
+    }
+
+    private static string Query(params (string Name, string? Value)[] values)
+    {
+        var parts = values.Where(x => !string.IsNullOrWhiteSpace(x.Value))
+            .Select(x => Uri.EscapeDataString(x.Name) + "=" + Uri.EscapeDataString(x.Value!));
+        var query = string.Join('&', parts);
+        return query.Length == 0 ? string.Empty : "?" + query;
     }
 }
