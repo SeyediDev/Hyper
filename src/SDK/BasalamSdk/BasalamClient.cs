@@ -28,6 +28,7 @@ public sealed class BasalamClient : IBasalamClient, IDisposable
     private readonly ILogger<BasalamClient>? _logger;
     private readonly System.Net.Http.HttpClient? _httpClient;
     private readonly IDisposable? _httpClientOwner;
+    private readonly BasalamHttpClient _transport;
     private TokenInfo? _token = null;
     private readonly object _tokenLock = new();
 
@@ -45,6 +46,7 @@ public sealed class BasalamClient : IBasalamClient, IDisposable
             _httpClientOwner = http;
 
         var httpFactory = new Clients.BasalamHttpClient(config, logger as ILogger<Clients.BasalamHttpClient>, http);
+        _transport = httpFactory;
 
         Vendors = new VendorService(httpFactory, logger as ILogger<Services.VendorService>);
         Products = new ProductService(httpFactory, logger as ILogger<Services.ProductService>);
@@ -81,7 +83,13 @@ public sealed class BasalamClient : IBasalamClient, IDisposable
 
     public void SetToken(TokenInfo? token)
     {
-        lock (_tokenLock) _token = token;
+        lock (_tokenLock)
+        {
+            _token = token;
+            // All child services share this transport. Keep their authentication
+            // in sync when a booth token is loaded, refreshed or cleared.
+            _transport.SetToken(token);
+        }
     }
 
     public void Dispose()

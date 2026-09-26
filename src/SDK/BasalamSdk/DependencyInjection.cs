@@ -17,9 +17,14 @@ public static class DependencyInjection
 
     public static IServiceCollection AddBasalamSdk(this IServiceCollection services, IConfiguration configuration)
     {
-        var section = configuration.GetSection(SectionName);
+        ArgumentNullException.ThrowIfNull(configuration);
+        var section = configuration is IConfigurationSection selected
+            && string.Equals(selected.Key, SectionName, StringComparison.OrdinalIgnoreCase)
+                ? selected : configuration.GetSection(SectionName);
         services.Configure<BasalamConfig>(section);
-        services.AddSingleton<BasalamConfig>(sp => sp.GetRequiredService<IOptionsMonitor<BasalamConfig>>().CurrentValue);
+        // The explicit-config overload has already registered the caller's
+        // instance; do not replace it with an empty options binding.
+        services.TryAddSingleton<BasalamConfig>(sp => sp.GetRequiredService<IOptionsMonitor<BasalamConfig>>().CurrentValue);
 
         // The SDK client carries per-connection authentication state; it must not be singleton.
         services.TryAddScoped<Clients.IBasalamHttpClient, Clients.BasalamHttpClient>();
