@@ -15,6 +15,10 @@ namespace Hyper.Infrastructure.Features.Integrations;
 public sealed class HyperyekAccountingApiOptions
 {
     public string BaseAddress { get; set; } = "http://localhost:5100/";
+    public string TokenEndpoint { get; set; } = "";
+    public string ClientId { get; set; } = "";
+    public string ClientSecret { get; set; } = "";
+    public string Scope { get; set; } = "hyperyek.accounting";
 }
 
 /// <summary>HTTP adapter for the platform-owned accounting API.</summary>

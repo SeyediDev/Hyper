@@ -49,37 +49,7 @@ public static class IntegrationServiceRegistration
         services.AddSingleton<IIntegrationScopeAuthorization, IntegrationScopeAuthorization>();
         services.AddHttpClient("ExternalIntegrations", client => client.Timeout = TimeSpan.FromSeconds(30))
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
-        services.AddHttpClient<IIntegrationBusinessCommandPort, HyperyekAccountingApiClient>((provider, client) =>
-        {
-            var options = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<HyperyekAccountingApiOptions>>().Value;
-            client.BaseAddress = new Uri(options.BaseAddress, UriKind.Absolute);
-            client.Timeout = TimeSpan.FromSeconds(30);
-        });
-        services.AddHttpClient<IIntegrationAccountingPort, HyperyekAccountingApiClient>((provider, client) =>
-        {
-            var options = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<HyperyekAccountingApiOptions>>().Value;
-            client.BaseAddress = new Uri(options.BaseAddress, UriKind.Absolute);
-            client.Timeout = TimeSpan.FromSeconds(30);
-        });
-        services.AddHttpClient<IIntegrationPlatformShopPort, HyperyekAccountingApiClient>((provider, client) =>
-        {
-            var options = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<HyperyekAccountingApiOptions>>().Value;
-            client.BaseAddress = new Uri(options.BaseAddress, UriKind.Absolute);
-            client.Timeout = TimeSpan.FromSeconds(30);
-        });
-        services.AddHttpClient<IIntegrationPlatformCatalogPort, HyperyekAccountingApiClient>((provider, client) =>
-        {
-            var options = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<HyperyekAccountingApiOptions>>().Value;
-            client.BaseAddress = new Uri(options.BaseAddress, UriKind.Absolute);
-            client.Timeout = TimeSpan.FromSeconds(30);
-        });
-        services.AddHttpClient<IIntegrationPlatformOverviewPort, HyperyekAccountingApiClient>((provider, client) =>
-        {
-            var options = provider.GetRequiredService<Microsoft.Extensions.Options.IOptions<HyperyekAccountingApiOptions>>().Value;
-            client.BaseAddress = new Uri(options.BaseAddress, UriKind.Absolute);
-            client.Timeout = TimeSpan.FromSeconds(30);
-        });
-        services.AddOptions<HyperyekAccountingApiOptions>();
+        services.AddHyperyekAccountingClients(configuration);
         if (configuration is not null)
         {
             services.Configure<BasalamOAuthSettings>(configuration.GetSection("Basalam"));

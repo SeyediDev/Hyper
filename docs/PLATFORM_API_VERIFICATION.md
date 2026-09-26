@@ -47,8 +47,10 @@ part of this result. No full-solution build or live-service acceptance is claime
 
 ## Remaining acceptance
 
-Host service authentication and client credential/configuration wiring still
-need verification before the independent HTTP services can be deployed. The
+Host service authentication and client credential/configuration wiring are
+implemented in [the service authentication stage](ACCOUNTING_SERVICE_AUTH.md).
+Real identity-provider provisioning and deployed HTTPS acceptance still need
+verification before the independent services can be activated. The
 legacy Core project graph still brings a transitive Neo.Bpms dependency; this
 change neither adds that dependency nor claims to remove it. CMD-102's native
 POS, stock-card, numbering, tax/warehouse and physical-return acceptance limits
