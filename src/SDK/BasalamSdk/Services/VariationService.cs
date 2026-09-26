@@ -20,13 +20,13 @@ public sealed class VariationService(IBasalamHttpClient client, ILogger<Variatio
     public Task<Variation?> CreateVariationAsync(VariationWriteRequest variation, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(variation); ValidateVariation(variation);
-        return client.PostAsync<Variation>("/v1/variations", variation, ct);
+        return client.PostAsync<Variation>("/v1/variations", ToWire(variation), ct);
     }
 
     public Task<Variation?> UpdateVariationAsync(int variationId, VariationWriteRequest variation, CancellationToken ct = default)
     {
         ValidateId(variationId); ArgumentNullException.ThrowIfNull(variation); ValidateVariation(variation);
-        return client.PatchAsync<Variation>($"/v1/variations/{variationId}", variation, ct);
+        return client.PatchAsync<Variation>($"/v1/variations/{variationId}", ToWire(variation), ct);
     }
 
     public async Task PatchStockAsync(int variationId, int stock, CancellationToken ct = default)
@@ -48,6 +48,16 @@ public sealed class VariationService(IBasalamHttpClient client, ILogger<Variatio
         if (variation.Stock < 0) throw new BasalamValidationError(new Dictionary<string, IReadOnlyList<string>>
             { ["stock"] = ["Stock must be non-negative"] });
     }
+
+    private static object ToWire(VariationWriteRequest variation) => new
+    {
+        product_id = variation.ProductId,
+        title = variation.Title,
+        primary_price = variation.Price,
+        sku = variation.Sku,
+        barcode = variation.Barcode,
+        stock = variation.Stock
+    };
     private static void ValidateId(int id)
     {
         if (id <= 0) throw new BasalamValidationError(new Dictionary<string, IReadOnlyList<string>>

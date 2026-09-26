@@ -29,13 +29,13 @@ public sealed class ProductService(IBasalamHttpClient client, ILogger<ProductSer
     public Task<Product?> CreateProductAsync(ProductWriteRequest product, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(product); ValidateProduct(product);
-        return client.PostAsync<Product>("/v1/products", product, ct);
+        return client.PostAsync<Product>("/v1/products", ToWire(product), ct);
     }
 
     public Task<Product?> UpdateProductAsync(int productId, ProductWriteRequest product, CancellationToken ct = default)
     {
         ValidateId(productId); ArgumentNullException.ThrowIfNull(product); ValidateProduct(product);
-        return client.PatchAsync<Product>($"/v1/products/{productId}", product, ct);
+        return client.PatchAsync<Product>($"/v1/products/{productId}", ToWire(product), ct);
     }
 
     public async Task PatchStockAsync(int productId, int stock, CancellationToken ct = default)
@@ -118,6 +118,18 @@ public sealed class ProductService(IBasalamHttpClient client, ILogger<ProductSer
         if (product.Stock < 0) throw new BasalamValidationError(new Dictionary<string, IReadOnlyList<string>>
             { ["stock"] = ["Stock must be non-negative"] });
     }
+
+    private static object ToWire(ProductWriteRequest product) => new
+    {
+        name = product.Name,
+        vendor_id = product.VendorId,
+        primary_price = product.Price,
+        sku = product.Sku,
+        barcode = product.Barcode,
+        description = product.Description,
+        stock = product.Stock,
+        category_id = product.CategoryId
+    };
     private static void ValidateId(int id)
     {
         if (id <= 0) throw new BasalamValidationError(new Dictionary<string, IReadOnlyList<string>>
