@@ -104,6 +104,7 @@ public sealed class ParcelService(IBasalamHttpClient client, ILogger<ParcelServi
 public interface ICustomerService
 {
     Task<object?> GetCustomerAsync(int customerId, CancellationToken ct = default);
+    Task<CustomerSnapshot?> GetCustomerSnapshotAsync(int customerId, CancellationToken ct = default);
 }
 
 public sealed class CustomerService(IBasalamHttpClient client, ILogger<CustomerService>? logger = null) : ICustomerService
@@ -114,5 +115,13 @@ public sealed class CustomerService(IBasalamHttpClient client, ILogger<CustomerS
         { ["id"] = ["Identifier must be positive"] });
         logger?.LogInformation("Getting customer {CustomerId}", customerId);
         return await client.GetAsync<object>($"/v1/customers/{customerId}", ct);
+    }
+
+    public Task<CustomerSnapshot?> GetCustomerSnapshotAsync(int customerId, CancellationToken ct = default)
+    {
+        if (customerId <= 0) throw new BasalamValidationError(new Dictionary<string, IReadOnlyList<string>>
+        { ["id"] = ["Identifier must be positive"] });
+        logger?.LogInformation("Getting typed customer snapshot {CustomerId}", customerId);
+        return client.GetAsync<CustomerSnapshot>($"/v1/customers/{customerId}", ct);
     }
 }

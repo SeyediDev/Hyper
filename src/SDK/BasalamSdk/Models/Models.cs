@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Basalam.SDK.Auth;
 
 namespace Basalam.SDK.Models;
@@ -104,6 +105,23 @@ public record PageResult<T>
     public int PerPage { get; init; }
     public int TotalPages { get; init; }
     public bool HasMore { get; init; }
+}
+
+// Customer payloads vary by token scope and Basalam API version. Keep stable
+// identity/contact fields typed while retaining the provider-specific payload.
+public sealed record CustomerSnapshot
+{
+    public int? Id { get; init; }
+    public string? FirstName { get; init; }
+    public string? LastName { get; init; }
+    public string? FullName { get; init; }
+    public string? Mobile { get; init; }
+    public string? Email { get; init; }
+    public string? City { get; init; }
+    public string? Province { get; init; }
+    public string? PostalCode { get; init; }
+    public JsonElement? Address { get; init; }
+    public JsonElement? Raw { get; init; }
 }
 
 public sealed record ProductWriteRequest(string Name, int VendorId, decimal? Price = null,
