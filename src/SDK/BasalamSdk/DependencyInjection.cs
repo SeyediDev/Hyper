@@ -50,6 +50,7 @@ public static class DependencyInjection
         services.TryAddScoped<Services.ICustomerService, Services.CustomerService>();
         services.TryAddScoped<Services.IWebhookService, Services.WebhookService>();
         services.TryAddScoped<Services.IChatService, Services.ChatService>();
+        services.TryAddScoped<Services.IUploadService, Services.UploadService>();
 
         return services;
     }

@@ -134,3 +134,12 @@ public sealed record ParcelSnapshot
     public string? Status { get; init; }
     public string? TrackingCode { get; init; }
 }
+
+public sealed record FileUploadResponse
+{
+    public long? Id { get; init; }
+    public string? FileName { get; init; }
+    public string? Url { get; init; }
+    public string? MimeType { get; init; }
+    public long? Size { get; init; }
+}
