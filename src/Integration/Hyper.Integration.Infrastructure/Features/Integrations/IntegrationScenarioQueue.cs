@@ -110,11 +110,24 @@ public sealed class IntegrationScenarioQueue(HyperIntegrationContext db, Integra
         if (errorCode is not null && resultJson is null)
             status = retry && job.Attempts < IntegrationRetryPolicy.MaxAttempts ? IntegrationScenarioStatus.Pending : IntegrationScenarioStatus.DeadLetter;
         var next = status == IntegrationScenarioStatus.Pending ? finished + IntegrationRetryPolicy.Delay(job.Attempts, retryAfter) : finished;
-        await db.IntegrationScenarioJobs.Where(x => x.Id == job.Id && x.Status == IntegrationScenarioStatus.Running && x.LeaseId == lease)
+        await using var completion = db.Database.CurrentTransaction is null
+            ? await db.Database.BeginTransactionAsync(CancellationToken.None) : null;
+        var acknowledged = await db.IntegrationScenarioJobs.Where(x => x.Id == job.Id && x.Status == IntegrationScenarioStatus.Running && x.LeaseId == lease)
             .ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, status).SetProperty(x => x.ErrorCode, errorCode)
                 .SetProperty(x => x.ResultJson, resultJson).SetProperty(x => x.NextAttemptAtUtc, next)
                 .SetProperty(x => x.CompletedAtUtc, status == IntegrationScenarioStatus.Pending ? (DateTime?)null : finished)
                 .SetProperty(x => x.LeaseId, (Guid?)null).SetProperty(x => x.LeaseExpiresAtUtc, (DateTime?)null), CancellationToken.None);
+        if (acknowledged == 1)
+        {
+            var inboxStatus = status == IntegrationScenarioStatus.Completed ? (byte)1
+                : status == IntegrationScenarioStatus.Pending ? (byte)0 : (byte)2;
+            await db.IntegrationWebhookInbox.Where(x => x.ConnectionId == job.ConnectionId && x.ExternalEventId == job.EventId)
+                .ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, inboxStatus)
+                    .SetProperty(x => x.Error, errorCode)
+                    .SetProperty(x => x.ProcessedAtUtc, status == IntegrationScenarioStatus.Pending ? (DateTime?)null : finished),
+                    CancellationToken.None);
+        }
+        if (completion is not null) await completion.CommitAsync(CancellationToken.None);
     }
 
     private async Task<bool> SessionLock(string resource, bool acquire, CancellationToken ct)

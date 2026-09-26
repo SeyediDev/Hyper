@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework></PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="../../src/Integration/Hyper.Integration.Domain/Hyper.Integration.Domain.csproj" />
+    <ProjectReference Include="../../src/Integration/Hyper.Integration.Contracts/Hyper.Integration.Contracts.csproj" />
+    <ProjectReference Include="../../src/Platform/Hyperyek.Accounting.Contracts/Hyperyek.Accounting.Contracts.csproj" />
+    <ProjectReference Include="../../src/SDK/BasalamSdk/Basalam.SDK.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <Using Include="Hyper.Integration.Domain.Entities.Integrations" />
+    <Using Include="Hyper.Integration.Domain.Features.Integrations" />
+    <Compile Include="../../src/Core/Hyper.Infrastructure/Data/Repository/Hyper/HyperIntegrationContext.cs" Link="Production/HyperIntegrationContext.cs" />
+    <Compile Include="../../src/Core/Hyper.Infrastructure/Data/Configurations/External*Configuration.cs;../../src/Core/Hyper.Infrastructure/Data/Configurations/Integration*Configuration.cs;../../src/Core/Hyper.Infrastructure/Data/Configurations/InventoryReservationLogConfiguration.cs;../../src/Core/Hyper.Infrastructure/Data/Configurations/IIntegrationEntityConfiguration.cs" Link="Production/%(Filename)%(Extension)" />
+    <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationWebhookIngress.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationWebhookVerifier.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationScenarioQueue.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationScenarioProcessor.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationBusinessEventDispatcher.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/UnregisteredIntegrationEngagementPort.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationInventoryCapture.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationOutbox.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationAccountingEventIngress.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationScopeAuthorization.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/HyperyekAccountingApiClient.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/BasalamSdkAdapter.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/BasalamOAuthService.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/BasalamOAuthStore.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/BasalamDemoProvisioner.cs" Link="Production/%(Filename)%(Extension)" />
+    <Compile Include="../../src/Integration/Hyper.Integration.Api/IntegrationAccountingEventController.cs" Link="Production/IntegrationAccountingEventController.cs" />
+  </ItemGroup>
+</Project>

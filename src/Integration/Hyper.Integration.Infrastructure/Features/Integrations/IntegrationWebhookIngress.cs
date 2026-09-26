@@ -22,34 +22,45 @@ public sealed class IntegrationWebhookIngress(
     {
         if (request.Body is null || request.Body.Length == 0 || request.Body.Length > 1024 * 1024)
             return new(WebhookIngressStatus.Invalid, ErrorCode: "PayloadTooLargeOrEmpty");
-        if (!Valid(request.ConnectionKey) || !Valid(request.EventId) || !Valid(request.EventType))
+        if (!Valid(request.ConnectionKey) || !Valid(request.EventId, 128) || !Valid(request.EventType))
             return new(WebhookIngressStatus.Invalid, ErrorCode: "InvalidHeader");
         JsonDocument payload;
         try { payload = JsonDocument.Parse(request.Body); }
         catch (JsonException) { return new(WebhookIngressStatus.Invalid, ErrorCode: "InvalidJson"); }
+        using var payloadLifetime = payload;
+        if (payload.RootElement.ValueKind != JsonValueKind.Object)
+            return new(WebhookIngressStatus.Invalid, ErrorCode: "InvalidJsonObject");
 
         // Hyperyek owns the internal hyper-hmac-v1 protocol. Its public contract
         // name is kept separate from the legacy provider enum used by persistence.
         var provider = request.Provider == ContractProvider.Hyperyek
             ? DomainProvider.Custom
             : (DomainProvider)(byte)request.Provider;
-        var connection = await db.ExternalIntegrationConnections.SingleOrDefaultAsync(x =>
-            x.Provider == provider && x.AccountIdentifier == request.ConnectionKey, cancellationToken);
-        if (connection is null) return new(WebhookIngressStatus.Invalid, ErrorCode: "ConnectionNotFound");
-
-        var validation = verifier.Verify(connection,
-            new Hyper.Integration.Domain.Features.Integrations.IntegrationWebhookRequest(
+        var candidates = await db.ExternalIntegrationConnections.AsNoTracking().Where(x =>
+            x.Provider == provider && x.AccountIdentifier == request.ConnectionKey).ToListAsync(cancellationToken);
+        if (candidates.Count == 0) return new(WebhookIngressStatus.Invalid, ErrorCode: "ConnectionNotFound");
+        // The same vendor may be registered in different shop/tenant scopes.
+        // Only the connection-specific credential can select one of those scopes.
+        var verificationRequest = new Hyper.Integration.Domain.Features.Integrations.IntegrationWebhookRequest(
                 request.Body, request.EventId, request.EventType, request.Timestamp, request.Signature,
-                request.Authorization),
-            DateTimeOffset.UtcNow);
-        if (validation == Hyper.Integration.Domain.Features.Integrations.WebhookValidationResult.Unsupported)
+                request.Authorization);
+        var validations = candidates.Select(candidate => new
+        {
+            Connection = candidate,
+            Result = verifier.Verify(candidate, verificationRequest, DateTimeOffset.UtcNow)
+        }).ToArray();
+        if (validations.All(x => x.Result == WebhookValidationResult.Unsupported))
             return new(WebhookIngressStatus.Unsupported, ErrorCode: "ProviderWebhookUnsupported");
-        if (validation != Hyper.Integration.Domain.Features.Integrations.WebhookValidationResult.Valid)
+        var verified = validations.Where(x => x.Result == WebhookValidationResult.Valid).ToArray();
+        if (verified.Length == 0)
             return new(WebhookIngressStatus.Invalid, ErrorCode: "SignatureInvalid");
+        if (verified.Length != 1)
+            return new(WebhookIngressStatus.Invalid, ErrorCode: "ConnectionKeyAmbiguous");
+        var connection = verified[0].Connection;
 
         var existing = await db.IntegrationWebhookInbox.AsNoTracking().SingleOrDefaultAsync(x =>
             x.ConnectionId == connection.Id && x.ExternalEventId == request.EventId, cancellationToken);
-        if (existing is not null) return new(WebhookIngressStatus.Duplicate, existing.Id);
+        if (existing is not null) return ReplayResult(existing, request);
 
         var audit = new IntegrationEventAudit
         {
@@ -86,11 +97,20 @@ public sealed class IntegrationWebhookIngress(
                 TenantId = connection.TenantId,
                 EventId = request.EventId,
                 Item = item,
-                Trigger = IntegrationSyncTrigger.BoothChanged,
+                Trigger = request.Provider == ContractProvider.Hyperyek
+                    ? IntegrationSyncTrigger.StoreChanged : IntegrationSyncTrigger.BoothChanged,
                 CreatedAtUtc = DateTime.UtcNow,
                 NextAttemptAtUtc = DateTime.UtcNow
             };
             db.IntegrationScenarioJobs.Add(scenarioJob);
+        }
+        else
+        {
+            // An ignored echo or unsupported event has no worker job. Do not
+            // leave its Inbox entry permanently reporting pending processing.
+            inbox.Status = isLoopback ? (byte)1 : (byte)2;
+            inbox.ProcessedAtUtc = DateTime.UtcNow;
+            inbox.Error = isLoopback ? null : "UnsupportedEventType";
         }
         try
         {
@@ -101,14 +121,24 @@ public sealed class IntegrationWebhookIngress(
         {
             var duplicate = await db.IntegrationWebhookInbox.AsNoTracking().SingleOrDefaultAsync(x =>
                 x.ConnectionId == connection.Id && x.ExternalEventId == request.EventId, cancellationToken);
-            if (duplicate is not null) return new(WebhookIngressStatus.Duplicate, duplicate.Id);
+            if (duplicate is not null)
+            {
+                db.Entry(audit).State = EntityState.Detached;
+                db.Entry(inbox).State = EntityState.Detached;
+                if (scenarioJob is not null) db.Entry(scenarioJob).State = EntityState.Detached;
+                return ReplayResult(duplicate, request);
+            }
             throw;
         }
-        finally { payload.Dispose(); }
     }
 
-    private static bool Valid(string value) => !string.IsNullOrWhiteSpace(value)
-        && value.Length <= 200 && !value.Any(char.IsControl);
+    private static WebhookIngressResult ReplayResult(IntegrationWebhookInbox existing, WebhookIngressRequest request) =>
+        existing.EventType == request.EventType && existing.PayloadJson == Encoding.UTF8.GetString(request.Body)
+            ? new(WebhookIngressStatus.Duplicate, existing.Id)
+            : new(WebhookIngressStatus.Invalid, ErrorCode: "EventIdentityConflict");
+
+    private static bool Valid(string value, int maximumLength = 200) => !string.IsNullOrWhiteSpace(value)
+        && value.Length <= maximumLength && !value.Any(char.IsControl);
 
     private static bool TryMapScenario(string eventType, out IntegrationSyncItem item)
     {
