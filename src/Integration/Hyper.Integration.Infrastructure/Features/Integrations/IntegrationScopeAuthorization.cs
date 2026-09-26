@@ -13,11 +13,14 @@ public sealed class IntegrationScopeAuthorization : IIntegrationScopeAuthorizati
         CancellationToken cancellationToken = default)
     {
         tenantId = tenantId?.Trim()!;
-        if (shopId <= 0 || string.IsNullOrWhiteSpace(tenantId) || tenantId.Length > 30
+        if (shopId <= 0 || string.IsNullOrWhiteSpace(tenantId) || tenantId.Length > 30 || tenantId.Any(char.IsControl)
             || principal.Identity?.IsAuthenticated != true)
             return Task.FromResult(false);
         var expected = $"shop:{shopId};tenant:{tenantId}";
-        var allowed = principal.FindAll("integration_scope").Concat(principal.FindAll("scope"))
+        // A principal can contain auxiliary unauthenticated identities. Their
+        // claims must not borrow authentication from a different identity.
+        var allowed = principal.Identities.Where(x => x.IsAuthenticated)
+            .SelectMany(x => x.FindAll("integration_scope").Concat(x.FindAll("scope")))
             .Any(x => string.Equals(x.Value, expected, StringComparison.Ordinal));
         return Task.FromResult(allowed);
     }

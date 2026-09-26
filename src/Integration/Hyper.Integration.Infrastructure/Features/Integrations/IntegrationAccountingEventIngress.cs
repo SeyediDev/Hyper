@@ -19,7 +19,7 @@ public sealed class IntegrationAccountingEventIngress(HyperIntegrationContext db
                              where m.ConnectionId == request.ConnectionId && m.ShopId == request.ShopId
                                 && m.ExternalProductId == request.ExternalProductId
                                 && m.ExternalVariantId == request.ExternalVariantId
-                                && m.IsActive && c.TenantId == request.TenantId && c.IsEnabled
+                                && m.IsActive && c.ShopId == request.ShopId && c.TenantId == request.TenantId && c.IsEnabled
                              select m).SingleOrDefaultAsync(ct);
         if (mapping is null) return null;
         var id = await outbox.EnqueueInventoryAsync(mapping.ConnectionId, mapping.Id,

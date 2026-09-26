@@ -13,6 +13,11 @@ public sealed class IntegrationTokenApi(
     public async Task<IntegrationTokenRequestStatus?> RequestAsync(string adminId,
         IntegrationTokenRequestCommand command, CancellationToken ct)
     {
+        var tenantId = NormalizeTenant(command.TenantId);
+        if (command.ShopId <= 0 || tenantId.Length == 0) return null;
+        var selection = await simulations.GetAsync(adminId, command.SimulationId, ct);
+        if (selection is null || selection.ShopId != command.ShopId
+            || !string.Equals(selection.TenantId, tenantId, StringComparison.Ordinal)) return null;
         var request = await simulations.RequestTokenAsync(adminId, command.SimulationId, command.ShopId,
             (DomainProvider)(byte)command.Provider, (DomainCredential)command.CredentialType, ct);
         return request is null ? null : new(request.Id, request.Status, request.RequestedAtUtc);
@@ -36,7 +41,9 @@ public sealed class IntegrationTokenApi(
         tenantId = NormalizeTenant(tenantId);
         if (shopId <= 0 || connectionId <= 0 || tenantId.Length == 0) return false;
         var changed = await db.ExternalOAuthTokens.Where(x => x.ConnectionId == connectionId
-                && x.ShopId == shopId && x.TenantId == tenantId)
+                && x.ShopId == shopId && x.TenantId == tenantId
+                && db.ExternalIntegrationConnections.Any(c => c.Id == x.ConnectionId
+                    && c.ShopId == shopId && c.TenantId == tenantId))
             .ExecuteUpdateAsync(x => x.SetProperty(t => t.IsActive, false), ct);
         if (changed == 0) return false;
         await db.ExternalIntegrationConnections.Where(x => x.Id == connectionId
