@@ -9,7 +9,14 @@
 <head>
     <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@(ViewBag.Title ?? "پنل مدیریت هایپریک")</title>
+    <link rel="stylesheet" href="~/_content/Neo.Bpms.UI.MVC/css/neo-theme.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Content/hyper-admin.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Content/hyper-admin-theme.css" asp-append-version="true" />
+    @if (!preview)
+    {
+        <partial name="Layout/_ThemeVariables" />
+    }
+    <script src="~/_content/Neo.Bpms.UI.MVC/js/neo-theme.js" asp-append-version="true"></script>
 </head>
 <body class="hyper-admin">
     <svg class="icon-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>

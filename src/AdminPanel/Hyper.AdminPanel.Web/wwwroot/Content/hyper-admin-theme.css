@@ -1,0 +1,65 @@
+/* Host adapter: use Neo's resolved palette; retain Hyperyek branding and data-series colors. */
+:root:not([data-neo-mode="dark"]) {
+  --neo-base-accent: #7c3aed;
+  --neo-base-accent-hover: #6d28d9;
+  --neo-base-canvas: #f8f5fe;
+  --neo-base-text: #181329;
+  --neo-base-muted: #746d7e;
+  --neo-base-border: #e9e4ef;
+}
+body.hyper-admin {
+  --green: var(--neo-accent);
+  --ink: var(--neo-text);
+  --muted: var(--neo-muted);
+  --line: var(--neo-border);
+  --canvas: var(--neo-canvas);
+  background: var(--neo-canvas);
+  color: var(--neo-text);
+}
+body.hyper-admin :is(.hyper-topbar, .metric-card, .dashboard-card, .period-picker, .platform-item, .queue-donut>div, .skip-link) {
+  background: var(--neo-surface);
+  color: var(--neo-text);
+  border-color: var(--neo-border);
+}
+body.hyper-admin :is(.metric-foot, .preview-pill, .soft-label, .user-avatar) {
+  background: var(--neo-hover);
+  color: var(--neo-muted);
+  border-color: var(--neo-border);
+}
+body.hyper-admin :is(.topbar-heading, .metric-card>div:first-child, .chart-axis, .chart-labels, .chart-legend, .chart-data, .queue-legend li, .hyper-footer) { color: var(--neo-muted); }
+body.hyper-admin :is(.dashboard-toolbar strong, .queue-legend strong) { color: var(--neo-text); }
+body.hyper-admin .button-primary { background: var(--neo-accent); color: var(--neo-on-accent); }
+body.hyper-admin .button-primary:hover { background: var(--neo-accent-hover); }
+body.hyper-admin .button-secondary { background: var(--neo-surface); color: var(--neo-text); border-color: var(--neo-border); }
+body.hyper-admin .period-picker a.selected { background: var(--neo-selection); color: var(--neo-text); }
+body.hyper-admin .hyper-sidebar { background: var(--neo-menu-bg-primary, #181329); color: var(--neo-text-primary, #ddd6fe); }
+body.hyper-admin .hyper-sidebar nav a:hover { background: var(--neo-menu-bg-hover, #2e2350); }
+body.hyper-admin .hyper-sidebar nav a.active { background: var(--neo-accent); color: var(--neo-on-accent); }
+body.hyper-admin .sidebar-note { background: var(--neo-menu-bg-hover, #2e2350); border-color: var(--neo-menu-bg-active, #483366); }
+body.hyper-admin :is(.nav-caption, .sidebar-note small, .small-label, .sidebar-footer small) { color: var(--neo-text-secondary, #c4b5fd); }
+body.hyper-admin :is(a, button, summary, input, select, textarea):focus-visible { outline: 3px solid var(--neo-accent); outline-offset: 3px; }
+body.hyper-admin :is(input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="submit"]):not([type="button"]), select, textarea) {
+  background: var(--neo-input); color: var(--neo-input-text); border-color: var(--neo-border);
+}
+body.hyper-admin :is(input, textarea)::placeholder { color: var(--neo-subtle); }
+body.hyper-admin :is(input, textarea, select):disabled { background: var(--neo-hover); color: var(--neo-muted); }
+body.hyper-admin [aria-invalid="true"] { border-color: var(--neo-danger); }
+body.hyper-admin :is(table, td, td strong, .queue-health-item strong) { color: var(--neo-text); }
+body.hyper-admin th { background: var(--neo-report-header); color: var(--neo-muted); }
+body.hyper-admin :is(th, td) { border-color: var(--neo-border); }
+body.hyper-admin :is(td small, .queue-health-label, .attention-item p, .platform-time) { color: var(--neo-muted); }
+body.hyper-admin :is(.queue-health-item, .attention-item, .platform-time) { border-color: var(--neo-border); }
+body.hyper-admin .chart-grid { stroke: var(--neo-border); }
+/* Let wide tables scroll inside their card instead of expanding the mobile grid. */
+body.hyper-admin :is(.dashboard-middle, .dashboard-bottom) > .dashboard-card { min-width: 0; }
+/* The invoice series and its legend keep the same color across palettes. */
+body.hyper-admin .chart-legend i:not(.blue-dot) { background: #7c3aed; }
+body.hyper-admin .queue-donut { background: conic-gradient(#7c3aed var(--delivered), var(--neo-hover) 0); }
+body.hyper-admin .queue-legend .mini-dot { background: #7c3aed; }
+@media (prefers-reduced-motion: reduce) {
+  body.hyper-admin .hyper-sidebar { transition: none; }
+}
+@media print {
+  body.hyper-admin { background: white; color: black; }
+  body.hyper-admin :is(.dashboard-card, .metric-card, th, td) { background: white; color: black; box-shadow: none; }
+}
