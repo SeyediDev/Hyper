@@ -336,6 +336,8 @@ public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db,
             return new(AccountingCommandStatus.Rejected, ErrorCode: "InvalidCancellationReason");
         await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
         await LockShopAsync(command.Scope.ShopId, ct);
+        if (!await HasShopScopeAsync(command.Scope, ct))
+            return new(AccountingCommandStatus.Rejected, ErrorCode: "AccountingShopScopeMismatch");
         var order = await FindOrderAsync(command.Scope, command.ConnectionId, command.ExternalOrderId, ct);
         if (order is null) return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingOrderNotFound");
         if (order.Status == 9) return new(AccountingCommandStatus.Duplicate, order.Saleorderid.ToString());
@@ -371,13 +373,46 @@ public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db,
     public async Task<AccountingCommandResult> ApplyParcelStatusAsync(ParcelStatusCommand command, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(command);
+        AccountingOrderIdentity.Marker(command.Scope, command.ConnectionId, command.ExternalOrderId);
+        if (string.IsNullOrWhiteSpace(command.EventId) || command.EventId.Length > 128 || command.EventId.Any(char.IsControl)
+            || string.IsNullOrWhiteSpace(command.ExternalParcelId) || command.ExternalParcelId.Length > 128
+            || command.ExternalParcelId.Any(char.IsControl))
+            return new(AccountingCommandStatus.Rejected, ErrorCode: "InvalidAccountingParcel");
+        // These are normalized accounting command states, not guessed provider codes.
+        var state = command.Status?.Trim().ToLowerInvariant() switch
+        {
+            "preparing" => (byte?)0,
+            "shipped" => (byte?)1,
+            "delivered" => (byte?)2,
+            _ => null
+        };
+        if (state is null)
+            return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingParcelStatusUnsupported");
+        var tracking = string.IsNullOrWhiteSpace(command.TrackingCode) ? null : command.TrackingCode.Trim();
+        var trackingLimit = db.Model.FindEntityType(typeof(SqlTblSaleorder))!
+            .FindProperty(nameof(SqlTblSaleorder.Waybillnumber))!.GetMaxLength() ?? 18;
+        // The legacy column is varchar: do not truncate or silently transliterate identifiers.
+        if (tracking is not null && (tracking.Length > trackingLimit || tracking.Any(c => c < 33 || c > 126)))
+            return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingTrackingCodeNeedsReview");
         await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
         await LockShopAsync(command.Scope.ShopId, ct);
+        if (!await HasShopScopeAsync(command.Scope, ct))
+            return new(AccountingCommandStatus.Rejected, ErrorCode: "AccountingShopScopeMismatch");
         var order = await FindOrderAsync(command.Scope, command.ConnectionId, command.ExternalOrderId, ct);
         if (order is null) return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingOrderNotFound");
         if (order.Status == 9) return new(AccountingCommandStatus.Rejected, ErrorCode: "AccountingOrderCancelled");
-        order.Waybillnumber = command.TrackingCode;
-        order.Deliverystatus = ParcelState(command.Status);
+        if (order.Deliverystatus is null or > 2)
+            return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingDeliveryStateNeedsReview");
+        if (state < order.Deliverystatus)
+            return new(AccountingCommandStatus.Duplicate, order.Saleorderid.ToString());
+        if (tracking is not null && !string.IsNullOrWhiteSpace(order.Waybillnumber)
+            && !string.Equals(tracking, order.Waybillnumber, StringComparison.Ordinal))
+            return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingTrackingCodeConflict");
+        var nextTracking = tracking ?? order.Waybillnumber;
+        if (state == order.Deliverystatus && nextTracking == order.Waybillnumber)
+            return new(AccountingCommandStatus.Duplicate, order.Saleorderid.ToString());
+        order.Waybillnumber = nextTracking;
+        order.Deliverystatus = state;
         await db.SaveChangesAsync(ct);
         await transaction.CommitAsync(ct);
         return new(AccountingCommandStatus.Applied, order.Saleorderid.ToString());
@@ -421,7 +456,6 @@ public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db,
             && x.Fiscalperiodstatusid == 1 && x.Startdate <= DateOnly.FromDateTime(DateTime.UtcNow)
             && x.Enddate >= DateOnly.FromDateTime(DateTime.UtcNow)).OrderByDescending(x => x.Startdate).FirstOrDefaultAsync(ct);
 
-    private static byte ParcelState(string status) => status.Contains("deliv", StringComparison.OrdinalIgnoreCase) ? (byte)2 : (byte)1;
 }
 
 internal sealed record AccountingCustomerPolicy(byte PersonType, string CustomerRole,

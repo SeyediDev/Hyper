@@ -199,6 +199,92 @@ try
         await Handler(db).ApplyParcelStatusAsync(new("parcel", scope, 10, "shipped", "p", "delivered", "track"), default);
     Check((await Cancel("shipped")).ErrorCode == "PhysicalReturnConfirmationRequired" && await Stock(products[6].Id) == 8,
         "shipped goods require physical return confirmation");
+    async Task<AccountingCommandResult> Parcel(string id, string status, string? tracking = null, long connection = 10)
+    {
+        await using var db = new HyperSqlServerContext(options);
+        return await Handler(db).ApplyParcelStatusAsync(new("parcel-" + id, scope, connection, id, "p-" + id, status, tracking), default);
+    }
+    async Task<SqlTblSaleorder> Invoice(string reference)
+    {
+        await using var db = new HyperSqlServerContext(options);
+        return await db.TblSaleorders.AsNoTracking().SingleAsync(x => x.Saleorderid == long.Parse(reference));
+    }
+    var parcelInvoice = await Apply(Order("parcel-life", products[4].Id, 1));
+    var parcelReference = parcelInvoice.InternalReference!;
+    Check((await Parcel("parcel-life", "delivery_failed", "bad")).ErrorCode == "AccountingParcelStatusUnsupported"
+        && (await Invoice(parcelReference)).Deliverystatus == 0 && (await Invoice(parcelReference)).Waybillnumber is null,
+        "unknown parcel status never guesses shipment or delivery");
+    Check((await Parcel("parcel-life", "preparing")).Status == AccountingCommandStatus.Duplicate,
+        "preparation is a no-op before dispatch and remains cancellable");
+    Check((await Parcel("parcel-life", "shipped", new string('t', 19))).ErrorCode == "AccountingTrackingCodeNeedsReview"
+        && (await Invoice(parcelReference)).Deliverystatus == 0,
+        "overlength tracking pauses without truncation or partial status write");
+    Check((await Parcel("parcel-life", "shipped", "۱۲۳")).ErrorCode == "AccountingTrackingCodeNeedsReview",
+        "varchar-incompatible tracking is not silently converted");
+    var tracking18 = new string('t', 18);
+    Check((await Parcel("parcel-life", " SHIPPED ", tracking18)).Status == AccountingCommandStatus.Applied
+        && (await Invoice(parcelReference)).Deliverystatus == 1,
+        "normalized shipment and maximum-length tracking are applied");
+    Check((await Parcel("parcel-life", "shipped", tracking18)).Status == AccountingCommandStatus.Duplicate,
+        "identical parcel replay returns duplicate");
+    Check((await Parcel("parcel-life", "delivered", "another")).ErrorCode == "AccountingTrackingCodeConflict"
+        && (await Invoice(parcelReference)).Deliverystatus == 1 && (await Invoice(parcelReference)).Waybillnumber == tracking18,
+        "conflicting tracking cannot overwrite code or advance state");
+    Check((await Parcel("parcel-life", "delivered", " ")).Status == AccountingCommandStatus.Applied
+        && (await Invoice(parcelReference)).Waybillnumber == tracking18,
+        "delivery without tracking preserves the existing code");
+    Check((await Parcel("parcel-life", "shipped", "old-code")).Status == AccountingCommandStatus.Duplicate
+        && (await Invoice(parcelReference)).Deliverystatus == 2 && (await Invoice(parcelReference)).Waybillnumber == tracking18,
+        "older shipment cannot regress delivery or overwrite tracking");
+    Check((await Parcel("parcel-life", "preparing")).Status == AccountingCommandStatus.Duplicate
+        && (await Cancel("parcel-life")).ErrorCode == "PhysicalReturnConfirmationRequired"
+        && await Stock(products[4].Id) == 9,
+        "late preparation cannot reopen stock-restoring cancellation");
+    Check((await Parcel("parcel-life", "delivered", connection: 11)).ErrorCode == "AccountingOrderNotFound",
+        "parcel lookup remains scoped to its connection");
+    await using (var db = new HyperSqlServerContext(options))
+    {
+        Check((await Handler(db).ApplyParcelStatusAsync(new("event", scope with { TenantId = "other" }, 10,
+            "parcel-life", "p", "delivered", null), default)).ErrorCode == "AccountingShopScopeMismatch",
+            "parcel verifies canonical shop tenant");
+        Check((await Handler(db).CancelOrderAsync(new("event", scope with { TenantId = "other" }, 10,
+            "parcel-life", "cancel"), default)).ErrorCode == "AccountingShopScopeMismatch",
+            "cancellation verifies canonical shop tenant");
+        Check((await Handler(db).ApplyParcelStatusAsync(new("event", scope, 10,
+            "parcel-life", "", "delivered", null), default)).ErrorCode == "InvalidAccountingParcel",
+            "missing parcel identity cannot update invoice");
+    }
+    Check((await Parcel("first", "shipped", "track")).ErrorCode == "AccountingOrderCancelled",
+        "cancelled order cannot be revived by shipment");
+    Check((await Parcel("parcel-before-order", "delivered")).ErrorCode == "AccountingOrderNotFound",
+        "parcel arriving before invoice waits for dependency");
+    var delayedInvoice = await Apply(Order("parcel-before-order", products[4].Id, 1));
+    Check((await Parcel("parcel-before-order", "delivered")).Status == AccountingCommandStatus.Applied
+        && (await Parcel("parcel-before-order", "delivered", "late-track")).Status == AccountingCommandStatus.Applied
+        && (await Invoice(delayedInvoice.InternalReference!)).Waybillnumber == "late-track",
+        "parcel retry after invoice can advance directly and add missing tracking");
+    var concurrentInvoice = await Apply(Order("parcel-concurrent", products[4].Id, 1));
+    await Task.WhenAll(Parcel("parcel-concurrent", "shipped"), Parcel("parcel-concurrent", "delivered"));
+    Check((await Invoice(concurrentInvoice.InternalReference!)).Deliverystatus == 2,
+        "concurrent shipment and delivery finish at delivery");
+    var cancelRaceInvoice = await Apply(Order("parcel-cancel-race", products[4].Id, 1));
+    var stockBeforeRace = await Stock(products[4].Id);
+    var cancelRace = await Task.WhenAll(Cancel("parcel-cancel-race"), Parcel("parcel-cancel-race", "shipped"));
+    var raceInvoice = await Invoice(cancelRaceInvoice.InternalReference!);
+    Check((raceInvoice.Status == 9 && raceInvoice.Deliverystatus == 0
+            && cancelRace[0].Status == AccountingCommandStatus.Applied && cancelRace[1].ErrorCode == "AccountingOrderCancelled"
+            && await Stock(products[4].Id) == stockBeforeRace + 1)
+        || (raceInvoice.Status != 9 && raceInvoice.Deliverystatus == 1
+            && cancelRace[0].ErrorCode == "PhysicalReturnConfirmationRequired" && cancelRace[1].Status == AccountingCommandStatus.Applied
+            && await Stock(products[4].Id) == stockBeforeRace),
+        "concurrent cancellation and shipment choose one consistent outcome");
+    await using (var db = new HyperSqlServerContext(options))
+    {
+        var legacyDelivery = await db.TblSaleorders.SingleAsync(x => x.Saleorderid == long.Parse(concurrentInvoice.InternalReference!));
+        legacyDelivery.Deliverystatus = null; await db.SaveChangesAsync();
+    }
+    Check((await Parcel("parcel-concurrent", "shipped")).ErrorCode == "AccountingDeliveryStateNeedsReview",
+        "unknown legacy delivery state is not guessed");
     await using (var db = new HyperSqlServerContext(options))
         await Handler(db).ApplyExternalProductChangedAsync(new("product", scope, 10, products[7].Id, "ext", null, null, "title", 2, 999, 1), default);
     Check(await Stock(products[7].Id) == 10, "marketplace snapshot cannot overwrite accounting stock");
