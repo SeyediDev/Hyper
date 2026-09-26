@@ -5,27 +5,50 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Hyper.Infrastructure.Features.Integrations;
 
-public sealed class IntegrationOutbox(HyperIntegrationContext db, IIntegrationStrategyResolver strategies) : IIntegrationOutbox
+public sealed class IntegrationOutbox(HyperIntegrationContext db, IIntegrationStrategyResolver strategies) : IIntegrationOutbox, IIntegrationProductOutbox
 {
-    private const string InventoryOperation = "inventory.set.v1";
+    public const string InventoryOperation = "inventory.set.v1";
+    public const string ProductOperation = "product.patch.v1";
 
     public async Task<long> EnqueueInventoryAsync(long connectionId, long mappingId, long sourceVersion, decimal quantity, CancellationToken ct)
     {
         if (sourceVersion <= 0 || quantity < 0) throw new ArgumentException("Positive source version and nonnegative absolute stock are required.");
+        return await EnqueueAsync(connectionId, mappingId, sourceVersion, InventoryOperation,
+            mapping => JsonSerializer.Serialize(new ExternalInventoryUpdate(mapping.ExternalProductId, mapping.ExternalVariantId, quantity)), ct);
+    }
+
+    public Task<long> EnqueueProductAsync(long connectionId, long mappingId, long sourceVersion,
+        ExternalProductUpdate update, CancellationToken ct)
+    {
+        if (sourceVersion <= 0) throw new ArgumentException("Positive source version is required.");
+        if (update.ValidationError() is { } error) throw new IntegrationProviderException(error, false);
+        return EnqueueAsync(connectionId, mappingId, sourceVersion, ProductOperation, mapping =>
+        {
+            if (mapping.ExternalProductId != update.ExternalProductId || mapping.ExternalVariantId != update.VariantId)
+                throw new IntegrationProviderException("MappingChanged", false);
+            return JsonSerializer.Serialize(update);
+        }, ct);
+    }
+
+    private async Task<long> EnqueueAsync(long connectionId, long mappingId, long sourceVersion,
+        string operation, Func<ExternalProductMapping, string> serialize, CancellationToken ct)
+    {
         await using var transaction = db.Database.CurrentTransaction is null ? await db.Database.BeginTransactionAsync(ct) : null;
         // Lock the mapping as the serialization point for concurrent source versions/replays.
         var mapping = await db.ExternalProductMappings.FromSqlInterpolated($"SELECT * FROM dbo.ExternalProductMappings WITH (UPDLOCK,HOLDLOCK) WHERE Id={mappingId}")
             .AsNoTracking().SingleOrDefaultAsync(ct) ?? throw new InvalidOperationException("MappingUnavailable");
         var connection = await db.ExternalIntegrationConnections.AsNoTracking().SingleAsync(x => x.Id == connectionId, ct);
         IntegrationConnectionReadiness.Validate(connection, DateTime.UtcNow);
-        strategies.Resolve(connection.Provider, connection.CredentialType);
+        var adapter = strategies.Resolve(connection.Provider, connection.CredentialType);
+        if (operation == ProductOperation && adapter is not IExternalProductPublisher)
+            throw new IntegrationProviderException("ProductPublishingUnsupported", false);
         if (mapping.ConnectionId != connectionId || mapping.ShopId != connection.ShopId || !mapping.IsActive || mapping.HyperProductId <= 0)
             throw new InvalidOperationException("MappingUnavailable");
-        var payload = JsonSerializer.Serialize(new ExternalInventoryUpdate(mapping.ExternalProductId, mapping.ExternalVariantId, quantity));
+        var payload = serialize(mapping);
         var previous = await db.IntegrationOutbox.AsNoTracking().Where(x => x.MappingId == mappingId && x.SourceVersion == sourceVersion).SingleOrDefaultAsync(ct);
         if (previous is not null)
         {
-            if (previous.PayloadJson != payload || previous.ConnectionId != connectionId)
+            if (previous.Operation != operation || previous.PayloadJson != payload || previous.ConnectionId != connectionId)
                 throw new InvalidOperationException("SourceVersionConflict");
             if (transaction is not null) await transaction.CommitAsync(ct);
             return previous.Id;
@@ -35,7 +58,7 @@ public sealed class IntegrationOutbox(HyperIntegrationContext db, IIntegrationSt
         var message = new IntegrationOutboxMessage
         {
             ConnectionId = connectionId, MappingId = mappingId, SourceVersion = sourceVersion,
-            Operation = InventoryOperation, PayloadJson = payload, CreatedAtUtc = DateTime.UtcNow, NextAttemptAtUtc = DateTime.UtcNow
+            Operation = operation, PayloadJson = payload, CreatedAtUtc = DateTime.UtcNow, NextAttemptAtUtc = DateTime.UtcNow
         };
         db.IntegrationOutbox.Add(message);
         await db.SaveChangesAsync(ct);
@@ -124,15 +147,29 @@ public sealed class IntegrationOutbox(HyperIntegrationContext db, IIntegrationSt
             var connection = await db.ExternalIntegrationConnections.AsNoTracking().SingleAsync(x => x.Id == message.ConnectionId, ct);
             IntegrationConnectionReadiness.Validate(connection, DateTime.UtcNow);
             var mapping = await db.ExternalProductMappings.AsNoTracking().SingleOrDefaultAsync(x => x.Id == message.MappingId, ct);
-            var update = JsonSerializer.Deserialize<ExternalInventoryUpdate>(message.PayloadJson)
-                ?? throw new IntegrationProviderException("InvalidPayload", false);
-            if (message.Operation != InventoryOperation || mapping is null || !mapping.IsActive
-                || mapping.ConnectionId != connection.Id || mapping.ShopId != connection.ShopId || mapping.HyperProductId <= 0
-                || mapping.ExternalProductId != update.ExternalProductId || mapping.ExternalVariantId != update.VariantId)
+            if (mapping is null || !mapping.IsActive
+                || mapping.ConnectionId != connection.Id || mapping.ShopId != connection.ShopId || mapping.HyperProductId <= 0)
                 throw new IntegrationProviderException("MappingChanged", false);
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
             timeout.CancelAfter(TimeSpan.FromSeconds(60));
-            await strategies.Resolve(connection.Provider, connection.CredentialType).PublishInventoryAsync(connection, [update], timeout.Token);
+            var adapter = strategies.Resolve(connection.Provider, connection.CredentialType);
+            if (message.Operation == InventoryOperation)
+            {
+                var update = JsonSerializer.Deserialize<ExternalInventoryUpdate>(message.PayloadJson)
+                    ?? throw new IntegrationProviderException("InvalidPayload", false);
+                if (mapping.ExternalProductId != update.ExternalProductId || mapping.ExternalVariantId != update.VariantId)
+                    throw new IntegrationProviderException("MappingChanged", false);
+                await adapter.PublishInventoryAsync(connection, [update], timeout.Token);
+            }
+            else if (message.Operation == ProductOperation && adapter is IExternalProductPublisher publisher)
+            {
+                var update = JsonSerializer.Deserialize<ExternalProductUpdate>(message.PayloadJson)
+                    ?? throw new IntegrationProviderException("InvalidPayload", false);
+                if (mapping.ExternalProductId != update.ExternalProductId || mapping.ExternalVariantId != update.VariantId)
+                    throw new IntegrationProviderException("MappingChanged", false);
+                await publisher.PublishProductAsync(connection, update, timeout.Token);
+            }
+            else throw new IntegrationProviderException("UnsupportedOutboxOperation", false);
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; } // lease recovers after shutdown
         catch (IntegrationProviderException exception) { errorCode = exception.Code; retry = exception.Retryable; retryAfter = exception.RetryAfter; }

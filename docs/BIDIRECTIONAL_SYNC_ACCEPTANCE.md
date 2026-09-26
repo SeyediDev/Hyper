@@ -3,7 +3,7 @@
 ## SDK transport regression checks
 
 Run `dotnet run --project tools/BasalamTransportChecks` from the Backend Git root.
-The 17 checks exercise the production SDK with an in-memory HTTP handler: loading,
+The checks exercise the production SDK with an in-memory HTTP handler: loading,
 refreshing and clearing a connection token must affect child services, distinct
 clients must not share booth credentials, and root/section/explicit configuration
 must all reach the SDK. Production relative routes resolve to HTTPS and stock zero
@@ -13,7 +13,8 @@ called by this tool.
 `BasalamClient.SetToken` now forwards to the shared transport used by its catalog,
 product and other services. `AddBasalamSdk` accepts either root configuration or
 the already-selected `Basalam` section and preserves an explicitly supplied
-`BasalamConfig` instance. Public method signatures and MCP contracts are unchanged.
+`BasalamConfig` instance. ProductService also exposes `PatchDetailsAsync` for a
+partial name/base-price update. Existing SDK methods and MCP contracts are unchanged.
 
 Catalog responses are explicitly adapted from the
 [official core OpenAPI](https://github.com/basalam/python-sdk/blob/main/openapi_data/core.json):
@@ -34,7 +35,7 @@ It never opens the business or configured Integration database. The SQL login
 must be allowed to create/drop this isolated fixture. Both HTTP destinations are
 intercepted in memory; accounting responses are fixtures, not financial documents.
 
-The 31 checks cover product webhook -> authoritative Basalam catalog read ->
+The checks cover product webhook -> authoritative Basalam catalog read ->
 accounting command, accounting
 inventory event -> authenticated stock PATCH, connection/tenant selection,
 replay/conflicting content, missing mapping, retry, explicit-source loopback,
@@ -43,8 +44,8 @@ cover provider 503 retry/recovery and rejecting fractional stock before HTTP.
 The adapter translates SDK HTTP failures into queue-safe codes without response
 bodies; 408/429/5xx are retryable, other HTTP failures are terminal. Stock must fit
 a nonnegative whole `int`; there is no implicit unit conversion. No accounting
-tables exist in the fixture Integration database. This does not verify the separate
-legacy inventory capture/reconciliation path, actual webhook payload delivery, real
+tables exist in the fixture Integration database. Capture/reconciliation also reads
+the accounting API rather than accounting tables. This does not verify actual webhook payload delivery, real
 HTTP authentication middleware, accounting SQL writes or public webhook delivery.
 
 For Basalam product notifications only the external product/variant identity is
@@ -65,6 +66,53 @@ Inbox outcome: pending/retry=0, processed=1, terminal failure/needs attention=2.
 authenticated principal and the existing shop/tenant scope authorization. A body
 containing `ShopId`/`TenantId` is not authorization. Producers must obtain a valid
 scope from the host's trusted issuer; do not forge tokens to exercise this route.
+
+## Accounting product details -> Basalam
+
+`POST /api/integrations/v1/accounting/events/product-changed` requires the same
+trusted `integration_scope` (or `scope`) claim `shop:<id>;tenant:<id>` as inventory.
+It is an ingress for an accounting producer, not an automatic trigger installed
+in the accounting application. Producer integration remains tracked by INT-006/Task101.
+
+Example contract (identifiers are illustrative, not a live write instruction):
+
+```json
+{
+  "shopId": 2659,
+  "tenantId": "3738",
+  "connectionId": 123,
+  "externalProductId": "456",
+  "externalVariantId": null,
+  "sourceVersion": 100,
+  "title": "Updated product name",
+  "primaryPrice": 250000
+}
+```
+
+At least one of `title` / `primaryPrice` must be supplied. Null/absent fields are
+omitted from the remote PATCH, never used to clear existing data. `primaryPrice`
+is the provider's absolute **base price**, an integral nonnegative value fitting
+Int64 in the provider's currency unit; there is no implicit rial/toman conversion
+or guarantee that it changes discount policy/effective sale price. The official
+PATCH fields are `name` and `primary_price`; stock, category and other metadata
+are not sent. Variant-level metadata changes are explicitly rejected until their
+separate contract is implemented; no variant change is redirected to its parent.
+
+The request needs an active connection/mapping. The same `(MappingId, SourceVersion)`
+stream is shared by inventory and product operations: producers must supply a
+monotonically increasing version across both; do not run independent version
+allocators/polling and event producers on one mapping without coordination.
+An exact retry reuses the message, conflicting or stale versions return 409.
+The new `product.patch.v1` operation uses the existing Outbox schema and worker.
+The adapter re-reads and validates vendor ownership before PATCH. Mapping changes
+are checked again before delivery. HTTP 202 means **queued**, not delivered;
+Outbox status 2 means acknowledged by the provider, 3 means dead letter.
+
+Regression coverage includes scoped authorization, invalid/empty/variant patches,
+wire names, omission/zero behavior, version replay/conflicts across operations,
+provider ownership mismatch, mapping deactivation, retry and inventory capture
+coexistence. HTTP is intercepted; real grant, middleware, producer and provider
+acceptance must still be executed separately.
 
 ## Real-provider prerequisites (not replaced by fixture tests)
 

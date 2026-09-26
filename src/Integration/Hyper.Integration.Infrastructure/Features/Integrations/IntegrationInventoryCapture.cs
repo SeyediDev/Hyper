@@ -65,12 +65,16 @@ public sealed class IntegrationInventoryCapture(HyperIntegrationContext db, IInt
                 && x.HyperProductId == mapping.HyperProductId && x.Status == 0 && x.ReleasedAtUtc == null)
             .SumAsync(x => x.Quantity, ct);
         var quantity = IntegrationAvailableInventory.Calculate(source.Stock, reserved, source.CanSell);
-        var latest = await db.IntegrationOutbox.AsNoTracking().Where(x => x.MappingId == mappingId)
+        var latest = await db.IntegrationOutbox.AsNoTracking().Where(x => x.MappingId == mappingId
+                && x.Operation == IntegrationOutbox.InventoryOperation)
             .OrderByDescending(x => x.SourceVersion).FirstOrDefaultAsync(ct);
         var update = new ExternalInventoryUpdate(mapping.ExternalProductId, mapping.ExternalVariantId, quantity);
         if (latest is not null && latest.PayloadJson == JsonSerializer.Serialize(update)
             && (!forceResend || latest.Status is 0 or 1)) return false;
-        var version = checked((latest?.SourceVersion ?? 0) + 1);
+        // The existing unique key/version stream is shared by all operations for a mapping.
+        var lastVersion = await db.IntegrationOutbox.Where(x => x.MappingId == mappingId)
+            .MaxAsync(x => (long?)x.SourceVersion, ct) ?? 0;
+        var version = checked(lastVersion + 1);
         await outbox.EnqueueInventoryAsync(connectionId, mappingId, version, quantity, ct);
         await transaction.CommitAsync(ct);
         return true;

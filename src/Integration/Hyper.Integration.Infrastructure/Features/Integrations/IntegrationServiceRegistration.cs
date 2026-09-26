@@ -22,7 +22,10 @@ public static class IntegrationServiceRegistration
         services.AddScoped<IntegrationBusinessEventDispatcher>();
         services.AddScoped<IIntegrationEngagementPort, UnregisteredIntegrationEngagementPort>();
         services.AddScoped<MediatR.INotificationHandler<IntegrationScenarioRequested>, IntegrationScenarioSubscriber>();
-        services.AddScoped<IIntegrationOutbox, IntegrationOutbox>();
+        services.AddScoped<IntegrationOutbox>();
+        services.AddScoped<IIntegrationOutbox>(sp => sp.GetRequiredService<IntegrationOutbox>());
+        services.AddScoped<IIntegrationProductOutbox>(sp => sp.GetRequiredService<IntegrationOutbox>());
+        services.AddScoped<IIntegrationAccountingProductEventIngress, IntegrationAccountingProductEventIngress>();
         services.AddScoped<IIntegrationAccountingEventIngress, IntegrationAccountingEventIngress>();
         services.AddScoped<IBasalamWebhookRegistration, BasalamWebhookRegistration>();
         // The admin OAuth/simulation controllers consume this concrete store.

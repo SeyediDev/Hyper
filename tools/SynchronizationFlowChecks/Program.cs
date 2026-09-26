@@ -217,6 +217,89 @@ static async Task<int> Run()
         try { await capture.CaptureOneAsync(connection.Id, mapping.Id, default); throw new Exception("Expected catalog failure"); }
         catch (HttpRequestException) { }
         Check(await db.IntegrationOutbox.CountAsync() == beforeFailure, "accounting outage cannot enqueue invented stock");
+        accountingHttp.FailCatalog = false;
+        // Drain earlier inventory checks before testing the independent product operation.
+        while (await outbox.ProcessConnectionAsync(connection.Id, default)) { }
+        var productIngress = new IntegrationAccountingProductEventIngress(db, outbox);
+        var productController = new IntegrationAccountingProductEventController(productIngress, new IntegrationScopeAuthorization())
+        { ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() } };
+        var version = await db.IntegrationOutbox.MaxAsync(x => x.SourceVersion) + 1;
+        var changedProduct = new AccountingProductChangedRequest(7, "tenant-a", connection.Id, "12", null, version, "Changed title", 250);
+        var messagesBefore = await db.IntegrationOutbox.CountAsync();
+        Check(await productController.ProductChanged(changedProduct, default) is ForbidResult,
+            "anonymous caller cannot queue a product mutation");
+        productController.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity([new Claim("scope", "shop:7;tenant:tenant-b")], "fixture"));
+        Check(await productController.ProductChanged(changedProduct, default) is ForbidResult,
+            "other tenant cannot queue a product mutation");
+        productController.HttpContext.User = controller.HttpContext.User;
+        Check((await productIngress.ReceiveAsync(changedProduct with { ExternalProductId = "999" })).ErrorCode == "MappingOrScopeNotFound",
+            "product mutation requires a trusted active mapping");
+        Check((await productIngress.ReceiveAsync(changedProduct with { Title = null, PrimaryPrice = null })).ErrorCode == "EmptyProductChange",
+            "empty product patches are rejected");
+        Check((await productIngress.ReceiveAsync(changedProduct with { Title = " " })).ErrorCode == "InvalidProductTitle",
+            "blank title cannot clear the product name");
+        Check((await productIngress.ReceiveAsync(changedProduct with { PrimaryPrice = -1 })).ErrorCode == "InvalidPrimaryPrice"
+            && (await productIngress.ReceiveAsync(changedProduct with { PrimaryPrice = 1.5m })).ErrorCode == "InvalidPrimaryPrice",
+            "negative or fractional provider prices are rejected without conversion");
+        Check((await productIngress.ReceiveAsync(changedProduct with { ExternalVariantId = "8" })).ErrorCode == "ProductVariantUpdateUnsupported"
+            && await db.IntegrationOutbox.CountAsync() == messagesBefore,
+            "unsupported variant patches never affect the parent product or queue");
+        var productAccepted = (await productController.ProductChanged(changedProduct, default) as AcceptedResult)?.Value as AccountingProductChangedResponse;
+        Check(productAccepted?.OutboxMessageId is not null && await db.IntegrationOutbox.AsNoTracking().AnyAsync(x =>
+                x.Id == productAccepted.OutboxMessageId && x.Operation == IntegrationOutbox.ProductOperation),
+            "authorized product change is persisted as typed Outbox operation");
+        Check((await productIngress.ReceiveAsync(changedProduct)).OutboxMessageId == productAccepted!.OutboxMessageId,
+            "identical product replay returns the same message");
+        Check(await productController.ProductChanged(changedProduct with { Title = "Conflict" }, default) is ConflictObjectResult,
+            "changed content for an existing source version returns HTTP conflict");
+        Check((await productIngress.ReceiveAsync(changedProduct with { SourceVersion = 1 })).ErrorCode == "SourceVersionConflict",
+            "product and inventory cannot reuse one source version for different operations");
+        var stockBeforeProduct = providerHttp.Stock;
+        Check(await outbox.ProcessConnectionAsync(connection.Id, default) && providerHttp.ProductPatches == 1
+            && providerHttp.ProductPatch!.GetProperty("name").GetString() == "Changed title"
+            && providerHttp.ProductPatch.GetProperty("primary_price").GetInt64() == 250
+            && !providerHttp.ProductPatch.TryGetProperty("stock", out _) && providerHttp.Stock == stockBeforeProduct,
+            "product operation sends official name/primary_price fields without touching stock");
+        Check(await db.IntegrationOutbox.AsNoTracking().AnyAsync(x => x.Id == productAccepted.OutboxMessageId && x.Status == 2)
+            && !await outbox.ProcessConnectionAsync(connection.Id, default),
+            "product success is persisted and not redelivered");
+        Check(!await capture.CaptureOneAsync(connection.Id, mapping.Id, default),
+            "a later product message does not make unchanged inventory capture publish stock again");
+        var priceOnly = changedProduct with { SourceVersion = ++version, Title = null, PrimaryPrice = 0 };
+        await productIngress.ReceiveAsync(priceOnly);
+        await outbox.ProcessConnectionAsync(connection.Id, default);
+        Check(providerHttp.ProductPatch!.GetProperty("primary_price").GetInt64() == 0
+            && !providerHttp.ProductPatch.TryGetProperty("name", out _), "zero base price is explicit and absent title is omitted");
+        var titleOnly = changedProduct with { SourceVersion = ++version, Title = "Only name", PrimaryPrice = null };
+        var productRetry = await productIngress.ReceiveAsync(titleOnly);
+        providerHttp.FailStatus = HttpStatusCode.ServiceUnavailable;
+        await outbox.ProcessConnectionAsync(connection.Id, default);
+        Check(await db.IntegrationOutbox.AsNoTracking().AnyAsync(x => x.Id == productRetry.OutboxMessageId && x.Status == 0 && x.LastError == "Http503"),
+            "product transport failure uses durable retry without sensitive response contents");
+        providerHttp.FailStatus = null;
+        await db.IntegrationOutbox.Where(x => x.Id == productRetry.OutboxMessageId)
+            .ExecuteUpdateAsync(s => s.SetProperty(x => x.NextAttemptAtUtc, DateTime.UtcNow.AddSeconds(-1)));
+        await outbox.ProcessConnectionAsync(connection.Id, default);
+        Check(providerHttp.ProductPatch!.GetProperty("name").GetString() == "Only name"
+            && !providerHttp.ProductPatch.TryGetProperty("primary_price", out _), "retried title-only patch omits price");
+        var productPatchCount = providerHttp.ProductPatches;
+        providerHttp.VendorId = 999;
+        var wrongVendor = await productIngress.ReceiveAsync(changedProduct with { SourceVersion = ++version });
+        await outbox.ProcessConnectionAsync(connection.Id, default);
+        Check(providerHttp.ProductPatches == productPatchCount && await db.IntegrationOutbox.AsNoTracking().AnyAsync(x =>
+                x.Id == wrongVendor.OutboxMessageId && x.Status == 3 && x.LastError == "VendorMismatch"),
+            "remote vendor identity is verified before any product write");
+        providerHttp.VendorId = 71;
+        var changedMapping = await productIngress.ReceiveAsync(changedProduct with { SourceVersion = ++version });
+        await db.ExternalProductMappings.Where(x => x.Id == mapping.Id).ExecuteUpdateAsync(s => s.SetProperty(x => x.IsActive, false));
+        await outbox.ProcessConnectionAsync(connection.Id, default);
+        Check(providerHttp.ProductPatches == productPatchCount && await db.IntegrationOutbox.AsNoTracking().AnyAsync(x =>
+                x.Id == changedMapping.OutboxMessageId && x.Status == 3 && x.LastError == "MappingChanged"),
+            "mapping deactivation before delivery prevents product mutation");
+        await db.ExternalProductMappings.Where(x => x.Id == mapping.Id).ExecuteUpdateAsync(s => s.SetProperty(x => x.IsActive, true));
+        Check(await capture.CaptureOneAsync(connection.Id, mapping.Id, default, true)
+            && await db.IntegrationOutbox.MaxAsync(x => x.SourceVersion) == version + 1,
+            "inventory capture allocates a version after product messages in the shared stream");
         Check(!await db.Database.SqlQueryRaw<int>("SELECT COUNT(*) AS Value FROM sys.tables WHERE name LIKE 'TBL[_]%' ").AnyAsync(x => x != 0),
             "both paths run with only Integration tables, no accounting tables in Integration database");
         Console.WriteLine($"{checks} synchronization flow checks passed. HTTP/accounting responses are controlled fixtures, not live-provider acceptance.");
@@ -274,6 +357,9 @@ sealed class AccountingTransport : HttpMessageHandler
 sealed class ProviderTransport : HttpMessageHandler
 {
     public int Patches; public int Stock; public bool Authenticated;
+    public int ProductPatches; public JsonElement? ProductPatchValue;
+    public JsonElement ProductPatch => ProductPatchValue!.Value;
+    public int VendorId = 71;
     public int Requests; public HttpStatusCode? FailStatus;
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
     {
@@ -292,10 +378,11 @@ sealed class ProviderTransport : HttpMessageHandler
         if (request.Method == HttpMethod.Patch)
         {
             using var body = JsonDocument.Parse(await request.Content!.ReadAsStringAsync(ct));
-            Stock = body.RootElement.GetProperty("stock").GetInt32(); Patches++;
+            if (body.RootElement.TryGetProperty("stock", out var stock)) { Stock = stock.GetInt32(); Patches++; }
+            else { ProductPatchValue = body.RootElement.Clone(); ProductPatches++; }
         }
         return new HttpResponseMessage(HttpStatusCode.OK)
-        { Content = new StringContent("{\"id\":12,\"vendor\":{\"id\":71},\"title\":\"Fixture product\",\"inventory\":3}", Encoding.UTF8, "application/json") };
+        { Content = JsonContent.Create(new { id = 12, vendor = new { id = VendorId }, title = "Fixture product", inventory = 3 }) };
     }
 }
 

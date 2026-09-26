@@ -159,6 +159,15 @@ src/
 
 ## Contributing
 
+### Hyperyek / Basalam synchronization
+
+See [bidirectional acceptance and product-change API](docs/BIDIRECTIONAL_SYNC_ACCEPTANCE.md)
+for setup, scoped authentication, inventory/product Outbox semantics and test commands.
+`POST /api/integrations/v1/accounting/events/product-changed` queues mapped product
+name/base-price updates; HTTP 202 is not proof of remote completion. Real booth
+OAuth consent, an explicit test product and accounting-origin event delivery are
+required separately from the SQL/HTTP fixture checks.
+
 This is a private repository. For contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License

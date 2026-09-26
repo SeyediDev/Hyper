@@ -8,7 +8,7 @@ using Hyper.Integration.Domain.Features.Integrations;
 
 namespace Hyper.Infrastructure.Features.Integrations;
 
-public sealed class BasalamSdkAdapter(IBasalamClient client, BasalamOAuthStore tokenStore) : IExternalIntegrationAdapter
+public sealed class BasalamSdkAdapter(IBasalamClient client, BasalamOAuthStore tokenStore) : IExternalIntegrationAdapter, IExternalProductPublisher
 {
     public IntegrationProvider Provider => IntegrationProvider.Basalam;
     public bool IsImplemented => true;
@@ -117,6 +117,22 @@ public sealed class BasalamSdkAdapter(IBasalamClient client, BasalamOAuthStore t
             }
         }
     }
+
+    public Task PublishProductAsync(ExternalIntegrationConnection connection, ExternalProductUpdate update, CancellationToken ct) =>
+        ProviderCall(async () =>
+        {
+            Validate(connection);
+            if (update.ValidationError() is { } error) throw new IntegrationProviderException(error, false);
+            Identifier(update.ExternalProductId);
+            await SetTokenAsync(connection, ct);
+            var id = int.Parse(update.ExternalProductId, CultureInfo.InvariantCulture);
+            var product = await client.Catalog.GetProductAsync(id, ct)
+                ?? throw new IntegrationProviderException("InvalidExternalIdentifier", false);
+            ValidateVendor(product, connection);
+            await client.Products.PatchDetailsAsync(id, update.Title,
+                update.PrimaryPrice is { } price ? checked((long)price) : null, ct);
+            return true;
+        });
 
     private static async Task<T> ProviderCall<T>(Func<Task<T>> action)
     {

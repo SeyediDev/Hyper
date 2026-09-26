@@ -6,6 +6,7 @@ public interface IProductService
     Task<Product?> CreateProductAsync(ProductWriteRequest product, CancellationToken ct = default);
     Task<Product?> UpdateProductAsync(int productId, ProductWriteRequest product, CancellationToken ct = default);
     Task PatchStockAsync(int productId, int stock, CancellationToken ct = default);
+    Task PatchDetailsAsync(int productId, string? name, long? primaryPrice, CancellationToken ct = default);
 }
 
 public sealed class ProductService(IBasalamHttpClient client, ILogger<ProductService>? logger = null) : IProductService
@@ -39,6 +40,21 @@ public sealed class ProductService(IBasalamHttpClient client, ILogger<ProductSer
                 ["stock"] = ["Stock must be non-negative"]
             });
         await client.PatchAsync<object>($"/v1/products/{productId}", new { stock }, ct);
+    }
+
+    public async Task PatchDetailsAsync(int productId, string? name, long? primaryPrice, CancellationToken ct = default)
+    {
+        ValidateId(productId);
+        if (name is null && primaryPrice is null || primaryPrice < 0
+            || name is not null && (string.IsNullOrWhiteSpace(name) || name.Length > 500))
+            throw new BasalamValidationError(new Dictionary<string, IReadOnlyList<string>>
+            { ["product"] = ["A valid name or nonnegative primary price is required"] });
+        // Official PATCH schema uses name/primary_price, not title/price.
+        // Omit absent fields entirely; never clear stock/category or a missing name.
+        var patch = new Dictionary<string, object>();
+        if (name is not null) patch["name"] = name;
+        if (primaryPrice is not null) patch["primary_price"] = primaryPrice.Value;
+        await client.PatchAsync<object>($"/v1/products/{productId}", patch, ct);
     }
 
     private static void ValidateProduct(ProductWriteRequest product)
