@@ -74,6 +74,9 @@ public static class DependencyInjection
         if (!string.IsNullOrWhiteSpace(workConnection))
         {
             services.AddDbContext<WorkManagementContext>(o => o.UseSqlServer(workConnection));
+            services.AddHttpClient<IAgentHarnessDispatcher, HttpAgentHarnessDispatcher>();
+            services.Configure<AgentHarnessOptions>(configuration.GetSection("AgentOrchestration:Harness"));
+            services.AddScoped<IAgentOrchestrationService, AgentOrchestrationService>();
             services.AddScoped<IWorkManagementApi, WorkManagementService>();
         }
 

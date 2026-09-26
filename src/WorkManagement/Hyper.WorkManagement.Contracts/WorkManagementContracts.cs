@@ -16,6 +16,12 @@ public sealed record ChatIntakeRequest(string ChatId, string Author, string Mess
 public sealed record ChatIntakeResponse(long IntakeId, long? WorkItemId, string Status);
 public sealed record CreateWorkItemRequest(string ProjectKey, string Key, string Title, string Domain, WorkItemPriority Priority = WorkItemPriority.Normal, string? Description = null, long? ParentWorkItemId = null, long? EstimatedSeconds = null);
 public sealed record EstimateWorkItemRequest(long? EstimatedSeconds);
+public sealed record AgentProfileView(long Id, string Key, string Name, string RoleKey, string Provider, string? Model, string? Instructions, string? SkillPath, bool IsEnabled);
+public sealed record WorkflowTransitionView(long Id, string Key, string? ProjectKey, string? Domain, WorkItemStatus FromStatus, WorkItemStatus TriggerStatus, string FromRoleKey, string NextRoleKey, WorkItemStatus NextStatus, bool RequireTests, bool RequireCommits, bool AutoDispatch, bool IsEnabled);
+public sealed record AgentRunView(long Id, long WorkItemId, string WorkItemKey, long AgentProfileId, string AgentProfileKey, string TargetRoleKey, string Status, string? ExternalRunId, string? Branch, string? LastError, DateTime CreatedAtUtc, DateTime? StartedAtUtc, DateTime? CompletedAtUtc);
+public sealed record CreateAgentProfileRequest(string Key, string Name, string RoleKey, string Provider = "codex", string? Model = null, string? Instructions = null, string? SkillPath = null, bool IsEnabled = true);
+public sealed record CreateWorkflowTransitionRequest(string Key, string? ProjectKey, string? Domain, WorkItemStatus FromStatus, WorkItemStatus TriggerStatus, string FromRoleKey, string NextRoleKey, WorkItemStatus NextStatus = WorkItemStatus.Review, bool RequireTests = false, bool RequireCommits = false, bool AutoDispatch = true, bool IsEnabled = true);
+public sealed record AgentOrchestrationSnapshot(IReadOnlyList<AgentProfileView> Profiles, IReadOnlyList<WorkflowTransitionView> Transitions, IReadOnlyList<AgentRunView> RecentRuns);
 public sealed record ChangeWorkItemStatusRequest(WorkItemStatus Status, string Author, string? Message = null);
 public sealed record CommitEvidenceRequest(string Sha, string? Message = null);
 public sealed record TestEvidenceRequest(string TestName, string Result, string? Details = null);
@@ -44,4 +50,18 @@ public interface IWorkManagementApi
     Task<bool> ArchiveAsync(long workItemId, CancellationToken ct = default);
     Task<bool> UnarchiveAsync(long workItemId, CancellationToken ct = default);
     Task<WorkItemSummary?> SetEstimateAsync(long workItemId, EstimateWorkItemRequest request, CancellationToken ct = default);
+    Task<AgentOrchestrationSnapshot> GetOrchestrationAsync(CancellationToken ct = default);
+    Task<AgentProfileView?> CreateAgentProfileAsync(CreateAgentProfileRequest request, CancellationToken ct = default);
+    Task<WorkflowTransitionView?> CreateWorkflowTransitionAsync(CreateWorkflowTransitionRequest request, CancellationToken ct = default);
+    Task<IReadOnlyList<AgentRunView>> GetRunsAsync(long workItemId, CancellationToken ct = default);
+    Task<AgentRunView?> DispatchNextAsync(long workItemId, CancellationToken ct = default);
+}
+public interface IAgentOrchestrationService
+{
+    Task<AgentOrchestrationSnapshot> GetAsync(CancellationToken ct = default);
+    Task<AgentProfileView?> CreateProfileAsync(CreateAgentProfileRequest request, CancellationToken ct = default);
+    Task<WorkflowTransitionView?> CreateTransitionAsync(CreateWorkflowTransitionRequest request, CancellationToken ct = default);
+    Task<IReadOnlyList<AgentRunView>> GetRunsAsync(long workItemId, CancellationToken ct = default);
+    Task<AgentRunView?> DispatchNextAsync(long workItemId, CancellationToken ct = default);
+    Task OnStatusChangedAsync(long workItemId, WorkItemStatus fromStatus, WorkItemStatus toStatus, CancellationToken ct = default);
 }

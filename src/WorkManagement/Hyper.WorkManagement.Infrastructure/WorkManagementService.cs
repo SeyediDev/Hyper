@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Hyper.WorkManagement.Infrastructure;
 
-public sealed class WorkManagementService(WorkManagementContext db) : IWorkManagementApi
+public sealed class WorkManagementService(WorkManagementContext db, IAgentOrchestrationService? orchestrator = null) : IWorkManagementApi
 {
     public async Task<WorkBoardResponse> GetBoardAsync(string? domain, string? project = null, string? role = null, bool includeArchived = false, CancellationToken ct = default)
     {
@@ -63,12 +63,15 @@ public sealed class WorkManagementService(WorkManagementContext db) : IWorkManag
     {
         var item = await db.WorkItems.Include(x => x.Project).SingleOrDefaultAsync(x => x.Id == id, ct);
         if (item is null) return null;
+        var previousStatus = item.Status;
         if (request.Status == WorkItemStatus.InProgress && item.OwnerRole is null) return null;
         if (item.Status != WorkItemStatus.InProgress && request.Status == WorkItemStatus.InProgress) await StartTrackingInternal(item, request.Message, ct);
         if (item.Status == WorkItemStatus.InProgress && request.Status != WorkItemStatus.InProgress) await StopTrackingInternal(item, request.Message, ct);
         item.Status = request.Status; item.CompletedAtUtc = request.Status == WorkItemStatus.Done ? DateTime.UtcNow : null; item.UpdatedAtUtc = DateTime.UtcNow;
         if (!string.IsNullOrWhiteSpace(request.Message)) db.WorkItemLogs.Add(new WorkItemLog { WorkItemId = id, Author = request.Author, Message = request.Message });
-        await db.SaveChangesAsync(ct); return await SummaryAsync(item, ct);
+        await db.SaveChangesAsync(ct);
+        if (orchestrator is not null && previousStatus != request.Status) await orchestrator.OnStatusChangedAsync(id, previousStatus, request.Status, ct);
+        return await SummaryAsync(item, ct);
     }
     public async Task<WorkItemDetails?> GetDetailsAsync(long id, CancellationToken ct = default)
     {
@@ -105,6 +108,11 @@ public sealed class WorkManagementService(WorkManagementContext db) : IWorkManag
     public async Task<bool> ArchiveAsync(long id, CancellationToken ct = default) { var item = await db.WorkItems.SingleOrDefaultAsync(x => x.Id == id, ct); if (item is null || item.Status is not (WorkItemStatus.Blocked or WorkItemStatus.Done)) return false; await StopTrackingInternal(item, null, ct); item.IsArchived = true; item.ArchivedAtUtc = DateTime.UtcNow; item.UpdatedAtUtc = DateTime.UtcNow; await db.SaveChangesAsync(ct); return true; }
     public async Task<bool> UnarchiveAsync(long id, CancellationToken ct = default) { var item = await db.WorkItems.SingleOrDefaultAsync(x => x.Id == id, ct); if (item is null || !item.IsArchived) return false; item.IsArchived = false; item.ArchivedAtUtc = null; item.UpdatedAtUtc = DateTime.UtcNow; await db.SaveChangesAsync(ct); return true; }
     public async Task<WorkItemSummary?> SetEstimateAsync(long id, EstimateWorkItemRequest request, CancellationToken ct = default) { var item = await db.WorkItems.Include(x => x.Project).SingleOrDefaultAsync(x => x.Id == id, ct); if (item is null || request.EstimatedSeconds is < 0) return null; item.EstimatedSeconds = request.EstimatedSeconds is > 0 ? request.EstimatedSeconds : null; item.UpdatedAtUtc = DateTime.UtcNow; await db.SaveChangesAsync(ct); return await SummaryAsync(item, ct); }
+    public Task<AgentOrchestrationSnapshot> GetOrchestrationAsync(CancellationToken ct = default) => orchestrator?.GetAsync(ct) ?? throw new InvalidOperationException("AgentOrchestrationUnavailable");
+    public Task<AgentProfileView?> CreateAgentProfileAsync(CreateAgentProfileRequest request, CancellationToken ct = default) => orchestrator?.CreateProfileAsync(request, ct) ?? throw new InvalidOperationException("AgentOrchestrationUnavailable");
+    public Task<WorkflowTransitionView?> CreateWorkflowTransitionAsync(CreateWorkflowTransitionRequest request, CancellationToken ct = default) => orchestrator?.CreateTransitionAsync(request, ct) ?? throw new InvalidOperationException("AgentOrchestrationUnavailable");
+    public Task<IReadOnlyList<AgentRunView>> GetRunsAsync(long id, CancellationToken ct = default) => orchestrator?.GetRunsAsync(id, ct) ?? throw new InvalidOperationException("AgentOrchestrationUnavailable");
+    public Task<AgentRunView?> DispatchNextAsync(long id, CancellationToken ct = default) => orchestrator?.DispatchNextAsync(id, ct) ?? throw new InvalidOperationException("AgentOrchestrationUnavailable");
     private async Task StartTrackingInternal(WorkItem item, string? note, CancellationToken ct) { if (await db.WorkItemTimeEntries.AnyAsync(x => x.WorkItemId == item.Id && x.EndedAtUtc == null, ct)) return; var now = DateTime.UtcNow; item.StartedAtUtc = now; db.WorkItemTimeEntries.Add(new WorkItemTimeEntry { WorkItemId = item.Id, StartedAtUtc = now, Note = note }); }
     private async Task StopTrackingInternal(WorkItem item, string? note, CancellationToken ct) { var entry = await db.WorkItemTimeEntries.Where(x => x.WorkItemId == item.Id && x.EndedAtUtc == null).OrderByDescending(x => x.StartedAtUtc).FirstOrDefaultAsync(ct); if (entry is null) return; entry.EndedAtUtc = DateTime.UtcNow; entry.DurationSeconds = Math.Max(0, (long)(entry.EndedAtUtc.Value - entry.StartedAtUtc).TotalSeconds); if (!string.IsNullOrWhiteSpace(note)) entry.Note = note; item.AccumulatedSeconds += entry.DurationSeconds; item.StartedAtUtc = null; }
     private async Task<WorkItemSummary> SummaryAsync(WorkItem item, CancellationToken ct) => ToSummary(item, await db.WorkItems.CountAsync(x => x.ParentWorkItemId == item.Id, ct));

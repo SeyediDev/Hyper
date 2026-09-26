@@ -74,3 +74,41 @@ IF NOT EXISTS (SELECT 1 FROM dbo.WorkRoles WHERE [Key]=N'accounting-platform') I
 IF NOT EXISTS (SELECT 1 FROM dbo.WorkRoles WHERE [Key]=N'worker-operations') INSERT dbo.WorkRoles([Key],Name,Scope,IsEnabled) VALUES(N'worker-operations',N'Worker Operations',N'Queue, outbox, retry, worker',1);
 IF NOT EXISTS (SELECT 1 FROM dbo.WorkRoles WHERE [Key]=N'quality') INSERT dbo.WorkRoles([Key],Name,Scope,IsEnabled) VALUES(N'quality',N'Quality and Test',N'Integration, E2E and regression tests',1);
 IF NOT EXISTS (SELECT 1 FROM dbo.WorkRoles WHERE [Key]=N'panel-operations') INSERT dbo.WorkRoles([Key],Name,Scope,IsEnabled) VALUES(N'panel-operations',N'Panel Operations',N'Admin dashboard, kanban and CRUD',1);
+IF OBJECT_ID(N'dbo.AgentProfiles',N'U') IS NULL
+BEGIN
+ CREATE TABLE dbo.AgentProfiles(
+  Id bigint IDENTITY(1,1) NOT NULL CONSTRAINT PK_AgentProfiles PRIMARY KEY,
+  [Key] nvarchar(120) NOT NULL CONSTRAINT UQ_AgentProfiles_Key UNIQUE,
+  Name nvarchar(200) NOT NULL, RoleKey nvarchar(120) NOT NULL, Provider nvarchar(40) NOT NULL,
+  Model nvarchar(120) NULL, Instructions nvarchar(max) NULL, SkillPath nvarchar(500) NULL,
+  IsEnabled bit NOT NULL CONSTRAINT DF_AgentProfiles_IsEnabled DEFAULT(1),
+  CreatedAtUtc datetime2(3) NOT NULL, UpdatedAtUtc datetime2(3) NOT NULL);
+END
+IF OBJECT_ID(N'dbo.WorkflowTransitions',N'U') IS NULL
+BEGIN
+ CREATE TABLE dbo.WorkflowTransitions(
+  Id bigint IDENTITY(1,1) NOT NULL CONSTRAINT PK_WorkflowTransitions PRIMARY KEY,
+  [Key] nvarchar(120) NOT NULL CONSTRAINT UQ_WorkflowTransitions_Key UNIQUE,
+  ProjectKey nvarchar(80) NULL, Domain nvarchar(80) NULL, FromStatus tinyint NOT NULL,
+  TriggerStatus tinyint NOT NULL, FromRoleKey nvarchar(120) NOT NULL, NextRoleKey nvarchar(120) NOT NULL,
+  NextStatus tinyint NOT NULL, RequireTests bit NOT NULL CONSTRAINT DF_WorkflowTransitions_RequireTests DEFAULT(0),
+  RequireCommits bit NOT NULL CONSTRAINT DF_WorkflowTransitions_RequireCommits DEFAULT(0),
+  AutoDispatch bit NOT NULL CONSTRAINT DF_WorkflowTransitions_AutoDispatch DEFAULT(1),
+  IsEnabled bit NOT NULL CONSTRAINT DF_WorkflowTransitions_IsEnabled DEFAULT(1), UpdatedAtUtc datetime2(3) NOT NULL);
+END
+IF OBJECT_ID(N'dbo.AgentRuns',N'U') IS NULL
+BEGIN
+ CREATE TABLE dbo.AgentRuns(
+  Id bigint IDENTITY(1,1) NOT NULL CONSTRAINT PK_AgentRuns PRIMARY KEY,
+  WorkItemId bigint NOT NULL, AgentProfileId bigint NOT NULL, TargetRoleKey nvarchar(120) NOT NULL,
+  [Status] nvarchar(40) NOT NULL, ExternalRunId nvarchar(200) NULL, Prompt nvarchar(max) NULL,
+  Branch nvarchar(300) NULL, LastError nvarchar(500) NULL, CreatedAtUtc datetime2(3) NOT NULL,
+  StartedAtUtc datetime2(3) NULL, CompletedAtUtc datetime2(3) NULL,
+  CONSTRAINT FK_AgentRuns_WorkItems FOREIGN KEY(WorkItemId) REFERENCES dbo.WorkItems(Id),
+  CONSTRAINT FK_AgentRuns_Profiles FOREIGN KEY(AgentProfileId) REFERENCES dbo.AgentProfiles(Id));
+END
+IF NOT EXISTS (SELECT 1 FROM dbo.AgentProfiles WHERE [Key]=N'codex-architecture-lead') INSERT dbo.AgentProfiles([Key],Name,RoleKey,Provider,Model,SkillPath,IsEnabled,CreatedAtUtc,UpdatedAtUtc) VALUES(N'codex-architecture-lead',N'Codex Architecture Lead',N'architecture-lead',N'codex',N'gpt-6-astra',N'.agents/skills/hyper-work-management/SKILL.md',1,SYSUTCDATETIME(),SYSUTCDATETIME());
+IF NOT EXISTS (SELECT 1 FROM dbo.AgentProfiles WHERE [Key]=N'codex-quality') INSERT dbo.AgentProfiles([Key],Name,RoleKey,Provider,Model,SkillPath,IsEnabled,CreatedAtUtc,UpdatedAtUtc) VALUES(N'codex-quality',N'Codex Quality',N'quality',N'codex',N'gpt-6-sol',N'.agents/skills/hyper-work-management/SKILL.md',1,SYSUTCDATETIME(),SYSUTCDATETIME());
+IF NOT EXISTS (SELECT 1 FROM dbo.AgentProfiles WHERE [Key]=N'codex-panel-operations') INSERT dbo.AgentProfiles([Key],Name,RoleKey,Provider,Model,SkillPath,IsEnabled,CreatedAtUtc,UpdatedAtUtc) VALUES(N'codex-panel-operations',N'Codex Panel Operations',N'panel-operations',N'codex',N'gpt-6-sol',N'.agents/skills/hyper-work-management/SKILL.md',1,SYSUTCDATETIME(),SYSUTCDATETIME());
+IF NOT EXISTS (SELECT 1 FROM dbo.WorkflowTransitions WHERE [Key]=N'implementation-to-quality') INSERT dbo.WorkflowTransitions([Key],ProjectKey,Domain,FromStatus,TriggerStatus,FromRoleKey,NextRoleKey,NextStatus,RequireTests,RequireCommits,AutoDispatch,IsEnabled,UpdatedAtUtc) VALUES(N'implementation-to-quality',N'HYPER',NULL,3,5,N'*',N'quality',5,1,1,1,1,SYSUTCDATETIME());
+IF NOT EXISTS (SELECT 1 FROM dbo.WorkflowTransitions WHERE [Key]=N'quality-to-panel-review') INSERT dbo.WorkflowTransitions([Key],ProjectKey,Domain,FromStatus,TriggerStatus,FromRoleKey,NextRoleKey,NextStatus,RequireTests,RequireCommits,AutoDispatch,IsEnabled,UpdatedAtUtc) VALUES(N'quality-to-panel-review',N'HYPER',NULL,3,5,N'quality',N'panel-operations',5,1,1,1,1,SYSUTCDATETIME());

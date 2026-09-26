@@ -40,4 +40,14 @@ public sealed class WorkManagementController(IWorkManagementApi api) : Controlle
     public async Task<IActionResult> Unarchive(long id, CancellationToken ct) => await api.UnarchiveAsync(id, ct) ? Ok() : NotFound();
     [HttpPut("items/{id:long}/estimate")]
     public async Task<IActionResult> Estimate(long id, [FromBody] EstimateWorkItemRequest request, CancellationToken ct) => (await api.SetEstimateAsync(id, request, ct)) is { } item ? Ok(item) : BadRequest(new { error = "InvalidEstimate" });
+    [HttpGet("orchestration")]
+    public Task<AgentOrchestrationSnapshot> Orchestration(CancellationToken ct) => api.GetOrchestrationAsync(ct);
+    [HttpPost("orchestration/profiles")]
+    public async Task<IActionResult> Profile([FromBody] CreateAgentProfileRequest request, CancellationToken ct) => (await api.CreateAgentProfileAsync(request, ct)) is { } profile ? Ok(profile) : Conflict(new { error = "ProfileKeyUnavailable" });
+    [HttpPost("orchestration/transitions")]
+    public async Task<IActionResult> Transition([FromBody] CreateWorkflowTransitionRequest request, CancellationToken ct) => (await api.CreateWorkflowTransitionAsync(request, ct)) is { } transition ? Ok(transition) : Conflict(new { error = "TransitionKeyUnavailable" });
+    [HttpGet("items/{id:long}/orchestration/runs")]
+    public Task<IReadOnlyList<AgentRunView>> Runs(long id, CancellationToken ct) => api.GetRunsAsync(id, ct);
+    [HttpPost("items/{id:long}/orchestration/dispatch")]
+    public async Task<IActionResult> Dispatch(long id, CancellationToken ct) => (await api.DispatchNextAsync(id, ct)) is { } run ? Ok(run) : NotFound(new { error = "QueuedRunNotFound" });
 }

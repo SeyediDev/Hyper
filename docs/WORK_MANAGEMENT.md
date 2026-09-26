@@ -70,6 +70,9 @@ and `src/WorkManagement/Hyper.WorkManagement.Infrastructure/WorkManagementServic
 | Start/stop elapsed time | `POST /items/{id}/time/start` or `/time/stop`: optional `Note` |
 | Archive / restore | `POST /items/{id}/archive` or `/unarchive`; only Blocked/Done items can be archived |
 | Set forecast | `PUT /items/{id}/estimate`: `{ "estimatedSeconds": 3600 }` |
+| Orchestration snapshot | `GET /orchestration` |
+| Agent profile / transition | `POST /orchestration/profiles`, `POST /orchestration/transitions` |
+| Agent runs | `GET /items/{id}/orchestration/runs`, `POST /items/{id}/orchestration/dispatch` |
 
 Persisted status values: Backlog=1, Ready=2, InProgress=3, Blocked=4, Review=5,
 Done=6, Cancelled=7. Priority: Low=1, Normal=2, High=3, Critical=4.
@@ -84,6 +87,23 @@ exclusive ownership. Follow the skill's pre/post ownership checks and serialize
 competing claims; if exclusive ownership cannot be established, do not edit.
 The schema provisioner's optional claim mode is not a concurrency-safe task
 client and must not replace this gate.
+
+## Agent orchestration
+
+`AgentProfiles` describe the role-facing agent instructions, provider, model and
+skill path. `WorkflowTransitions` define a gated handoff from a previous status
+and role to a next role. When a matching status change has its prerequisites
+(optional tests and commits), the service creates one queued `AgentRun` and
+assigns the next role. Duplicate queued/dispatched runs for the same work item
+and target role are ignored.
+
+`AgentRuns` are durable records. The HTTP Harness adapter dispatches them only
+when `AgentOrchestration:Harness:Enabled` and an endpoint are configured; with
+the default disabled setting the run is retained as `NeedsConfiguration`, never
+pretending that Codex or a cloud agent executed. The endpoint is provider-neutral
+so a Codex SDK gateway, Agents API worker, or an internal MCP bridge can implement
+the external execution contract. The Work Management database remains the source
+of truth for task state and evidence; the Harness owns agent context and execution.
 
 ## Local database fallback
 

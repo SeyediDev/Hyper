@@ -95,3 +95,49 @@ public sealed class ChatWorkIntake
     public byte Status { get; set; }
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 }
+public sealed class AgentProfile
+{
+    public long Id { get; set; }
+    public string Key { get; set; } = null!;
+    public string Name { get; set; } = null!;
+    public string RoleKey { get; set; } = null!;
+    public string Provider { get; set; } = "codex";
+    public string? Model { get; set; }
+    public string? Instructions { get; set; }
+    public string? SkillPath { get; set; }
+    public bool IsEnabled { get; set; } = true;
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+}
+public sealed class WorkflowTransition
+{
+    public long Id { get; set; }
+    public string Key { get; set; } = null!;
+    public string? ProjectKey { get; set; }
+    public string? Domain { get; set; }
+    public WorkItemStatus FromStatus { get; set; }
+    public WorkItemStatus TriggerStatus { get; set; }
+    public string FromRoleKey { get; set; } = null!;
+    public string NextRoleKey { get; set; } = null!;
+    public WorkItemStatus NextStatus { get; set; } = WorkItemStatus.Review;
+    public bool RequireTests { get; set; }
+    public bool RequireCommits { get; set; }
+    public bool AutoDispatch { get; set; } = true;
+    public bool IsEnabled { get; set; } = true;
+    public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+}
+public sealed class AgentRun
+{
+    public long Id { get; set; }
+    public long WorkItemId { get; set; }
+    public long AgentProfileId { get; set; }
+    public string TargetRoleKey { get; set; } = null!;
+    public string Status { get; set; } = "Queued";
+    public string? ExternalRunId { get; set; }
+    public string? Prompt { get; set; }
+    public string? Branch { get; set; }
+    public string? LastError { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
+    public DateTime? StartedAtUtc { get; set; }
+    public DateTime? CompletedAtUtc { get; set; }
+}

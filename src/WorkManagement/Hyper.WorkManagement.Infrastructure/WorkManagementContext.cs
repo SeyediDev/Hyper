@@ -14,6 +14,9 @@ public sealed class WorkManagementContext(DbContextOptions<WorkManagementContext
     public DbSet<WorkItemCommit> WorkItemCommits => Set<WorkItemCommit>();
     public DbSet<WorkItemTestEvidence> WorkItemTestEvidence => Set<WorkItemTestEvidence>();
     public DbSet<WorkItemTimeEntry> WorkItemTimeEntries => Set<WorkItemTimeEntry>();
+    public DbSet<AgentProfile> AgentProfiles => Set<AgentProfile>();
+    public DbSet<WorkflowTransition> WorkflowTransitions => Set<WorkflowTransition>();
+    public DbSet<AgentRun> AgentRuns => Set<AgentRun>();
     protected override void OnModelCreating(ModelBuilder b)
     {
         b.Entity<WorkItem>().ToTable("WorkItems").HasKey(x => x.Id);
@@ -36,5 +39,11 @@ public sealed class WorkManagementContext(DbContextOptions<WorkManagementContext
         b.Entity<WorkItemTestEvidence>().ToTable("WorkItemTestEvidence").HasKey(x => x.Id);
         b.Entity<WorkItemTimeEntry>().ToTable("WorkItemTimeEntries").HasKey(x => x.Id);
         b.Entity<WorkItemTimeEntry>().HasIndex(x => new { x.WorkItemId, x.EndedAtUtc });
+        b.Entity<AgentProfile>().ToTable("AgentProfiles").HasKey(x => x.Id);
+        b.Entity<AgentProfile>().HasIndex(x => x.Key).IsUnique();
+        b.Entity<WorkflowTransition>().ToTable("WorkflowTransitions").HasKey(x => x.Id);
+        b.Entity<WorkflowTransition>().HasIndex(x => x.Key).IsUnique();
+        b.Entity<AgentRun>().ToTable("AgentRuns").HasKey(x => x.Id);
+        b.Entity<AgentRun>().HasIndex(x => new { x.WorkItemId, x.Status });
     }
 }
