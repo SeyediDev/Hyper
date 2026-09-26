@@ -61,8 +61,10 @@ public sealed class IntegrationWebhookVerifier : IIntegrationWebhookVerifier
         try
         {
             using var credentials = JsonDocument.Parse(connection.CredentialsJson);
-            if (credentials.RootElement.TryGetProperty("webhookSecret", out var secret)
-                && secret.ValueKind == JsonValueKind.String)
+            if (credentials.RootElement.ValueKind == JsonValueKind.Object
+                && credentials.RootElement.TryGetProperty("webhookSecret", out var secret)
+                && secret.ValueKind == JsonValueKind.String
+                && !string.IsNullOrWhiteSpace(secret.GetString()))
                 expectedAuthorization = $"Bearer {secret.GetString()}";
         }
         catch (JsonException) { return WebhookValidationResult.Invalid; }

@@ -15,6 +15,7 @@ public static class IntegrationSourceRules
 
     public static string? ReadSource(JsonElement root)
     {
+        if (root.ValueKind != JsonValueKind.Object) return null;
         foreach (var name in new[] { "source", "syncSource", "sync_source" })
             if (root.TryGetProperty(name, out var value) && value.ValueKind == JsonValueKind.String)
                 return value.GetString();
