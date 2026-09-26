@@ -25,6 +25,7 @@ public sealed class WorkManagementContext(DbContextOptions<WorkManagementContext
         b.Entity<WorkItem>().HasIndex(x => new { x.ProjectId, x.Key }).IsUnique();
         b.Entity<WorkItem>().Property(x => x.Key).HasMaxLength(40).IsRequired();
         b.Entity<WorkItem>().Property(x => x.Domain).HasMaxLength(80).IsRequired();
+        b.Entity<WorkItem>().Property(x => x.Description).HasColumnType("nvarchar(max)");
         b.Entity<WorkRole>().ToTable("WorkRoles").HasKey(x => x.Id);
         b.Entity<WorkRole>().HasIndex(x => x.Key).IsUnique();
         b.Entity<WorkItemLog>().ToTable("WorkItemLogs").HasKey(x => x.Id);

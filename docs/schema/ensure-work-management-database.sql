@@ -11,7 +11,7 @@ CREATE TABLE dbo.WorkItems(
  Priority tinyint NOT NULL, Description nvarchar(max) NULL, OwnerRole nvarchar(120) NULL,
  OwnerAgent nvarchar(200) NULL, ChatId nvarchar(200) NULL, Branch nvarchar(300) NULL,
  CommitSha nvarchar(80) NULL, CreatedAtUtc datetime2(3) NOT NULL, UpdatedAtUtc datetime2(3) NOT NULL,
- StartedAtUtc datetime2(3) NULL, CompletedAtUtc datetime2(3) NULL, AccumulatedSeconds bigint NOT NULL CONSTRAINT DF_WorkItems_AccumulatedSeconds DEFAULT(0),
+ StartedAtUtc datetime2(3) NULL, CompletedAtUtc datetime2(3) NULL, AccumulatedSeconds bigint NOT NULL CONSTRAINT DF_WorkItems_AccumulatedSeconds DEFAULT(0), EstimatedSeconds bigint NULL, IsArchived bit NOT NULL CONSTRAINT DF_WorkItems_IsArchived DEFAULT(0), ArchivedAtUtc datetime2(3) NULL,
  CONSTRAINT FK_WorkItems_Projects FOREIGN KEY(ProjectId) REFERENCES dbo.Projects(Id),
  CONSTRAINT FK_WorkItems_Parent FOREIGN KEY(ParentWorkItemId) REFERENCES dbo.WorkItems(Id),
  CONSTRAINT UQ_WorkItems_Project_Key UNIQUE(ProjectId,[Key]));
@@ -54,6 +54,9 @@ IF COL_LENGTH(N'dbo.WorkItems',N'ParentWorkItemId') IS NULL ALTER TABLE dbo.Work
 IF COL_LENGTH(N'dbo.WorkItems',N'StartedAtUtc') IS NULL ALTER TABLE dbo.WorkItems ADD StartedAtUtc datetime2(3) NULL;
 IF COL_LENGTH(N'dbo.WorkItems',N'CompletedAtUtc') IS NULL ALTER TABLE dbo.WorkItems ADD CompletedAtUtc datetime2(3) NULL;
 IF COL_LENGTH(N'dbo.WorkItems',N'AccumulatedSeconds') IS NULL ALTER TABLE dbo.WorkItems ADD AccumulatedSeconds bigint NOT NULL CONSTRAINT DF_WorkItems_AccumulatedSeconds DEFAULT(0);
+IF COL_LENGTH(N'dbo.WorkItems',N'EstimatedSeconds') IS NULL ALTER TABLE dbo.WorkItems ADD EstimatedSeconds bigint NULL;
+IF COL_LENGTH(N'dbo.WorkItems',N'IsArchived') IS NULL ALTER TABLE dbo.WorkItems ADD IsArchived bit NOT NULL CONSTRAINT DF_WorkItems_IsArchived DEFAULT(0);
+IF COL_LENGTH(N'dbo.WorkItems',N'ArchivedAtUtc') IS NULL ALTER TABLE dbo.WorkItems ADD ArchivedAtUtc datetime2(3) NULL;
 IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name=N'FK_WorkItems_Parent') ALTER TABLE dbo.WorkItems ADD CONSTRAINT FK_WorkItems_Parent FOREIGN KEY(ParentWorkItemId) REFERENCES dbo.WorkItems(Id);
 IF OBJECT_ID(N'dbo.WorkItemTimeEntries',N'U') IS NULL
 BEGIN

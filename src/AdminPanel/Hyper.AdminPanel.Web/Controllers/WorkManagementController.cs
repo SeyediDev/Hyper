@@ -9,7 +9,7 @@ namespace Hyper.AdminPanel.Web.Controllers;
 public sealed class WorkManagementController(IWorkManagementApi api) : ControllerBase
 {
     [HttpGet("board")]
-    public Task<WorkBoardResponse> Board([FromQuery] string? domain, [FromQuery] string? project, CancellationToken ct) => api.GetBoardAsync(domain, project, ct);
+    public Task<WorkBoardResponse> Board([FromQuery] string? domain, [FromQuery] string? project, [FromQuery] string? role, [FromQuery] bool includeArchived, CancellationToken ct) => api.GetBoardAsync(domain, project, role, includeArchived, ct);
     [HttpGet("roles")]
     public Task<IReadOnlyList<WorkRoleSummary>> Roles(CancellationToken ct) => api.GetRolesAsync(ct);
     [HttpPost("items/{id:long}/claim")]
@@ -34,4 +34,10 @@ public sealed class WorkManagementController(IWorkManagementApi api) : Controlle
     public async Task<IActionResult> StartTime(long id, [FromBody] TimeTrackingRequest request, CancellationToken ct) => (await api.StartTrackingAsync(id, request, ct)) is { } item ? Ok(item) : NotFound();
     [HttpPost("items/{id:long}/time/stop")]
     public async Task<IActionResult> StopTime(long id, [FromBody] TimeTrackingRequest request, CancellationToken ct) => (await api.StopTrackingAsync(id, request, ct)) is { } item ? Ok(item) : NotFound();
+    [HttpPost("items/{id:long}/archive")]
+    public async Task<IActionResult> Archive(long id, CancellationToken ct) => await api.ArchiveAsync(id, ct) ? Ok() : Conflict(new { error = "OnlyBlockedOrDoneCanBeArchived" });
+    [HttpPost("items/{id:long}/unarchive")]
+    public async Task<IActionResult> Unarchive(long id, CancellationToken ct) => await api.UnarchiveAsync(id, ct) ? Ok() : NotFound();
+    [HttpPut("items/{id:long}/estimate")]
+    public async Task<IActionResult> Estimate(long id, [FromBody] EstimateWorkItemRequest request, CancellationToken ct) => (await api.SetEstimateAsync(id, request, ct)) is { } item ? Ok(item) : BadRequest(new { error = "InvalidEstimate" });
 }

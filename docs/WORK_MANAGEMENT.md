@@ -58,7 +58,7 @@ and `src/WorkManagement/Hyper.WorkManagement.Infrastructure/WorkManagementServic
 
 | Operation | Route / request fields |
 | --- | --- |
-| Read board / roles | `GET /board?project=HYPER&domain=...`, `GET /roles` |
+| Read board / roles | `GET /board?project=HYPER&domain=...&role=...&includeArchived=false`, `GET /roles` (board returns filter options and time metrics) |
 | Read item, logs, tests, children and dependencies | `GET /items/{id}` |
 | Managed chat intake | `POST /chat-intake`: `ChatId`, `Author`, `Message`, optional `SuggestedTitle`, `Domain` |
 | Create explicit project/subtask | `POST /items`: `ProjectKey`, `Key`, `Title`, `Domain`, `Priority`, `Description`, `ParentWorkItemId` |
@@ -68,6 +68,8 @@ and `src/WorkManagement/Hyper.WorkManagement.Infrastructure/WorkManagementServic
 | Add dependency | `POST /items/{id}/dependencies`: `DependsOnWorkItemId` |
 | Change status | `POST /items/{id}/status`: `Status`, `Author`, `Message` |
 | Start/stop elapsed time | `POST /items/{id}/time/start` or `/time/stop`: optional `Note` |
+| Archive / restore | `POST /items/{id}/archive` or `/unarchive`; only Blocked/Done items can be archived |
+| Set forecast | `PUT /items/{id}/estimate`: `{ "estimatedSeconds": 3600 }` |
 
 Persisted status values: Backlog=1, Ready=2, InProgress=3, Blocked=4, Review=5,
 Done=6, Cancelled=7. Priority: Low=1, Normal=2, High=3, Critical=4.

@@ -10,13 +10,15 @@ namespace Hyper.AdminPanel.Web.Controllers;
 public sealed class WorkManagementPageController(IWorkManagementApi api) : ControllerBaseMVC
 {
     [HttpGet]
-    public async Task<IActionResult> Index(string? domain, string? project, CancellationToken ct = default)
+    public async Task<IActionResult> Index(string? domain, string? project, string? role, bool includeArchived = false, CancellationToken ct = default)
     {
         var admin = GetUser();
         if (!admin.IsAdmin) return StatusCode(403);
         ViewBag.AdminDisplayName = admin.UserName;
         ViewBag.Domain = domain;
         ViewBag.Project = project;
-        return View(await api.GetBoardAsync(domain, project, ct));
+        ViewBag.Role = role;
+        ViewBag.IncludeArchived = includeArchived;
+        return View(await api.GetBoardAsync(domain, project, role, includeArchived, ct));
     }
 }

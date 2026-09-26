@@ -24,6 +24,9 @@ public sealed class WorkItem
     public DateTime? StartedAtUtc { get; set; }
     public DateTime? CompletedAtUtc { get; set; }
     public long AccumulatedSeconds { get; set; }
+    public long? EstimatedSeconds { get; set; }
+    public bool IsArchived { get; set; }
+    public DateTime? ArchivedAtUtc { get; set; }
 }
 public sealed class WorkProject
 {
