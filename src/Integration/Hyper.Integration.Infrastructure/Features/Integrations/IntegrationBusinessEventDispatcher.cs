@@ -40,7 +40,7 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
                 OptionalAny(root, "reason", "cancel_reason", "cancelReason", "status") ?? inbox.EventType), ct);
             if (cancellation.Status is BusinessCommandStatus.Applied or BusinessCommandStatus.Duplicate)
                 await reservations.ReleaseAsync(new OwnedIntegrationShop(job.ShopId, job.TenantId),
-                    $"order:{externalOrderId}", ct);
+                    IntegrationReservationIdentity.ForOrder(new(job.ShopId, job.TenantId), job.ConnectionId, externalOrderId), ct);
             return Result(cancellation);
         }
         if (job.Item is IntegrationSyncItem.Subscription or IntegrationSyncItem.Review or IntegrationSyncItem.Chat)
@@ -141,31 +141,24 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
     private async Task<BusinessCommandResult> SaleCoreAsync(IntegrationScenarioJob job, JsonElement root,
         IReadOnlyCollection<IntegrationOrderLineCommand> lines, CancellationToken ct)
     {
+        var payment = PaymentStatus(root);
+        if (payment != SalePaymentStatus.Paid)
+            return new(BusinessCommandStatus.PendingDependency, ErrorCode: "BoothOrderPaymentNotConfirmed");
         var externalCustomerId = RequiredAny(root, "externalCustomerId", "customer_id", "customerId", "user_id", "userId");
         var mapping = await db.IntegrationCustomerMappings.AsNoTracking().SingleOrDefaultAsync(x =>
             x.ShopId == job.ShopId && x.TenantId == job.TenantId && x.ExternalCustomerId == externalCustomerId, ct);
         if (mapping is null || mapping.PersonId <= 0)
             throw new IntegrationProviderException("AccountingCustomerMappingUnavailable", false);
         var externalOrderId = RequiredAny(root, "externalOrderId", "order_id", "orderId", "id");
-        var reservationKey = $"order:{externalOrderId}";
         var shop = new OwnedIntegrationShop(job.ShopId, job.TenantId);
+        var reservationKey = IntegrationReservationIdentity.ForOrder(shop, job.ConnectionId, externalOrderId);
+        var command = new IntegrationVendorOrderCommand(job.EventId, job.ShopId, job.TenantId, job.ConnectionId,
+            externalOrderId, OptionalAny(root, "externalParcelId", "parcel_id", "parcelId"), externalCustomerId,
+            lines, DecimalAny(root, "totalAmount", "total_amount", "total", "amount"), payment, mapping.PersonId);
         await reservations.ReserveAsync(shop, reservationKey, lines, ct);
-        try
-        {
-            var result = await commands.ApplyVendorOrderAsync(new(job.EventId, job.ShopId, job.TenantId, job.ConnectionId,
-                externalOrderId,
-                OptionalAny(root, "externalParcelId", "parcel_id", "parcelId"), externalCustomerId,
-                lines, DecimalAny(root, "totalAmount", "total_amount", "total", "amount"),
-                PaymentStatus(root), mapping.PersonId), ct);
-            if (result.Status is not (BusinessCommandStatus.Applied or BusinessCommandStatus.Duplicate))
-                await reservations.ReleaseAsync(shop, reservationKey, ct);
-            return result;
-        }
-        catch
-        {
-            await reservations.ReleaseAsync(shop, reservationKey, ct);
-            throw;
-        }
+        // A timeout or error does not prove the remote write failed. Retain the hold
+        // for idempotent replay; only an acknowledged cancellation releases it.
+        return await commands.ApplyVendorOrderAsync(command, ct);
     }
 
     private Task<BusinessCommandResult> PurchaseAsync(IntegrationScenarioJob job, JsonElement root, CancellationToken ct)
