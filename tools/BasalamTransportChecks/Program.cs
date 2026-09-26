@@ -48,6 +48,14 @@ try
     await client.Variations.UpdateVariationAsync(8, new VariationWriteRequest(12, Title: "Blue"));
     Check(transport.LastUri?.AbsolutePath == "/v1/variations/8" && transport.LastMethod == HttpMethod.Patch,
         "typed variation update uses the official variation route");
+    transport.ResponseBody = "{\"id\":91,\"status\":\"paid\",\"totalAmount\":1250,\"parcels\":[{\"id\":7,\"orderId\":91,\"status\":\"ready\"}]}";
+    var orderSnapshot = await client.Orders.GetOrderSnapshotAsync(91);
+    Check(orderSnapshot?.Id == 91 && orderSnapshot.TotalAmount == 1250 && orderSnapshot.Parcels.Count == 1,
+        "typed order snapshot maps stable lifecycle fields");
+    transport.ResponseBody = "{\"id\":7,\"orderId\":91,\"status\":\"ready\",\"trackingCode\":\"TRK-1\"}";
+    var parcelSnapshot = await client.Parcels.GetParcelSnapshotAsync(7);
+    Check(parcelSnapshot?.OrderId == 91 && parcelSnapshot.TrackingCode == "TRK-1",
+        "typed parcel snapshot maps order and tracking identity");
     transport.ResponseBody = null;
 
     transport.Statuses.Enqueue(HttpStatusCode.ServiceUnavailable);

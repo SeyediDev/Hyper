@@ -112,3 +112,25 @@ public sealed record ProductWriteRequest(string Name, int VendorId, decimal? Pri
 
 public sealed record VariationWriteRequest(int ProductId, string? Title = null,
     decimal? Price = null, string? Sku = null, string? Barcode = null, int? Stock = null);
+
+// Provider snapshots intentionally keep all fields optional: Basalam has changed
+// order/parcel response envelopes across API versions. Stable identities and
+// lifecycle fields are typed without pretending to know provider-specific money
+// or customer schemas.
+public sealed record OrderSnapshot
+{
+    public int? Id { get; init; }
+    public string? ExternalId { get; init; }
+    public string? Status { get; init; }
+    public int? CustomerId { get; init; }
+    public decimal? TotalAmount { get; init; }
+    public List<ParcelSnapshot> Parcels { get; init; } = [];
+}
+
+public sealed record ParcelSnapshot
+{
+    public int? Id { get; init; }
+    public int? OrderId { get; init; }
+    public string? Status { get; init; }
+    public string? TrackingCode { get; init; }
+}
