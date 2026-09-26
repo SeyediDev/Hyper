@@ -25,6 +25,8 @@ public static class IntegrationServiceRegistration
         services.AddScoped<IntegrationOutbox>();
         services.AddScoped<IIntegrationOutbox>(sp => sp.GetRequiredService<IntegrationOutbox>());
         services.AddScoped<IIntegrationProductOutbox>(sp => sp.GetRequiredService<IntegrationOutbox>());
+        services.AddScoped<IIntegrationCapturedInventoryOutbox>(sp => sp.GetRequiredService<IntegrationOutbox>());
+        services.AddScoped<IIntegrationVersionSourceApi, IntegrationVersionSourceApi>();
         services.AddScoped<IIntegrationAccountingProductEventIngress, IntegrationAccountingProductEventIngress>();
         services.AddScoped<IIntegrationAccountingEventIngress, IntegrationAccountingEventIngress>();
         services.AddScoped<IBasalamWebhookRegistration, BasalamWebhookRegistration>();

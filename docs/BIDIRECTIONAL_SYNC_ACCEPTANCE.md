@@ -115,8 +115,10 @@ separate contract is implemented; no variant change is redirected to its parent.
 
 The request needs an active connection/mapping. The same `(MappingId, SourceVersion)`
 stream is shared by inventory and product operations: producers must supply a
-monotonically increasing version across both; do not run independent version
-allocators/polling and event producers on one mapping without coordination.
+monotonically increasing version across both. The durable
+[source ownership gate](INTEGRATION_VERSION_SOURCE.md) prevents independent
+polling and accounting-event allocators on the same mapping. Switching requires
+an expected-state check and a drained stream; versions never reset.
 An exact retry reuses the message, conflicting or stale versions return 409.
 The new `product.patch.v1` operation uses the existing Outbox schema and worker.
 The adapter re-reads and validates vendor ownership before PATCH. Mapping changes

@@ -15,7 +15,12 @@ public sealed class IntegrationAccountingEventController(IIntegrationAccountingE
         CancellationToken cancellationToken)
     {
         if (!await scope.CanAccessAsync(User, request.ShopId, request.TenantId, cancellationToken)) return Forbid();
-        var result = await ingress.ReceiveInventoryChangedAsync(request, cancellationToken);
-        return result is null ? BadRequest(new { Error = "MappingOrScopeNotFound" }) : Accepted(result);
+        try
+        {
+            var result = await ingress.ReceiveInventoryChangedAsync(request, cancellationToken);
+            return result is null ? BadRequest(new { Error = "MappingOrScopeNotFound" }) : Accepted(result);
+        }
+        catch (InvalidOperationException ex) when (ex.Message is "SourceVersionConflict" or "StaleSourceVersion" or "VersionSourceConflict" or "VersionSourceUnassigned")
+        { return Conflict(new { Error = ex.Message }); }
     }
 }

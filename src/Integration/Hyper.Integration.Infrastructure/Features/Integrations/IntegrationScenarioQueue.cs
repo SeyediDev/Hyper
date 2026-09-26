@@ -105,10 +105,11 @@ public sealed class IntegrationScenarioQueue(HyperIntegrationContext db, Integra
         catch (OperationCanceledException) { errorCode = "ProviderTimeout"; retry = true; }
         catch (JsonException) { errorCode = "InvalidProviderPayload"; }
         catch (ArgumentException) { errorCode = "DuplicateOrInvalidSourceData"; }
+        catch (InvalidOperationException ex) when (ex.Message is "VersionSourceConflict" or "VersionSourceUnassigned") { errorCode = ex.Message; }
         catch (InvalidOperationException) { errorCode = "ConnectionOrSourceUnavailable"; }
         var finished = DateTime.UtcNow;
         if (errorCode is not null && resultJson is null)
-            status = errorCode is "ProductMappingUnavailable" or "ProductMappingAmbiguous" or "AccountingCustomerMappingUnavailable"
+            status = errorCode is "ProductMappingUnavailable" or "ProductMappingAmbiguous" or "AccountingCustomerMappingUnavailable" or "VersionSourceConflict" or "VersionSourceUnassigned"
                 ? IntegrationScenarioStatus.NeedsAttention
                 : retry && job.Attempts < IntegrationRetryPolicy.MaxAttempts ? IntegrationScenarioStatus.Pending : IntegrationScenarioStatus.DeadLetter;
         var next = status == IntegrationScenarioStatus.Pending ? finished + IntegrationRetryPolicy.Delay(job.Attempts, retryAfter) : finished;

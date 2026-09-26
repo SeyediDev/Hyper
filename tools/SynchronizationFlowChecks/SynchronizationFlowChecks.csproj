@@ -1,6 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework></PropertyGroup>
   <ItemGroup>
+    <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationVersionSourceApi.cs" Link="Production/IntegrationVersionSourceApi.cs" />
+    <Compile Include="../../src/Integration/Hyper.Integration.Api/IntegrationVersionSourceController.cs" Link="Production/IntegrationVersionSourceController.cs" />
+    <None Include="../../docs/schema/ensure-integration-version-ownership.sql" Link="ensure-integration-version-ownership.sql" CopyToOutputDirectory="PreserveNewest" />
     <Compile Include="../../src/Integration/Hyper.Integration.Api/IntegrationWebhookController.cs" Link="Production/IntegrationWebhookController.cs" />
     <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/BasalamWebhookEvents.cs" Link="Production/BasalamWebhookEvents.cs" />
     <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/BasalamWebhookRegistration.cs" Link="Production/BasalamWebhookRegistration.cs" />

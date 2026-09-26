@@ -32,13 +32,17 @@ static async Task<int> Run()
     var masterOptions = new SqlConnectionStringBuilder(source) { InitialCatalog = "master", Pooling = false };
     await using var master = new SqlConnection(masterOptions.ConnectionString);
     await master.OpenAsync();
-    await Execute(master, $"CREATE DATABASE [{database}]");
     try
     {
-        var options = new DbContextOptionsBuilder<HyperIntegrationContext>().UseSqlServer(sqlOptions.ConnectionString)
+        Console.WriteLine("Creating isolated SQL fixture " + database);
+        await Execute(master, $"CREATE DATABASE [{database}]");
+        var options = new DbContextOptionsBuilder<HyperIntegrationContext>().UseSqlServer(sqlOptions.ConnectionString, sql => sql.CommandTimeout(120))
             .ReplaceService<IModelCustomizer, FixtureSchema>().Options;
         await using var db = new HyperIntegrationContext(options);
         await db.Database.EnsureCreatedAsync();
+        var sourceSchema = await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "ensure-integration-version-ownership.sql"));
+        await db.Database.ExecuteSqlRawAsync(sourceSchema);
+        await db.Database.ExecuteSqlRawAsync(sourceSchema);
         var checks = 0;
         void Check(bool ok, string name)
         {
@@ -194,6 +198,18 @@ static async Task<int> Run()
         var verified = Options.Create(new IntegrationInventoryCaptureOptions { AccountingStockSourceVerified = true });
         var capture = new IntegrationInventoryCapture(db, outbox, resolver, verified, commands);
         var mapping = await db.ExternalProductMappings.AsNoTracking().SingleAsync(x => x.ConnectionId == connection.Id);
+        var versionSources = new IntegrationVersionSourceApi(db);
+        var versionScope = new IntegrationConnectionCommandRequest(7, "tenant-a", connection.Id);
+        async Task SwitchSource(IntegrationVersionSource target)
+        {
+            var current = (await versionSources.ReadAsync(versionScope, mapping.Id, default))!;
+            var switched = await versionSources.ChangeAsync(versionScope, mapping.Id,
+                new(target, current.Source, current.LastVersion), default);
+            Check(switched?.Status == "Changed", "explicit drained-stream switch to " + target + " preserves source high-water mark");
+        }
+        await Reject(() => capture.CaptureOneAsync(connection.Id, mapping.Id, default), "VersionSourceConflict");
+        Check(await capture.CaptureAsync(default) == 0, "automatic capture excludes externally owned mappings before accounting reads");
+        await SwitchSource(IntegrationVersionSource.InventoryCapture);
         db.InventoryReservationLogs.AddRange(
             new() { ShopId = 7, HyperProductId = 44, ReservationKey = "active", Quantity = 2, Status = 0, Source = "fixture" },
             new() { ShopId = 7, HyperProductId = 44, ReservationKey = "consumed", Quantity = 5, Status = 2, Source = "fixture" },
@@ -229,6 +245,7 @@ static async Task<int> Run()
         accountingHttp.FailCatalog = false;
         // Drain earlier inventory checks before testing the independent product operation.
         while (await outbox.ProcessConnectionAsync(connection.Id, default)) { }
+        await SwitchSource(IntegrationVersionSource.AccountingEvents);
         var productIngress = new IntegrationAccountingProductEventIngress(db, outbox);
         var productController = new IntegrationAccountingProductEventController(productIngress, new IntegrationScopeAuthorization())
         { ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() } };
@@ -261,8 +278,8 @@ static async Task<int> Run()
             "identical product replay returns the same message");
         Check(await productController.ProductChanged(changedProduct with { Title = "Conflict" }, default) is ConflictObjectResult,
             "changed content for an existing source version returns HTTP conflict");
-        Check((await productIngress.ReceiveAsync(changedProduct with { SourceVersion = 1 })).ErrorCode == "SourceVersionConflict",
-            "product and inventory cannot reuse one source version for different operations");
+        Check((await productIngress.ReceiveAsync(changedProduct with { SourceVersion = 1 })).ErrorCode == "StaleSourceVersion",
+            "product cannot reuse a version from a previous source ownership period");
         var stockBeforeProduct = providerHttp.Stock;
         Check(await outbox.ProcessConnectionAsync(connection.Id, default) && providerHttp.ProductPatches == 1
             && providerHttp.ProductPatch!.GetProperty("name").GetString() == "Changed title"
@@ -272,8 +289,7 @@ static async Task<int> Run()
         Check(await db.IntegrationOutbox.AsNoTracking().AnyAsync(x => x.Id == productAccepted.OutboxMessageId && x.Status == 2)
             && !await outbox.ProcessConnectionAsync(connection.Id, default),
             "product success is persisted and not redelivered");
-        Check(!await capture.CaptureOneAsync(connection.Id, mapping.Id, default),
-            "a later product message does not make unchanged inventory capture publish stock again");
+        await Reject(() => capture.CaptureOneAsync(connection.Id, mapping.Id, default), "VersionSourceConflict");
         var priceOnly = changedProduct with { SourceVersion = ++version, Title = null, PrimaryPrice = 0 };
         await productIngress.ReceiveAsync(priceOnly);
         await outbox.ProcessConnectionAsync(connection.Id, default);
@@ -306,6 +322,7 @@ static async Task<int> Run()
                 x.Id == changedMapping.OutboxMessageId && x.Status == 3 && x.LastError == "MappingChanged"),
             "mapping deactivation before delivery prevents product mutation");
         await db.ExternalProductMappings.Where(x => x.Id == mapping.Id).ExecuteUpdateAsync(s => s.SetProperty(x => x.IsActive, true));
+        await SwitchSource(IntegrationVersionSource.InventoryCapture);
         Check(await capture.CaptureOneAsync(connection.Id, mapping.Id, default, true)
             && await db.IntegrationOutbox.MaxAsync(x => x.SourceVersion) == version + 1,
             "inventory capture allocates a version after product messages in the shared stream");
@@ -449,6 +466,7 @@ static async Task<int> Run()
         }
         Check(!await db.Database.SqlQueryRaw<int>("SELECT COUNT(*) AS Value FROM sys.tables WHERE name LIKE 'TBL[_]%' ").AnyAsync(x => x != 0),
             "both paths run with only Integration tables, no accounting tables in Integration database");
+        await VersionSourceChecks.Run(db, options, resolver, connection.Id, Check);
         Console.WriteLine($"{checks} synchronization flow checks passed. HTTP/accounting responses are controlled fixtures, not live-provider acceptance.");
         return 0;
     }
@@ -457,7 +475,7 @@ static async Task<int> Run()
         if (!database.StartsWith("HyperSyncChecks_", StringComparison.Ordinal)
             || !Guid.TryParseExact(database["HyperSyncChecks_".Length..], "N", out _)
             || sqlOptions.InitialCatalog != database) throw new InvalidOperationException("Unsafe fixture cleanup target");
-        await Execute(master, $"DROP DATABASE [{database}]");
+        await Execute(master, $"IF DB_ID(N'{database}') IS NOT NULL DROP DATABASE [{database}]");
         Console.WriteLine("Removed only this run's disposable SQL fixture database.");
     }
 }
@@ -466,6 +484,7 @@ static async Task Execute(SqlConnection sql, string text)
 {
     await using var command = sql.CreateCommand();
     command.CommandText = text;
+    command.CommandTimeout = 120; // Local fixture DDL can be slow while other builds share the disk.
     await command.ExecuteNonQueryAsync();
 }
 

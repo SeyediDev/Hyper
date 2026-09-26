@@ -28,7 +28,7 @@ public sealed class IntegrationAccountingProductEventIngress(HyperIntegrationCon
             var id = await outbox.EnqueueProductAsync(request.ConnectionId, mapping.Id, request.SourceVersion, update, ct);
             return new(id, "Queued");
         }
-        catch (InvalidOperationException ex) when (ex.Message is "SourceVersionConflict" or "StaleSourceVersion")
+        catch (InvalidOperationException ex) when (ex.Message is "SourceVersionConflict" or "StaleSourceVersion" or "VersionSourceConflict" or "VersionSourceUnassigned")
         { return new(null, "Conflict", ex.Message); }
         catch (IntegrationProviderException ex) when (!ex.Retryable)
         { return new(null, "Rejected", ex.Code); }

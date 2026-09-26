@@ -16,6 +16,11 @@ integration_scope=shop:{ShopId};tenant:{TenantId}
 
 ## endpointها
 
+انتخاب مالک نسخه‌گذاری هر نگاشت با GET/PUT مسیر
+`/api/integrations/v1/connections/{connectionId}/mappings/{mappingId}/version-source`
+در [قرارداد مالک نسخه‌گذاری](INTEGRATION_VERSION_SOURCE.md) مستند شده است.
+هر دو ورودی `accounting/events/*` تعارض مالک یا نسخه را با 409 برمی‌گردانند.
+
 | Method | مسیر | کاربرد |
 |---|---|---|
 | POST | `/api/integrations/v1/webhooks/{provider}/{connectionKey}` | دریافت وب‌هوک و ثبت inbox |

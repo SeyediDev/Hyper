@@ -61,6 +61,14 @@ public sealed class HyperIntegrationContext(DbContextOptions<HyperIntegrationCon
                 .HasDatabaseName("UX_IntegrationCustomerMappings_Person");
         });
         modelBuilder.ApplyConfiguration(new ExternalProductMappingConfiguration());
+        modelBuilder.Entity<IntegrationVersionOwnership>(entity =>
+        {
+            entity.ToTable("IntegrationVersionOwnership", "dbo", table =>
+                table.HasCheckConstraint("CK_IntegrationVersionOwnership_Source", "[Source] IN (1,2) AND [VersionFloor] >= 0"));
+            entity.HasKey(x => x.MappingId);
+            entity.Property(x => x.MappingId).ValueGeneratedNever();
+            entity.HasOne<ExternalProductMapping>().WithMany().HasForeignKey(x => x.MappingId).OnDelete(DeleteBehavior.NoAction);
+        });
         modelBuilder.ApplyConfiguration(new IntegrationSyncRunConfiguration());
         modelBuilder.ApplyConfiguration(new IntegrationWebhookInboxConfiguration());
         modelBuilder.ApplyConfiguration(new ExternalOrderMappingConfiguration());

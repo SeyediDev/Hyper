@@ -2,18 +2,26 @@ using System.Data;
 using System.Text.Json;
 using Hyper.Infrastructure.Data.Repository.Hyper;
 using Microsoft.EntityFrameworkCore;
+using Hyper.Integration.Contracts;
 
 namespace Hyper.Infrastructure.Features.Integrations;
 
-public sealed class IntegrationOutbox(HyperIntegrationContext db, IIntegrationStrategyResolver strategies) : IIntegrationOutbox, IIntegrationProductOutbox
+public sealed class IntegrationOutbox(HyperIntegrationContext db, IIntegrationStrategyResolver strategies) : IIntegrationOutbox, IIntegrationProductOutbox, IIntegrationCapturedInventoryOutbox
 {
     public const string InventoryOperation = "inventory.set.v1";
     public const string ProductOperation = "product.patch.v1";
 
     public async Task<long> EnqueueInventoryAsync(long connectionId, long mappingId, long sourceVersion, decimal quantity, CancellationToken ct)
+        => await EnqueueInventoryCoreAsync(connectionId, mappingId, sourceVersion, quantity, IntegrationVersionSource.AccountingEvents, ct);
+
+    public Task<long> EnqueueCapturedInventoryAsync(long connectionId, long mappingId, long sourceVersion, decimal quantity, CancellationToken ct)
+        => EnqueueInventoryCoreAsync(connectionId, mappingId, sourceVersion, quantity, IntegrationVersionSource.InventoryCapture, ct);
+
+    private Task<long> EnqueueInventoryCoreAsync(long connectionId, long mappingId, long sourceVersion, decimal quantity,
+        IntegrationVersionSource source, CancellationToken ct)
     {
         if (sourceVersion <= 0 || quantity < 0) throw new ArgumentException("Positive source version and nonnegative absolute stock are required.");
-        return await EnqueueAsync(connectionId, mappingId, sourceVersion, InventoryOperation,
+        return EnqueueAsync(connectionId, mappingId, sourceVersion, InventoryOperation, source,
             mapping => JsonSerializer.Serialize(new ExternalInventoryUpdate(mapping.ExternalProductId, mapping.ExternalVariantId, quantity)), ct);
     }
 
@@ -22,7 +30,7 @@ public sealed class IntegrationOutbox(HyperIntegrationContext db, IIntegrationSt
     {
         if (sourceVersion <= 0) throw new ArgumentException("Positive source version is required.");
         if (update.ValidationError() is { } error) throw new IntegrationProviderException(error, false);
-        return EnqueueAsync(connectionId, mappingId, sourceVersion, ProductOperation, mapping =>
+        return EnqueueAsync(connectionId, mappingId, sourceVersion, ProductOperation, IntegrationVersionSource.AccountingEvents, mapping =>
         {
             if (mapping.ExternalProductId != update.ExternalProductId || mapping.ExternalVariantId != update.VariantId)
                 throw new IntegrationProviderException("MappingChanged", false);
@@ -31,7 +39,7 @@ public sealed class IntegrationOutbox(HyperIntegrationContext db, IIntegrationSt
     }
 
     private async Task<long> EnqueueAsync(long connectionId, long mappingId, long sourceVersion,
-        string operation, Func<ExternalProductMapping, string> serialize, CancellationToken ct)
+        string operation, IntegrationVersionSource source, Func<ExternalProductMapping, string> serialize, CancellationToken ct)
     {
         await using var transaction = db.Database.CurrentTransaction is null ? await db.Database.BeginTransactionAsync(ct) : null;
         // Lock the mapping as the serialization point for concurrent source versions/replays.
@@ -45,6 +53,8 @@ public sealed class IntegrationOutbox(HyperIntegrationContext db, IIntegrationSt
         if (mapping.ConnectionId != connectionId || mapping.ShopId != connection.ShopId || !mapping.IsActive || mapping.HyperProductId <= 0)
             throw new InvalidOperationException("MappingUnavailable");
         var payload = serialize(mapping);
+        var floor = await IntegrationVersionSourceGuard.RequireAsync(db, mappingId, source, true, ct);
+        if (sourceVersion <= floor) throw new InvalidOperationException("StaleSourceVersion");
         var previous = await db.IntegrationOutbox.AsNoTracking().Where(x => x.MappingId == mappingId && x.SourceVersion == sourceVersion).SingleOrDefaultAsync(ct);
         if (previous is not null)
         {
@@ -79,6 +89,8 @@ public sealed class IntegrationOutbox(HyperIntegrationContext db, IIntegrationSt
         if (mapping is null || !mapping.IsActive || mapping.ConnectionId != connectionId
             || await db.IntegrationOutbox.AnyAsync(x => x.MappingId == message.MappingId && x.SourceVersion > message.SourceVersion, ct))
             return false;
+        var sourceOwner = await db.Set<IntegrationVersionOwnership>().AsNoTracking().SingleOrDefaultAsync(x => x.MappingId == message.MappingId, ct);
+        if (sourceOwner is not null && message.SourceVersion <= sourceOwner.VersionFloor) return false;
         var connection = await db.ExternalIntegrationConnections.AsNoTracking().SingleAsync(x => x.Id == connectionId, ct);
         IntegrationConnectionReadiness.Validate(connection, DateTime.UtcNow);
         var changed = await db.IntegrationOutbox.Where(x => x.Id == messageId && x.ConnectionId == connectionId && x.Status == 3)

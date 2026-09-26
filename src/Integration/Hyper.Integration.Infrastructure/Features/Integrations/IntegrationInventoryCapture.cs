@@ -3,6 +3,7 @@ using System.Text.Json;
 using Hyper.Infrastructure.Data.Repository.Hyper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Hyper.Integration.Contracts;
 
 namespace Hyper.Infrastructure.Features.Integrations;
 
@@ -29,6 +30,9 @@ public sealed class IntegrationInventoryCapture(HyperIntegrationContext db, IInt
                                   join connection in db.ExternalIntegrationConnections.AsNoTracking() on mapping.ConnectionId equals connection.Id
                                   where mapping.Id > cursor && mapping.IsActive && mapping.ShopId == connection.ShopId
                                     && connection.IsEnabled && (connection.ExpiresAtUtc == null || connection.ExpiresAtUtc > now)
+                                    && (db.Set<IntegrationVersionOwnership>().Any(o => o.MappingId == mapping.Id && o.Source == (byte)IntegrationVersionSource.InventoryCapture)
+                                        || !db.Set<IntegrationVersionOwnership>().Any(o => o.MappingId == mapping.Id)
+                                            && !db.IntegrationOutbox.Any(o => o.MappingId == mapping.Id))
                                   orderby mapping.Id
                                   select new { mapping.Id, mapping.ConnectionId, connection.Provider, connection.CredentialType })
                 .Take(100).ToListAsync(ct);
@@ -38,7 +42,9 @@ public sealed class IntegrationInventoryCapture(HyperIntegrationContext db, IInt
                 cursor = candidate.Id;
                 try { strategies.Resolve(candidate.Provider, candidate.CredentialType); }
                 catch (NotSupportedException) { continue; }
-                if (await CaptureOneAsync(candidate.ConnectionId, candidate.Id, ct)) captured++;
+                try { if (await CaptureOneAsync(candidate.ConnectionId, candidate.Id, ct)) captured++; }
+                catch (InvalidOperationException ex) when (ex.Message is "VersionSourceConflict" or "VersionSourceUnassigned")
+                { /* Source can change after candidate selection; next scan will exclude it. */ }
             }
         }
     }
@@ -55,6 +61,7 @@ public sealed class IntegrationInventoryCapture(HyperIntegrationContext db, IInt
         if (mapping is null || connection is null || !mapping.IsActive || mapping.ConnectionId != connectionId || mapping.ShopId != connection.ShopId)
             return false;
         IntegrationConnectionReadiness.Validate(connection, DateTime.UtcNow);
+        var sourceFloor = await IntegrationVersionSourceGuard.RequireAsync(db, mappingId, IntegrationVersionSource.InventoryCapture, false, ct);
         await IntegrationInventoryReadLock.AcquireAsync(db, connection.ShopId, ct);
         // Accounting owns gross stock and sellability. Only Integration's active
         // holds are read here; the two databases never need a cross-domain join.
@@ -66,7 +73,7 @@ public sealed class IntegrationInventoryCapture(HyperIntegrationContext db, IInt
             .SumAsync(x => x.Quantity, ct);
         var quantity = IntegrationAvailableInventory.Calculate(source.Stock, reserved, source.CanSell);
         var latest = await db.IntegrationOutbox.AsNoTracking().Where(x => x.MappingId == mappingId
-                && x.Operation == IntegrationOutbox.InventoryOperation)
+                && x.Operation == IntegrationOutbox.InventoryOperation && x.SourceVersion > sourceFloor)
             .OrderByDescending(x => x.SourceVersion).FirstOrDefaultAsync(ct);
         var update = new ExternalInventoryUpdate(mapping.ExternalProductId, mapping.ExternalVariantId, quantity);
         if (latest is not null && latest.PayloadJson == JsonSerializer.Serialize(update)
@@ -74,8 +81,10 @@ public sealed class IntegrationInventoryCapture(HyperIntegrationContext db, IInt
         // The existing unique key/version stream is shared by all operations for a mapping.
         var lastVersion = await db.IntegrationOutbox.Where(x => x.MappingId == mappingId)
             .MaxAsync(x => (long?)x.SourceVersion, ct) ?? 0;
-        var version = checked(lastVersion + 1);
-        await outbox.EnqueueInventoryAsync(connectionId, mappingId, version, quantity, ct);
+        var version = checked(Math.Max(lastVersion, sourceFloor) + 1);
+        if (outbox is not IIntegrationCapturedInventoryOutbox capturedOutbox)
+            throw new InvalidOperationException("CapturedInventoryOutboxUnavailable");
+        await capturedOutbox.EnqueueCapturedInventoryAsync(connectionId, mappingId, version, quantity, ct);
         await transaction.CommitAsync(ct);
         return true;
     }
