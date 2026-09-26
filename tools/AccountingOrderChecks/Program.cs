@@ -18,7 +18,8 @@ var scope = new AccountingScope(7, "tenant-a");
 var passed = 0;
 void Check(bool condition, string name) { if (!condition) throw new Exception(name); Console.WriteLine("PASS " + name); passed++; }
 SqlAccountingCommandHandler Handler(HyperSqlServerContext db, bool verified = true) => new(db,
-    Options.Create(new AccountingCustomerOptions()), Options.Create(new AccountingInventoryOptions { AccountingStockSourceVerified = verified }));
+    Options.Create(new AccountingCustomerOptions { PersonType = 1, CustomerRole = "customer", DetailAccountEntityType = "person" }),
+    Options.Create(new AccountingInventoryOptions { AccountingStockSourceVerified = verified }));
 await using var setup = new HyperSqlServerContext(options);
 var created = false;
 try
@@ -37,10 +38,15 @@ try
             TenantId = i == 8 ? null : scope.TenantId });
         await setup.SaveChangesAsync();
     }
-    var person = new SqlTblPerson { Shopid = 7, TenantId = scope.TenantId, Nickname = "fixture", Isenabled = true };
+    var detail = new SqlTblDetailaccount { Shopid = 7, TenantId = scope.TenantId, Name = "fixture", Entitytype = "person" };
+    var stockAccount = new SqlTblDetailaccount { Shopid = 7, TenantId = scope.TenantId, Name = "stock", Entitytype = "product" };
+    var legacyStockAccount = new SqlTblDetailaccount { Shopid = 8, Name = "legacy stock", Entitytype = "product" };
+    setup.AddRange(detail, stockAccount, legacyStockAccount); await setup.SaveChangesAsync();
+    var person = new SqlTblPerson { Shopid = 7, TenantId = scope.TenantId, Nickname = "fixture", Isenabled = true,
+        Type = 1, Roles = "customer", Detailaccountid = detail.Detailaccountid };
     var products = Enumerable.Range(1, 8).Select(n => new SqlTblProduct { Shopid = 7, TenantId = scope.TenantId,
         Name = "fixture-" + n, Accountingstock = 10, Isenabled = true, Issellable = true,
-        Isonlinesellable = true, Isstockable = true }).ToArray();
+        Isonlinesellable = true, Isstockable = true, Detailaccountid = stockAccount.Detailaccountid }).ToArray();
     setup.Add(person); setup.AddRange(products);
     setup.TblShopfiscalperiods.Add(new() { Shopid = 7, TenantId = scope.TenantId, Fiscalperiodname = "fixture",
         Fiscalperiodstatusid = 1, Startdate = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(-2),
@@ -62,10 +68,77 @@ try
     products[0].Isonlinesellable = true; products[1].Issellable = true; products[2].Isservice = false;
     products[3].Isstockable = true; products[4].Isenabled = true;
     var legacy = new SqlTblProduct { Shopid = 8, TenantId = "  ", Name = "legacy", Accountingstock = 4,
-        Isenabled = true, Issellable = true, Isonlinesellable = true, Isstockable = true };
+        Isenabled = true, Issellable = true, Isonlinesellable = true, Isstockable = true,
+        Detailaccountid = legacyStockAccount.Detailaccountid };
     setup.Add(legacy); await setup.SaveChangesAsync();
     Check((await Handler(setup).GetProductsAsync(new(8, "shop:8"), default)).Single().ProductId == legacy.Id,
         "tenantless legacy shop uses its canonical accounting scope");
+    async Task<AccountingCommandResult> Resolve(AccountingScope customerScope, AccountingCustomerIdentity identity)
+    { await using var db = new HyperSqlServerContext(options); return await Handler(db).ResolveCustomerAsync(new(customerScope, identity), default); }
+    async Task<AccountingCommandResult> Validate(AccountingScope customerScope, int id, AccountingCustomerIdentity identity)
+    { await using var db = new HyperSqlServerContext(options); return await Handler(db).ValidateCustomerAsync(new(customerScope, id, identity), default); }
+    var identity = new AccountingCustomerIdentity("Customer fixture", "09120000001", "1234567890", "external-fixture");
+    var resolved = await Resolve(scope, identity);
+    var customerId = int.Parse(resolved.InternalReference!);
+    Check(resolved.Status == AccountingCommandStatus.Applied
+        && (await Validate(scope, customerId, identity)).Status == AccountingCommandStatus.Applied,
+        "customer and linked detail account commit and validate together");
+    var replayCustomer = await Resolve(scope, identity);
+    Check(replayCustomer.InternalReference == resolved.InternalReference,
+        "recovery after lost Integration mapping reuses national-identity customer");
+    var concurrentIdentity = identity with { Mobile = "09120000002", IdentifierNumber = "1234567891" };
+    var customerRace = await Task.WhenAll(Resolve(scope, concurrentIdentity), Resolve(scope, concurrentIdentity));
+    Check(customerRace.All(x => x.Status == AccountingCommandStatus.Applied)
+        && customerRace[0].InternalReference == customerRace[1].InternalReference,
+        "concurrent resolution creates one person and detail account");
+    Check((await Resolve(scope with { TenantId = "other" }, identity)).ErrorCode == "AccountingShopScopeMismatch"
+        && (await Validate(scope with { TenantId = "other" }, customerId, identity)).ErrorCode == "AccountingShopScopeMismatch",
+        "resolve and validate reject noncanonical shop tenant");
+    Check((await Resolve(new(9999, "missing"), identity)).ErrorCode == "AccountingShopScopeMismatch",
+        "missing shop cannot receive customer records");
+    Check((await Resolve(scope, identity with { Mobile = null, IdentifierNumber = null })).ErrorCode == "InvalidAccountingCustomer"
+        && (await Resolve(scope, identity with { Name = new string('n', 101) })).ErrorCode == "InvalidAccountingCustomer"
+        && (await Resolve(scope, identity with { Mobile = " " })).ErrorCode == "InvalidAccountingCustomer",
+        "invalid customer fields reject before persistence");
+    Check((await Resolve(scope, identity with { IdentifierNumber = null })).ErrorCode == "AccountingCustomerNeedsReview",
+        "mobile-only match does not silently merge identities");
+    Check((await Resolve(scope, identity with { Mobile = concurrentIdentity.Mobile })).ErrorCode == "AmbiguousAccountingCustomer",
+        "conflicting national identity and mobile require review");
+    var legacyIdentity = identity with { Mobile = "09120000003", IdentifierNumber = "1234567892" };
+    var legacyAccount = new SqlTblDetailaccount { Shopid = 8, TenantId = " ", Entitytype = "person", Name = "legacy customer" };
+    setup.Add(legacyAccount); await setup.SaveChangesAsync();
+    var legacyPerson = new SqlTblPerson { Shopid = 8, TenantId = null, Nickname = "legacy customer", Type = 1,
+        Roles = "customer", Isenabled = true, Detailaccountid = legacyAccount.Detailaccountid,
+        Mobilenumber = legacyIdentity.Mobile, Identifiernumber = legacyIdentity.IdentifierNumber };
+    setup.Add(legacyPerson); await setup.SaveChangesAsync();
+    Check((await Resolve(new(8, "shop:8"), legacyIdentity)).InternalReference == legacyPerson.Id.ToString()
+        && (await Validate(new(8, "shop:8"), legacyPerson.Id, legacyIdentity)).Status == AccountingCommandStatus.Applied,
+        "legacy null and blank tenant customer and account use canonical shop scope");
+    var unscopedIdentity = identity with { Mobile = "09120000004", IdentifierNumber = "1234567893" };
+    var unscopedPerson = new SqlTblPerson { Shopid = 7, TenantId = null, Nickname = "unscoped", Type = 1,
+        Roles = "customer", Isenabled = true, Detailaccountid = detail.Detailaccountid,
+        Mobilenumber = unscopedIdentity.Mobile, Identifiernumber = unscopedIdentity.IdentifierNumber };
+    setup.Add(unscopedPerson); await setup.SaveChangesAsync();
+    Check((await Validate(scope, unscopedPerson.Id, unscopedIdentity)).ErrorCode == "AccountingCustomerMappingNeedsReview"
+        && (await Resolve(scope, unscopedIdentity)).InternalReference != unscopedPerson.Id.ToString(),
+        "tenanted shop never adopts an unscoped person");
+    await using (var db = new HyperSqlServerContext(options))
+    {
+        var createdPerson = await db.TblPersons.SingleAsync(x => x.Id == customerId);
+        var createdAccount = await db.TblDetailaccounts.SingleAsync(x => x.Detailaccountid == createdPerson.Detailaccountid);
+        Check(createdAccount.Referenceid == customerId, "new account points back to its person");
+        createdAccount.Shopid = 8; await db.SaveChangesAsync();
+        Check((await Resolve(scope, identity)).ErrorCode == "AccountingCustomerDetailAccountMismatch"
+            && (await Validate(scope, customerId, identity)).ErrorCode == "AccountingCustomerDetailAccountMismatch",
+            "cross-shop detail account rejects both resolution and linked validation");
+        createdAccount.Shopid = 7; createdAccount.Referenceid = person.Id; await db.SaveChangesAsync();
+        Check((await Resolve(scope, identity)).ErrorCode == "AccountingCustomerDetailAccountMismatch",
+            "account reference to another person requires review");
+        createdAccount.Referenceid = customerId; createdAccount.Entitytype = "supplier"; await db.SaveChangesAsync();
+        Check((await Validate(scope, customerId, identity)).ErrorCode == "AccountingCustomerDetailAccountMismatch",
+            "wrong detail account entity type requires review");
+        createdAccount.Entitytype = "person"; await db.SaveChangesAsync();
+    }
     VendorOrderCommand Order(string id, int product, decimal qty, long connection = 10) =>
         new("event-" + id, scope, connection, id, null, "buyer", [new(product, qty, 2)], qty * 2, 1, person.Id);
     async Task<AccountingCommandResult> Apply(VendorOrderCommand order, bool verified = true)
@@ -76,6 +149,15 @@ try
     { await using var db = new HyperSqlServerContext(options); return await Handler(db).CancelOrderAsync(new("cancel-" + id, scope, connection, id, new string('x', 400)), default); }
 
     var first = Order("first", products[0].Id, 3);
+    detail.Referenceid = customerId; await setup.SaveChangesAsync();
+    Check((await Apply(first)).ErrorCode == "AccountingCustomerDetailAccountMismatch" && await Stock(products[0].Id) == 10,
+        "invoice cannot bypass customer account consistency or debit stock on failure");
+    detail.Referenceid = person.Id; person.Roles = "supplier"; await setup.SaveChangesAsync();
+    Check((await Apply(first)).ErrorCode == "AccountingCustomerNeedsReview" && await Stock(products[0].Id) == 10,
+        "invoice requires configured customer role before stock debit");
+    person.Roles = "customer"; await setup.SaveChangesAsync();
+    Check((await Apply(first with { Scope = scope with { TenantId = "other" } })).ErrorCode == "AccountingShopScopeMismatch",
+        "invoice validates canonical shop tenant");
     Check((await Apply(first, false)).ErrorCode == "AccountingStockSourceUnverified", "unverified stock cannot be written");
     var applied = await Apply(first);
     Check(applied.Status == AccountingCommandStatus.Applied && applied.StockCommitted && await Stock(products[0].Id) == 7,
@@ -131,6 +213,11 @@ try
     await Task.WhenAll(native, online);
     Check(native.Result + (online.Result.Status == AccountingCommandStatus.Applied ? 1 : 0) == 1
         && await Stock(products[7].Id) == 4, "conditional POS-style writer and online order share row concurrency");
+    var resolvedOrder = Order("resolved-customer", products[1].Id, 1) with { AccountingCustomerId = customerId };
+    var resolvedInvoice = await Apply(resolvedOrder);
+    Check(resolvedInvoice.Status == AccountingCommandStatus.Applied && resolvedInvoice.StockCommitted
+        && (await Apply(resolvedOrder)).Status == AccountingCommandStatus.Duplicate && await Stock(products[1].Id) == 9,
+        "resolved customer proceeds through invoice and replay without another stock debit");
     Console.WriteLine($"{passed} accounting SQL checks passed.");
 }
 finally
@@ -144,7 +231,7 @@ sealed class FixtureModel(ModelCustomizerDependencies dependencies) : ModelCusto
     public override void Customize(ModelBuilder builder, DbContext context)
     {
         base.Customize(builder, context);
-        Type[] keep = [typeof(SqlTblShop), typeof(SqlTblPerson), typeof(SqlTblProduct), typeof(SqlTblShopfiscalperiod), typeof(SqlTblSaleorder), typeof(SqlTblSaleorderitem)];
+        Type[] keep = [typeof(SqlTblShop), typeof(SqlTblPerson), typeof(SqlTblDetailaccount), typeof(SqlTblProduct), typeof(SqlTblShopfiscalperiod), typeof(SqlTblSaleorder), typeof(SqlTblSaleorderitem)];
         // Keep real column/key/default mappings; only omit unrelated legacy tables
         // from the disposable fixture, not from the production accounting model.
         foreach (var entity in builder.Model.GetEntityTypes().ToArray())

@@ -115,27 +115,35 @@ public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db,
 
     public async Task<AccountingCommandResult> ValidateCustomerAsync(ValidateCustomerCommand command, CancellationToken ct)
     {
+        ArgumentNullException.ThrowIfNull(command);
+        if (!ValidCustomer(command.Scope, command.Customer) || command.PersonId <= 0)
+            return new(AccountingCommandStatus.Rejected, ErrorCode: "InvalidAccountingCustomer");
+        if (!await HasShopScopeAsync(command.Scope, ct))
+            return new(AccountingCommandStatus.Rejected, ErrorCode: "AccountingShopScopeMismatch");
         var policy = Policy();
-        var person = await db.TblPersons.SingleOrDefaultAsync(x => x.Id == command.PersonId
-            && x.Shopid == command.Scope.ShopId && x.TenantId == command.Scope.TenantId && x.Isenabled, ct);
-        if (person is null || person.Type != policy.PersonType || !HasRole(person.Roles, policy.CustomerRole)
+        var person = await ScopedPeople(command.Scope).SingleOrDefaultAsync(x => x.Id == command.PersonId, ct);
+        if (person is null || !person.Isenabled || person.Type != policy.PersonType || !HasRole(person.Roles, policy.CustomerRole)
             || (command.Customer.Mobile != null && person.Mobilenumber != null && person.Mobilenumber != command.Customer.Mobile)
             || (command.Customer.IdentifierNumber != null && person.Identifiernumber != null
                 && person.Identifiernumber != command.Customer.IdentifierNumber))
             return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingCustomerMappingNeedsReview");
-        var account = await db.TblDetailaccounts.AnyAsync(a => a.Detailaccountid == person.Detailaccountid
-            && a.Shopid == command.Scope.ShopId && a.TenantId == command.Scope.TenantId, ct);
+        var account = await HasCustomerAccountAsync(command.Scope, person, policy, ct);
         return account ? new(AccountingCommandStatus.Applied, person.Id.ToString())
             : new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingCustomerDetailAccountMismatch");
     }
 
     public async Task<AccountingCommandResult> ResolveCustomerAsync(ResolveCustomerCommand command, CancellationToken ct)
     {
+        ArgumentNullException.ThrowIfNull(command);
+        if (!ValidCustomer(command.Scope, command.Customer))
+            return new(AccountingCommandStatus.Rejected, ErrorCode: "InvalidAccountingCustomer");
         var policy = Policy();
         await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
-        var matches = await db.TblPersons.Where(p => p.Shopid == command.Scope.ShopId
-                && (p.TenantId == command.Scope.TenantId || p.TenantId == null || p.TenantId == "")
-                && ((command.Customer.Mobile != null && p.Mobilenumber == command.Customer.Mobile)
+        await LockShopAsync(command.Scope.ShopId, ct);
+        if (!await HasShopScopeAsync(command.Scope, ct))
+            return new(AccountingCommandStatus.Rejected, ErrorCode: "AccountingShopScopeMismatch");
+        var matches = await ScopedPeople(command.Scope).Where(p =>
+                ((command.Customer.Mobile != null && p.Mobilenumber == command.Customer.Mobile)
                     || (command.Customer.IdentifierNumber != null && p.Identifiernumber == command.Customer.IdentifierNumber)))
             .ToListAsync(ct);
         if (matches.Count > 1) return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AmbiguousAccountingCustomer");
@@ -147,6 +155,8 @@ public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db,
                     && person.Mobilenumber != command.Customer.Mobile)
                 || person.Type != policy.PersonType || !HasRole(person.Roles, policy.CustomerRole))
                 return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingCustomerNeedsReview");
+            if (!await HasCustomerAccountAsync(command.Scope, person, policy, ct))
+                return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingCustomerDetailAccountMismatch");
             await transaction.CommitAsync(ct);
             return new(AccountingCommandStatus.Applied, person.Id.ToString());
         }
@@ -194,6 +204,40 @@ public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db,
     private static string CanonicalTenant(int shopId, string? tenantId) =>
         string.IsNullOrWhiteSpace(tenantId) ? $"shop:{shopId}" : tenantId.Trim();
 
+    private static bool ValidCustomer(AccountingScope? scope, AccountingCustomerIdentity? customer) =>
+        scope is { ShopId: > 0 } && !string.IsNullOrWhiteSpace(scope.TenantId) && scope.TenantId.Length <= 30
+        && scope.TenantId == scope.TenantId.Trim() && customer is not null
+        && !string.IsNullOrWhiteSpace(customer.Name) && customer.Name.Length <= 100
+        && !string.IsNullOrWhiteSpace(customer.ExternalCustomerId) && customer.ExternalCustomerId.Length <= 128
+        && (!string.IsNullOrWhiteSpace(customer.Mobile) || !string.IsNullOrWhiteSpace(customer.IdentifierNumber))
+        && ValidOptionalIdentity(customer.Mobile, 15) && ValidOptionalIdentity(customer.IdentifierNumber, 12);
+
+    private static bool ValidOptionalIdentity(string? value, int length) => value is null
+        || (!string.IsNullOrWhiteSpace(value) && value.Length <= length && value == value.Trim() && !value.Any(char.IsControl));
+
+    private async Task<bool> HasShopScopeAsync(AccountingScope scope, CancellationToken ct) =>
+        await GetShopAsync(scope.ShopId, ct) is { } shop
+        && string.Equals(shop.TenantId, scope.TenantId, StringComparison.Ordinal);
+
+    private IQueryable<SqlTblPerson> ScopedPeople(AccountingScope scope)
+    {
+        var tenantless = scope.TenantId == CanonicalTenant(scope.ShopId, null);
+        return db.TblPersons.Where(x => x.Shopid == scope.ShopId
+            && (x.TenantId != null && x.TenantId.Trim() == scope.TenantId
+                || tenantless && (x.TenantId == null || x.TenantId.Trim() == "")));
+    }
+
+    private async Task<bool> HasCustomerAccountAsync(AccountingScope scope, SqlTblPerson person,
+        AccountingCustomerPolicy policy, CancellationToken ct)
+    {
+        var account = await db.TblDetailaccounts.AsNoTracking()
+            .SingleOrDefaultAsync(x => x.Detailaccountid == person.Detailaccountid, ct);
+        return account is not null && account.Shopid == scope.ShopId
+            && CanonicalTenant(account.Shopid, account.TenantId) == scope.TenantId
+            && account.Entitytype == policy.DetailAccountEntityType
+            && (account.Referenceid is null || account.Referenceid == person.Id);
+    }
+
     public async Task<AccountingCommandResult> ApplyVendorOrderAsync(VendorOrderCommand command, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(command);
@@ -205,6 +249,8 @@ public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db,
         var fingerprint = AccountingOrderIdentity.Fingerprint(command);
         await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
         await LockShopAsync(command.Scope.ShopId, ct);
+        if (!await HasShopScopeAsync(command.Scope, ct))
+            return new(AccountingCommandStatus.Rejected, ErrorCode: "AccountingShopScopeMismatch");
         var existing = await FindOrderAsync(command.Scope, command.ConnectionId, command.ExternalOrderId, ct);
         if (existing is not null)
         {
@@ -219,10 +265,14 @@ public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db,
         if (await HasLegacyOrderAsync(command.Scope, command.ExternalOrderId, ct))
             return new(AccountingCommandStatus.PendingDependency, ErrorCode: "LegacyAccountingOrderNeedsReconciliation");
         var tenantless = command.Scope.TenantId == CanonicalTenant(command.Scope.ShopId, null);
-        var customer = await db.TblPersons.SingleOrDefaultAsync(x => x.Id == command.AccountingCustomerId
-            && x.Shopid == command.Scope.ShopId && (x.TenantId == command.Scope.TenantId
-                || tenantless && (x.TenantId == null || x.TenantId == "")) && x.Isenabled, ct);
+        var customer = await ScopedPeople(command.Scope).SingleOrDefaultAsync(x => x.Id == command.AccountingCustomerId
+            && x.Isenabled, ct);
         if (customer is null) return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingCustomerNotFound");
+        var policy = Policy();
+        if (customer.Type != policy.PersonType || !HasRole(customer.Roles, policy.CustomerRole))
+            return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingCustomerNeedsReview");
+        if (!await HasCustomerAccountAsync(command.Scope, customer, policy, ct))
+            return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingCustomerDetailAccountMismatch");
         var products = await db.TblProducts.AsNoTracking().Where(x => command.Lines.Select(l => l.HyperProductId).Contains(x.Id)
             && x.Shopid == command.Scope.ShopId && (x.TenantId == command.Scope.TenantId
                 || tenantless && (x.TenantId == null || x.TenantId == ""))).ToDictionaryAsync(x => x.Id, ct);
