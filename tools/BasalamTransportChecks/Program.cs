@@ -1,9 +1,11 @@
 using System.Net;
+using System.Text.Json;
 using Basalam.SDK;
 using Basalam.SDK.Auth;
 using Basalam.SDK.Clients;
 using Basalam.SDK.Config;
 using Basalam.SDK.Models;
+using Basalam.SDK.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -34,6 +36,16 @@ try
     Check(transport.LastAuthorization == "Bearer fixture-refreshed", "inventory PATCH receives refreshed token");
     Check(transport.LastBody == "{\"stock\":0}" && transport.LastMethod == HttpMethod.Patch,
         "zero inventory is an explicit absolute PATCH");
+    await client.Products.PatchDetailsAsync(12, "New name", 250);
+    using (var patch = JsonDocument.Parse(transport.LastBody!))
+        Check(patch.RootElement.GetProperty("name").GetString() == "New name"
+            && patch.RootElement.GetProperty("primary_price").GetInt64() == 250
+            && patch.RootElement.EnumerateObject().Count() == 2,
+            "product details use official wire names and cannot mutate inventory");
+    await client.Products.PatchDetailsAsync(12, null, 0);
+    Check(transport.LastBody == "{\"primary_price\":0}", "price-only patch omits name and preserves explicit zero");
+    await client.Products.PatchDetailsAsync(12, "Name only", null);
+    Check(transport.LastBody == "{\"name\":\"Name only\"}", "name-only patch omits price");
 
     client.SetToken(new TokenInfo { AccessToken = "old", TokenType = "Bearer", RefreshToken = "refresh-me" });
     var refreshed = await client.RefreshTokenAsync();
@@ -56,6 +68,13 @@ try
     var parcelSnapshot = await client.Parcels.GetParcelSnapshotAsync(7);
     Check(parcelSnapshot?.OrderId == 91 && parcelSnapshot.TrackingCode == "TRK-1",
         "typed parcel snapshot maps order and tracking identity");
+    transport.ResponseBody = "{\"id\":3,\"unseen\":1}";
+    await client.Chat.GetUnseenCountAsync();
+    Check(transport.LastUri?.AbsolutePath == "/v1/chats/unseen-count" && transport.LastMethod == HttpMethod.Get,
+        "chat unseen count uses the official route");
+    await client.Chat.CreateMessageAsync(new ChatMessageRequest(3, "text", new { text = "fixture" }));
+    Check(transport.LastUri?.AbsolutePath == "/v1/chats/3/messages" && transport.LastMethod == HttpMethod.Post,
+        "chat message uses the scoped official route");
     transport.ResponseBody = null;
 
     transport.Statuses.Enqueue(HttpStatusCode.ServiceUnavailable);
