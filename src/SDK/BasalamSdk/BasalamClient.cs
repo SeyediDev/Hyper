@@ -17,6 +17,7 @@ public interface IBasalamClient
     ParcelService Parcels { get; }
     CustomerService Customers { get; }
     WebhookService Webhooks { get; }
+    ChatService Chat { get; }
     TokenInfo? Token { get; }
     Task<TokenInfo> RefreshTokenAsync(CancellationToken ct = default);
     void SetToken(TokenInfo? token);
@@ -59,6 +60,7 @@ public sealed class BasalamClient : IBasalamClient, IDisposable
         Parcels = new ParcelService(httpFactory, logger as ILogger<Services.ParcelService>);
         Customers = new CustomerService(httpFactory, logger as ILogger<Services.CustomerService>);
         Webhooks = new WebhookService(httpFactory, logger as ILogger<Services.WebhookService>);
+        Chat = new ChatService(httpFactory, logger as ILogger<Services.ChatService>);
     }
 
     public VendorService Vendors { get; }
@@ -69,6 +71,7 @@ public sealed class BasalamClient : IBasalamClient, IDisposable
     public ParcelService Parcels { get; }
     public CustomerService Customers { get; }
     public WebhookService Webhooks { get; }
+    public ChatService Chat { get; }
 
     public TokenInfo? Token
     {

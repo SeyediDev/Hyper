@@ -49,6 +49,7 @@ public static class DependencyInjection
         services.TryAddScoped<Services.IParcelService, Services.ParcelService>();
         services.TryAddScoped<Services.ICustomerService, Services.CustomerService>();
         services.TryAddScoped<Services.IWebhookService, Services.WebhookService>();
+        services.TryAddScoped<Services.IChatService, Services.ChatService>();
 
         return services;
     }
