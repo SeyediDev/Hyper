@@ -50,4 +50,7 @@ public sealed class WorkManagementController(IWorkManagementApi api) : Controlle
     public Task<IReadOnlyList<AgentRunView>> Runs(long id, CancellationToken ct) => api.GetRunsAsync(id, ct);
     [HttpPost("items/{id:long}/orchestration/dispatch")]
     public async Task<IActionResult> Dispatch(long id, CancellationToken ct) => (await api.DispatchNextAsync(id, ct)) is { } run ? Ok(run) : NotFound(new { error = "QueuedRunNotFound" });
+    [AllowAnonymous]
+    [HttpPost("orchestration/runs/{id:long}/callback")]
+    public async Task<IActionResult> Callback(long id, [FromBody] AgentRunCallbackRequest request, [FromHeader(Name = "X-Agent-Harness-Key")] string? harnessKey, CancellationToken ct) => (await api.CompleteRunAsync(id, request, harnessKey, ct)) is { } run ? Ok(run) : Unauthorized(new { error = "InvalidHarnessCallback" });
 }

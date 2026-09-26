@@ -27,3 +27,7 @@ The adapter is intentionally asynchronous at the boundary: a successful HTTP
 acceptance means the external harness accepted a run, not that the code change is
 complete. The external callback/worker must later attach commits, tests and logs,
 then move the Work Management item through its normal status rules.
+
+The callback is protected by the configured Harness key in the
+`X-Agent-Harness-Key` header. Keep this key in deployment secrets. An absent key
+or disabled endpoint cannot mark a run successful.

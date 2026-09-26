@@ -73,6 +73,7 @@ and `src/WorkManagement/Hyper.WorkManagement.Infrastructure/WorkManagementServic
 | Orchestration snapshot | `GET /orchestration` |
 | Agent profile / transition | `POST /orchestration/profiles`, `POST /orchestration/transitions` |
 | Agent runs | `GET /items/{id}/orchestration/runs`, `POST /items/{id}/orchestration/dispatch` |
+| Harness callback | `POST /orchestration/runs/{id}/callback` with `X-Agent-Harness-Key`; terminal statuses are `Succeeded`, `Failed` or `NeedsInput` |
 
 Persisted status values: Backlog=1, Ready=2, InProgress=3, Blocked=4, Review=5,
 Done=6, Cancelled=7. Priority: Low=1, Normal=2, High=3, Critical=4.

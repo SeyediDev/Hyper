@@ -19,6 +19,7 @@ public sealed record EstimateWorkItemRequest(long? EstimatedSeconds);
 public sealed record AgentProfileView(long Id, string Key, string Name, string RoleKey, string Provider, string? Model, string? Instructions, string? SkillPath, bool IsEnabled);
 public sealed record WorkflowTransitionView(long Id, string Key, string? ProjectKey, string? Domain, WorkItemStatus FromStatus, WorkItemStatus TriggerStatus, string FromRoleKey, string NextRoleKey, WorkItemStatus NextStatus, bool RequireTests, bool RequireCommits, bool AutoDispatch, bool IsEnabled);
 public sealed record AgentRunView(long Id, long WorkItemId, string WorkItemKey, long AgentProfileId, string AgentProfileKey, string TargetRoleKey, string Status, string? ExternalRunId, string? Branch, string? LastError, DateTime CreatedAtUtc, DateTime? StartedAtUtc, DateTime? CompletedAtUtc);
+public sealed record AgentRunCallbackRequest(string Status, string? ExternalRunId = null, string? Error = null);
 public sealed record CreateAgentProfileRequest(string Key, string Name, string RoleKey, string Provider = "codex", string? Model = null, string? Instructions = null, string? SkillPath = null, bool IsEnabled = true);
 public sealed record CreateWorkflowTransitionRequest(string Key, string? ProjectKey, string? Domain, WorkItemStatus FromStatus, WorkItemStatus TriggerStatus, string FromRoleKey, string NextRoleKey, WorkItemStatus NextStatus = WorkItemStatus.Review, bool RequireTests = false, bool RequireCommits = false, bool AutoDispatch = true, bool IsEnabled = true);
 public sealed record AgentOrchestrationSnapshot(IReadOnlyList<AgentProfileView> Profiles, IReadOnlyList<WorkflowTransitionView> Transitions, IReadOnlyList<AgentRunView> RecentRuns);
@@ -55,6 +56,7 @@ public interface IWorkManagementApi
     Task<WorkflowTransitionView?> CreateWorkflowTransitionAsync(CreateWorkflowTransitionRequest request, CancellationToken ct = default);
     Task<IReadOnlyList<AgentRunView>> GetRunsAsync(long workItemId, CancellationToken ct = default);
     Task<AgentRunView?> DispatchNextAsync(long workItemId, CancellationToken ct = default);
+    Task<AgentRunView?> CompleteRunAsync(long runId, AgentRunCallbackRequest request, string? harnessKey, CancellationToken ct = default);
 }
 public interface IAgentOrchestrationService
 {
@@ -63,5 +65,6 @@ public interface IAgentOrchestrationService
     Task<WorkflowTransitionView?> CreateTransitionAsync(CreateWorkflowTransitionRequest request, CancellationToken ct = default);
     Task<IReadOnlyList<AgentRunView>> GetRunsAsync(long workItemId, CancellationToken ct = default);
     Task<AgentRunView?> DispatchNextAsync(long workItemId, CancellationToken ct = default);
+    Task<AgentRunView?> CompleteRunAsync(long runId, AgentRunCallbackRequest request, string? harnessKey, CancellationToken ct = default);
     Task OnStatusChangedAsync(long workItemId, WorkItemStatus fromStatus, WorkItemStatus toStatus, CancellationToken ct = default);
 }

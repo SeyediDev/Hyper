@@ -49,7 +49,7 @@ public sealed class HttpAgentHarnessDispatcher(HttpClient client, IOptions<Agent
     private sealed record HarnessResponse(string? ExternalRunId);
 }
 
-public sealed class AgentOrchestrationService(WorkManagementContext db, IAgentHarnessDispatcher harness) : IAgentOrchestrationService
+public sealed class AgentOrchestrationService(WorkManagementContext db, IAgentHarnessDispatcher harness, IOptions<AgentHarnessOptions> options) : IAgentOrchestrationService
 {
     public async Task<AgentOrchestrationSnapshot> GetAsync(CancellationToken ct = default)
     {
@@ -102,6 +102,19 @@ public sealed class AgentOrchestrationService(WorkManagementContext db, IAgentHa
         var profile = await db.AgentProfiles.SingleOrDefaultAsync(x => x.Id == run.AgentProfileId, ct);
         if (item is null || profile is null) return null;
         await DispatchRunAsync(run, item, profile, ct); return await RunsQuery(workItemId, ct).ContinueWith(x => x.Result.FirstOrDefault(y => y.Id == run.Id), ct);
+    }
+
+    public async Task<AgentRunView?> CompleteRunAsync(long runId, AgentRunCallbackRequest request, string? harnessKey, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(options.Value.ApiKey) || !string.Equals(options.Value.ApiKey, harnessKey, StringComparison.Ordinal)) return null;
+        var status = request.Status.Trim();
+        if (status is not ("Running" or "Succeeded" or "Failed" or "NeedsInput")) return null;
+        var run = await db.AgentRuns.SingleOrDefaultAsync(x => x.Id == runId, ct);
+        if (run is null) return null;
+        run.Status = status; run.ExternalRunId = request.ExternalRunId ?? run.ExternalRunId; run.LastError = request.Error;
+        run.CompletedAtUtc = status is "Succeeded" or "Failed" or "NeedsInput" ? DateTime.UtcNow : null;
+        await db.SaveChangesAsync(ct);
+        return (await RunsQuery(run.WorkItemId, ct)).FirstOrDefault(x => x.Id == runId);
     }
 
     private async Task DispatchRunAsync(AgentRun run, WorkItem item, AgentProfile profile, CancellationToken ct)
