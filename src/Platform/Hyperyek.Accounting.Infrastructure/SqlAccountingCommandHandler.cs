@@ -325,6 +325,31 @@ public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db,
     public async Task<AccountingCommandResult> ApplyCustomerOrderAsync(CustomerOrderCommand command, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(command);
+        // CMD-103 — تصمیم قطعی: خرید و ثبت‌های مالی خودکار است؛ پیش‌فاکتور یا تأیید اپراتور نداریم.
+        // سورس اصلی هایپریک در دسترس نیست؛ پرسش‌های زیر باید با مدیر پلتفرم پاسخ داده و کنترل شوند.
+        // TODO(HYPERYEK-PLATFORM-CONFIRM) PURCHASE-01: هویت تأمین‌کننده، کالا و تفصیلی‌های معتبر چگونه
+        // از سفارش بیرونی به شناسه‌های همان فروشگاه/مستأجر/دوره مالی نگاشت می‌شود؟
+        // TODO(HYPERYEK-PLATFORM-CONFIRM) PURCHASE-02: منبع روش ادواری/دائمی، واحد و ارز، تخفیف،
+        // مالیات، حمل و مبلغ پرداخت/تسویه چیست؟ ورودی‌های فعلی فرمان کافی نیست؛ مقدار یا نرخ حدس نزنیم.
+        // TODO(HYPERYEK-PLATFORM-CONFIRM) PURCHASE-03: نگاشت حساب‌ها و تفصیلی‌های خرید را تأیید کنید.
+        // شاهد خواندنی: AccountingDocumentBuilderProcess v6 / Activity_CreateDocument3:
+        // بستانکار تأمین‌کننده 201؛ بدهکار خدمت 603، غیرانبارپذیر 605، ادواری 701 یا دائمی 109؛ مالیات 110.
+        // این اعداد AccountKey هستند، نه AccountId؛ مبلغ خالص/مالیات و تراز سند نیز باید کنترل شود.
+        // AccountingDocumentsRegistrationProcess v13 از GetAccountsQuery و GetDetailAccountBasicDataQuery
+        // برای حساب/تفصیلی استفاده می‌کند؛ قرارداد فراخوانی و محدودسازی فروشگاه/دوره آن‌ها چیست؟
+        // TODO(HYPERYEK-PLATFORM-CONFIRM) PURCHASE-04: DocumentStatusID، TransactionReferenceTypeID،
+        // TransactionReferenceID، تاریخ و قواعد رزرو/تخصیص شماره سند چیست؟ قرارداد
+        // com.hyperyek.bpm.delegate.ManageDocumentNumber را دریافت کنیم؛ MAX+1 جایگزین معتبر نیست.
+        // قرارداد مشاهده‌شده IRR/ExchangeRate=1، PrimaryType=2 و SecondaryType=2 نیز باید تأیید شود.
+        // TODO(HYPERYEK-PLATFORM-CONFIRM) PURCHASE-05: API یا تراکنش رسمی برای ثبت اتمیک خرید، اقلام،
+        // سند/آرتیکل، موجودی/کاردکس و آثار پرداخت چیست؟ کلید یکتایی و بازیابی پس از خطا چگونه است تا
+        // تکرار رویداد/سفارش همان سند قبلی را برگرداند و هیچ اثر مالی یا انباری دوباره ثبت نشود؟
+        // TODO(HYPERYEK-PLATFORM-CONFIRM) PURCHASE-06: افزایش موجودی/رسید، آزادسازی رزرو و سند پرداخت
+        // یا تسویه خرید پرداخت‌شده در چه مرحله‌ای رخ می‌دهد؟ حساب بانک/صندوق را حدس نزنیم.
+        // TODO(HYPERYEK-PLATFORM-CONFIRM) PURCHASE-07: یک نمونه خرید مورد تأیید مدیر پلتفرم بگیریم و
+        // فاکتور/اقلام، تراز سند، شماره، موجودی و گردش تأمین‌کننده را با خروجی مورد انتظار تطبیق دهیم.
+        // پاسخ‌ها و شواهد در CMD-103 ثبت شوند؛ تا اتصال واقعی ثبت خرید و آثار مالی، PendingDependency
+        // حفظ شود. درج صرف رکورد خرید یا اضافه‌کردن این TODOها به معنی Applied/StockCommitted نیست.
         return new(AccountingCommandStatus.PendingDependency, ErrorCode: "CustomerOrderAccountingPolicyNotConfigured");
     }
 
