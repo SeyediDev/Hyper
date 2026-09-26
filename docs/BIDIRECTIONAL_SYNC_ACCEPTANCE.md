@@ -3,7 +3,7 @@
 ## SDK transport regression checks
 
 Run `dotnet run --project tools/BasalamTransportChecks` from the Backend Git root.
-The checks exercise the production SDK with an in-memory HTTP handler: loading,
+The 17 checks exercise the production SDK with an in-memory HTTP handler: loading,
 refreshing and clearing a connection token must affect child services, distinct
 clients must not share booth credentials, and root/section/explicit configuration
 must all reach the SDK. Production relative routes resolve to HTTPS and stock zero
@@ -14,6 +14,14 @@ called by this tool.
 product and other services. `AddBasalamSdk` accepts either root configuration or
 the already-selected `Basalam` section and preserves an explicitly supplied
 `BasalamConfig` instance. Public method signatures and MCP contracts are unchanged.
+
+Catalog responses are explicitly adapted from the
+[official core OpenAPI](https://github.com/basalam/python-sdk/blob/main/openapi_data/core.json):
+`title`, `inventory`, `vendor.id` and `total_page`/`per_page` are not assumed to be
+camelCase CLR fields. Product detail must identify its owner; a scoped vendor-list
+request supplies ownership only when the list item omits it. Missing pagination
+continues until an empty page (within the adapter's existing page limit), malformed
+pages fail, and missing stock stays unknown rather than becoming zero.
 
 ## SQL-backed two-way flow checks
 
@@ -26,12 +34,16 @@ It never opens the business or configured Integration database. The SQL login
 must be allowed to create/drop this isolated fixture. Both HTTP destinations are
 intercepted in memory; accounting responses are fixtures, not financial documents.
 
-The 27 checks cover normalized product webhook -> accounting command, accounting
+The 30 checks cover normalized product webhook -> accounting command, accounting
 inventory event -> authenticated stock PATCH, connection/tenant selection,
 replay/conflicting content, missing mapping, retry, explicit-source loopback,
-unknown events, version ordering, zero stock and persisted outcomes. No accounting
+unknown events, version ordering, zero stock and persisted outcomes. They also
+cover provider 503 retry/recovery and rejecting fractional stock before HTTP.
+The adapter translates SDK HTTP failures into queue-safe codes without response
+bodies; 408/429/5xx are retryable, other HTTP failures are terminal. Stock must fit
+a nonnegative whole `int`; there is no implicit unit conversion. No accounting
 tables exist in the fixture Integration database. This does not verify the separate
-legacy inventory capture/reconciliation path, actual Basalam payload shape, real
+legacy inventory capture/reconciliation path, actual webhook payload delivery, real
 HTTP authentication middleware, accounting SQL writes or public webhook delivery.
 
 Ingress accepts only object JSON and event IDs up to the worker's 128-character

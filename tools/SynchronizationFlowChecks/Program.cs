@@ -164,6 +164,22 @@ static async Task<int> Run()
         await outbox.ProcessConnectionAsync(connection.Id, default);
         Check(providerHttp.Patches == 2 && providerHttp.Stock == 0, "newer zero stock is delivered without rounding or omission");
         Check(!await outbox.ProcessConnectionAsync(connection.Id, default) && providerHttp.Patches == 2, "delivered outbox is not resent");
+        providerHttp.FailStatus = HttpStatusCode.ServiceUnavailable;
+        var temporarilyFailed = await accountingIngress.ReceiveInventoryChangedAsync(inventory with { SourceVersion = 4, AvailableQuantity = 5 });
+        await outbox.ProcessConnectionAsync(connection.Id, default);
+        Check(await db.IntegrationOutbox.AsNoTracking().AnyAsync(x => x.Id == temporarilyFailed!.OutboxMessageId
+            && x.Status == 0 && x.LastError == "Http503" && x.Attempts == 1), "SDK HTTP 503 is scheduled for retry without provider response body");
+        providerHttp.FailStatus = null;
+        await db.IntegrationOutbox.Where(x => x.Id == temporarilyFailed!.OutboxMessageId)
+            .ExecuteUpdateAsync(s => s.SetProperty(x => x.NextAttemptAtUtc, DateTime.UtcNow.AddSeconds(-1)));
+        await outbox.ProcessConnectionAsync(connection.Id, default);
+        Check(providerHttp.Patches == 3 && providerHttp.Stock == 5, "provider recovery delivers the pending absolute inventory");
+        var requestsBeforeInvalid = providerHttp.Requests;
+        var fractional = await accountingIngress.ReceiveInventoryChangedAsync(inventory with { SourceVersion = 5, AvailableQuantity = 0.5m });
+        await outbox.ProcessConnectionAsync(connection.Id, default);
+        Check(await db.IntegrationOutbox.AsNoTracking().AnyAsync(x => x.Id == fractional!.OutboxMessageId
+            && x.Status == 3 && x.LastError == "InvalidInventoryQuantity") && providerHttp.Requests == requestsBeforeInvalid,
+            "fractional stock fails explicitly before HTTP instead of truncating to zero");
         Check(!await db.Database.SqlQueryRaw<int>("SELECT COUNT(*) AS Value FROM sys.tables WHERE name LIKE 'TBL[_]%' ").AnyAsync(x => x != 0),
             "both paths run with only Integration tables, no accounting tables in Integration database");
         Console.WriteLine($"{checks} synchronization flow checks passed. HTTP/accounting responses are controlled fixtures, not live-provider acceptance.");
@@ -212,19 +228,22 @@ sealed class AccountingTransport : HttpMessageHandler
 sealed class ProviderTransport : HttpMessageHandler
 {
     public int Patches; public int Stock; public bool Authenticated;
+    public int Requests; public HttpStatusCode? FailStatus;
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
     {
+        Requests++;
         if (request.RequestUri?.Host != "openapi.basalam.com" || request.RequestUri.AbsolutePath != "/v1/products/12")
             throw new InvalidOperationException("Unexpected Basalam fixture route");
         Authenticated = request.Headers.Authorization?.ToString() == "Bearer fixture-grant";
         if (!Authenticated) throw new InvalidOperationException("Missing connection-specific authentication");
+        if (FailStatus is { } failure) return new HttpResponseMessage(failure) { Content = new StringContent("provider-sensitive-fixture") };
         if (request.Method == HttpMethod.Patch)
         {
             using var body = JsonDocument.Parse(await request.Content!.ReadAsStringAsync(ct));
             Stock = body.RootElement.GetProperty("stock").GetInt32(); Patches++;
         }
         return new HttpResponseMessage(HttpStatusCode.OK)
-        { Content = new StringContent("{\"id\":12,\"vendorId\":71,\"name\":\"Fixture product\"}", Encoding.UTF8, "application/json") };
+        { Content = new StringContent("{\"id\":12,\"vendor\":{\"id\":71},\"title\":\"Fixture product\",\"inventory\":3}", Encoding.UTF8, "application/json") };
     }
 }
 

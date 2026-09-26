@@ -71,6 +71,26 @@ try
     using var explicitProvider = explicitServices.BuildServiceProvider();
     Check(ReferenceEquals(explicitConfig, explicitProvider.GetRequiredService<BasalamConfig>()),
         "explicit configuration overload preserves the supplied instance");
+
+    transport.ResponseBody = "{\"id\":12,\"title\":\"Real shape\",\"vendor\":{\"id\":71},\"inventory\":0,\"price\":250}";
+    var product = await client.Catalog.GetProductAsync(12);
+    Check(product is { Id: 12, VendorId: 71, Name: "Real shape", Stock: 0, Price: 250 },
+        "official product wire shape maps title, vendor ownership and zero inventory");
+    transport.ResponseBody = "{\"data\":[{\"id\":12,\"title\":\"List item\",\"inventory\":4}],\"total_count\":2,\"page\":1,\"total_page\":2,\"per_page\":1}";
+    var products = await client.Catalog.GetProductsAsync(71, 1, 1);
+    Check(products.HasMore && products.TotalPages == 2 && products.Total == 2 && products.PerPage == 1
+        && products.Data.Single().VendorId == 71, "snake_case pagination continues to the next official catalog page");
+    transport.ResponseBody = "{\"data\":[{\"id\":12,\"title\":\"Unknown stock\"}]}";
+    products = await client.Catalog.GetProductsAsync(71);
+    Check(products.HasMore && products.Data.Single().Stock is null, "missing pagination continues until empty and missing stock is not zero");
+    transport.ResponseBody = "{\"data\":[]}";
+    Check(!(await client.Catalog.GetProductsAsync(71)).HasMore, "empty catalog page stops pagination");
+    transport.ResponseBody = "{\"id\":12,\"title\":\"No ownership\"}";
+    try { await client.Catalog.GetProductAsync(12); Check(false, "product detail must identify its vendor"); }
+    catch (System.Text.Json.JsonException) { Check(true, "product detail must identify its vendor"); }
+    transport.ResponseBody = "{}";
+    try { await client.Catalog.GetProductsAsync(71); Check(false, "malformed page cannot masquerade as an empty catalog"); }
+    catch (System.Text.Json.JsonException) { Check(true, "malformed page cannot masquerade as an empty catalog"); }
     Console.WriteLine($"{checks - failures.Count}/{checks} transport checks passed. No network or database writes.");
     return failures.Count == 0 ? 0 : 1;
 }
@@ -82,6 +102,7 @@ catch (Exception ex)
 
 sealed class Capture : HttpMessageHandler
 {
+    public string? ResponseBody { get; set; }
     public string? LastAuthorization { get; private set; }
     public string? LastBody { get; private set; }
     public Uri? LastUri { get; private set; }
@@ -94,8 +115,8 @@ sealed class Capture : HttpMessageHandler
         LastBody = request.Content is null ? null : await request.Content.ReadAsStringAsync(ct);
         return new HttpResponseMessage(HttpStatusCode.OK)
         {
-            Content = new StringContent(request.Method == HttpMethod.Get
-                ? "{\"data\":[],\"hasMore\":false}" : "{}", System.Text.Encoding.UTF8, "application/json")
+            Content = new StringContent(ResponseBody ?? (request.Method == HttpMethod.Get
+                ? "{\"data\":[],\"hasMore\":false}" : "{}"), System.Text.Encoding.UTF8, "application/json")
         };
     }
 }

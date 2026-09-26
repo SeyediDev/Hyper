@@ -2,6 +2,7 @@ using System.Globalization;
 using Basalam.SDK;
 using Basalam.SDK.Clients;
 using Basalam.SDK.Models;
+using Basalam.SDK.Errors;
 using Hyper.Integration.Domain.Entities.Integrations;
 using Hyper.Integration.Domain.Features.Integrations;
 
@@ -14,7 +15,11 @@ public sealed class BasalamSdkAdapter(IBasalamClient client, BasalamOAuthStore t
     public bool SupportsCredentialType(IntegrationCredentialType type) =>
         type is IntegrationCredentialType.OAuth2 or IntegrationCredentialType.BearerToken;
 
-    public async Task<IReadOnlyCollection<ExternalCatalogItem>> ReadCatalogAsync(
+    public Task<IReadOnlyCollection<ExternalCatalogItem>> ReadCatalogAsync(
+        ExternalIntegrationConnection connection, CancellationToken cancellationToken) =>
+        ProviderCall(() => ReadCatalogCoreAsync(connection, cancellationToken));
+
+    private async Task<IReadOnlyCollection<ExternalCatalogItem>> ReadCatalogCoreAsync(
         ExternalIntegrationConnection connection, CancellationToken cancellationToken)
     {
         Validate(connection);
@@ -42,7 +47,7 @@ public sealed class BasalamSdkAdapter(IBasalamClient client, BasalamOAuthStore t
                             ? product.Name
                             : $"{product.Name} - {variant.Title}",
                         variant.Price ?? product.Price,
-                        variant.Stock ?? 0,
+                        variant.Stock,
                         variant.Id.ToString()));
                 }
 
@@ -53,7 +58,7 @@ public sealed class BasalamSdkAdapter(IBasalamClient client, BasalamOAuthStore t
                         product.Sku,
                         product.Name,
                         product.Price,
-                        product.Stock ?? 0,
+                        product.Stock,
                         null));
                 }
             }
@@ -69,12 +74,23 @@ public sealed class BasalamSdkAdapter(IBasalamClient client, BasalamOAuthStore t
         }
     }
 
-    public async Task PublishInventoryAsync(
+    public Task PublishInventoryAsync(ExternalIntegrationConnection connection,
+        IReadOnlyCollection<ExternalInventoryUpdate> updates, CancellationToken cancellationToken) =>
+        ProviderCall(async () => { await PublishInventoryCoreAsync(connection, updates, cancellationToken); return true; });
+
+    private async Task PublishInventoryCoreAsync(
         ExternalIntegrationConnection connection,
         IReadOnlyCollection<ExternalInventoryUpdate> updates,
         CancellationToken cancellationToken)
     {
         Validate(connection);
+        foreach (var update in updates)
+        {
+            Identifier(update.ExternalProductId);
+            if (update.VariantId is not null) Identifier(update.VariantId);
+            if (update.Quantity < 0 || update.Quantity > int.MaxValue || decimal.Truncate(update.Quantity) != update.Quantity)
+                throw new IntegrationProviderException("InvalidInventoryQuantity", false);
+        }
         await SetTokenAsync(connection, cancellationToken);
 
         foreach (var update in updates)
@@ -100,6 +116,19 @@ public sealed class BasalamSdkAdapter(IBasalamClient client, BasalamOAuthStore t
                 await client.Products.PatchStockAsync(externalProductId, (int)update.Quantity, cancellationToken);
             }
         }
+    }
+
+    private static async Task<T> ProviderCall<T>(Func<Task<T>> action)
+    {
+        try { return await action(); }
+        catch (BasalamAPIError error)
+        {
+            // Provider response bodies can contain sensitive data. Persist only
+            // a stable code understood by queue retry/dead-letter processing.
+            throw new IntegrationProviderException($"Http{error.StatusCode}",
+                error.StatusCode is 408 or 429 || error.StatusCode >= 500);
+        }
+        catch (BasalamValidationError) { throw new IntegrationProviderException("ProviderValidation", false); }
     }
 
     private async Task SetTokenAsync(ExternalIntegrationConnection connection, CancellationToken ct)
