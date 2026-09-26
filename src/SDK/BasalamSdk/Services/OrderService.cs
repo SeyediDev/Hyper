@@ -9,6 +9,7 @@ namespace Basalam.SDK.Services;
 public interface IOrderService
 {
     Task<object?> CreateOrderAsync(object order, CancellationToken ct = default);
+    Task<OrderSnapshot?> CreateOrderSnapshotAsync(object order, CancellationToken ct = default);
     Task<object?> GetOrderAsync(int orderId, CancellationToken ct = default);
     Task<OrderSnapshot?> GetOrderSnapshotAsync(int orderId, CancellationToken ct = default);
 }
@@ -17,8 +18,16 @@ public sealed class OrderService(IBasalamHttpClient client, ILogger<OrderService
 {
     public async Task<object?> CreateOrderAsync(object order, CancellationToken ct = default)
     {
+        ArgumentNullException.ThrowIfNull(order);
         logger?.LogInformation("Creating order");
         return await client.PostAsync<object>("/v1/orders", order, ct);
+    }
+
+    public Task<OrderSnapshot?> CreateOrderSnapshotAsync(object order, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(order);
+        logger?.LogInformation("Creating typed order snapshot");
+        return client.PostAsync<OrderSnapshot>("/v1/orders", order, ct);
     }
 
     public async Task<object?> GetOrderAsync(int orderId, CancellationToken ct = default)
@@ -45,6 +54,8 @@ public interface IParcelService
 {
     Task<object?> GetParcelAsync(int parcelId, CancellationToken ct = default);
     Task<object?> UpdateParcelStatusAsync(int parcelId, string status, CancellationToken ct = default);
+    Task<ParcelSnapshot?> UpdateParcelStatusSnapshotAsync(int parcelId, string status,
+        CancellationToken ct = default);
     Task<ParcelSnapshot?> GetParcelSnapshotAsync(int parcelId, CancellationToken ct = default);
 }
 
@@ -62,6 +73,13 @@ public sealed class ParcelService(IBasalamHttpClient client, ILogger<ParcelServi
         ValidateId(parcelId); ValidateStatus(status);
         logger?.LogInformation("Updating parcel {ParcelId} status to {Status}", parcelId, status);
         return await client.PatchAsync<object>($"/v1/parcels/{parcelId}", new { status }, ct);
+    }
+
+    public Task<ParcelSnapshot?> UpdateParcelStatusSnapshotAsync(int parcelId, string status,
+        CancellationToken ct = default)
+    {
+        ValidateId(parcelId); ValidateStatus(status);
+        return client.PatchAsync<ParcelSnapshot>($"/v1/parcels/{parcelId}", new { status }, ct);
     }
 
     public Task<ParcelSnapshot?> GetParcelSnapshotAsync(int parcelId, CancellationToken ct = default)
