@@ -31,5 +31,9 @@ builder.Services.AddHttpClient<BasalamOAuthService>();
 builder.Services.AddScoped<BasalamOAuthStore>();
 builder.Services.AddHyperIntegrations(connection, integrationConnection, builder.Configuration);
 builder.Services.Configure<IntegrationInventoryCaptureOptions>(builder.Configuration.GetSection("IntegrationInventoryCapture"));
+builder.Services.AddOptions<Hyper.IntegrationWorker.Application.IntegrationWorkerOptions>()
+    .Bind(builder.Configuration.GetSection("IntegrationWorker"))
+    .Validate(options => options.IsValid(), "Worker intervals must be between 1 millisecond and 1 hour.")
+    .ValidateOnStart();
 builder.Services.AddHostedService<Hyper.IntegrationWorker.Application.IntegrationWorker>();
 await builder.Build().RunAsync();
