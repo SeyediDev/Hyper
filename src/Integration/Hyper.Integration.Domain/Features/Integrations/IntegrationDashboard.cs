@@ -9,6 +9,9 @@ public sealed record IntegrationDashboardSnapshot(int Connections, int EnabledCo
 {
     public IReadOnlyList<IntegrationStatusCount> Outbox { get; init; } = [];
     public IReadOnlyList<IntegrationRecentOutbox> RecentOutbox { get; init; } = [];
+    public IReadOnlyList<IntegrationRecentWebhook> RecentInbox { get; init; } = [];
+    public IReadOnlyList<IntegrationRecentWebhook> FailedInbox { get; init; } = [];
+    public IReadOnlyList<IntegrationRecentOutbox> DeadLetterOutbox { get; init; } = [];
     public IReadOnlyList<IntegrationConnectionHealth> ConnectionsHealth { get; init; } = [];
     public int OutboxCount(byte status) => Outbox.Where(x => x.Status == status).Sum(x => x.Count);
     public int RunCount(byte status) => Runs.Where(x => x.Status == status).Sum(x => x.Count);
@@ -19,6 +22,8 @@ public sealed record IntegrationDashboardSnapshot(int Connections, int EnabledCo
 
 public sealed record IntegrationRecentOutbox(long Id, string ConnectionName, byte Status, int Attempts,
     DateTime CreatedAtUtc, DateTime NextAttemptAtUtc, string? LastError);
+public sealed record IntegrationRecentWebhook(long Id, string ConnectionName, string ExternalEventId,
+    string EventType, byte Status, DateTime ReceivedAtUtc, DateTime? ProcessedAtUtc, string? Error);
 public sealed record IntegrationConnectionHealth(long ConnectionId, string ConnectionName,
     IntegrationProvider Provider, bool Enabled, bool TokenExpired, bool HasError,
     DateTime? LastSyncAtUtc, string Status);

@@ -38,6 +38,28 @@
             <article><span>ارسال موفق به پلتفرم</span><strong>@stats.OutboxCount(2)</strong></article>
             <article><span>خطای نهایی ارسال</span><strong>@stats.OutboxCount(3)</strong></article>
         </div>
+        <section class="simulation-card"><h2>پیام‌های نیازمند بررسی</h2>
+            <p class="simulation-help">تا ۳۰ خطای اخیر از هر صف؛ ورود پیام‌های موفق، خطاهای قبلی را از این بخش حذف نمی‌کند.</p>
+            <h3>وب‌هوک‌های ناموفق (@stats.WebhookCount(2))</h3>
+            <partial name="_WebhookMessages" model="stats.FailedInbox" />
+            <h3>خطاهای نهایی ارسال (@stats.OutboxCount(3))</h3>
+            @if (stats.DeadLetterOutbox.Count == 0)
+            { <div class="simulation-empty">پیام خروجی با خطای نهایی وجود ندارد.</div> }
+            else
+            {
+                <div class="sync-table-scroll"><table class="sync-runs"><thead><tr><th>شناسه</th><th>اتصال</th><th>تعداد تلاش</th><th>زمان ثبت (UTC)</th><th>خطا</th></tr></thead><tbody>
+                @foreach (var message in stats.DeadLetterOutbox)
+                {
+                    <tr><td>@message.Id</td><td>@message.ConnectionName</td><td>@message.Attempts</td>
+                    <td dir="ltr">@message.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm")</td><td>@(message.LastError ?? "—")</td></tr>
+                }
+                </tbody></table></div>
+            }
+        </section>
+        <section class="simulation-card"><h2>آخرین وب‌هوک‌های دریافتی</h2>
+            <p class="simulation-help">حداکثر ۳۰ پیام، به ترتیب زمان دریافت؛ محتوای خام پیام نمایش داده نمی‌شود.</p>
+            <partial name="_WebhookMessages" model="stats.RecentInbox" />
+        </section>
         <section class="simulation-card"><h2>آخرین پیام‌های خروجی</h2>
             @if (stats.RecentOutbox.Count == 0)
             { <div class="simulation-empty">پیامی برای ارسال ثبت نشده است.</div> }

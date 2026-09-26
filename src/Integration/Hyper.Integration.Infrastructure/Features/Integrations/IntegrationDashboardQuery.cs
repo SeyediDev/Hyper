@@ -38,6 +38,19 @@ public sealed class IntegrationDashboardQuery(HyperIntegrationContext db, IInteg
             .Select(x => new IntegrationStatusCount(x.Key, x.Count())).ToListAsync(ct);
         var webhookCounts = await inbox.GroupBy(x => x.Status)
             .Select(x => new IntegrationStatusCount(x.Key, x.Count())).ToListAsync(ct);
+        var inboxDetails = from message in inbox
+                           join connection in connections on message.ConnectionId equals connection.Id
+                           select new { Message = message, connection.DisplayName };
+        var recentInbox = await inboxDetails.OrderByDescending(x => x.Message.ReceivedAtUtc)
+            .ThenByDescending(x => x.Message.Id).Take(30)
+            .Select(x => new IntegrationRecentWebhook(x.Message.Id, x.DisplayName, x.Message.ExternalEventId,
+                x.Message.EventType, x.Message.Status, x.Message.ReceivedAtUtc, x.Message.ProcessedAtUtc, x.Message.Error))
+            .ToListAsync(ct);
+        var failedInbox = await inboxDetails.Where(x => x.Message.Status == 2)
+            .OrderByDescending(x => x.Message.ReceivedAtUtc).ThenByDescending(x => x.Message.Id).Take(30)
+            .Select(x => new IntegrationRecentWebhook(x.Message.Id, x.DisplayName, x.Message.ExternalEventId,
+                x.Message.EventType, x.Message.Status, x.Message.ReceivedAtUtc, x.Message.ProcessedAtUtc, x.Message.Error))
+            .ToListAsync(ct);
         var recent = await runs.OrderByDescending(x => x.Run.StartedAtUtc).ThenByDescending(x => x.Run.Id).Take(30)
             .Select(x => new IntegrationRecentRun(x.Run.Id, x.DisplayName, x.Provider, x.Run.Status,
                 x.Run.StartedAtUtc, x.Run.FinishedAtUtc, x.Run.ItemsRead, x.Run.ItemsWritten, x.Run.ItemsFailed, x.Run.Error))
@@ -50,6 +63,10 @@ public sealed class IntegrationDashboardQuery(HyperIntegrationContext db, IInteg
         var recentOutbox = await outbox.OrderByDescending(x => x.Message.Id).Take(30)
             .Select(x => new IntegrationRecentOutbox(x.Message.Id, x.DisplayName, x.Message.Status, x.Message.Attempts,
                 x.Message.CreatedAtUtc, x.Message.NextAttemptAtUtc, x.Message.LastError)).ToListAsync(ct);
+        var deadLetterOutbox = await outbox.Where(x => x.Message.Status == 3)
+            .OrderByDescending(x => x.Message.Id).Take(30)
+            .Select(x => new IntegrationRecentOutbox(x.Message.Id, x.DisplayName, x.Message.Status, x.Message.Attempts,
+                x.Message.CreatedAtUtc, x.Message.NextAttemptAtUtc, x.Message.LastError)).ToListAsync(ct);
         var now = DateTime.UtcNow;
         var health = await connections.OrderBy(x => x.Id)
             .Select(x => new IntegrationConnectionHealth(x.Id, x.DisplayName, x.Provider, x.IsEnabled,
@@ -59,6 +76,7 @@ public sealed class IntegrationDashboardQuery(HyperIntegrationContext db, IInteg
             .ToListAsync(ct);
         return new(connectionCount, enabledCount, mappingCount, runCounts, webhookCounts, recent)
             { Outbox = outboxCounts, RecentOutbox = recentOutbox, ConnectionsHealth = health,
+              RecentInbox = recentInbox, FailedInbox = failedInbox, DeadLetterOutbox = deadLetterOutbox,
               PriceDifferenceCount = priceDifferences, InventoryDifferenceCount = inventoryDifferences };
     }
 }

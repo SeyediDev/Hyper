@@ -109,7 +109,12 @@ public sealed record IntegrationDashboardResponse(int Connections, int EnabledCo
 {
     public IReadOnlyList<IntegrationDashboardConnectionHealth> ConnectionsHealth { get; init; } = [];
     public IReadOnlyList<IntegrationDashboardOutbox> RecentOutbox { get; init; } = [];
+    public IReadOnlyList<IntegrationDashboardWebhook> RecentInbox { get; init; } = [];
+    public IReadOnlyList<IntegrationDashboardWebhook> FailedInbox { get; init; } = [];
+    public IReadOnlyList<IntegrationDashboardOutbox> DeadLetterOutbox { get; init; } = [];
 }
+public sealed record IntegrationDashboardWebhook(long Id, string ConnectionName, string ExternalEventId,
+    string EventType, byte Status, DateTime ReceivedAtUtc, DateTime? ProcessedAtUtc, string? Error);
 public sealed record IntegrationDashboardConnectionHealth(long ConnectionId, string ConnectionName,
     IntegrationProvider Provider, bool Enabled, bool TokenExpired, bool HasError,
     DateTime? LastSyncAtUtc, string Status);

@@ -1,0 +1,24 @@
+@model IReadOnlyList<Hyper.Integration.Domain.Features.Integrations.IntegrationRecentWebhook>
+@{
+    string State(byte status) => status switch { 0 => "در انتظار", 1 => "پردازش‌شده", 2 => "ناموفق", _ => "نامشخص" };
+}
+@if (Model.Count == 0)
+{
+    <div class="simulation-empty">پیامی در این فهرست وجود ندارد.</div>
+}
+else
+{
+    <div class="sync-table-scroll"><table class="sync-runs">
+        <thead><tr><th>شناسه</th><th>اتصال</th><th>شناسه رویداد</th><th>نوع رویداد</th><th>وضعیت</th><th>دریافت (UTC)</th><th>پردازش (UTC)</th><th>خطا</th></tr></thead>
+        <tbody>
+        @foreach (var message in Model)
+        {
+            <tr><td>@message.Id</td><td>@message.ConnectionName</td><td>@message.ExternalEventId</td>
+                <td>@message.EventType</td><td>@State(message.Status)</td>
+                <td dir="ltr">@message.ReceivedAtUtc.ToString("yyyy-MM-dd HH:mm")</td>
+                <td dir="ltr">@(message.ProcessedAtUtc?.ToString("yyyy-MM-dd HH:mm") ?? "—")</td>
+                <td>@(message.Error ?? "—")</td></tr>
+        }
+        </tbody>
+    </table></div>
+}
