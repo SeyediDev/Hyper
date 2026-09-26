@@ -16,7 +16,8 @@ public sealed class IntegrationScenarioProcessor(HyperIntegrationContext db, IIn
             ?? throw new IntegrationProviderException("ConnectionScopeChanged", false);
         IntegrationConnectionReadiness.Validate(connection, DateTime.UtcNow);
         if (job.Item is IntegrationSyncItem.Counterparty or IntegrationSyncItem.Product
-            or IntegrationSyncItem.Sale or IntegrationSyncItem.Purchase)
+            or IntegrationSyncItem.Sale or IntegrationSyncItem.Purchase
+            or IntegrationSyncItem.Subscription or IntegrationSyncItem.Review or IntegrationSyncItem.Chat)
             return await businessEvents.DispatchAsync(job, connection, ct);
         var demoBasalam = connection.Provider == IntegrationProvider.Basalam
             && string.Equals(basalamOptions.Value.Mode, "Demo", StringComparison.OrdinalIgnoreCase);

@@ -343,6 +343,48 @@ static async Task<int> Run()
         Check(await managementController.Replay(connection.Id, running.InboxId!.Value, 7, "tenant-a", default) is ConflictObjectResult
             && await db.IntegrationScenarioJobs.AsNoTracking().AnyAsync(x => x.Id == running.ScenarioJobId && x.LeaseId == activeLease),
             "replay cannot steal or reset a running worker lease");
+        // End the lease fixture through the normal expired-lease recovery path;
+        // otherwise it intentionally blocks subsequent jobs on this connection.
+        await db.IntegrationScenarioJobs.Where(x => x.Id == running.ScenarioJobId).ExecuteUpdateAsync(s =>
+            s.SetProperty(x => x.LeaseExpiresAtUtc, DateTime.UtcNow.AddSeconds(-1)));
+        Check(await queue.ProcessConnectionAsync(connection.Id, default)
+            && await db.IntegrationScenarioJobs.AsNoTracking().AnyAsync(x => x.Id == running.ScenarioJobId
+                && x.Status == IntegrationScenarioStatus.Completed), "expired lease is recovered before later connection events");
+        var owner = new RecordingEngagementOwner();
+        var ownerDispatcher = new IntegrationBusinessEventDispatcher(commands, owner, new NoReservations(), db, resolver);
+        var ownerProcessor = new IntegrationScenarioProcessor(db, resolver, new NoCapture(),
+            Options.Create(new IntegrationInventoryCaptureOptions()), Options.Create(new BasalamOAuthSettings()), null!, ownerDispatcher, commands);
+        var ownerQueue = new IntegrationScenarioQueue(db, ownerProcessor);
+        var engagementCases = new[]
+        {
+            ("subscription.renewed", "{\"externalSubscriptionId\":\"subscription-1\",\"status\":\"active\"}"),
+            ("review.created", "{\"externalReviewId\":\"review-1\",\"rating\":4,\"text\":\"fixture\"}"),
+            ("chat.message.received", "{\"externalConversationId\":\"chat-1\",\"externalMessageId\":\"message-in\",\"text\":\"fixture\"}"),
+            ("chat.message.sent", "{\"externalConversationId\":\"chat-1\",\"externalMessageId\":\"message-out\",\"text\":\"fixture\"}")
+        };
+        foreach (var (eventType, payload) in engagementCases)
+        {
+            var beforeProvider = providerHttp.Requests;
+            var beforeAccounting = accountingHttp.Calls;
+            var engagementEvent = await ingress.ReceiveAsync(Event("engagement-" + eventType) with
+                { EventType = eventType, Body = Encoding.UTF8.GetBytes(payload) });
+            await queue.ProcessConnectionAsync(connection.Id, default);
+            var pendingOwner = await db.IntegrationScenarioJobs.AsNoTracking().SingleAsync(x => x.Id == engagementEvent.ScenarioJobId);
+            Check(pendingOwner.Status == IntegrationScenarioStatus.NeedsAttention
+                && pendingOwner.ResultJson!.Contains("EngagementOwnerApiNotRegistered")
+                && providerHttp.Requests == beforeProvider && accountingHttp.Calls == beforeAccounting,
+                eventType + " reaches engagement boundary, not catalog/accounting or false completion");
+            await management.ReplayWebhookAsync(scope, engagementEvent.InboxId!.Value);
+            await ownerQueue.ProcessConnectionAsync(connection.Id, default);
+            Check(await db.IntegrationScenarioJobs.AsNoTracking().AnyAsync(x => x.Id == engagementEvent.ScenarioJobId
+                    && x.Status == IntegrationScenarioStatus.Completed)
+                && await db.IntegrationWebhookInbox.AsNoTracking().AnyAsync(x => x.Id == engagementEvent.InboxId && x.Status == 1),
+                eventType + " completes only after an acknowledged owner result (fixture)");
+        }
+        Check(owner.Subscription is { ShopId: 7, TenantId: "tenant-a", ExternalSubscriptionId: "subscription-1" }
+            && owner.Review is { ExternalReviewId: "review-1", Rating: 4 }
+            && owner.Chats.Count == 2 && !owner.Chats[0].Outbound && owner.Chats[1].Outbound,
+            "normalized engagement contracts retain scoped identities and chat direction");
         Check(!await db.Database.SqlQueryRaw<int>("SELECT COUNT(*) AS Value FROM sys.tables WHERE name LIKE 'TBL[_]%' ").AnyAsync(x => x != 0),
             "both paths run with only Integration tables, no accounting tables in Integration database");
         Console.WriteLine($"{checks} synchronization flow checks passed. HTTP/accounting responses are controlled fixtures, not live-provider acceptance.");
@@ -433,6 +475,18 @@ sealed class NoCapture : IIntegrationInventoryCapture
 {
     public Task<int> CaptureAsync(CancellationToken ct) => throw new InvalidOperationException("Unexpected legacy capture");
     public Task<bool> ReconcileOneAsync(long connectionId, long mappingId, CancellationToken ct) => throw new InvalidOperationException("Unexpected legacy reconciliation");
+}
+sealed class RecordingEngagementOwner : IIntegrationEngagementPort
+{
+    public IntegrationSubscriptionCommand? Subscription;
+    public IntegrationReviewCommand? Review;
+    public List<IntegrationChatMessageCommand> Chats = [];
+    public Task<EngagementCommandResult> ApplySubscriptionAsync(IntegrationSubscriptionCommand command, CancellationToken ct)
+    { Subscription = command; return Task.FromResult(new EngagementCommandResult(EngagementCommandStatus.Applied)); }
+    public Task<EngagementCommandResult> ApplyReviewAsync(IntegrationReviewCommand command, CancellationToken ct)
+    { Review = command; return Task.FromResult(new EngagementCommandResult(EngagementCommandStatus.Applied)); }
+    public Task<EngagementCommandResult> ApplyChatMessageAsync(IntegrationChatMessageCommand command, CancellationToken ct)
+    { Chats.Add(command); return Task.FromResult(new EngagementCommandResult(EngagementCommandStatus.Applied)); }
 }
 sealed class NoReservations : IIntegrationInventoryReservation
 {

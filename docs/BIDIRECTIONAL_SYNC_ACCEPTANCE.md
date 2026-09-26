@@ -131,6 +131,15 @@ acceptance must still be executed separately.
 
 ## Real-provider prerequisites (not replaced by fixture tests)
 
+Subscription/review/chat jobs now dispatch to `IIntegrationEngagementPort`, not
+the catalog comparison branch. The default owner remains unregistered, so these
+jobs correctly end in `NeedsAttention` with `EngagementOwnerApiNotRegistered` in
+the result rather than claiming success. Regression tests replay normalized
+fixtures against an acknowledging in-memory owner; this is not an implemented
+engagement domain API or evidence that Basalam emits every normalized event name.
+Owner API, real payload adaptation and subscription source remain separately
+tracked by SYNC-ENGAGEMENT-OWNER-001, SYNC-WEBHOOK-CONTRACT-001 and the scenario tasks.
+
 The selected integration database must contain the real shop/tenant connection,
 an OAuth grant obtained through the panel's existing Basalam login, and explicit
 product/variant mappings. Application ClientId/ClientSecret alone are not a booth
