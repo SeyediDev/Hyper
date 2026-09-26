@@ -7,7 +7,7 @@ namespace Hyper.Infrastructure.Features.Integrations;
 public sealed class IntegrationScenarioProcessor(HyperIntegrationContext db, IIntegrationStrategyResolver strategies,
     IIntegrationInventoryCapture inventory, IOptions<IntegrationInventoryCaptureOptions> options,
     IOptions<BasalamOAuthSettings> basalamOptions, BasalamDemoProvisioner demoProvisioner,
-    IntegrationBusinessEventDispatcher businessEvents)
+    IntegrationBusinessEventDispatcher businessEvents, IIntegrationPlatformCatalogPort catalog)
 {
     public async Task<IntegrationScenarioResult> ProcessAsync(IntegrationScenarioJob job, CancellationToken ct)
     {
@@ -29,20 +29,21 @@ public sealed class IntegrationScenarioProcessor(HyperIntegrationContext db, IIn
         var remote = await adapter.ReadCatalogAsync(connection, ct);
         var mappings = await db.ExternalProductMappings.AsNoTracking().Where(x => x.ConnectionId == connection.Id
             && x.ShopId == connection.ShopId && x.IsActive).ToListAsync(ct);
-        var rows = await db.Database.SqlQuery<LocalProductRow>($"""
-            SELECT p.ID_ AS Id, p.NAME_ AS Title, p.TAXCODE_ AS Sku, p.SALEPRICE_ AS Price, p.ACCOUNTINGSTOCK_ AS Stock,
-              CAST(CASE WHEN p.ISENABLED_=1 AND p.ISSELLABLE_=1 AND p.ISONLINESELLABLE_=1
-                AND p.ISSTOCKABLE_=1 AND p.ISSERVICE_=0 THEN 1 ELSE 0 END AS bit) AS CanSell,
-              COALESCE((SELECT SUM(r.Quantity) FROM dbo.InventoryReservationLogs r
-                WHERE r.ShopId=p.SHOPID_ AND r.HyperProductId=p.ID_ AND r.Status=0 AND r.ReleasedAtUtc IS NULL),0) AS Reserved
-            FROM dbo.TBL_Product p JOIN dbo.TBL_Shop s ON s.SHOPID_=p.SHOPID_
-            WHERE p.SHOPID_={job.ShopId}
-              AND COALESCE(NULLIF(LTRIM(RTRIM(p.TENANT_ID_)),''),CONCAT('shop:',p.SHOPID_))={job.TenantId}
-              AND COALESCE(NULLIF(LTRIM(RTRIM(s.TENANT_ID_)),''),CONCAT('shop:',s.SHOPID_))={job.TenantId}
-            """).ToListAsync(ct);
-        var local = rows.Select(x => new IntegrationLocalProduct(x.Id, x.Title,
-            job.Item == IntegrationSyncItem.Inventory ? IntegrationAvailableInventory.Calculate(x.Stock, x.Reserved, x.CanSell) : 0,
-            x.Sku, x.Price)).ToArray();
+        IntegrationLocalProduct[] local;
+        await using (var snapshot = await db.Database.BeginTransactionAsync(ct))
+        {
+            await IntegrationInventoryReadLock.AcquireAsync(db, job.ShopId, ct);
+            var rows = await catalog.GetProductsAsync(job.ShopId, job.TenantId, ct);
+            var reserved = await db.InventoryReservationLogs.AsNoTracking()
+                .Where(x => x.ShopId == job.ShopId && x.Status == 0 && x.ReleasedAtUtc == null)
+                .GroupBy(x => x.HyperProductId).Select(x => new { ProductId = x.Key, Quantity = x.Sum(r => r.Quantity) })
+                .ToDictionaryAsync(x => x.ProductId, x => x.Quantity, ct);
+            local = rows.Select(x => new IntegrationLocalProduct(x.ProductId, x.Name,
+                job.Item == IntegrationSyncItem.Inventory
+                    ? IntegrationAvailableInventory.Calculate(x.Stock, reserved.GetValueOrDefault(x.ProductId), x.CanSell) : 0,
+                x.Sku, x.Price)).ToArray();
+            await snapshot.CommitAsync(ct);
+        }
         var result = IntegrationCatalogComparison.Compare(local, remote, mappings, job.Item);
         var enqueued = 0;
         if (job.Item == IntegrationSyncItem.Inventory)
@@ -57,14 +58,4 @@ public sealed class IntegrationScenarioProcessor(HyperIntegrationContext db, IIn
         return result with { Enqueued = enqueued };
     }
 
-    private sealed class LocalProductRow
-    {
-        public int Id { get; set; }
-        public string Title { get; set; } = null!;
-        public string? Sku { get; set; }
-        public decimal? Price { get; set; }
-        public decimal Stock { get; set; }
-        public decimal Reserved { get; set; }
-        public bool CanSell { get; set; }
-    }
 }

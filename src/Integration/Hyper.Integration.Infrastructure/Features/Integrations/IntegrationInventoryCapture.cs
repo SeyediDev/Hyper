@@ -14,7 +14,8 @@ public sealed class IntegrationInventoryCaptureOptions
 }
 
 public sealed class IntegrationInventoryCapture(HyperIntegrationContext db, IIntegrationOutbox outbox,
-    IIntegrationStrategyResolver strategies, IOptions<IntegrationInventoryCaptureOptions> options) : IIntegrationInventoryCapture
+    IIntegrationStrategyResolver strategies, IOptions<IntegrationInventoryCaptureOptions> options,
+    IIntegrationPlatformCatalogPort catalog) : IIntegrationInventoryCapture
 {
     public async Task<int> CaptureAsync(CancellationToken ct)
     {
@@ -54,20 +55,16 @@ public sealed class IntegrationInventoryCapture(HyperIntegrationContext db, IInt
         if (mapping is null || connection is null || !mapping.IsActive || mapping.ConnectionId != connectionId || mapping.ShopId != connection.ShopId)
             return false;
         IntegrationConnectionReadiness.Validate(connection, DateTime.UtcNow);
-        // Read only. No triggers, CDC enabling, update timestamp or schema changes on legacy tables.
-        var source = await db.Database.SqlQuery<InventorySourceRow>($"""
-            SELECT p.ACCOUNTINGSTOCK_ AS AccountingStock,
-              CAST(CASE WHEN p.ISENABLED_=1 AND p.ISSELLABLE_=1 AND p.ISONLINESELLABLE_=1
-                     AND p.ISSTOCKABLE_=1 AND p.ISSERVICE_=0 THEN 1 ELSE 0 END AS bit) AS CanSell,
-              COALESCE((SELECT SUM(r.Quantity) FROM dbo.InventoryReservationLogs r
-                WHERE r.ShopId=p.SHOPID_ AND r.HyperProductId=p.ID_ AND r.Status=0 AND r.ReleasedAtUtc IS NULL),0) AS Reserved
-            FROM dbo.TBL_Product p JOIN dbo.TBL_Shop s ON p.SHOPID_=s.SHOPID_
-            WHERE p.ID_={mapping.HyperProductId} AND p.SHOPID_={connection.ShopId}
-              AND COALESCE(NULLIF(LTRIM(RTRIM(p.TENANT_ID_)),''), CONCAT('shop:',p.SHOPID_))={connection.TenantId}
-              AND COALESCE(NULLIF(LTRIM(RTRIM(s.TENANT_ID_)),''), CONCAT('shop:',s.SHOPID_))={connection.TenantId}
-            """).SingleOrDefaultAsync(ct);
+        await IntegrationInventoryReadLock.AcquireAsync(db, connection.ShopId, ct);
+        // Accounting owns gross stock and sellability. Only Integration's active
+        // holds are read here; the two databases never need a cross-domain join.
+        var source = (await catalog.GetProductsAsync(connection.ShopId, connection.TenantId, ct))
+            .SingleOrDefault(x => x.ProductId == mapping.HyperProductId);
         if (source is null) return false;
-        var quantity = IntegrationAvailableInventory.Calculate(source.AccountingStock, source.Reserved, source.CanSell);
+        var reserved = await db.InventoryReservationLogs.Where(x => x.ShopId == connection.ShopId
+                && x.HyperProductId == mapping.HyperProductId && x.Status == 0 && x.ReleasedAtUtc == null)
+            .SumAsync(x => x.Quantity, ct);
+        var quantity = IntegrationAvailableInventory.Calculate(source.Stock, reserved, source.CanSell);
         var latest = await db.IntegrationOutbox.AsNoTracking().Where(x => x.MappingId == mappingId)
             .OrderByDescending(x => x.SourceVersion).FirstOrDefaultAsync(ct);
         var update = new ExternalInventoryUpdate(mapping.ExternalProductId, mapping.ExternalVariantId, quantity);
@@ -79,10 +76,17 @@ public sealed class IntegrationInventoryCapture(HyperIntegrationContext db, IInt
         return true;
     }
 
-    private sealed class InventorySourceRow
-    {
-        public decimal AccountingStock { get; set; }
-        public decimal Reserved { get; set; }
-        public bool CanSell { get; set; }
-    }
+}
+
+internal static class IntegrationInventoryReadLock
+{
+    // Same transaction-owned lock as reservation create/release/commit: an ACK
+    // cannot remove a hold between reading gross stock and reading active holds.
+    public static Task AcquireAsync(HyperIntegrationContext db, int shopId, CancellationToken ct) =>
+        db.Database.ExecuteSqlInterpolatedAsync($"""
+            DECLARE @result int;
+            EXEC @result=sys.sp_getapplock @Resource={"integration-reservations:" + shopId},
+                @LockMode='Exclusive', @LockOwner='Transaction', @LockTimeout=15000;
+            IF @result < 0 THROW 51000, 'InventoryReadLockUnavailable', 1;
+            """, ct);
 }

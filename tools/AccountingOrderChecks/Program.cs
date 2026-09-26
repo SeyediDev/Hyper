@@ -31,6 +31,12 @@ try
     using (var serviceScope = provider.CreateScope())
         Check(ReferenceEquals(serviceScope.ServiceProvider.GetRequiredService<IAccountingCommandHandler>(),
             serviceScope.ServiceProvider.GetRequiredService<IAccountingPlatformReadHandler>()), "accounting command and read handlers resolve in DI");
+    for (var i = 1; i <= 8; i++)
+    {
+        setup.TblShops.Add(new() { Ownerid = "fixture-owner", Name = "fixture-shop-" + i,
+            TenantId = i == 8 ? null : scope.TenantId });
+        await setup.SaveChangesAsync();
+    }
     var person = new SqlTblPerson { Shopid = 7, TenantId = scope.TenantId, Nickname = "fixture", Isenabled = true };
     var products = Enumerable.Range(1, 8).Select(n => new SqlTblProduct { Shopid = 7, TenantId = scope.TenantId,
         Name = "fixture-" + n, Accountingstock = 10, Isenabled = true, Issellable = true,
@@ -40,6 +46,26 @@ try
         Fiscalperiodstatusid = 1, Startdate = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(-2),
         Enddate = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(2) });
     await setup.SaveChangesAsync();
+    var catalog = await Handler(setup).GetProductsAsync(scope, default);
+    Check(catalog.Count == 8 && catalog.All(x => x.CanSell), "accounting catalog exposes authoritative sellability");
+    Check((await Handler(setup).GetProductsAsync(scope with { TenantId = "other-tenant" }, default)).Count == 0,
+        "catalog rejects a different shop tenant");
+    products[0].Isonlinesellable = false;
+    products[1].Issellable = false;
+    products[2].Isservice = true;
+    products[3].Isstockable = false;
+    products[4].Isenabled = false;
+    await setup.SaveChangesAsync();
+    catalog = await Handler(setup).GetProductsAsync(scope, default);
+    Check(catalog.Where(x => products.Take(5).Select(p => p.Id).Contains(x.ProductId)).All(x => !x.CanSell),
+        "all five accounting sellability flags are respected");
+    products[0].Isonlinesellable = true; products[1].Issellable = true; products[2].Isservice = false;
+    products[3].Isstockable = true; products[4].Isenabled = true;
+    var legacy = new SqlTblProduct { Shopid = 8, TenantId = "  ", Name = "legacy", Accountingstock = 4,
+        Isenabled = true, Issellable = true, Isonlinesellable = true, Isstockable = true };
+    setup.Add(legacy); await setup.SaveChangesAsync();
+    Check((await Handler(setup).GetProductsAsync(new(8, "shop:8"), default)).Single().ProductId == legacy.Id,
+        "tenantless legacy shop uses its canonical accounting scope");
     VendorOrderCommand Order(string id, int product, decimal qty, long connection = 10) =>
         new("event-" + id, scope, connection, id, null, "buyer", [new(product, qty, 2)], qty * 2, 1, person.Id);
     async Task<AccountingCommandResult> Apply(VendorOrderCommand order, bool verified = true)
@@ -118,7 +144,7 @@ sealed class FixtureModel(ModelCustomizerDependencies dependencies) : ModelCusto
     public override void Customize(ModelBuilder builder, DbContext context)
     {
         base.Customize(builder, context);
-        Type[] keep = [typeof(SqlTblPerson), typeof(SqlTblProduct), typeof(SqlTblShopfiscalperiod), typeof(SqlTblSaleorder), typeof(SqlTblSaleorderitem)];
+        Type[] keep = [typeof(SqlTblShop), typeof(SqlTblPerson), typeof(SqlTblProduct), typeof(SqlTblShopfiscalperiod), typeof(SqlTblSaleorder), typeof(SqlTblSaleorderitem)];
         // Keep real column/key/default mappings; only omit unrelated legacy tables
         // from the disposable fixture, not from the production accounting model.
         foreach (var entity in builder.Model.GetEntityTypes().ToArray())

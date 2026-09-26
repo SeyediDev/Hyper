@@ -16,7 +16,7 @@ public interface IIntegrationPlatformShopPort
 }
 
 public sealed record IntegrationPlatformProduct(int ProductId, string Name, string? Sku,
-    decimal Price, decimal Stock, bool IsEnabled, bool IsStockable, decimal? MinimumStock);
+    decimal Price, decimal Stock, bool IsEnabled, bool IsStockable, decimal? MinimumStock, bool CanSell = false);
 
 /// <summary>Read-only platform catalog port; Integration does not know the accounting schema.</summary>
 public interface IIntegrationPlatformCatalogPort

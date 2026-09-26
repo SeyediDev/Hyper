@@ -46,7 +46,7 @@ public sealed class IntegrationInventoryReservation(HyperIntegrationContext db,
         foreach (var item in requested)
         {
             var product = products.SingleOrDefault(x => x.ProductId == item.Key);
-            if (product is null || !product.IsEnabled || !product.IsStockable)
+            if (product is null || !product.IsEnabled || !product.IsStockable || !product.CanSell)
                 throw new IntegrationProviderException("ProductNotSellable", false);
             var reserved = await db.InventoryReservationLogs.AsNoTracking().Where(x => x.ShopId == shop.ShopId
                 && x.HyperProductId == item.Key && x.Status == 0 && x.ReleasedAtUtc == null)

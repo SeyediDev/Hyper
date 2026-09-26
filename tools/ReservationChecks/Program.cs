@@ -38,6 +38,9 @@ try
     }
     var key = Key("multi");
     var lines = new[] { Line(1, 2), Line(2, 3), Line(1, 1) };
+    await Reject(() => new IntegrationInventoryReservation(setup, new Catalog(false),
+        Options.Create(new IntegrationInventoryCaptureOptions { AccountingStockSourceVerified = true }))
+        .ReserveAsync(shop, Key("not-sellable"), lines, default), "ProductNotSellable");
     await Service(setup).ReserveAsync(shop, key, lines, default);
     Check(await setup.InventoryReservationLogs.CountAsync() == 2, "multi-product order with repeated product");
     await Service(setup).ReserveAsync(shop, key, lines, default);
@@ -101,10 +104,10 @@ finally
     if (setup.Database.GetDbConnection().Database == database && database.StartsWith("HyperReservationChecks_", StringComparison.Ordinal))
         await setup.Database.EnsureDeletedAsync();
 }
-sealed class Catalog : IIntegrationPlatformCatalogPort
+sealed class Catalog(bool canSell = true) : IIntegrationPlatformCatalogPort
 {
     public Task<IReadOnlyList<IntegrationPlatformProduct>> GetProductsAsync(int shopId, string tenantId, CancellationToken ct) =>
-        Task.FromResult<IReadOnlyList<IntegrationPlatformProduct>>(Enumerable.Range(1, 4).Select(id => new IntegrationPlatformProduct(id, "product", null, 1, 10, true, true, null)).ToArray());
+        Task.FromResult<IReadOnlyList<IntegrationPlatformProduct>>(Enumerable.Range(1, 4).Select(id => new IntegrationPlatformProduct(id, "product", null, 1, 10, true, true, null, CanSell: canSell)).ToArray());
 }
 sealed class Reply : HttpMessageHandler
 {

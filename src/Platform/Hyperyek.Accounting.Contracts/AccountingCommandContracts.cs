@@ -14,7 +14,7 @@ public sealed record ResolveCustomerCommand(AccountingScope Scope, AccountingCus
 
 public sealed record AccountingShopRead(int ShopId, string ShopName, string MerchantIdentifier, string TenantId);
 public sealed record AccountingProductRead(int ProductId, string Name, string? Sku, decimal Price,
-    decimal Stock, bool IsEnabled, bool IsStockable, decimal? MinimumStock);
+    decimal Stock, bool IsEnabled, bool IsStockable, decimal? MinimumStock, bool CanSell = false);
 public sealed record AccountingOverviewDay(DateTime Date, int Invoices);
 public sealed record AccountingPlatformOverview(int Shops, int Products, int ActiveProducts, int People,
     int Invoices, int LowStockProducts, IReadOnlyList<AccountingOverviewDay> InvoiceTrend);

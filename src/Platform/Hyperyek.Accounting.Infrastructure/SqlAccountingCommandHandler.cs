@@ -66,11 +66,17 @@ public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db,
 
     public async Task<IReadOnlyList<AccountingProductRead>> GetProductsAsync(AccountingScope scope, CancellationToken ct)
     {
+        if (scope.ShopId <= 0 || string.IsNullOrWhiteSpace(scope.TenantId))
+            throw new ArgumentException("Shop requires tenant scope.", nameof(scope));
+        var shop = await GetShopAsync(scope.ShopId, ct);
+        if (shop is null || !string.Equals(shop.TenantId, scope.TenantId, StringComparison.Ordinal)) return [];
         var tenantless = scope.TenantId == CanonicalTenant(scope.ShopId, null);
         return await db.TblProducts.AsNoTracking().Where(x => x.Shopid == scope.ShopId
-                && (x.TenantId == scope.TenantId || tenantless && (x.TenantId == null || x.TenantId == "")))
+                && (x.TenantId != null && x.TenantId.Trim() == scope.TenantId
+                    || tenantless && (x.TenantId == null || x.TenantId.Trim() == "")))
             .OrderBy(x => x.Id).Select(x => new AccountingProductRead(x.Id, x.Name, x.Taxcode,
-                x.Saleprice, x.Accountingstock, x.Isenabled, x.Isstockable, x.Minimumstock)).ToListAsync(ct);
+                x.Saleprice, x.Accountingstock, x.Isenabled, x.Isstockable, x.Minimumstock,
+                x.Isenabled && x.Issellable && x.Isonlinesellable && x.Isstockable && !x.Isservice)).ToListAsync(ct);
     }
 
     public async Task<AccountingPlatformOverview> GetOverviewAsync(int days, AccountingScope? scope, CancellationToken ct)

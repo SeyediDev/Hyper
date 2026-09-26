@@ -120,7 +120,7 @@ if (args.Length > 0)
     var adapter = new FakeAdapter();
     var processor = new IntegrationScenarioProcessor(db, new IntegrationStrategyResolver([adapter]), new FakeInventory(),
         Options.Create(new IntegrationInventoryCaptureOptions()), Options.Create(new BasalamOAuthSettings()),
-        null!, null!);
+        null!, null!, null!);
     var queue = new IntegrationScenarioQueue(db, processor);
     var conn = new ExternalIntegrationConnection { ShopId=int.MaxValue-1, TenantId="scenario-test", Provider=IntegrationProvider.Custom,
         DisplayName="Rollback scenario test", AccountIdentifier=Guid.NewGuid().ToString("N"), CredentialType=IntegrationCredentialType.BearerToken, CredentialsJson="{}", IsEnabled=true };

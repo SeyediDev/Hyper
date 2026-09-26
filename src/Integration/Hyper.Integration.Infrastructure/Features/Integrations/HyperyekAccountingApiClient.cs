@@ -64,7 +64,7 @@ public sealed class HyperyekAccountingApiClient(
         var route = $"api/hyperyek/v1/accounting/platform/shops/{shopId}/products?tenantId={Uri.EscapeDataString(tenantId)}";
         var products = await GetAsync<List<AccountingProductRead>>(route, ct);
         return products.Select(x => new IntegrationPlatformProduct(x.ProductId, x.Name, x.Sku, x.Price,
-            x.Stock, x.IsEnabled, x.IsStockable, x.MinimumStock)).ToArray();
+            x.Stock, x.IsEnabled, x.IsStockable, x.MinimumStock, x.CanSell)).ToArray();
     }
 
     public async Task<bool> ValidateLinkedCustomerAsync(IntegrationCustomerIdentity customer, int personId,

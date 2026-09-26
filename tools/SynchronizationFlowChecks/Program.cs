@@ -82,7 +82,7 @@ static async Task<int> Run()
         var dispatcher = new IntegrationBusinessEventDispatcher(commands, new UnregisteredIntegrationEngagementPort(),
             new NoReservations(), db, resolver);
         var processor = new IntegrationScenarioProcessor(db, resolver, new NoCapture(),
-            Options.Create(new IntegrationInventoryCaptureOptions()), Options.Create(new BasalamOAuthSettings()), null!, dispatcher);
+            Options.Create(new IntegrationInventoryCaptureOptions()), Options.Create(new BasalamOAuthSettings()), null!, dispatcher, commands);
         var queue = new IntegrationScenarioQueue(db, processor);
         var ingress = new IntegrationWebhookIngress(db, new IntegrationWebhookVerifier());
         WebhookIngressRequest Event(string id, string product = "12", string? sourceMarker = null) =>
@@ -182,6 +182,41 @@ static async Task<int> Run()
         Check(await db.IntegrationOutbox.AsNoTracking().AnyAsync(x => x.Id == fractional!.OutboxMessageId
             && x.Status == 3 && x.LastError == "InvalidInventoryQuantity") && providerHttp.Requests == requestsBeforeInvalid,
             "fractional stock fails explicitly before HTTP instead of truncating to zero");
+        var verified = Options.Create(new IntegrationInventoryCaptureOptions { AccountingStockSourceVerified = true });
+        var capture = new IntegrationInventoryCapture(db, outbox, resolver, verified, commands);
+        var mapping = await db.ExternalProductMappings.AsNoTracking().SingleAsync(x => x.ConnectionId == connection.Id);
+        db.InventoryReservationLogs.AddRange(
+            new() { ShopId = 7, HyperProductId = 44, ReservationKey = "active", Quantity = 2, Status = 0, Source = "fixture" },
+            new() { ShopId = 7, HyperProductId = 44, ReservationKey = "consumed", Quantity = 5, Status = 2, Source = "fixture" },
+            new() { ShopId = 8, HyperProductId = 44, ReservationKey = "other-shop", Quantity = 9, Status = 0, Source = "fixture" });
+        await db.SaveChangesAsync();
+        Check(await capture.ReconcileOneAsync(connection.Id, mapping.Id, default), "capture reads accounting over HTTP and enqueues available stock");
+        async Task<decimal> LatestQuantity()
+        {
+            var message = await db.IntegrationOutbox.AsNoTracking().Where(x => x.MappingId == mapping.Id)
+                .OrderByDescending(x => x.SourceVersion).FirstAsync();
+            return JsonSerializer.Deserialize<ExternalInventoryUpdate>(message.PayloadJson)!.Quantity;
+        }
+        Check(await LatestQuantity() == 8 && accountingHttp.LastCatalogQuery == "?tenantId=tenant-a",
+            "capture subtracts only active same-shop holds from scoped accounting stock");
+        Check(!await capture.CaptureOneAsync(connection.Id, mapping.Id, default), "unchanged capture does not duplicate outbox");
+        var inventoryProcessor = new IntegrationScenarioProcessor(db, resolver, capture, verified,
+            Options.Create(new BasalamOAuthSettings()), null!, dispatcher, commands);
+        var compared = await inventoryProcessor.ProcessAsync(new() { ConnectionId = connection.Id, ShopId = 7,
+            TenantId = "tenant-a", EventId = "catalog-inventory", Item = IntegrationSyncItem.Inventory }, default);
+        Check(compared.Differences.Any(x => x.Code == "InventoryMismatch"),
+            "inventory scenario compares remote inventory to accounting API plus local holds");
+        accountingHttp.CanSell = false;
+        Check(await capture.CaptureOneAsync(connection.Id, mapping.Id, default) && await LatestQuantity() == 0,
+            "non-sellable accounting product publishes zero available inventory");
+        accountingHttp.LegacyCatalog = true;
+        Check(!(await commands.GetProductsAsync(7, "tenant-a", default)).Single().CanSell,
+            "older accounting response without CanSell fails closed");
+        accountingHttp.FailCatalog = true;
+        var beforeFailure = await db.IntegrationOutbox.CountAsync();
+        try { await capture.CaptureOneAsync(connection.Id, mapping.Id, default); throw new Exception("Expected catalog failure"); }
+        catch (HttpRequestException) { }
+        Check(await db.IntegrationOutbox.CountAsync() == beforeFailure, "accounting outage cannot enqueue invented stock");
         Check(!await db.Database.SqlQueryRaw<int>("SELECT COUNT(*) AS Value FROM sys.tables WHERE name LIKE 'TBL[_]%' ").AnyAsync(x => x != 0),
             "both paths run with only Integration tables, no accounting tables in Integration database");
         Console.WriteLine($"{checks} synchronization flow checks passed. HTTP/accounting responses are controlled fixtures, not live-provider acceptance.");
@@ -216,8 +251,17 @@ sealed class FixtureSchema(ModelCustomizerDependencies dependencies) : ModelCust
 sealed class AccountingTransport : HttpMessageHandler
 {
     public int Calls; public bool Fail; public ExternalProductChangedCommand? LastCommand;
+    public bool CanSell = true; public bool LegacyCatalog; public bool FailCatalog; public string? LastCatalogQuery;
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
     {
+        if (request.RequestUri?.AbsolutePath == "/api/hyperyek/v1/accounting/platform/shops/7/products")
+        {
+            if (FailCatalog) throw new HttpRequestException("Controlled catalog outage");
+            LastCatalogQuery = request.RequestUri.Query;
+            return new HttpResponseMessage(HttpStatusCode.OK) { Content = LegacyCatalog
+                ? new StringContent("[{\"productId\":44,\"name\":\"Fixture product\",\"price\":125,\"stock\":10,\"isEnabled\":true,\"isStockable\":true}]", Encoding.UTF8, "application/json")
+                : JsonContent.Create(new[] { new AccountingProductRead(44, "Fixture product", "catalog-sku", 125, 10, true, true, null, CanSell) }) };
+        }
         if (request.RequestUri?.AbsolutePath != "/api/hyperyek/v1/accounting/products/external-changed")
             throw new InvalidOperationException("Unexpected accounting route");
         Calls++;
