@@ -44,26 +44,28 @@ public sealed class IntegrationScenarioQueue(HyperIntegrationContext db, Integra
     private async Task<bool> ProcessNextCore(long? onlyConnection, CancellationToken ct)
     {
         var now = DateTime.UtcNow;
-        var candidates = await db.IntegrationScenarioJobs.AsNoTracking()
-            .Where(x => !onlyConnection.HasValue || x.ConnectionId == onlyConnection.Value)
-            .Where(x => x.Status == IntegrationScenarioStatus.Pending && x.NextAttemptAtUtc <= now
-                || x.Status == IntegrationScenarioStatus.Running && x.LeaseExpiresAtUtc <= now)
-            .OrderBy(x => x.Id).Take(50).Select(x => x.ConnectionId).ToListAsync(ct);
-        foreach (var connectionId in candidates.Distinct())
+        var candidates = await IntegrationScenarioScheduling.ReadyHeads(
+                db.IntegrationScenarioJobs.AsNoTracking(), now, onlyConnection)
+            .Select(x => x.ShopId).ToListAsync(ct);
+        foreach (var shopId in candidates)
         {
             await db.Database.OpenConnectionAsync(ct);
-            var resource = $"Hyper.Integration.Scenarios:{connectionId}";
+            var resource = IntegrationScenarioScheduling.LockResource(shopId);
             var locked = false;
             try
             {
                 locked = await SessionLock(resource, true, ct);
                 if (!locked) continue;
-                var job = await db.IntegrationScenarioJobs.AsNoTracking().Where(x => x.ConnectionId == connectionId
-                    && (x.Status == IntegrationScenarioStatus.Pending || x.Status == IntegrationScenarioStatus.Running))
+                // Re-read after locking: another worker may have completed the candidate.
+                // All connections of a shop share this ordering and session lock.
+                var job = await IntegrationScenarioScheduling.Active(db.IntegrationScenarioJobs.AsNoTracking())
+                    .Where(x => x.ShopId == shopId)
                     .OrderBy(x => x.Id).FirstOrDefaultAsync(ct);
                 now = DateTime.UtcNow;
-                if (job is null || job.Status == IntegrationScenarioStatus.Pending && job.NextAttemptAtUtc > now
-                    || job.Status == IntegrationScenarioStatus.Running && job.LeaseExpiresAtUtc > now) continue;
+                if (job is null || onlyConnection.HasValue && job.ConnectionId != onlyConnection.Value
+                    || job.Status == IntegrationScenarioStatus.Pending && job.NextAttemptAtUtc > now
+                    || job.Status == IntegrationScenarioStatus.Running
+                        && (job.LeaseExpiresAtUtc is null || job.LeaseExpiresAtUtc > now)) continue;
                 var lease = Guid.NewGuid();
                 await db.IntegrationScenarioJobs.Where(x => x.Id == job.Id).ExecuteUpdateAsync(s => s
                     .SetProperty(x => x.Status, IntegrationScenarioStatus.Running).SetProperty(x => x.LeaseId, lease)

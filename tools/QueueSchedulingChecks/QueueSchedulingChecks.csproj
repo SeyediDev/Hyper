@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType></PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Integration/Hyper.Integration.Domain/Hyper.Integration.Domain.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationScenarioScheduling.cs" Link="Production/IntegrationScenarioScheduling.cs" />
+  </ItemGroup>
+</Project>
