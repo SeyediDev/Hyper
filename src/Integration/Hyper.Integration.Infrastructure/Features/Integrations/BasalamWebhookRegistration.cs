@@ -17,8 +17,8 @@ public interface IBasalamWebhookRegistration
 public sealed class BasalamWebhookRegistration(HyperIntegrationContext db, BasalamOAuthStore tokens, IBasalamClient client)
     : IBasalamWebhookRegistration
 {
-    // Official Basalam event ids: vendor order, vendor parcel and product changes.
-    private static readonly int[] EventIds = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+    // Keep registration and ingress routing on the same provider catalog.
+    private static readonly int[] EventIds = BasalamWebhookEvents.All.Select(x => x.Id).ToArray();
 
     public async Task RegisterForConnectionAsync(long connectionId, int shopId, string tenantId,
         string vendorId, string callbackBaseUri, CancellationToken ct)

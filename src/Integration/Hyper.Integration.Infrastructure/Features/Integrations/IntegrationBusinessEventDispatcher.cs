@@ -62,6 +62,13 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
 
     private async Task<IntegrationScenarioResult> DispatchEngagementAsync(IntegrationScenarioJob job, string eventType, JsonElement root, CancellationToken ct)
     {
+        root = Envelope(root);
+        // Official CHAT_* sample_data uses numeric id/chat_id and message.text.
+        // The delivery ID remains job.EventId; message id must never replace it.
+        var officialChat = eventType.Trim().Equals("CHAT_RECEIVED_MESSAGE", StringComparison.OrdinalIgnoreCase)
+            || eventType.Trim().Equals("CHAT_SEND_MESSAGE", StringComparison.OrdinalIgnoreCase);
+        if (officialChat && HasChatContentBeyondText(root))
+            return new(1, [new(null, null, null, "ChatRichContentOwnerContractRequired")]);
         EngagementCommandResult result = job.Item switch
         {
             IntegrationSyncItem.Subscription => await engagement.ApplySubscriptionAsync(new(job.EventId, job.ShopId, job.TenantId, job.ConnectionId,
@@ -69,12 +76,43 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
             IntegrationSyncItem.Review => await engagement.ApplyReviewAsync(new(job.EventId, job.ShopId, job.TenantId, job.ConnectionId,
                 Required(root, "externalReviewId"), Optional(root, "externalOrderId"), Integer(root, "rating"), Optional(root, "text")), ct),
             _ => await engagement.ApplyChatMessageAsync(new(job.EventId, job.ShopId, job.TenantId, job.ConnectionId,
-                Required(root, "externalConversationId"), Required(root, "externalMessageId"), eventType.EndsWith(".sent", StringComparison.OrdinalIgnoreCase), Optional(root, "text")), ct)
+                officialChat ? PositiveIdentity(root, "chat_id") : Required(root, "externalConversationId"),
+                officialChat ? PositiveIdentity(root, "id") : Required(root, "externalMessageId"),
+                eventType.Trim().EndsWith(".sent", StringComparison.OrdinalIgnoreCase)
+                    || eventType.Trim().Equals("CHAT_SEND_MESSAGE", StringComparison.OrdinalIgnoreCase),
+                officialChat ? ChatText(root) : Optional(root, "text")), ct)
         };
         if (result.Status == EngagementCommandStatus.Rejected)
             throw new IntegrationProviderException(result.ErrorCode ?? "EngagementCommandRejected", false);
         return result.Status == EngagementCommandStatus.PendingDependency
             ? new(1, [new(null, null, null, result.ErrorCode ?? "EngagementDependencyPending")]) : new(1, []);
+    }
+
+    private static string PositiveIdentity(JsonElement root, string name) =>
+        long.TryParse(OptionalAny(root, name), System.Globalization.NumberStyles.None,
+            System.Globalization.CultureInfo.InvariantCulture, out var value) && value > 0
+            ? value.ToString(System.Globalization.CultureInfo.InvariantCulture)
+            : throw new ArgumentException($"Invalid{name}");
+
+    private static string? ChatText(JsonElement root)
+    {
+        if (!root.TryGetProperty("message", out var message) || message.ValueKind != JsonValueKind.Object)
+            throw new ArgumentException("InvalidChatMessage");
+        return Optional(message, "text");
+    }
+
+    private static bool HasChatContentBeyondText(JsonElement root)
+    {
+        if (!root.TryGetProperty("message", out var message) || message.ValueKind != JsonValueKind.Object)
+            throw new ArgumentException("InvalidChatMessage");
+        // The current owner contract is text-only. Preserve richer payloads in
+        // Inbox for replay; do not report success while dropping attachments.
+        foreach (var name in new[] { "files", "links" })
+            if (message.TryGetProperty(name, out var value) && value.ValueKind != JsonValueKind.Null
+                && !(value.ValueKind == JsonValueKind.Array && value.GetArrayLength() == 0)
+                && !(value.ValueKind == JsonValueKind.Object && !value.EnumerateObject().Any())) return true;
+        return message.TryGetProperty("entity_id", out var entity) && entity.ValueKind != JsonValueKind.Null
+            && entity.ToString() is not "0" and not "";
     }
 
     private static IntegrationScenarioResult Result(BusinessCommandResult result) =>

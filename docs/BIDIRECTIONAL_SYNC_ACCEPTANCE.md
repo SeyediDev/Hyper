@@ -131,6 +131,11 @@ acceptance must still be executed separately.
 
 ## Real-provider prerequisites (not replaced by fixture tests)
 
+See [the provider delivery contract](BASALAM_WEBHOOK_DELIVERY.md) for the verified
+nine-event catalog, text-chat sample normalization, and the still-unverified
+delivery envelope/identity. All nine names are routing-tested; that is not proof
+of review/order/parcel payload hydration or successful live processing.
+
 Subscription/review/chat jobs now dispatch to `IIntegrationEngagementPort`, not
 the catalog comparison branch. The default owner remains unregistered, so these
 jobs correctly end in `NeedsAttention` with `EngagementOwnerApiNotRegistered` in

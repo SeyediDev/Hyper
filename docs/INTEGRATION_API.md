@@ -75,6 +75,11 @@ Provider webhook → Inbox + Audit → IntegrationScenarioJobs → Worker
 
 ## ورودی webhook
 
+قرارداد دقیق metadata، فهرست رخدادها و مرزهای تأیید دریافت واقعی باسلام در
+[Basalam webhook delivery](BASALAM_WEBHOOK_DELIVERY.md) ثبت شده است.
+در باسلام فیلد ریشهٔ `id` شناسهٔ تحویل محسوب نمی‌شود؛ `X-Event-Id` یا metadata
+صریح قرارداد لازم است. بدنهٔ غیرشیء و provider عددی تعریف‌نشده رد می‌شوند.
+
 ```text
 POST /api/integrations/v1/webhooks/{provider}/{connectionKey}
 ```

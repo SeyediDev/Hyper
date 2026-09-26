@@ -75,6 +75,14 @@ static async Task<int> Run()
             new() { AccessToken = "fixture-grant", ExpiresIn = 3600, Scope = "vendor.product.read vendor.product.write" }));
         await db.SaveChangesAsync();
         var adapter = new BasalamSdkAdapter(sdk, new BasalamOAuthStore(db, oauth));
+        var registration = new BasalamWebhookRegistration(db, new BasalamOAuthStore(db, oauth), sdk);
+        await registration.RegisterForConnectionAsync(connection.Id, 7, "tenant-a", "71", "https://callback.fixture.invalid/oauth/callback", default);
+        Check(providerHttp.WebhookRegistration is { } registered
+            && registered.GetProperty("event_ids").EnumerateArray().Select(x => x.GetInt32()).SequenceEqual(Enumerable.Range(1, 9))
+            && registered.GetProperty("url").GetString() == "https://callback.fixture.invalid/api/integrations/v1/webhooks/basalam/71"
+            && registered.GetProperty("request_headers").GetString() == "Authorization: Bearer fixture-secret-a"
+            && registered.GetProperty("register_me").GetBoolean(),
+            "registration sends shared event catalog and connection callback/secret using the scoped grant (intercepted HTTP)");
         var resolver = new IntegrationStrategyResolver([adapter]);
         var accountingHttp = new AccountingTransport();
         using var commandsHttp = new HttpClient(accountingHttp) { BaseAddress = new Uri("https://accounting.fixture.invalid/") };
@@ -85,6 +93,7 @@ static async Task<int> Run()
             Options.Create(new IntegrationInventoryCaptureOptions()), Options.Create(new BasalamOAuthSettings()), null!, dispatcher, commands);
         var queue = new IntegrationScenarioQueue(db, processor);
         var ingress = new IntegrationWebhookIngress(db, new IntegrationWebhookVerifier());
+        await WebhookContractChecks.Run(ingress, Check);
         WebhookIngressRequest Event(string id, string product = "12", string? sourceMarker = null) =>
             new(ApiProvider.Basalam, "71", id, "product.updated", null, null,
                 JsonSerializer.SerializeToUtf8Bytes(new { externalProductId = product, hyperProductId = 999,
@@ -385,6 +394,59 @@ static async Task<int> Run()
             && owner.Review is { ExternalReviewId: "review-1", Rating: 4 }
             && owner.Chats.Count == 2 && !owner.Chats[0].Outbound && owner.Chats[1].Outbound,
             "normalized engagement contracts retain scoped identities and chat direction");
+        // Official sample_data shape, with positive synthetic entity IDs. Headers
+        // below are our explicit delivery contract, not captured Basalam metadata.
+        foreach (var eventType in new[] { "CHAT_RECEIVED_MESSAGE", "CHAT_SEND_MESSAGE" })
+        {
+            var payload = "{\"id\":123,\"chat_id\":456,\"message\":{\"text\":\"official-shape fixture\",\"files\":[],\"links\":{}},\"sender_id\":789}";
+            var controllerEvent = WebhookContractChecks.Controller(ingress, payload, "official-" + eventType, eventType);
+            var delivered = (await controllerEvent.Receive("basalam", "71", default) as AcceptedResult)?.Value as WebhookIngressResult;
+            Check(delivered?.ScenarioJobId is not null, eventType + " accepted by real controller/ingress into SQL queue");
+            await ownerQueue.ProcessConnectionAsync(connection.Id, default);
+            Check(owner.Chats.Last() is { ExternalConversationId: "456", ExternalMessageId: "123", Text: "official-shape fixture" } chat
+                && chat.Outbound == (eventType == "CHAT_SEND_MESSAGE")
+                && await db.IntegrationScenarioJobs.AsNoTracking().AnyAsync(x => x.Id == delivered!.ScenarioJobId
+                    && x.Status == IntegrationScenarioStatus.Completed), eventType + " numeric identities, nested text and direction reach owner fixture");
+            var again = WebhookContractChecks.Controller(ingress, payload, "official-" + eventType, eventType);
+            Check((await again.Receive("basalam", "71", default) as OkObjectResult)?.Value is WebhookIngressResult { Status: WebhookIngressStatus.Duplicate },
+                eventType + " identical controller delivery is deduplicated");
+        }
+        var chatCount = owner.Chats.Count;
+        var invalidChat = await ingress.ReceiveAsync(Event("invalid-chat-id") with { EventType = "CHAT_SEND_MESSAGE",
+            Body = Encoding.UTF8.GetBytes("{\"id\":0,\"chat_id\":456,\"message\":{\"text\":\"fixture\"}}") });
+        await ownerQueue.ProcessConnectionAsync(connection.Id, default);
+        Check(owner.Chats.Count == chatCount && await db.IntegrationScenarioJobs.AsNoTracking().AnyAsync(x =>
+            x.Id == invalidChat.ScenarioJobId && x.Status == IntegrationScenarioStatus.DeadLetter),
+            "invalid official message identity never reaches downstream owner");
+        var richChat = await ingress.ReceiveAsync(Event("rich-chat") with { EventType = "CHAT_RECEIVED_MESSAGE",
+            Body = Encoding.UTF8.GetBytes("{\"id\":124,\"chat_id\":456,\"message\":{\"text\":\"fixture\",\"files\":[{\"id\":1}]}}") });
+        await ownerQueue.ProcessConnectionAsync(connection.Id, default);
+        Check(owner.Chats.Count == chatCount && await db.IntegrationScenarioJobs.AsNoTracking().AnyAsync(x =>
+            x.Id == richChat.ScenarioJobId && x.Status == IntegrationScenarioStatus.NeedsAttention
+            && x.ResultJson!.Contains("ChatRichContentOwnerContractRequired")),
+            "rich chat content remains actionable instead of silently dropping attachments");
+        var callsBeforeSuccessiveUpdates = accountingHttp.Calls;
+        foreach (var eventId in new[] { "product-delivery-a", "product-delivery-b" })
+        {
+            var notification = WebhookContractChecks.Controller(ingress, "{\"data\":{\"id\":12,\"name\":\"untrusted\"}}",
+                eventId, "PRODUCT_CREATE_CHANGES");
+            var delivered = (await notification.Receive("basalam", "71", default) as AcceptedResult)?.Value as WebhookIngressResult;
+            await queue.ProcessConnectionAsync(connection.Id, default);
+            Check(delivered?.ScenarioJobId is not null
+                && accountingHttp.LastCommand is { HyperProductId: 44, Title: "Fixture product", Price: 125 }
+                && accountingHttp.LastCommand.SourceVersion == delivered.ScenarioJobId
+                && await db.IntegrationScenarioJobs.AsNoTracking().AnyAsync(x => x.Id == delivered.ScenarioJobId
+                    && x.Status == IntegrationScenarioStatus.Completed),
+                eventId + " thin normalized product notification re-reads authoritative catalog before accounting HTTP");
+        }
+        Check(accountingHttp.Calls == callsBeforeSuccessiveUpdates + 2,
+            "two explicit delivery IDs for one product are not collapsed by its entity ID");
+        foreach (var definition in BasalamWebhookEvents.All)
+        {
+            var routed = await ingress.ReceiveAsync(Event("catalog-" + definition.Id) with { EventType = definition.Name });
+            Check(await db.IntegrationScenarioJobs.AsNoTracking().AnyAsync(x => x.Id == routed.ScenarioJobId
+                && x.Item == definition.Item), definition.Name + " routes to " + definition.Item + " (routing only)");
+        }
         Check(!await db.Database.SqlQueryRaw<int>("SELECT COUNT(*) AS Value FROM sys.tables WHERE name LIKE 'TBL[_]%' ").AnyAsync(x => x != 0),
             "both paths run with only Integration tables, no accounting tables in Integration database");
         Console.WriteLine($"{checks} synchronization flow checks passed. HTTP/accounting responses are controlled fixtures, not live-provider acceptance.");
@@ -445,10 +507,20 @@ sealed class ProviderTransport : HttpMessageHandler
     public int ProductPatches; public JsonElement? ProductPatchValue;
     public JsonElement ProductPatch => ProductPatchValue!.Value;
     public int VendorId = 71;
+    public JsonElement? WebhookRegistration;
     public int Requests; public HttpStatusCode? FailStatus;
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
     {
         Requests++;
+        if (request.RequestUri?.Host == "webhook.basalam.com" && request.RequestUri.AbsolutePath == "/v1/webhooks"
+            && request.Method == HttpMethod.Post)
+        {
+            if (request.Headers.Authorization?.ToString() != "Bearer fixture-grant")
+                throw new InvalidOperationException("Registration must use the selected connection grant");
+            using var body = JsonDocument.Parse(await request.Content!.ReadAsStringAsync(ct));
+            WebhookRegistration = body.RootElement.Clone();
+            return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("{}", Encoding.UTF8, "application/json") };
+        }
         if (request.RequestUri?.Host != "openapi.basalam.com")
             throw new InvalidOperationException("Unexpected Basalam fixture route");
         Authenticated = request.Headers.Authorization?.ToString() == "Bearer fixture-grant";

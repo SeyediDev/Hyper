@@ -20,6 +20,8 @@ public sealed class IntegrationWebhookIngress(
 {
     public async Task<WebhookIngressResult> ReceiveAsync(WebhookIngressRequest request, CancellationToken cancellationToken = default)
     {
+        if (!Enum.IsDefined(request.Provider))
+            return new(WebhookIngressStatus.Unsupported, ErrorCode: "ProviderWebhookUnsupported");
         if (request.Body is null || request.Body.Length == 0 || request.Body.Length > 1024 * 1024)
             return new(WebhookIngressStatus.Invalid, ErrorCode: "PayloadTooLargeOrEmpty");
         if (!Valid(request.ConnectionKey) || !Valid(request.EventId, 128) || !Valid(request.EventType))
@@ -142,19 +144,19 @@ public sealed class IntegrationWebhookIngress(
 
     private static bool TryMapScenario(string eventType, out IntegrationSyncItem item)
     {
+        if (BasalamWebhookEvents.TryMap(eventType, out item)) return true;
         item = eventType.Trim().ToLowerInvariant() switch
         {
-            "product.created" or "product.updated" or "product.changed" or "product_create_changes" => IntegrationSyncItem.Product,
+            "product.created" or "product.updated" or "product.changed" => IntegrationSyncItem.Product,
             "inventory.updated" or "stock.updated" or "inventory.changed" => IntegrationSyncItem.Inventory,
             "customer.created" or "customer.updated" or "customer.changed" => IntegrationSyncItem.Counterparty,
             "order.vendor.created" or "order.vendor.updated" or "order.vendor.cancelled"
-                or "order.vendor.returned" or "parcel.created" or "parcel.status_changed"
-                or "vendor_new_order" or "vendor_order_item_changes" or "vendor_parcel_changes" => IntegrationSyncItem.Sale,
+                or "order.vendor.returned" or "parcel.created" or "parcel.status_changed" => IntegrationSyncItem.Sale,
             "order.customer.created" or "order.customer.updated" or "order.customer.cancelled"
-                or "order.customer.returned" or "new_order" or "order_item_changes" => IntegrationSyncItem.Purchase,
+                or "order.customer.returned" => IntegrationSyncItem.Purchase,
             "subscription.created" or "subscription.renewed" or "subscription.cancelled" => IntegrationSyncItem.Subscription,
-            "review.created" or "review.updated" or "review_create_changes" => IntegrationSyncItem.Review,
-            "chat.message.received" or "chat.message.sent" or "chat_received_message" or "chat_send_message" => IntegrationSyncItem.Chat,
+            "review.created" or "review.updated" => IntegrationSyncItem.Review,
+            "chat.message.received" or "chat.message.sent" => IntegrationSyncItem.Chat,
             _ => default
         };
         return item != default;
