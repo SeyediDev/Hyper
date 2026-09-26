@@ -44,3 +44,15 @@ The host must already be running in Development. Tests enforce a loopback URL.
 Preview coverage is separate from authenticated report acceptance, data operations,
 production cache/CSP and exhaustive host palette coverage. Never commit session
 cookies, real account screenshots or browser profiles as test fixtures.
+
+Final host-override check: after adding the main-shell includes, a targeted
+`dotnet build ... --no-restore --disable-build-servers -m:1
+-p:BuildProjectReferences=false -p:UseSharedCompilation=false` succeeded with zero
+warnings/errors using existing dependency outputs. A preceding full-graph rebuild
+encountered access-denied errors in Neo.Application's temporary build files; it
+was stopped without changing permissions or other workers' processes.
+The rebuilt executable returned HTTP 200 for login and preview, with canonical
+assets and the host adapter present. The signed-in dashboard had been observed
+before this restart; a post-restart authenticated report/filter acceptance run
+was not completed because the in-app browser tab could not reattach. This remains
+separate from the passing isolated column-filter regression suite.
