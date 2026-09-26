@@ -128,6 +128,11 @@ public sealed record ProductWriteRequest(string Name, int VendorId, decimal? Pri
     string? Sku = null, string? Barcode = null, string? Description = null,
     int? Stock = null, string? CategoryId = null);
 
+public sealed record ProductBatchUpdateItem(int Id, string? Name = null, int? Stock = null,
+    decimal? PrimaryPrice = null, string? Status = null);
+
+public sealed record ProductBatchUpdateRequest(IReadOnlyCollection<ProductBatchUpdateItem> Data);
+
 public sealed record VariationWriteRequest(int ProductId, string? Title = null,
     decimal? Price = null, string? Sku = null, string? Barcode = null, int? Stock = null);
 

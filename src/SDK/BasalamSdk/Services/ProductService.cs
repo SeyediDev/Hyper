@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace Basalam.SDK.Services;
 
 public interface IProductService
@@ -7,6 +9,8 @@ public interface IProductService
     Task<Product?> UpdateProductAsync(int productId, ProductWriteRequest product, CancellationToken ct = default);
     Task PatchStockAsync(int productId, int stock, CancellationToken ct = default);
     Task PatchDetailsAsync(int productId, string? name, long? primaryPrice, CancellationToken ct = default);
+    Task<JsonElement> UpdateBulkProductsAsync(int vendorId, ProductBatchUpdateRequest request,
+        bool? continueOnError = null, CancellationToken ct = default);
 }
 
 public sealed class ProductService(IBasalamHttpClient client, ILogger<ProductService>? logger = null) : IProductService
@@ -55,6 +59,31 @@ public sealed class ProductService(IBasalamHttpClient client, ILogger<ProductSer
         if (name is not null) patch["name"] = name;
         if (primaryPrice is not null) patch["primary_price"] = primaryPrice.Value;
         await client.PatchAsync<object>($"/v1/products/{productId}", patch, ct);
+    }
+
+    public Task<JsonElement> UpdateBulkProductsAsync(int vendorId, ProductBatchUpdateRequest request,
+        bool? continueOnError = null, CancellationToken ct = default)
+    {
+        ValidateId(vendorId);
+        ArgumentNullException.ThrowIfNull(request);
+        if (request.Data.Count == 0 || request.Data.Any(item => item.Id <= 0
+            || item.Stock is < 0 || item.PrimaryPrice is < 0
+            || item.Name is { Length: > 500 }))
+            throw new BasalamValidationError(new Dictionary<string, IReadOnlyList<string>>
+            { ["data"] = ["At least one valid product update is required"] });
+
+        var query = continueOnError.HasValue
+            ? $"?continue_on_error={continueOnError.Value.ToString().ToLowerInvariant()}"
+            : string.Empty;
+        return client.PatchAsync<JsonElement>($"/v1/vendors/{vendorId}/products/batch-updates" + query,
+            new { data = request.Data.Select(item => new
+            {
+                id = item.Id,
+                name = item.Name,
+                stock = item.Stock,
+                primary_price = item.PrimaryPrice,
+                status = item.Status
+            }) }, ct);
     }
 
     private static void ValidateProduct(ProductWriteRequest product)
