@@ -132,6 +132,62 @@ reference generated during an overlapping source edit required a targeted
 non-incremental Contracts rebuild before the final successful host test. No
 tests contacted SQL, the real IdP or Basalam. No full-solution build is claimed.
 
-Next: validate real provider financial snapshots, expose preview in the panel,
+## Integration mapping checkpoint (ACC-201)
+
+`IIntegrationFinancialPreviewPort` now exposes provider-neutral request/result
+records in Integration.Domain. Only the HTTP adapter in Integration.Infrastructure
+references Accounting.Contracts; Integration.Domain does not reference accounting
+or reproduce its calculator. `AccountingFinancialPreviewClient` is registered by
+`AddHyperyekAccountingClients` with the existing authenticated accounting service
+client. No new credential, merchant token, database or Neo.Bpms dependency is added.
+
+Usage from an Integration consumer (resolve the port through dependency injection):
+
+```csharp
+IntegrationFinancialPreviewResult result =
+    await financialPreview.PreviewAsync(normalizedEvidence, cancellationToken);
+// Display Status, Issues, Components and explanatory totals.
+// Never turn Validated into an ApplyVendorOrder call or a posting permission.
+```
+
+The mapper preserves tenant/shop/connection/order/billing-group/version, every
+nullable amount, explicit discount allocation, unit and verification flag. It
+does not convert Toman, infer missing fees or taxes, load a webhook, authorize
+shop ownership, fetch provider data, create customer mappings, or post a document.
+The result remains preview-only. The caller must supply normalized evidence from
+a trusted source. No current dispatcher or panel workflow calls this port yet;
+the provider-to-preview-to-display workflow is **not** complete at this checkpoint.
+
+Only HTTP 200 with a recognized preview response is mapped. The actual wire
+`previewOnly` flag must be true; malformed/unknown status, policy or currency,
+missing result collections, foreign/duplicate line IDs and incomplete Validated
+results fail closed. Nonvalidated results must have matching issue severity and
+no settlement. These checks validate the response contract, not the underlying
+accounting arithmetic or the authenticity of the source data.
+
+Responses are bounded to 1 MiB, and the HTTP timeout covers body reading as well
+as headers. Errors expose stable codes, not raw response bodies or nested
+transport exceptions. HTTP 408/429/5xx, network failures and timeouts are retryable;
+caller cancellation propagates. The existing auth handler owns 401 token
+invalidation; neither it nor this adapter blindly replays a POST. Retry scheduling
+belongs to a future caller/durable workflow, not the financial calculator.
+
+`AccountingSecurityChecks` includes real local authenticated-controller bridge
+tests plus controlled transport/mapping/error fixtures. Run:
+
+```powershell
+dotnet build tools/AccountingSecurityChecks/AccountingSecurityChecks.csproj --artifacts-path .artifacts/platform-api-accounting -m:1 -p:UseSharedCompilation=false -p:NuGetAudit=false
+dotnet exec .artifacts/platform-api-accounting/bin/AccountingSecurityChecks/debug/AccountingSecurityChecks.dll
+```
+
+Checkpoint verified on 2026-09-26: **99** authentication/HTTP/mapping assertions
+passed (61 added since the 38-check calculator endpoint stage), including preview
+through the registered service client, 401 invalidation without replay and token
+refresh on the next explicit attempt. The existing **40** pure financial checks
+were rerun successfully. The initial check-project build included dependencies;
+the final test-only rebuild reused those built references. Both had zero warnings
+and errors. This is targeted verification, not a full solution or live-provider test.
+
+Next: validate real provider financial snapshots, connect the caller and expose preview in the panel,
 obtain accounting policy/account mapping acceptance, then implement versioned
 posting and reconciliation independently. WorkManagement owns task status.

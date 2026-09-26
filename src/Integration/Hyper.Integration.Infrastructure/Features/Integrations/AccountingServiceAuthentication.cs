@@ -41,6 +41,8 @@ public static class AccountingClientRegistration
         services.AddScoped<IIntegrationPlatformShopPort>(sp => sp.GetRequiredService<HyperyekAccountingApiClient>());
         services.AddScoped<IIntegrationPlatformCatalogPort>(sp => sp.GetRequiredService<HyperyekAccountingApiClient>());
         services.AddScoped<IIntegrationPlatformOverviewPort>(sp => sp.GetRequiredService<HyperyekAccountingApiClient>());
+        services.AddScoped<IIntegrationFinancialPreviewPort>(sp =>
+            new AccountingFinancialPreviewClient(sp.GetRequiredService<IHttpClientFactory>().CreateClient(ApiClient)));
         return services;
     }
 

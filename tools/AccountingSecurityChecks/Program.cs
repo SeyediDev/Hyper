@@ -130,6 +130,7 @@ try
     }
     using (var response = await http.PostAsync(previewRoute, new StringContent("{bad", System.Text.Encoding.UTF8, "application/json")))
         Check(response.StatusCode == HttpStatusCode.BadRequest, "malformed preview body is rejected by API binding");
+    await FinancialPreviewBridgeChecks.RunAsync(http, Check);
 }
 finally { await app.StopAsync(); }
 
@@ -151,6 +152,8 @@ using var clientHost = FixtureHost(services);
 var provider = clientHost.Services;
 using var serviceScope = provider.CreateScope();
 var catalog = serviceScope.ServiceProvider.GetRequiredService<IIntegrationPlatformCatalogPort>();
+Check(serviceScope.ServiceProvider.GetRequiredService<IIntegrationFinancialPreviewPort>() is AccountingFinancialPreviewClient,
+    "financial preview port resolves with the dedicated accounting service client");
 await Task.WhenAll(Enumerable.Range(0, 8).Select(_ => catalog.GetProductsAsync(7, "tenant-a", default)));
 Check(tokenTransport.Calls == 1 && apiTransport.Calls == 8 && apiTransport.LastToken == tokenTransport.Token,
     "worker-safe concurrent requests share one service token without HttpContext");
@@ -167,6 +170,17 @@ Check(apiTransport.Calls == callsBefore401 + 1, "401 does not blindly replay an 
 apiTransport.Status = HttpStatusCode.OK;
 await catalog.GetProductsAsync(7, "tenant-a", default);
 Check(tokenTransport.Calls == 2, "next durable attempt refreshes rejected token");
+var financialPort = serviceScope.ServiceProvider.GetRequiredService<IIntegrationFinancialPreviewPort>();
+var previewViaService = await financialPort.PreviewAsync(FinancialPreviewBridgeChecks.Sample);
+Check(previewViaService.ExpectedSettlement == 8_700_000 && apiTransport.LastToken == tokenTransport.Token
+    && tokenTransport.Calls == 2, "registered financial preview reuses service authentication, not a merchant or admin token");
+apiTransport.Status = HttpStatusCode.Unauthorized;
+var previewCallsBefore401 = apiTransport.Calls;
+await Reject(() => financialPort.PreviewAsync(FinancialPreviewBridgeChecks.Sample), "AccountingAuthenticationFailed");
+Check(apiTransport.Calls == previewCallsBefore401 + 1, "financial preview 401 invalidates token without POST replay");
+apiTransport.Status = HttpStatusCode.OK;
+await financialPort.PreviewAsync(FinancialPreviewBridgeChecks.Sample);
+Check(tokenTransport.Calls == 3, "next explicit financial preview attempt obtains a fresh service token");
 using (var named = provider.GetRequiredService<IHttpClientFactory>().CreateClient(AccountingClientRegistration.ApiClient))
     await Reject(() => named.GetAsync("https://untrusted.fixture.invalid/"), "AccountingRequestDestinationInvalid");
 var tokens = provider.GetRequiredService<AccountingServiceTokenProvider>();
@@ -223,9 +237,14 @@ sealed class TokenTransport : HttpMessageHandler
 sealed class ApiTransport : HttpMessageHandler
 {
     public int Calls; public string? LastToken; public HttpStatusCode Status = HttpStatusCode.OK;
-    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
     {
         Interlocked.Increment(ref Calls); LastToken = request.Headers.Authorization?.Parameter;
-        return Task.FromResult(new HttpResponseMessage(Status) { Content = new StringContent("[]", System.Text.Encoding.UTF8, "application/json") });
+        if (Status == HttpStatusCode.OK && request.RequestUri!.AbsolutePath.EndsWith("/financial-preview", StringComparison.Ordinal))
+        {
+            var preview = await request.Content!.ReadFromJsonAsync<FinancialPreviewRequest>(cancellationToken: ct);
+            return new(Status) { Content = JsonContent.Create(new FinancialPreviewCalculator().Preview(preview!)) };
+        }
+        return new(Status) { Content = new StringContent("[]", System.Text.Encoding.UTF8, "application/json") };
     }
 }
