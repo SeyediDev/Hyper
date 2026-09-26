@@ -3,6 +3,8 @@
   <ItemGroup>
     <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationAccountingProductEventIngress.cs" Link="Production/IntegrationAccountingProductEventIngress.cs" />
     <Compile Include="../../src/Integration/Hyper.Integration.Api/IntegrationAccountingProductEventController.cs" Link="Production/IntegrationAccountingProductEventController.cs" />
+    <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationManagementApi.cs" Link="Production/IntegrationManagementApi.cs" />
+    <Compile Include="../../src/Integration/Hyper.Integration.Api/IntegrationManagementController.cs" Link="Production/IntegrationManagementController.cs" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="../../src/Integration/Hyper.Integration.Domain/Hyper.Integration.Domain.csproj" />
     <ProjectReference Include="../../src/Integration/Hyper.Integration.Contracts/Hyper.Integration.Contracts.csproj" />

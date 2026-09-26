@@ -108,7 +108,9 @@ public sealed class IntegrationScenarioQueue(HyperIntegrationContext db, Integra
         catch (InvalidOperationException) { errorCode = "ConnectionOrSourceUnavailable"; }
         var finished = DateTime.UtcNow;
         if (errorCode is not null && resultJson is null)
-            status = retry && job.Attempts < IntegrationRetryPolicy.MaxAttempts ? IntegrationScenarioStatus.Pending : IntegrationScenarioStatus.DeadLetter;
+            status = errorCode is "ProductMappingUnavailable" or "ProductMappingAmbiguous" or "AccountingCustomerMappingUnavailable"
+                ? IntegrationScenarioStatus.NeedsAttention
+                : retry && job.Attempts < IntegrationRetryPolicy.MaxAttempts ? IntegrationScenarioStatus.Pending : IntegrationScenarioStatus.DeadLetter;
         var next = status == IntegrationScenarioStatus.Pending ? finished + IntegrationRetryPolicy.Delay(job.Attempts, retryAfter) : finished;
         await using var completion = db.Database.CurrentTransaction is null
             ? await db.Database.BeginTransactionAsync(CancellationToken.None) : null;

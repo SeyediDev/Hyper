@@ -72,13 +72,34 @@ public sealed class IntegrationManagementApi(HyperIntegrationContext db) : IInte
     {
         var tenantId = NormalizeTenant(request.TenantId);
         if (inboxId <= 0 || request.ShopId <= 0 || request.ConnectionId <= 0 || tenantId is null) return null;
-        var changed = await db.IntegrationWebhookInbox
-            .Where(x => x.Id == inboxId && x.ConnectionId == request.ConnectionId
+        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
+        var inbox = await db.IntegrationWebhookInbox.AsNoTracking()
+            .SingleOrDefaultAsync(x => x.Id == inboxId && x.ConnectionId == request.ConnectionId
                 && db.ExternalIntegrationConnections.Any(c => c.Id == x.ConnectionId
-                    && c.ShopId == request.ShopId && c.TenantId == tenantId))
+                    && c.ShopId == request.ShopId && c.TenantId == tenantId && c.IsEnabled), cancellationToken);
+        if (inbox is null) return null;
+        var job = await db.IntegrationScenarioJobs.AsNoTracking().SingleOrDefaultAsync(x =>
+            x.ConnectionId == request.ConnectionId && x.ShopId == request.ShopId && x.TenantId == tenantId
+            && x.EventId == inbox.ExternalEventId, cancellationToken);
+        // Echoes/unsupported notifications have no job. Do not leave their Inbox pending forever.
+        if (job is null) return new(inboxId, "NotReplayable");
+        if (job.Status == IntegrationScenarioStatus.Completed) return new(inboxId, "AlreadyCompleted");
+        if (job.Status == IntegrationScenarioStatus.Running) return new(inboxId, "Running");
+        if (job.Status == IntegrationScenarioStatus.Pending) return new(inboxId, "AlreadyQueued");
+        var changed = await db.IntegrationScenarioJobs.Where(x => x.Id == job.Id
+                && (x.Status == IntegrationScenarioStatus.DeadLetter || x.Status == IntegrationScenarioStatus.NeedsAttention))
+            .ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, IntegrationScenarioStatus.Pending)
+                .SetProperty(x => x.Attempts, 0).SetProperty(x => x.NextAttemptAtUtc, DateTime.UtcNow)
+                .SetProperty(x => x.ErrorCode, (string?)null).SetProperty(x => x.ResultJson, (string?)null)
+                .SetProperty(x => x.CompletedAtUtc, (DateTime?)null).SetProperty(x => x.LeaseId, (Guid?)null)
+                .SetProperty(x => x.LeaseExpiresAtUtc, (DateTime?)null), cancellationToken);
+        if (changed != 1) return new(inboxId, "ReplayConflict");
+        changed = await db.IntegrationWebhookInbox.Where(x => x.Id == inbox.Id && x.ConnectionId == job.ConnectionId)
             .ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, (byte)0)
                 .SetProperty(x => x.Error, (string?)null).SetProperty(x => x.ProcessedAtUtc, (DateTime?)null), cancellationToken);
-        return changed == 1 ? new IntegrationReplayResponse(inboxId, "Queued") : null;
+        if (changed != 1) return null;
+        await transaction.CommitAsync(cancellationToken);
+        return new(inboxId, "Queued");
     }
 
     private static string? NormalizeTenant(string? value) => NormalizeText(value, 30);

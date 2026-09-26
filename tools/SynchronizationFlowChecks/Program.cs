@@ -300,6 +300,49 @@ static async Task<int> Run()
         Check(await capture.CaptureOneAsync(connection.Id, mapping.Id, default, true)
             && await db.IntegrationOutbox.MaxAsync(x => x.SourceVersion) == version + 1,
             "inventory capture allocates a version after product messages in the shared stream");
+        // Repair a missing mapping, then prove replay wakes the original worker job.
+        var management = new IntegrationManagementApi(db);
+        var managementController = new IntegrationManagementController(management, new IntegrationScopeAuthorization())
+        { ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() } };
+        var scope = new IntegrationConnectionCommandRequest(7, "tenant-a", connection.Id);
+        var accountingCalls = accountingHttp.Calls;
+        await db.ExternalProductMappings.Where(x => x.Id == mapping.Id).ExecuteUpdateAsync(s => s.SetProperty(x => x.IsActive, false));
+        var repair = await ingress.ReceiveAsync(Event("repair-mapping"));
+        await queue.ProcessConnectionAsync(connection.Id, default);
+        Check(await db.IntegrationScenarioJobs.AsNoTracking().AnyAsync(x => x.Id == repair.ScenarioJobId
+            && x.Status == IntegrationScenarioStatus.NeedsAttention && x.ErrorCode == "ProductMappingUnavailable")
+            && accountingHttp.Calls == accountingCalls, "missing mapping needs attention without a guessed accounting mutation");
+        Check(await managementController.Replay(connection.Id, repair.InboxId!.Value, 7, "tenant-a", default) is ForbidResult,
+            "anonymous replay is forbidden");
+        Check(await management.ReplayWebhookAsync(scope with { TenantId = "tenant-b" }, repair.InboxId.Value) is null,
+            "another tenant cannot replay the original event");
+        await db.ExternalProductMappings.Where(x => x.Id == mapping.Id).ExecuteUpdateAsync(s => s.SetProperty(x => x.IsActive, true));
+        managementController.HttpContext.User = controller.HttpContext.User;
+        var repaired = await managementController.Replay(connection.Id, repair.InboxId.Value, 7, "tenant-a", default) as AcceptedResult;
+        Check(repaired?.Value is IntegrationReplayResponse { Status: "Queued" }
+            && await db.IntegrationScenarioJobs.AsNoTracking().AnyAsync(x => x.Id == repair.ScenarioJobId
+                && x.Status == IntegrationScenarioStatus.Pending && x.Attempts == 0 && x.CompletedAtUtc == null && x.ErrorCode == null)
+            && await db.IntegrationWebhookInbox.AsNoTracking().AnyAsync(x => x.Id == repair.InboxId && x.Status == 0 && x.Error == null),
+            "manual replay atomically resets the original job and Inbox after mapping repair");
+        Check((await management.ReplayWebhookAsync(scope, repair.InboxId.Value))?.Status == "AlreadyQueued",
+            "repeated replay does not duplicate pending work");
+        await queue.ProcessConnectionAsync(connection.Id, default);
+        Check(accountingHttp.Calls == accountingCalls + 1 && accountingHttp.LastCommand!.SourceVersion == repair.ScenarioJobId
+            && await db.IntegrationWebhookInbox.AsNoTracking().AnyAsync(x => x.Id == repair.InboxId && x.Status == 1),
+            "repaired mapping completes the original event with stable identity and sequence");
+        Check(await managementController.Replay(connection.Id, repair.InboxId.Value, 7, "tenant-a", default) is OkObjectResult
+            && !await queue.ProcessConnectionAsync(connection.Id, default), "completed webhook replay does not reapply accounting effects");
+        Check(await managementController.Replay(connection.Id, unknown.InboxId!.Value, 7, "tenant-a", default) is ConflictObjectResult
+            && await db.IntegrationWebhookInbox.AsNoTracking().AnyAsync(x => x.Id == unknown.InboxId && x.Status == 2),
+            "unsupported event remains actionable instead of falsely requeued");
+        var running = await ingress.ReceiveAsync(Event("running-replay"));
+        var activeLease = Guid.NewGuid();
+        await db.IntegrationScenarioJobs.Where(x => x.Id == running.ScenarioJobId).ExecuteUpdateAsync(s =>
+            s.SetProperty(x => x.Status, IntegrationScenarioStatus.Running).SetProperty(x => x.LeaseId, activeLease)
+             .SetProperty(x => x.LeaseExpiresAtUtc, DateTime.UtcNow.AddMinutes(5)));
+        Check(await managementController.Replay(connection.Id, running.InboxId!.Value, 7, "tenant-a", default) is ConflictObjectResult
+            && await db.IntegrationScenarioJobs.AsNoTracking().AnyAsync(x => x.Id == running.ScenarioJobId && x.LeaseId == activeLease),
+            "replay cannot steal or reset a running worker lease");
         Check(!await db.Database.SqlQueryRaw<int>("SELECT COUNT(*) AS Value FROM sys.tables WHERE name LIKE 'TBL[_]%' ").AnyAsync(x => x != 0),
             "both paths run with only Integration tables, no accounting tables in Integration database");
         Console.WriteLine($"{checks} synchronization flow checks passed. HTTP/accounting responses are controlled fixtures, not live-provider acceptance.");

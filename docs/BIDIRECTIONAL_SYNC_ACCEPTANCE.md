@@ -67,6 +67,21 @@ authenticated principal and the existing shop/tenant scope authorization. A body
 containing `ShopId`/`TenantId` is not authorization. Producers must obtain a valid
 scope from the host's trusted issuer; do not forge tokens to exercise this route.
 
+## Mapping repair and replay
+
+Missing/ambiguous product mappings and missing customer mappings leave the inbound
+job in `NeedsAttention` with its original error and Inbox identity. There is no
+automatic product creation or guessed match. Correct the mapping through the
+existing scoped mapping API, then call
+`POST /api/integrations/v1/connections/{connectionId}/webhooks/{inboxId}/replay`
+with the same authenticated scope plus `X-Shop-Id` and `X-Tenant-Id`.
+Replay resets the terminal job and Inbox together without changing event/job IDs:
+202 Queued/AlreadyQueued, 200 AlreadyCompleted (no new side effect), 409 for a
+running lease or an event with no replayable job. Disabled or foreign-scope
+connections are not replayed. Outbound events without mappings remain explicitly
+rejected to the accounting producer, which must retain/retry them; they cannot be
+stored as deliverable Outbox rows without a valid mapping.
+
 ## Accounting product details -> Basalam
 
 `POST /api/integrations/v1/accounting/events/product-changed` requires the same

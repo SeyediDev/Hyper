@@ -52,7 +52,13 @@ public sealed class IntegrationManagementController(IIntegrationManagementApi ma
             || tenantId.Length > 30) return BadRequest("InvalidScope");
         if (!await scope.CanAccessAsync(User, shopId, tenantId, cancellationToken)) return Forbid();
         var result = await management.ReplayWebhookAsync(new(shopId, tenantId, connectionId), inboxId, cancellationToken);
-        return result is null ? NotFound(new { error = "WebhookNotFound" }) : Accepted(result);
+        if (result is null) return NotFound(new { error = "WebhookNotFound" });
+        return result.Status switch
+        {
+            "Queued" or "AlreadyQueued" => Accepted(result),
+            "AlreadyCompleted" => Ok(result),
+            _ => Conflict(result)
+        };
     }
 
     private async Task<IActionResult> SetEnabled(long connectionId, int shopId, string tenantId, bool enabled,
