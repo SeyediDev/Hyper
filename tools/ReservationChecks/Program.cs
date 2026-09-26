@@ -29,6 +29,13 @@ await using var setup = new HyperIntegrationContext(options);
 try
 {
     await setup.Database.EnsureCreatedAsync();
+    using (var http = new HttpClient(new Reply()) { BaseAddress = new Uri("http://fixture.invalid/") })
+    {
+        var client = new HyperyekAccountingApiClient(http);
+        var result = await client.ApplyVendorOrderAsync(new("event", 7, "tenant-a", 10, "order", null, "buyer", [], 0, SalePaymentStatus.Paid), default);
+        Check(result.Status == BusinessCommandStatus.Duplicate && result.StockCommitted && result.InternalReference == "invoice-1",
+            "HTTP conflict body preserves stock acknowledgement and invoice reference");
+    }
     var key = Key("multi");
     var lines = new[] { Line(1, 2), Line(2, 3), Line(1, 1) };
     await Service(setup).ReserveAsync(shop, key, lines, default);
@@ -78,9 +85,15 @@ try
     try { await Dispatch("timeout", "paid", "Paid"); throw new Exception("Expected timeout"); } catch (HttpRequestException) { }
     Check(await setup.InventoryReservationLogs.Where(x => x.HyperProductId == 4 && x.Status == 0).SumAsync(x => x.Quantity) == 2, "timeout retains hold");
     accounting.Timeout = false;
+    accounting.StockCommitted = true;
     await Dispatch("retry", "paid", "Paid");
     Check(accounting.Calls == 2 && accounting.LastProduct == 4 && await setup.InventoryReservationLogs.CountAsync(x => x.HyperProductId == 4) == 1,
         "replay resolves mapping and reuses hold");
+    Check(await setup.InventoryReservationLogs.Where(x => x.HyperProductId == 4).AllAsync(x => x.Status == 2),
+        "accounting acknowledgement consumes hold instead of subtracting stock twice");
+    await Dispatch("committed-retry", "paid", "Paid");
+    Check(await setup.InventoryReservationLogs.CountAsync(x => x.HyperProductId == 4) == 1,
+        "replay of committed reservation cannot recreate hold");
     Console.WriteLine($"{checks} SQL/dispatcher checks passed.");
 }
 finally
@@ -92,6 +105,15 @@ sealed class Catalog : IIntegrationPlatformCatalogPort
 {
     public Task<IReadOnlyList<IntegrationPlatformProduct>> GetProductsAsync(int shopId, string tenantId, CancellationToken ct) =>
         Task.FromResult<IReadOnlyList<IntegrationPlatformProduct>>(Enumerable.Range(1, 4).Select(id => new IntegrationPlatformProduct(id, "product", null, 1, 10, true, true, null)).ToArray());
+}
+sealed class Reply : HttpMessageHandler
+{
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct) =>
+        Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.Conflict)
+        {
+            Content = new StringContent("{\"status\":2,\"internalReference\":\"invoice-1\",\"stockCommitted\":true}",
+                System.Text.Encoding.UTF8, "application/json")
+        });
 }
 sealed class TestSchemaCustomizer(ModelCustomizerDependencies dependencies) : ModelCustomizer(dependencies)
 {
@@ -105,9 +127,9 @@ sealed class TestSchemaCustomizer(ModelCustomizerDependencies dependencies) : Mo
 }
 sealed class Commands : IIntegrationBusinessCommandPort
 {
-    public bool Timeout; public int Calls; public int LastProduct;
+    public bool Timeout; public bool StockCommitted; public int Calls; public int LastProduct;
     public Task<BusinessCommandResult> ApplyVendorOrderAsync(IntegrationVendorOrderCommand c, CancellationToken ct)
-    { Calls++; LastProduct = c.Lines.Single().HyperProductId; if (Timeout) throw new HttpRequestException(); return Task.FromResult(new BusinessCommandResult(BusinessCommandStatus.Duplicate)); }
+    { Calls++; LastProduct = c.Lines.Single().HyperProductId; if (Timeout) throw new HttpRequestException(); return Task.FromResult(new BusinessCommandResult(BusinessCommandStatus.Duplicate, StockCommitted: StockCommitted)); }
     public Task<BusinessCommandResult> ApplyCounterpartyAsync(IntegrationCounterpartyCommand c, CancellationToken ct) => throw new NotSupportedException();
     public Task<BusinessCommandResult> ApplyCustomerOrderAsync(IntegrationCustomerOrderCommand c, CancellationToken ct) => throw new NotSupportedException();
     public Task<BusinessCommandResult> CancelOrderAsync(IntegrationOrderCancellationCommand c, CancellationToken ct) => throw new NotSupportedException();

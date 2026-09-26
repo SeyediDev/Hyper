@@ -4,6 +4,8 @@
        checks from the unrelated legacy Neo/Bpms build graph. -->
   <ItemGroup>
     <ProjectReference Include="../../src/Integration/Hyper.Integration.Domain/Hyper.Integration.Domain.csproj" />
+    <ProjectReference Include="../../src/Platform/Hyperyek.Accounting.Contracts/Hyperyek.Accounting.Contracts.csproj" />
+    <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/HyperyekAccountingApiClient.cs" Link="Production/HyperyekAccountingApiClient.cs" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
     <Compile Include="../../src/Core/Hyper.Infrastructure/Data/Repository/Hyper/HyperIntegrationContext.cs" Link="Production/HyperIntegrationContext.cs" />
     <Compile Include="../../src/Core/Hyper.Infrastructure/Data/Configurations/Integration*Configuration.cs;../../src/Core/Hyper.Infrastructure/Data/Configurations/IIntegrationEntityConfiguration.cs;../../src/Core/Hyper.Infrastructure/Data/Configurations/External*Configuration.cs;../../src/Core/Hyper.Infrastructure/Data/Configurations/InventoryReservationLogConfiguration.cs" LinkBase="Production/Configurations" />

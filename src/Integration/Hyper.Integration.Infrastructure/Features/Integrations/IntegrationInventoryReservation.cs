@@ -33,7 +33,7 @@ public sealed class IntegrationInventoryReservation(HyperIntegrationContext db,
             && (x.ReservationKey == reservationKey || x.ReservationKey.StartsWith(prefix))).ToListAsync(ct);
         if (existing.Count > 0)
         {
-            if (existing.Any(x => x.Status != 0 || x.ReleasedAtUtc is not null))
+            if (existing.Any(x => x.Status is not (0 or 2) || x.ReleasedAtUtc is not null))
                 throw new InvalidOperationException("ReservationAlreadyReleased");
             if (existing.Count != requested.Count || existing.Any(x =>
                 !requested.TryGetValue(x.HyperProductId, out var quantity) || quantity != x.Quantity))
@@ -92,4 +92,22 @@ public sealed class IntegrationInventoryReservation(HyperIntegrationContext db,
             @LockMode='Exclusive', @LockOwner='Transaction', @LockTimeout=15000;
         IF @result < 0 THROW 51000, 'ReservationLockUnavailable', 1;
         """, ct);
+
+    public async Task CommitAsync(OwnedIntegrationShop shop, string reservationKey, CancellationToken ct)
+    {
+        if (shop.ShopId <= 0 || string.IsNullOrWhiteSpace(shop.TenantId)
+            || string.IsNullOrWhiteSpace(reservationKey) || reservationKey.Length > 170)
+            throw new ArgumentException("InvalidReservationScope");
+        await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        await LockShopAsync(shop.ShopId, ct);
+        var prefix = reservationKey + ":product:";
+        var rows = await db.InventoryReservationLogs.Where(x => x.ShopId == shop.ShopId
+            && (x.ReservationKey == reservationKey || x.ReservationKey.StartsWith(prefix))).ToListAsync(ct);
+        if (rows.Count == 0) throw new InvalidOperationException("ReservationNotFound");
+        // A concurrent acknowledged cancellation is terminal. A late sale ACK
+        // must not turn a released reservation back into a live one.
+        foreach (var row in rows.Where(x => x.Status == 0 && x.ReleasedAtUtc == null)) row.Status = 2;
+        await db.SaveChangesAsync(ct);
+        await transaction.CommitAsync(ct);
+    }
 }

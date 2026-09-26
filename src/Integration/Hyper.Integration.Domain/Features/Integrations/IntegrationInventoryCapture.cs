@@ -11,6 +11,7 @@ public interface IIntegrationInventoryReservation
     Task ReserveAsync(OwnedIntegrationShop shop, string reservationKey,
         IReadOnlyCollection<IntegrationOrderLineCommand> lines, CancellationToken ct);
     Task ReleaseAsync(OwnedIntegrationShop shop, string reservationKey, CancellationToken ct);
+    Task CommitAsync(OwnedIntegrationShop shop, string reservationKey, CancellationToken ct);
 }
 
 public static class IntegrationReservationIdentity

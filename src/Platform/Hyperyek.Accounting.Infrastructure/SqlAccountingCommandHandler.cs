@@ -14,7 +14,10 @@ public static class AccountingInfrastructureServiceCollectionExtensions
     {
         services.AddDbContext<HyperSqlServerContext>(options => options.UseSqlServer(connectionString));
         services.AddOptions<AccountingCustomerOptions>().BindConfiguration("IntegrationCustomer");
-        services.AddScoped<IAccountingCommandHandler, SqlAccountingCommandHandler>();
+        services.AddOptions<AccountingInventoryOptions>().BindConfiguration("AccountingInventory");
+        services.AddScoped<SqlAccountingCommandHandler>();
+        services.AddScoped<IAccountingCommandHandler>(sp => sp.GetRequiredService<SqlAccountingCommandHandler>());
+        services.AddScoped<IAccountingPlatformReadHandler>(sp => sp.GetRequiredService<SqlAccountingCommandHandler>());
         return services;
     }
 }
@@ -31,7 +34,8 @@ public sealed class AccountingCustomerOptions
 }
 
 public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db,
-    IOptions<AccountingCustomerOptions> customerOptions) : IAccountingCommandHandler, IAccountingPlatformReadHandler
+    IOptions<AccountingCustomerOptions> customerOptions,
+    IOptions<AccountingInventoryOptions> inventoryOptions) : IAccountingCommandHandler, IAccountingPlatformReadHandler
 {
     public async Task<IReadOnlyList<AccountingShopRead>> SearchShopsAsync(string? search, CancellationToken ct)
     {
@@ -187,27 +191,58 @@ public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db,
     public async Task<AccountingCommandResult> ApplyVendorOrderAsync(VendorOrderCommand command, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(command);
-        var existing = await FindOrderAsync(command.Scope, command.ExternalOrderId, ct);
-        if (existing is not null) return new(AccountingCommandStatus.Duplicate, existing.Saleorderid.ToString());
+        var marker = AccountingOrderIdentity.Marker(command.Scope, command.ConnectionId, command.ExternalOrderId);
+        if (AccountingOrderIdentity.Validate(command) is { } error)
+            return new(AccountingCommandStatus.Rejected, ErrorCode: error);
+        if (command.PaymentStatus != 1)
+            return new(AccountingCommandStatus.PendingDependency, ErrorCode: "BoothOrderPaymentNotConfirmed");
+        var fingerprint = AccountingOrderIdentity.Fingerprint(command);
+        await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        await LockShopAsync(command.Scope.ShopId, ct);
+        var existing = await FindOrderAsync(command.Scope, command.ConnectionId, command.ExternalOrderId, ct);
+        if (existing is not null)
+        {
+            if (existing.Status == 9) return new(AccountingCommandStatus.Rejected, ErrorCode: "AccountingOrderCancelled");
+            if (!existing.Description!.Contains(fingerprint, StringComparison.Ordinal))
+                return new(AccountingCommandStatus.Rejected, ErrorCode: "AccountingOrderContentChanged");
+            return new(AccountingCommandStatus.Duplicate, existing.Saleorderid.ToString(),
+                StockCommitted: existing.Description.Contains("stock:committed;", StringComparison.Ordinal));
+        }
+        if (!inventoryOptions.Value.AccountingStockSourceVerified)
+            return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingStockSourceUnverified");
+        if (await HasLegacyOrderAsync(command.Scope, command.ExternalOrderId, ct))
+            return new(AccountingCommandStatus.PendingDependency, ErrorCode: "LegacyAccountingOrderNeedsReconciliation");
+        var tenantless = command.Scope.TenantId == CanonicalTenant(command.Scope.ShopId, null);
         var customer = await db.TblPersons.SingleOrDefaultAsync(x => x.Id == command.AccountingCustomerId
-            && x.Shopid == command.Scope.ShopId && x.TenantId == command.Scope.TenantId && x.Isenabled, ct);
+            && x.Shopid == command.Scope.ShopId && (x.TenantId == command.Scope.TenantId
+                || tenantless && (x.TenantId == null || x.TenantId == "")) && x.Isenabled, ct);
         if (customer is null) return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingCustomerNotFound");
-        var products = await db.TblProducts.Where(x => command.Lines.Select(l => l.HyperProductId).Contains(x.Id)
-            && x.Shopid == command.Scope.ShopId && x.TenantId == command.Scope.TenantId).ToDictionaryAsync(x => x.Id, ct);
+        var products = await db.TblProducts.AsNoTracking().Where(x => command.Lines.Select(l => l.HyperProductId).Contains(x.Id)
+            && x.Shopid == command.Scope.ShopId && (x.TenantId == command.Scope.TenantId
+                || tenantless && (x.TenantId == null || x.TenantId == ""))).ToDictionaryAsync(x => x.Id, ct);
         if (products.Count != command.Lines.Select(x => x.HyperProductId).Distinct().Count())
             return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingProductNotFound");
         var period = await OpenFiscalPeriodAsync(command.Scope, ct);
         if (period is null) return new(AccountingCommandStatus.PendingDependency, ErrorCode: "OpenFiscalPeriodNotFound");
-        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+        foreach (var group in command.Lines.GroupBy(x => x.HyperProductId).OrderBy(x => x.Key))
+        {
+            var quantity = group.Sum(x => x.Quantity);
+            var affected = await db.TblProducts.Where(x => x.Id == group.Key && x.Shopid == command.Scope.ShopId
+                && (x.TenantId == command.Scope.TenantId || tenantless && (x.TenantId == null || x.TenantId == ""))
+                && x.Isenabled && x.Issellable && x.Isonlinesellable && x.Isstockable && !x.Isservice
+                && x.Accountingstock >= quantity)
+                .ExecuteUpdateAsync(update => update.SetProperty(x => x.Accountingstock, x => x.Accountingstock - quantity), ct);
+            if (affected != 1) return new(AccountingCommandStatus.PendingDependency, ErrorCode: "InsufficientSellableStock");
+        }
         var total = command.Lines.Sum(x => x.Quantity * x.UnitPrice);
         var now = DateTime.UtcNow;
         var order = new SqlTblSaleorder
         {
             Totalamountbeforediscount = total, Totalinvoiceamount = total, Totalamount = total,
-            Totalamountafterdiscount = total, Paidamount = command.PaymentStatus == 2 ? total : 0,
-            Paymentstatus = command.PaymentStatus, Status = 1, Shopid = command.Scope.ShopId,
+            Totalamountafterdiscount = total, Paidamount = total,
+            Paymentstatus = command.PaymentStatus, Status = 1, Deliverystatus = 0, Shopid = command.Scope.ShopId,
             TenantId = command.Scope.TenantId, Customerid = customer.Id, Fiscalperiodid = period.Fiscalperiodid,
-            Creationdatetime = now, Issuedatetime = now, Description = Marker(command.EventId, command.ExternalOrderId),
+            Creationdatetime = now, Issuedatetime = now, Description = marker + fingerprint + "stock:committed;",
             Currency = "IRR", Exchangerate = 1, Invoicesubject = 1, Invoiceformat = 1
         };
         db.TblSaleorders.Add(order);
@@ -223,12 +258,12 @@ public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db,
                 Lineamountafterdiscount = amount, Shopid = command.Scope.ShopId,
                 TenantId = command.Scope.TenantId, Fiscalperiodid = period.Fiscalperiodid,
                 Productdescription = product.Name, Producttaxcode = product.Taxcode,
-                Unitconversionfactor = 1
+                Unit = product.Baseunit, Unitconversionfactor = 1
             });
         }
         await db.SaveChangesAsync(ct);
         await transaction.CommitAsync(ct);
-        return new(AccountingCommandStatus.Applied, order.Saleorderid.ToString());
+        return new(AccountingCommandStatus.Applied, order.Saleorderid.ToString(), StockCommitted: true);
     }
 
     public async Task<AccountingCommandResult> ApplyCustomerOrderAsync(CustomerOrderCommand command, CancellationToken ct)
@@ -240,23 +275,55 @@ public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db,
     public async Task<AccountingCommandResult> CancelOrderAsync(CancelOrderCommand command, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(command);
-        var order = await FindOrderAsync(command.Scope, command.ExternalOrderId, ct);
+        AccountingOrderIdentity.Marker(command.Scope, command.ConnectionId, command.ExternalOrderId);
+        if (string.IsNullOrWhiteSpace(command.Reason) || command.Reason.Length > 500)
+            return new(AccountingCommandStatus.Rejected, ErrorCode: "InvalidCancellationReason");
+        await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        await LockShopAsync(command.Scope.ShopId, ct);
+        var order = await FindOrderAsync(command.Scope, command.ConnectionId, command.ExternalOrderId, ct);
         if (order is null) return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingOrderNotFound");
         if (order.Status == 9) return new(AccountingCommandStatus.Duplicate, order.Saleorderid.ToString());
+        if (order.Deliverystatus != 0)
+            return new(AccountingCommandStatus.PendingDependency, ErrorCode: "PhysicalReturnConfirmationRequired");
+        if (order.Description!.Contains("stock:committed;", StringComparison.Ordinal))
+        {
+            var quantities = await db.TblSaleorderitems.AsNoTracking().Where(x => x.Saleorderid == order.Saleorderid
+                && x.Shopid == command.Scope.ShopId && x.TenantId == command.Scope.TenantId)
+                .GroupBy(x => x.Productid).Select(x => new { Id = x.Key, Quantity = x.Sum(l => l.Quantity) })
+                .OrderBy(x => x.Id).ToListAsync(ct);
+            if (quantities.Count == 0 || quantities.Any(x => x.Quantity <= 0))
+                return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingOrderLinesNeedReview");
+            var tenantless = command.Scope.TenantId == CanonicalTenant(command.Scope.ShopId, null);
+            foreach (var line in quantities)
+            {
+                var affected = await db.TblProducts.Where(x => x.Id == line.Id && x.Shopid == command.Scope.ShopId
+                    && (x.TenantId == command.Scope.TenantId || tenantless && (x.TenantId == null || x.TenantId == "")))
+                    .ExecuteUpdateAsync(update => update.SetProperty(x => x.Accountingstock, x => x.Accountingstock + line.Quantity), ct);
+                if (affected != 1) return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingProductNotFound");
+            }
+        }
         order.Status = 9;
-        order.Description = $"{order.Description};cancel:{command.Reason}"[..Math.Min(4000, ($"{order.Description};cancel:{command.Reason}").Length)];
+        var description = $"{order.Description};cancel:{command.Reason}";
+        var maxLength = db.Model.FindEntityType(typeof(SqlTblSaleorder))!
+            .FindProperty(nameof(SqlTblSaleorder.Description))!.GetMaxLength() ?? 200;
+        order.Description = description[..Math.Min(maxLength, description.Length)];
         await db.SaveChangesAsync(ct);
+        await transaction.CommitAsync(ct);
         return new(AccountingCommandStatus.Applied, order.Saleorderid.ToString());
     }
 
     public async Task<AccountingCommandResult> ApplyParcelStatusAsync(ParcelStatusCommand command, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(command);
-        var order = await FindOrderAsync(command.Scope, command.ExternalOrderId, ct);
+        await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        await LockShopAsync(command.Scope.ShopId, ct);
+        var order = await FindOrderAsync(command.Scope, command.ConnectionId, command.ExternalOrderId, ct);
         if (order is null) return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingOrderNotFound");
+        if (order.Status == 9) return new(AccountingCommandStatus.Rejected, ErrorCode: "AccountingOrderCancelled");
         order.Waybillnumber = command.TrackingCode;
         order.Deliverystatus = ParcelState(command.Status);
         await db.SaveChangesAsync(ct);
+        await transaction.CommitAsync(ct);
         return new(AccountingCommandStatus.Applied, order.Saleorderid.ToString());
     }
 
@@ -267,21 +334,37 @@ public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db,
             && x.Shopid == command.Scope.ShopId && x.TenantId == command.Scope.TenantId, ct);
         if (product is null) return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingProductNotFound");
         product.Name = command.Title; product.Taxcode = command.Sku; if (command.Price is not null) product.Saleprice = command.Price.Value;
-        if (command.Inventory is not null) product.Accountingstock = command.Inventory.Value;
+        // Marketplace inventory is an observation, never an authoritative
+        // replacement for accounting stock or an acknowledged stock movement.
         await db.SaveChangesAsync(ct);
         return new(AccountingCommandStatus.Applied, product.Id.ToString());
     }
 
-    private Task<SqlTblSaleorder?> FindOrderAsync(AccountingScope scope, string externalOrderId, CancellationToken ct) =>
-        db.TblSaleorders.SingleOrDefaultAsync(x => x.Shopid == scope.ShopId && x.TenantId == scope.TenantId
-            && x.Description != null && x.Description.Contains($"external-order:{externalOrderId};"), ct);
+    private Task<SqlTblSaleorder?> FindOrderAsync(AccountingScope scope, long connectionId, string externalOrderId, CancellationToken ct)
+    {
+        var marker = AccountingOrderIdentity.Marker(scope, connectionId, externalOrderId);
+        return db.TblSaleorders.SingleOrDefaultAsync(x => x.Shopid == scope.ShopId && x.TenantId == scope.TenantId
+            && x.Description != null && x.Description.StartsWith(marker), ct);
+    }
+
+    private Task<bool> HasLegacyOrderAsync(AccountingScope scope, string externalOrderId, CancellationToken ct) =>
+        db.TblSaleorders.AsNoTracking().AnyAsync(x => x.Shopid == scope.ShopId && x.TenantId == scope.TenantId
+            && x.Description != null && x.Description.StartsWith("integration-event:")
+            && x.Description.Contains($"external-order:{externalOrderId};"), ct);
+
+    private Task LockShopAsync(int shopId, CancellationToken ct) => db.Database.ExecuteSqlInterpolatedAsync($"""
+        DECLARE @result int;
+        EXEC @result=sys.sp_getapplock @Resource={"accounting-orders:" + shopId},
+            @LockMode='Exclusive', @LockOwner='Transaction', @LockTimeout=15000;
+        IF @result < 0 THROW 51000, 'AccountingOrderLockUnavailable', 1;
+        """, ct);
 
     private Task<SqlTblShopfiscalperiod?> OpenFiscalPeriodAsync(AccountingScope scope, CancellationToken ct) =>
-        db.TblShopfiscalperiods.Where(x => x.Shopid == scope.ShopId && x.TenantId == scope.TenantId
+        db.TblShopfiscalperiods.Where(x => x.Shopid == scope.ShopId && (x.TenantId == scope.TenantId
+            || scope.TenantId == "shop:" + scope.ShopId && (x.TenantId == null || x.TenantId == ""))
             && x.Fiscalperiodstatusid == 1 && x.Startdate <= DateOnly.FromDateTime(DateTime.UtcNow)
             && x.Enddate >= DateOnly.FromDateTime(DateTime.UtcNow)).OrderByDescending(x => x.Startdate).FirstOrDefaultAsync(ct);
 
-    private static string Marker(string eventId, string externalOrderId) => $"integration-event:{eventId};external-order:{externalOrderId};";
     private static byte ParcelState(string status) => status.Contains("deliv", StringComparison.OrdinalIgnoreCase) ? (byte)2 : (byte)1;
 }
 

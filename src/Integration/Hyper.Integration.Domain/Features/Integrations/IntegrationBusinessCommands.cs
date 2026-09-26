@@ -67,4 +67,4 @@ public enum BusinessCommandStatus : byte
 
 public sealed record BusinessCommandResult(
     BusinessCommandStatus Status, string? InternalReference = null,
-    string? ErrorCode = null);
+    string? ErrorCode = null, bool StockCommitted = false);

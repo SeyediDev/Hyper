@@ -158,7 +158,10 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
         await reservations.ReserveAsync(shop, reservationKey, lines, ct);
         // A timeout or error does not prove the remote write failed. Retain the hold
         // for idempotent replay; only an acknowledged cancellation releases it.
-        return await commands.ApplyVendorOrderAsync(command, ct);
+        var result = await commands.ApplyVendorOrderAsync(command, ct);
+        if (result.StockCommitted && result.Status is BusinessCommandStatus.Applied or BusinessCommandStatus.Duplicate)
+            await reservations.CommitAsync(shop, reservationKey, ct);
+        return result;
     }
 
     private Task<BusinessCommandResult> PurchaseAsync(IntegrationScenarioJob job, JsonElement root, CancellationToken ct)

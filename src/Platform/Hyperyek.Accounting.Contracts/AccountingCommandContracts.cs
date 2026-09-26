@@ -66,7 +66,7 @@ public enum AccountingCommandStatus : byte
 
 public sealed record AccountingCommandResult(
     AccountingCommandStatus Status, string? InternalReference = null,
-    string? ErrorCode = null);
+    string? ErrorCode = null, bool StockCommitted = false);
 
 public interface IAccountingCommandHandler
 {

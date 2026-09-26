@@ -120,16 +120,13 @@ public sealed class HyperyekAccountingApiClient(
     private async Task<IntegrationCommandResult> PostAsync<T>(string route, T command, CancellationToken ct)
     {
         using var response = await client.PostAsJsonAsync(route, command, ct);
-        if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
-            return new(IntegrationCommandStatus.Duplicate);
-        if (response.StatusCode == System.Net.HttpStatusCode.Accepted)
-            return new(IntegrationCommandStatus.PendingDependency);
-        if (!response.IsSuccessStatusCode)
+        if (!response.IsSuccessStatusCode && response.StatusCode != System.Net.HttpStatusCode.Conflict
+            && response.StatusCode != System.Net.HttpStatusCode.UnprocessableEntity)
             return new(IntegrationCommandStatus.Rejected, ErrorCode: $"AccountingApi_{(int)response.StatusCode}");
         var result = await response.Content.ReadFromJsonAsync<AccountingCommandResult>(cancellationToken: ct);
         return result is null
             ? new(IntegrationCommandStatus.Rejected, ErrorCode: "AccountingApiEmptyResponse")
-            : new((IntegrationCommandStatus)(byte)result.Status, result.InternalReference, result.ErrorCode);
+            : new((IntegrationCommandStatus)(byte)result.Status, result.InternalReference, result.ErrorCode, result.StockCommitted);
     }
 
     private async Task<T> GetAsync<T>(string route, CancellationToken ct)

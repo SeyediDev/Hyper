@@ -27,6 +27,12 @@ accounting outcomes retain their hold for replay/reconciliation. Confirmed order
 cancellation releases the hold. Shipping alone must not release stock until the
 accounting stock deduction is known to have committed.
 
+Accounting replies now include `StockCommitted` (default false for old servers).
+An Applied/Duplicate reply with this flag transitions the reservation to status 2
+(consumed). Such rows are not subtracted again from accounting stock, but remain
+available for replay and content verification. A timeout leaves status 0 intact.
+HTTP 409 response bodies must be preserved so replay carries this acknowledgement.
+
 Limits and remaining acceptance work:
 
 - These locks coordinate Integration reservations only. An atomic operation in
@@ -34,7 +40,8 @@ Limits and remaining acceptance work:
   global overselling prevention.
 - Catalog stock must be verified gross stock (`AccountingStockSourceVerified`).
   Full sellability flags and native reservations require an owner-side contract.
-- Accounting idempotency and cancellation must also include connection identity.
+- Accounting idempotency/cancellation now include connection identity; see
+  `ACCOUNTING_ORDER_VERIFICATION.md` for transaction tests and activation limits.
 - Historical `order:<external-id>` reservations require explicit reconciliation;
   they are not silently reassigned or released by the new scoped identity.
 - Inventory capture and scenario processing still contain raw legacy-table SQL;
