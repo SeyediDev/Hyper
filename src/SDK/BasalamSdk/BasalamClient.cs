@@ -29,13 +29,15 @@ public sealed class BasalamClient : IBasalamClient, IDisposable
     private readonly System.Net.Http.HttpClient? _httpClient;
     private readonly IDisposable? _httpClientOwner;
     private readonly BasalamHttpClient _transport;
+    private readonly IBasalamAuthClient _authClient;
     private TokenInfo? _token = null;
     private readonly object _tokenLock = new();
 
     public BasalamClient(
         BasalamConfig config,
         ILogger<object>? logger = null,
-        System.Net.Http.HttpClient? httpClient = null)
+        System.Net.Http.HttpClient? httpClient = null,
+        IBasalamAuthClient? authClient = null)
     {
         _config = config ?? throw new ArgumentNullException(nameof(config));
         _logger = logger as ILogger<BasalamClient>;
@@ -47,6 +49,7 @@ public sealed class BasalamClient : IBasalamClient, IDisposable
 
         var httpFactory = new Clients.BasalamHttpClient(config, logger as ILogger<Clients.BasalamHttpClient>, http);
         _transport = httpFactory;
+        _authClient = authClient ?? new BasalamAuthClient(config, httpClient: http);
 
         Vendors = new VendorService(httpFactory, logger as ILogger<Services.VendorService>);
         Products = new ProductService(httpFactory, logger as ILogger<Services.ProductService>);
@@ -78,7 +81,12 @@ public sealed class BasalamClient : IBasalamClient, IDisposable
     public async Task<TokenInfo> RefreshTokenAsync(CancellationToken ct = default)
     {
         _logger?.LogInformation("Refreshing Basalam token");
-        throw new InvalidOperationException("Auth client not configured for token refresh");
+        var current = Token;
+        var refreshed = string.IsNullOrWhiteSpace(current?.RefreshToken)
+            ? await _authClient.GetTokenAsync(ct)
+            : await _authClient.RefreshTokenAsync(current.RefreshToken, ct);
+        SetToken(refreshed);
+        return refreshed;
     }
 
     public void SetToken(TokenInfo? token)

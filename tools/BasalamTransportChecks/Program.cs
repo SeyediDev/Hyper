@@ -1,7 +1,9 @@
 using System.Net;
 using Basalam.SDK;
 using Basalam.SDK.Auth;
+using Basalam.SDK.Clients;
 using Basalam.SDK.Config;
+using Basalam.SDK.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,7 +21,8 @@ try
     // Capture all HTTP in memory: these checks never contact a provider.
     var transport = new Capture();
     using var http = new HttpClient(transport);
-    using var client = new BasalamClient(new BasalamConfig(), httpClient: http);
+    var auth = new FixtureAuthClient();
+    using var client = new BasalamClient(new BasalamConfig(), httpClient: http, authClient: auth);
     client.SetToken(new TokenInfo { AccessToken = "fixture-first", TokenType = "Bearer" });
     await client.Catalog.GetProductsAsync(71);
     Check(transport.LastAuthorization == "Bearer fixture-first", "catalog receives the connection token");
@@ -31,6 +34,21 @@ try
     Check(transport.LastAuthorization == "Bearer fixture-refreshed", "inventory PATCH receives refreshed token");
     Check(transport.LastBody == "{\"stock\":0}" && transport.LastMethod == HttpMethod.Patch,
         "zero inventory is an explicit absolute PATCH");
+
+    client.SetToken(new TokenInfo { AccessToken = "old", TokenType = "Bearer", RefreshToken = "refresh-me" });
+    var refreshed = await client.RefreshTokenAsync();
+    Check(refreshed.AccessToken == "new-access" && client.Token?.AccessToken == "new-access"
+        && auth.LastRefreshToken == "refresh-me", "client refreshes and propagates the refreshed token");
+
+    transport.ResponseBody = "{\"id\":12,\"name\":\"Written\",\"vendorId\":71}";
+    await client.Products.UpdateProductAsync(12, new ProductWriteRequest("Written", 71, Price: 10));
+    Check(transport.LastUri?.AbsolutePath == "/v1/products/12" && transport.LastMethod == HttpMethod.Patch,
+        "typed product update uses the official product route");
+    transport.ResponseBody = "{\"id\":8,\"productId\":12,\"vendorId\":71}";
+    await client.Variations.UpdateVariationAsync(8, new VariationWriteRequest(12, Title: "Blue"));
+    Check(transport.LastUri?.AbsolutePath == "/v1/variations/8" && transport.LastMethod == HttpMethod.Patch,
+        "typed variation update uses the official variation route");
+    transport.ResponseBody = null;
 
     transport.Statuses.Enqueue(HttpStatusCode.ServiceUnavailable);
     transport.Statuses.Enqueue(HttpStatusCode.ServiceUnavailable);
@@ -47,7 +65,7 @@ try
     await otherClient.Catalog.GetProductsAsync(72);
     await client.Catalog.GetProductsAsync(71);
     Check(otherTransport.LastAuthorization == "Bearer fixture-other"
-        && transport.LastAuthorization == "Bearer fixture-refreshed", "clients do not share booth tokens");
+        && transport.LastAuthorization == "Bearer new-access", "clients do not share booth tokens");
 
     client.SetToken(null);
     await client.Catalog.GetProductsAsync(71);
@@ -134,5 +152,17 @@ sealed class Capture : HttpMessageHandler
         if (RetryAfterZero && status != HttpStatusCode.OK)
             response.Headers.RetryAfter = new System.Net.Http.Headers.RetryConditionHeaderValue(TimeSpan.Zero);
         return response;
+    }
+}
+
+sealed class FixtureAuthClient : IBasalamAuthClient
+{
+    public string? LastRefreshToken { get; private set; }
+    public Task<TokenInfo> GetTokenAsync(CancellationToken ct = default) =>
+        Task.FromResult(new TokenInfo { AccessToken = "new-access", TokenType = "Bearer" });
+    public Task<TokenInfo> RefreshTokenAsync(string refreshToken, CancellationToken ct = default)
+    {
+        LastRefreshToken = refreshToken;
+        return Task.FromResult(new TokenInfo { AccessToken = "new-access", TokenType = "Bearer", RefreshToken = "new-refresh" });
     }
 }

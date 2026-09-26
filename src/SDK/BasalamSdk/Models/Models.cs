@@ -105,3 +105,10 @@ public record PageResult<T>
     public int TotalPages { get; init; }
     public bool HasMore { get; init; }
 }
+
+public sealed record ProductWriteRequest(string Name, int VendorId, decimal? Price = null,
+    string? Sku = null, string? Barcode = null, string? Description = null,
+    int? Stock = null, string? CategoryId = null);
+
+public sealed record VariationWriteRequest(int ProductId, string? Title = null,
+    decimal? Price = null, string? Sku = null, string? Barcode = null, int? Stock = null);
