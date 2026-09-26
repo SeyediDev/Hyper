@@ -9,7 +9,8 @@ namespace Hyper.Infrastructure.Features.Integrations;
 public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessCommandPort commands,
     IIntegrationEngagementPort engagement,
     IIntegrationInventoryReservation reservations,
-    HyperIntegrationContext db)
+    HyperIntegrationContext db,
+    IIntegrationStrategyResolver? strategies = null)
 {
     public async Task<IntegrationScenarioResult> DispatchAsync(IntegrationScenarioJob job,
         ExternalIntegrationConnection connection, CancellationToken ct)
@@ -98,6 +99,25 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
             && x.ExternalProductId == externalProductId && x.ExternalVariantId == variantId && x.IsActive, ct);
         if (mapping is null || mapping.HyperProductId <= 0)
             throw new IntegrationProviderException("ProductMappingUnavailable", false);
+        if (connection.Provider == IntegrationProvider.Basalam)
+        {
+            if (strategies is null || job.Id <= 0)
+                throw new IntegrationProviderException("ProviderCatalogUnavailable", false);
+            // A provider webhook is a notification, not the authoritative price
+            // or accounting identity. Re-read its scoped catalog before applying.
+            var catalog = await strategies.Resolve(connection.Provider, connection.CredentialType)
+                .ReadCatalogAsync(connection, ct);
+            var matches = catalog.Where(x => x.ExternalProductId == externalProductId && x.VariantId == variantId).ToArray();
+            if (matches.Length != 1)
+                throw new IntegrationProviderException(matches.Length == 0 ? "ExternalProductMissing" : "ProductMappingAmbiguous", false);
+            var product = matches[0];
+            return await commands.ApplyExternalProductChangedAsync(new(job.EventId, job.ShopId, job.TenantId,
+                job.ConnectionId, mapping.HyperProductId, externalProductId, variantId,
+                product.Sku, product.Title, product.Price, product.Inventory,
+                // Durable job sequence is stable on retry; do not invent a
+                // provider version or require one in Basalam's webhook body.
+                job.Id), ct);
+        }
         return await commands.ApplyExternalProductChangedAsync(new(job.EventId, job.ShopId, job.TenantId,
             job.ConnectionId, mapping.HyperProductId, externalProductId, variantId,
             OptionalAny(root, "sku", "barcode", "tax_code"), RequiredAny(root, "title", "name", "product_name"),

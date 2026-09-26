@@ -34,7 +34,8 @@ It never opens the business or configured Integration database. The SQL login
 must be allowed to create/drop this isolated fixture. Both HTTP destinations are
 intercepted in memory; accounting responses are fixtures, not financial documents.
 
-The 30 checks cover normalized product webhook -> accounting command, accounting
+The 31 checks cover product webhook -> authoritative Basalam catalog read ->
+accounting command, accounting
 inventory event -> authenticated stock PATCH, connection/tenant selection,
 replay/conflicting content, missing mapping, retry, explicit-source loopback,
 unknown events, version ordering, zero stock and persisted outcomes. They also
@@ -45,6 +46,12 @@ a nonnegative whole `int`; there is no implicit unit conversion. No accounting
 tables exist in the fixture Integration database. This does not verify the separate
 legacy inventory capture/reconciliation path, actual webhook payload delivery, real
 HTTP authentication middleware, accounting SQL writes or public webhook delivery.
+
+For Basalam product notifications only the external product/variant identity is
+used from the body. An active mapping selects the accounting product; the provider
+catalog supplies SKU/title/price/inventory. The durable job ID provides a stable
+internal sequence on retry, not a claimed Basalam source version. Other providers'
+normalized product command contract is unchanged.
 
 Ingress accepts only object JSON and event IDs up to the worker's 128-character
 limit. A reused event ID with different type/body is invalid (`EventIdentityConflict`).

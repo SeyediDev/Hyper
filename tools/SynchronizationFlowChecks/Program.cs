@@ -80,7 +80,7 @@ static async Task<int> Run()
         using var commandsHttp = new HttpClient(accountingHttp) { BaseAddress = new Uri("https://accounting.fixture.invalid/") };
         var commands = new HyperyekAccountingApiClient(commandsHttp);
         var dispatcher = new IntegrationBusinessEventDispatcher(commands, new UnregisteredIntegrationEngagementPort(),
-            new NoReservations(), db);
+            new NoReservations(), db, resolver);
         var processor = new IntegrationScenarioProcessor(db, resolver, new NoCapture(),
             Options.Create(new IntegrationInventoryCaptureOptions()), Options.Create(new BasalamOAuthSettings()), null!, dispatcher);
         var queue = new IntegrationScenarioQueue(db, processor);
@@ -88,7 +88,7 @@ static async Task<int> Run()
         WebhookIngressRequest Event(string id, string product = "12", string? sourceMarker = null) =>
             new(ApiProvider.Basalam, "71", id, "product.updated", null, null,
                 JsonSerializer.SerializeToUtf8Bytes(new { externalProductId = product, hyperProductId = 999,
-                    title = "Fixture product", price = 125, sourceVersion = 1, source = sourceMarker }),
+                    title = "Untrusted webhook title", sku = "untrusted-sku", price = 999, source = sourceMarker }),
                 Authorization: "Bearer fixture-secret-a");
         var request = Event("product-1");
         var accepted = await ingress.ReceiveAsync(request);
@@ -111,8 +111,10 @@ static async Task<int> Run()
         job = await db.IntegrationScenarioJobs.AsNoTracking().SingleAsync(x => x.Id == accepted.ScenarioJobId);
         Check(inbox.Status == 1 && inbox.ProcessedAtUtc.HasValue && job.Status == IntegrationScenarioStatus.Completed,
             "successful accounting response acknowledges both job and inbox");
-        Check(accountingHttp.LastCommand is { HyperProductId: 44, Title: "Fixture product", Price: 125 }
+        Check(accountingHttp.LastCommand is { HyperProductId: 44, Title: "Fixture product", Price: 125, Sku: "catalog-sku" }
             && accountingHttp.LastCommand.Scope == new AccountingScope(7, "tenant-a"), "accounting HTTP contract uses trusted mapping and scope");
+        Check(accountingHttp.LastCommand?.SourceVersion == accepted.ScenarioJobId,
+            "Basalam catalog overrides untrusted webhook fields and missing provider version uses stable job sequence");
         Check(!await queue.ProcessConnectionAsync(connection.Id, default) && accountingHttp.Calls == 1,
             "completed product is not applied again");
 
@@ -232,11 +234,17 @@ sealed class ProviderTransport : HttpMessageHandler
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
     {
         Requests++;
-        if (request.RequestUri?.Host != "openapi.basalam.com" || request.RequestUri.AbsolutePath != "/v1/products/12")
+        if (request.RequestUri?.Host != "openapi.basalam.com")
             throw new InvalidOperationException("Unexpected Basalam fixture route");
         Authenticated = request.Headers.Authorization?.ToString() == "Bearer fixture-grant";
         if (!Authenticated) throw new InvalidOperationException("Missing connection-specific authentication");
         if (FailStatus is { } failure) return new HttpResponseMessage(failure) { Content = new StringContent("provider-sensitive-fixture") };
+        if (request.Method == HttpMethod.Get && request.RequestUri.AbsolutePath == "/v1/vendors/71/products")
+            return new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("{\"data\":[{\"id\":12,\"vendor\":{\"id\":71},\"title\":\"Fixture product\",\"sku\":\"catalog-sku\",\"price\":125,\"inventory\":3}],\"page\":1,\"total_page\":1}", Encoding.UTF8, "application/json")
+            };
+        if (request.RequestUri.AbsolutePath != "/v1/products/12") throw new InvalidOperationException("Unexpected Basalam fixture route");
         if (request.Method == HttpMethod.Patch)
         {
             using var body = JsonDocument.Parse(await request.Content!.ReadAsStringAsync(ct));
