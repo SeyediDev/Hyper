@@ -19,6 +19,7 @@ public static class DependencyInjection
     public static void AddHyperAdminPanelServices(this IServiceCollection services, IConfiguration configuration, IHostEnvironment environment)
     {
         services.AddSingleton<AdminSimulationTickets>();
+        services.AddScoped<AdminFinancialPreviewWorkflow>();
         // Core Domain Services
         services.AddHyperDomainServices(configuration);
 

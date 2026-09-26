@@ -1,0 +1,15 @@
+.financial-preview{max-width:1120px;margin:24px auto;padding:0 20px;color:#163047;line-height:1.9}
+.financial-preview header{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;margin-bottom:20px}
+.financial-preview h1{font-size:1.7rem;margin:4px 0}.financial-preview h2{font-size:1.2rem}.fp-eyebrow{color:#567184;font-size:.9rem}
+.financial-preview nav{display:flex;gap:16px;flex-wrap:wrap}.financial-preview a{color:#006d77;text-decoration:underline}
+.fp-notice,.fp-error,.fp-context,.fp-card{padding:20px;border-radius:12px;margin-bottom:20px;border:1px solid #dbe5eb}
+.fp-notice{background:#fff8e5;border-color:#e7cb79}.fp-error{background:#fff0f0;border-color:#e7a6a6;color:#8c2222}.fp-card{background:#fff}
+.fp-context{display:flex;gap:20px;flex-wrap:wrap;background:#edf6f5}.financial-preview label{display:block;font-weight:600;margin:12px 0 8px}
+.financial-preview select,.financial-preview textarea{border:1px solid #a9bac6;border-radius:8px;padding:12px;width:100%;background:white;color:#163047}
+.financial-preview textarea{font:14px/1.6 Consolas,monospace;resize:vertical;min-height:250px}.financial-preview input[type=checkbox]{margin-left:8px;width:18px;height:18px;vertical-align:middle}
+.financial-preview button{background:#006d77;border:0;border-radius:8px;color:white;padding:12px 22px;font:inherit;cursor:pointer}
+.financial-preview :focus-visible{outline:3px solid #efb44d;outline-offset:3px}.fp-totals{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:20px 0}
+.fp-totals>div{background:#f0f6f8;border-radius:10px;padding:18px}.fp-totals span,.fp-totals strong{display:block}.fp-totals strong{font-size:1.45rem;direction:ltr;text-align:right}
+.fp-components{display:grid;grid-template-columns:minmax(160px,1fr) 1fr;gap:6px 24px}.fp-components dd{margin:0;direction:ltr;text-align:right}.fp-components dt{font-weight:400}
+.fp-table{overflow-x:auto}.fp-table table{width:100%;border-collapse:collapse}.fp-table th,.fp-table td{padding:10px;text-align:right;border-bottom:1px solid #dbe5eb;white-space:nowrap}.fp-table caption{caption-side:top;text-align:right;color:#163047}.fp-issues{padding-right:20px}
+@media(max-width:640px){.financial-preview{padding:0 12px}.fp-card,.fp-notice,.fp-error,.fp-context{padding:14px}.fp-totals{grid-template-columns:1fr}.fp-components{grid-template-columns:1fr 1fr;gap:6px 10px}.financial-preview h1{font-size:1.35rem}}

@@ -154,9 +154,10 @@ The mapper preserves tenant/shop/connection/order/billing-group/version, every
 nullable amount, explicit discount allocation, unit and verification flag. It
 does not convert Toman, infer missing fees or taxes, load a webhook, authorize
 shop ownership, fetch provider data, create customer mappings, or post a document.
-The result remains preview-only. The caller must supply normalized evidence from
-a trusted source. No current dispatcher or panel workflow calls this port yet;
-the provider-to-preview-to-display workflow is **not** complete at this checkpoint.
+The result remains preview-only. Production callers must supply normalized evidence
+from a trusted source. The manual panel workflow below now calls this port with
+explicitly synthetic inputs. The dispatcher does not call it, and the real
+provider-to-preview-to-display workflow is **not** complete at this checkpoint.
 
 Only HTTP 200 with a recognized preview response is mapped. The actual wire
 `previewOnly` flag must be true; malformed/unknown status, policy or currency,
@@ -188,6 +189,88 @@ were rerun successfully. The initial check-project build included dependencies;
 the final test-only rebuild reused those built references. Both had zero warnings
 and errors. This is targeted verification, not a full solution or live-provider test.
 
-Next: validate real provider financial snapshots, connect the caller and expose preview in the panel,
+## Manual panel preview (ACC-201.PREVIEW-UI)
+
+Open `/AccountingFinancialPreview/Index` on the AdminPanel host while logged in
+as an administrator. This is a separate page; existing simulator/dashboard views
+and the shared navigation are not changed. Use its link to `/MerchantSimulation`
+to select a shop, then return to the preview URL. An enabled Basalam connection
+must belong to that exact shop and tenant. This page does not request merchant
+tokens or fetch anything from Basalam.
+
+The panel invokes `IIntegrationFinancialPreviewPort`; it does not reference the
+accounting calculator or read/write accounting tables. The dedicated accounting
+service HTTPS/token settings described above must be configured on the panel
+host. The operator's merchant/admin token is not reused for accounting access.
+
+The editable JSON contains financial draft fields only. Shop, tenant, connection,
+policy and source-verification fields cannot be inserted into it. Shop/tenant
+come from the live server simulation, connection from its scoped enabled list,
+and policy is fixed to `irr-preview-v1`. The unit acknowledgement is deliberately
+unchecked on initial display. It means the operator checked the unit for this
+**manual simulation**, not that Basalam data has been authenticated. Output is
+always labelled synthetic and preview-only, with no apply/submit-to-accounting
+button. Unknown totals display as unknown, not zero.
+
+The page uses existing admin authentication, an explicit admin gate, antiforgery,
+no-store response caching and a 256 KiB request limit. Editable JSON is limited
+to 100,000 characters, depth 8 and 1,000 lines; duplicate or unrecognized fields
+are rejected. Both the posted protected context ticket and current simulation
+cookie must identify the same administrator-owned active simulation. The
+simulation is rechecked after the financial call before displaying its result.
+The page does not cache drafts/results in a database or queue a scenario.
+
+Manual acceptance steps:
+
+1. Sign in as an admin, select a shop in the existing simulator, open the preview
+   URL, and select its active Basalam connection. No selection or connection
+   should show an actionable empty state.
+2. Leave the sample JSON unchanged, acknowledge its IRR unit, and calculate.
+   Expect invoice 9,600,000, buyer 9,100,000 and settlement 8,700,000 IRR.
+3. Set `platformCommission` to `null`: expect AwaitingEvidence and unknown
+   settlement, while the invoice remains calculable.
+4. Restore the sample and change `buyerPayment` to `1`: expect NeedsReview and
+   a payment issue, not a successful posting. Uncheck unit acknowledgement:
+   expect missing unit evidence and no calculated totals.
+5. Keep an old form open, change shops in a second tab, then submit the old form:
+   expect HTTP 409 without an accounting call. Repeat after ending/expiring the
+   simulation. A different admin's ticket or another shop's connection must fail.
+6. Insert `shopId`/`tenantId` or a duplicate monetary field into JSON: expect
+   HTTP 400. A POST without antiforgery must be rejected by MVC. A non-admin must
+   not gain access. Verify that error output does not expose tokens/settings.
+7. Confirm no invoice, stock, token request, inbox or outbox is created. The page
+   should only read simulation/connection context and call the no-write preview.
+
+Focused workflow checks (fake ports; no live SQL/identity/provider):
+
+```powershell
+dotnet build tools/FinancialPreviewPanelChecks/FinancialPreviewPanelChecks.csproj --artifacts-path .artifacts/panel-financial-checks -m:1 -p:UseSharedCompilation=false -p:NuGetAudit=false
+dotnet exec .artifacts/panel-financial-checks/bin/FinancialPreviewPanelChecks/debug/FinancialPreviewPanelChecks.dll
+```
+
+These workflow checks are not browser, real MVC authorization/antiforgery or live
+accounting acceptance. Compile the actual AdminPanel/Razor as a separate targeted
+build and perform the manual steps against the configured host before release.
+
+Verified on 2026-09-26: 45 workflow assertions passed, including safe handling of
+an unavailable accounting-backed shop lookup before and after form submission.
+The unchanged 99-check accounting HTTP/authentication fixture binary was rerun
+successfully. The initial AdminPanel build included dependencies and Razor and
+succeeded with zero warnings/errors. The final reference-reusing build also
+passed with zero warnings/errors, including the final workflow/controller/view changes:
+
+```powershell
+dotnet build src/AdminPanel/Hyper.AdminPanel.Web/Hyper.AdminPanel.Web.csproj --no-restore --artifacts-path .artifacts/platform-api-accounting -m:1 -p:BuildProjectReferences=false -p:UseSharedCompilation=false -p:NuGetAudit=false
+```
+
+Do **not** add `--no-incremental` or invoke Rebuild for this narrow check: this
+repository hooks Clean/Rebuild to npm installation and shared microfrontend
+builds. An intermediate attempt hit that hook and failed with npm EPERM on the
+shared EditableGrid package-lock; no elevated npm attempt was made. This is not
+a successful microfrontend build. Shared package.json/package-lock had no tracked
+changes afterward. Asset copies generated by normal panel builds are excluded
+from this feature's commit. Browser and live-host acceptance remain pending.
+
+Next: validate real provider financial snapshots and connect the authoritative caller,
 obtain accounting policy/account mapping acceptance, then implement versioned
 posting and reconciliation independently. WorkManagement owns task status.

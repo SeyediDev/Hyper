@@ -1,0 +1,83 @@
+@model Hyper.AdminPanel.Web.ViewModels.FinancialPreviewViewModel
+@using Hyper.Integration.Domain.Features.Integrations
+@using System.Globalization
+@{
+    Layout = "_HyperAdminLayout";
+    ViewBag.Title = "پیش‌نمایش مالی آزمایشی | هایپریک";
+    string Money(decimal? value) => value?.ToString("N0", CultureInfo.InvariantCulture) ?? "نامشخص";
+    string Status(IntegrationFinancialReviewStatus status) => status switch
+    {
+        IntegrationFinancialReviewStatus.Validated => "محاسبه معتبر — فقط آزمایشی",
+        IntegrationFinancialReviewStatus.AwaitingEvidence => "در انتظار اطلاعات تکمیلی",
+        _ => "نیازمند بررسی"
+    };
+}
+<link rel="stylesheet" href="~/Content/accounting-financial-preview.css" asp-append-version="true" />
+<section class="financial-preview" dir="rtl">
+    <header><div><span class="fp-eyebrow">شبیه‌ساز · مالی</span><h1>پیش‌نمایش مالی فروش غرفه</h1></div>
+        <nav><a asp-controller="MerchantSimulation" asp-action="Index">انتخاب مغازه و اتصال</a>
+        <a asp-controller="MerchantSimulation" asp-action="Dashboard">داشبورد</a></nav></header>
+    <div class="fp-notice"><strong>این صفحه فقط محاسبهٔ آزمایشی است.</strong>
+        داده‌ها دستی‌اند و از باسلام دریافت نشده‌اند. هیچ فاکتور، سند، رزرو یا تغییر موجودی ایجاد نمی‌شود؛ نتیجهٔ معتبر مجوز ثبت سند نیست.</div>
+    @if (Model.Error is not null) { <div class="fp-error" role="alert">@Model.Error</div> }
+    @if (Model.Selected is null)
+    {
+        <div class="fp-card"><p>ابتدا در شبیه‌ساز یک مغازه انتخاب کنید، سپس به این صفحه برگردید.</p>
+            <a asp-controller="MerchantSimulation" asp-action="Index">انتخاب مغازه</a></div>
+    }
+    else
+    {
+        <div class="fp-context"><strong>@Model.Selected.ShopName</strong><span>مغازه @Model.Selected.ShopId</span>
+            <span>مبالغ خروجی: ریال</span><span>سیاست آزمایشی: <bdi>irr-preview-v1</bdi></span></div>
+        @if (Model.Connections.Count == 0)
+        {
+            <div class="fp-card">اتصال فعال باسلام برای این مغازه وجود ندارد. ابتدا اتصال را در شبیه‌ساز تنظیم کنید.</div>
+        }
+        else
+        {
+            <form asp-action="Preview" method="post" class="fp-card">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="ContextTicket" value="@Model.Form.ContextTicket" />
+                <label for="fp-connection">اتصال متعلق به مغازه انتخاب‌شده</label>
+                <select id="fp-connection" name="ConnectionId" required>
+                    @foreach (var connection in Model.Connections)
+                    {
+                        <option value="@connection.Id" selected="@(connection.Id == Model.Form.ConnectionId)">@connection.DisplayName — @connection.Id</option>
+                    }
+                </select>
+                <label for="fp-json">دادهٔ مالی آزمایشی (JSON)</label>
+                <p id="fp-help">واحد ورودی <code>sourceUnit</code>: عدد ۱ ریال، عدد ۲ تومان. مقدار <code>null</code> یعنی نامشخص؛ صفر فقط وقتی واقعاً صفر است.
+                    قیمت واحد، تخفیف فروشنده، حمایت پلتفرم، کارمزد و ارسال را جدا وارد کنید. اطلاعات شخصی یا توکن وارد نکنید.</p>
+                <textarea id="fp-json" name="DraftJson" dir="ltr" rows="23" maxlength="100000" required spellcheck="false" aria-describedby="fp-help">@Model.Form.DraftJson</textarea>
+                <label class="fp-checkbox"><input type="checkbox" name="UnitAcknowledged" value="true" checked="@Model.Form.UnitAcknowledged" />
+                    واحد ورودی را برای همین محاسبهٔ دستی بررسی کرده‌ام (تأیید اصالت دادهٔ باسلام نیست).</label>
+                <button type="submit">محاسبهٔ پیش‌نمایش — بدون ثبت</button>
+            </form>
+        }
+        @if (Model.Result is { } result)
+        {
+            <article class="fp-card" aria-live="polite">
+                <h2>@Status(result.Status)</h2>
+                <p>منبع: ورودی دستی شبیه‌ساز · نتیجه فقط خواندنی و آزمایشی · همه مبالغ زیر ریال‌اند.</p>
+                <div class="fp-totals"><div><span>جمع فاکتور فروشنده</span><strong>@Money(result.InvoiceTotal)</strong></div>
+                    <div><span>پرداخت مورد انتظار خریدار</span><strong>@Money(result.BuyerPayable)</strong></div>
+                    <div><span>تسویهٔ مورد انتظار</span><strong>@Money(result.ExpectedSettlement)</strong></div></div>
+                <dl class="fp-components"><dt>فروش ناخالص</dt><dd>@Money(result.Gross)</dd><dt>تخفیف فروشنده</dt><dd>@Money(result.SellerDiscount)</dd>
+                    <dt>سهم تخفیف سراسری سفارش</dt><dd>@Money(result.Components?.SellerOrderDiscount)</dd>
+                    <dt>خالص کالا</dt><dd>@Money(result.NetGoods)</dd><dt>ارسال متعلق به فروشنده</dt><dd>@Money(result.Components?.MerchantShipping)</dd>
+                    <dt>ارسال مستقیم شخص ثالث</dt><dd>@Money(result.Components?.ThirdPartyShipping)</dd><dt>مالیات فاکتور</dt><dd>@Money(result.Components?.InvoiceTax)</dd>
+                    <dt>حمایت مالی پلتفرم</dt><dd>@Money(result.Components?.PlatformFunding)</dd><dt>پرداخت گزارش‌شده خریدار</dt><dd>@Money(result.Components?.BuyerPayment)</dd>
+                    <dt>کارمزد پلتفرم</dt><dd>@Money(result.Components?.PlatformCommission)</dd><dt>مالیات کارمزد</dt><dd>@Money(result.Components?.CommissionTax)</dd>
+                    <dt>سایر کسورات تسویه</dt><dd>@Money(result.Components?.SettlementDeductions)</dd><dt>سایر بستانکاری‌های تسویه</dt><dd>@Money(result.Components?.SettlementCredits)</dd></dl>
+                @if (result.Issues.Count > 0)
+                {
+                    <h3>اطلاعات ناقص یا اختلاف‌ها</h3><ul class="fp-issues">
+                    @foreach (var issue in result.Issues) { <li><bdi>@issue.Code</bdi> — <bdi>@issue.Field</bdi> — @Status(issue.Status)</li> }
+                    </ul>
+                }
+                <div class="fp-table"><table><caption>تفکیک اقلام و تخصیص تخفیف</caption><thead><tr><th>قلم</th><th>ناخالص</th><th>تخفیف مستقیم</th><th>سهم تخفیف سفارش</th><th>خالص</th></tr></thead>
+                    <tbody>@foreach (var line in result.Lines) { <tr><td>@line.LineId</td><td>@Money(line.Gross)</td><td>@Money(line.SellerDiscount)</td><td>@Money(line.AllocatedOrderDiscount)</td><td>@Money(line.Net)</td></tr> }</tbody></table></div>
+            </article>
+        }
+    }
+</section>
