@@ -52,7 +52,7 @@ public sealed class ClientCredentialsAuth : BasalamAuthBase
         var content = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
-            throw new BasalamAuthError($"Token request failed: {(int)response.StatusCode}", content);
+            throw new BasalamAuthError($"Token request failed: {(int)response.StatusCode}");
 
         return ParseToken(content);
     }
@@ -157,7 +157,7 @@ public sealed class AuthorizationCodeAuth : BasalamAuthBase
         var content = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
-            throw new BasalamAuthError($"Token exchange failed: {(int)response.StatusCode}", content);
+            throw new BasalamAuthError($"Token exchange failed: {(int)response.StatusCode}");
 
         return ParseToken(content);
     }

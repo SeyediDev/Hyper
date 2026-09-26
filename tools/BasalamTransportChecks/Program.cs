@@ -32,6 +32,14 @@ try
     Check(transport.LastBody == "{\"stock\":0}" && transport.LastMethod == HttpMethod.Patch,
         "zero inventory is an explicit absolute PATCH");
 
+    transport.Statuses.Enqueue(HttpStatusCode.ServiceUnavailable);
+    transport.Statuses.Enqueue(HttpStatusCode.ServiceUnavailable);
+    transport.Statuses.Enqueue(HttpStatusCode.OK);
+    transport.RetryAfterZero = true;
+    await client.Products.PatchStockAsync(12, 7);
+    Check(transport.Requests >= 3 && transport.LastBody == "{\"stock\":7}",
+        "transient provider responses retry the same PATCH and honor Retry-After");
+
     var otherTransport = new Capture();
     using var otherHttp = new HttpClient(otherTransport);
     using var otherClient = new BasalamClient(new BasalamConfig(), httpClient: otherHttp);
@@ -102,6 +110,9 @@ catch (Exception ex)
 
 sealed class Capture : HttpMessageHandler
 {
+    public Queue<HttpStatusCode> Statuses { get; } = new();
+    public bool RetryAfterZero { get; set; }
+    public int Requests { get; private set; }
     public string? ResponseBody { get; set; }
     public string? LastAuthorization { get; private set; }
     public string? LastBody { get; private set; }
@@ -109,14 +120,19 @@ sealed class Capture : HttpMessageHandler
     public HttpMethod? LastMethod { get; private set; }
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
     {
+        Requests++;
         LastAuthorization = request.Headers.Authorization?.ToString();
         LastUri = request.RequestUri;
         LastMethod = request.Method;
         LastBody = request.Content is null ? null : await request.Content.ReadAsStringAsync(ct);
-        return new HttpResponseMessage(HttpStatusCode.OK)
+        var status = Statuses.Count == 0 ? HttpStatusCode.OK : Statuses.Dequeue();
+        var response = new HttpResponseMessage(status)
         {
             Content = new StringContent(ResponseBody ?? (request.Method == HttpMethod.Get
                 ? "{\"data\":[],\"hasMore\":false}" : "{}"), System.Text.Encoding.UTF8, "application/json")
         };
+        if (RetryAfterZero && status != HttpStatusCode.OK)
+            response.Headers.RetryAfter = new System.Net.Http.Headers.RetryConditionHeaderValue(TimeSpan.Zero);
+        return response;
     }
 }

@@ -1,6 +1,7 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Basalam.SDK.Auth;
@@ -66,17 +67,56 @@ public sealed class BasalamHttpClient : IBasalamHttpClient, IDisposable
 
         var token = GetCurrentToken();
         if (token != null)
-        {
             request.Headers.Authorization = new AuthenticationHeaderValue(token.TokenType, token.AccessToken);
+
+        var maxRetries = Math.Clamp(_config.MaxRetries, 0, 10);
+        var delayBase = Math.Clamp(_config.RetryDelayMilliseconds, 0, 60_000);
+        for (var attempt = 0; ; attempt++)
+        {
+            // HttpRequestMessage instances cannot be sent twice. Clone before every
+            // attempt so POST/PATCH bodies are retried exactly as issued.
+            using var outgoing = await CloneAsync(request, ct);
+            _logger.LogInformation("Sending {Method} {Url} (attempt {Attempt})", outgoing.Method,
+                outgoing.RequestUri, attempt + 1);
+            var response = await _httpClient.SendAsync(outgoing, ct);
+            _logger.LogInformation("Received {StatusCode} from {Url}", (int)response.StatusCode, outgoing.RequestUri);
+            if (!IsTransient(response.StatusCode) || attempt >= maxRetries) return response;
+
+            var delay = RetryDelay(response, attempt, delayBase);
+            response.Dispose();
+            if (delay > TimeSpan.Zero) await Task.Delay(delay, ct);
         }
+    }
 
-        _logger.LogInformation("Sending {Method} {Url}", request.Method, request.RequestUri);
+    private static bool IsTransient(HttpStatusCode status) => status is HttpStatusCode.RequestTimeout
+        or (HttpStatusCode)429 || status is HttpStatusCode.InternalServerError
+        or HttpStatusCode.BadGateway or HttpStatusCode.ServiceUnavailable
+        or HttpStatusCode.GatewayTimeout;
 
-        var response = await _httpClient.SendAsync(request, ct);
+    private static TimeSpan RetryDelay(HttpResponseMessage response, int attempt, int baseMilliseconds)
+    {
+        if (response.Headers.RetryAfter?.Delta is { } delta && delta >= TimeSpan.Zero)
+            return delta > TimeSpan.FromMinutes(1) ? TimeSpan.FromMinutes(1) : delta;
+        if (response.Headers.RetryAfter?.Date is { } date)
+        {
+            var remaining = date - DateTimeOffset.UtcNow;
+            if (remaining > TimeSpan.Zero) return remaining > TimeSpan.FromMinutes(1) ? TimeSpan.FromMinutes(1) : remaining;
+        }
+        var milliseconds = (long)baseMilliseconds * (1L << Math.Min(attempt, 6));
+        return TimeSpan.FromMilliseconds(Math.Min(milliseconds, 60_000));
+    }
 
-        _logger.LogInformation("Received {StatusCode} from {Url}", (int)response.StatusCode, request.RequestUri);
-
-        return response;
+    private static async Task<HttpRequestMessage> CloneAsync(HttpRequestMessage source, CancellationToken ct)
+    {
+        var clone = new HttpRequestMessage(source.Method, source.RequestUri);
+        foreach (var header in source.Headers) clone.Headers.TryAddWithoutValidation(header.Key, header.Value);
+        if (source.Content is not null)
+        {
+            var bytes = await source.Content.ReadAsByteArrayAsync(ct);
+            clone.Content = new ByteArrayContent(bytes);
+            foreach (var header in source.Content.Headers) clone.Content.Headers.TryAddWithoutValidation(header.Key, header.Value);
+        }
+        return clone;
     }
 
     public async Task<T?> GetAsync<T>(string url, CancellationToken ct = default)

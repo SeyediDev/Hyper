@@ -67,7 +67,7 @@ public sealed class BasalamCredentialAuthClient : IDisposable
         var content = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
-            throw new BasalamAuthError($"Token refresh failed: {(int)response.StatusCode}", content);
+            throw new BasalamAuthError($"Token refresh failed: {(int)response.StatusCode}");
 
         using var doc = JsonDocument.Parse(content);
         var root = doc.RootElement;

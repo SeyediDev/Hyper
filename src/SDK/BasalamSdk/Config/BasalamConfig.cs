@@ -50,10 +50,14 @@ public sealed class BasalamConfig
     {
         Environment = BasalamEnvironment.Production;
         TimeoutSeconds = 30;
+        MaxRetries = 5;
+        RetryDelayMilliseconds = 250;
     }
 
     public BasalamEnvironment Environment { get; set; }
     public int TimeoutSeconds { get; set; }
+    public int MaxRetries { get; set; }
+    public int RetryDelayMilliseconds { get; set; }
     public string? UserAgent { get; set; }
     public string? ClientId { get; set; }
     public string? ClientSecret { get; set; }

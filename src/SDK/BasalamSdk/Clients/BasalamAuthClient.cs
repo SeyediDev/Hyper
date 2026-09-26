@@ -73,7 +73,7 @@ public sealed class BasalamAuthClient : IBasalamAuthClient
         var content = await response.Content.ReadAsStringAsync();
 
         if (!response.IsSuccessStatusCode)
-            throw new BasalamAuthError($"Token request failed: {(int)response.StatusCode} {response.ReasonPhrase}", content);
+            throw new BasalamAuthError($"Token request failed: {(int)response.StatusCode} {response.ReasonPhrase}");
 
         using var doc = JsonDocument.Parse(content);
         var root = doc.RootElement;
