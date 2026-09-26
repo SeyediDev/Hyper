@@ -97,6 +97,16 @@ API documentation available at:
 
 ## Development
 
+### Multi-chat work management
+
+Start development sessions in this Git repository (`Backend`) and follow
+[AGENTS.md](AGENTS.md) and the repository
+[hyper-work-management skill](.agents/skills/hyper-work-management/SKILL.md).
+The `WorkManagement` database owns task status, project/domain, role assignments,
+subtasks, time entries and test/commit evidence; Markdown is not a second board.
+See [the operational reference](docs/WORK_MANAGEMENT.md) for API usage and local
+database fallback. Existing chats should reload the guidance before taking work.
+
 ### Build
 
 ```bash
