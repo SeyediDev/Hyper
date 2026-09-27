@@ -98,3 +98,34 @@ Express held the destination). A subsequent `dotnet build ... --no-restore
 -p:UseSharedCompilation=false` passed with zero warnings/errors. This verifies
 the compile target, including Razor, without replacing the running host binary;
 it is not a deployment or a successful complete host build.
+
+## Mmenu palette regression (2026-09-27)
+
+The native light palettes exposed a separate host override in
+`wwwroot/Content/custom-theme.css`: menu text remained `#e0e0e0`, while navbar,
+search wrapper and footer retained a `#2a2a2a` background. Those menu surface,
+text and border tokens now reference the native palette. The search input itself
+is styled (not only its wrapper), navigation glyphs use current text color, and
+both legacy/current Mmenu selected-item classes receive the same styles. The
+main Layout versions the CSS URL so subsequent builds invalidate stale caches.
+
+`Menu.browser.test.cjs` reproduces the original mismatch with the real host
+Mmenu JavaScript, custom CSS, RTL assets and the Neo bridge. The teal regression
+initially failed at 1.39:1 navbar contrast. The corrected fixture checks all eight
+palettes on light/mobile and dark/desktop OS configurations: opening inside the
+viewport, readable text/chrome/input/selection, hover, submenu/back navigation,
+search results, keyboard focus and a live palette change. Search assertions use
+the opened panel because Mmenu keeps offscreen original links and clones results.
+This is isolated sample navigation, not authenticated panel acceptance. No shared
+Neo Skill or MCP contract changes are needed for the host-only CSS correction.
+
+To see this CSS-only menu fix in the currently running local host, hard-refresh
+the page (Ctrl+F5). Unlike the earlier C# palette change, the CSS content does not
+require restarting IIS Express. The versioned Razor URL takes effect on the next
+host rebuild; hard refresh also handles the existing unversioned URL.
+
+The host Compile target passed with zero warnings/errors using existing dependency
+outputs. Menu acceptance here is based on computed colors, geometry and actual
+plugin interactions. Off-canvas fixture raster captures were not reliable and
+are not used as visual evidence; the user's authenticated screen still needs a
+refresh/visual check.

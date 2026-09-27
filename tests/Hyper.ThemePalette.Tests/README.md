@@ -30,3 +30,18 @@ directory as `hyper-teal-light-fixture.png`. It is not a real panel screenshot.
 
 The successful fixture run is separate from live authenticated acceptance and
 from a full Hyper dependency-graph build. Do not treat it as either.
+
+## Real Mmenu regression
+
+After generating the same palette JSON, run:
+
+```powershell
+node --test tests/Hyper.ThemePalette.Tests/Menu.browser.test.cjs
+```
+
+This suite loads Hyper's actual Mmenu plugin, custom-theme.css, RTL/UX styles and
+Neo theme bridge into sample DOM matching the host's RTL body. It covers all eight
+palettes in light/mobile and dark/desktop configurations, menu contrast and open
+bounds, submenu/back/search, focus and live palette changes. It does not contact
+a running host. Assertions use computed styles, viewport bounds and plugin interactions;
+no real user navigation or credentials are captured.

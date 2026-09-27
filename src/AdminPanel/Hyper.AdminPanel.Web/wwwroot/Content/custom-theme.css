@@ -88,23 +88,23 @@ button {
   --neo-menu-primary-active: #6d28d9;
   --neo-menu-primary-light: rgba(124, 58, 237, 0.16);
   
-  /* Background Colors - Dark Theme */
-  --neo-menu-bg-primary: #333333;
-  --neo-menu-bg-secondary: #2a2a2a;
-  --neo-menu-bg-tertiary: #3a3a3a;
-  --neo-menu-bg-hover: #444444;
-  --neo-menu-bg-active: #333333;
+  /* Menu surfaces and text follow the native host palette, including live changes. */
+  --neo-menu-bg-primary: var(--neo-dashboard-bg-primary, #ffffff);
+  --neo-menu-bg-secondary: var(--neo-dashboard-bg-secondary, #f8fafc);
+  --neo-menu-bg-tertiary: var(--neo-dashboard-bg-tertiary, #f1f5f9);
+  --neo-menu-bg-hover: var(--neo-menu-primary-light, #eef2ff);
+  --neo-menu-bg-active: var(--neo-menu-primary-light, #eef2ff);
   
   /* Text Colors */
-  --neo-menu-text-primary: #ffffff;
-  --neo-menu-text-secondary: #e0e0e0;
-  --neo-menu-text-muted: #aaaaaa;
+  --neo-menu-text-primary: var(--neo-text-primary, #0f172a);
+  --neo-menu-text-secondary: var(--neo-text-secondary, #334155);
+  --neo-menu-text-muted: var(--neo-text-muted, #475569);
   --neo-menu-text-hover: var(--neo-menu-primary, #c2ef03);
   
   /* Border Colors */
-  --neo-menu-border-light: #444444;
-  --neo-menu-border-medium: #555555;
-  --neo-menu-border-dark: #666666;
+  --neo-menu-border-light: var(--neo-dashboard-border-light, #e2e8f0);
+  --neo-menu-border-medium: var(--neo-dashboard-border-medium, #cbd5e1);
+  --neo-menu-border-dark: var(--neo-dashboard-border-dark, #94a3b8);
   
   /* Status Colors */
   --neo-menu-success: var(--neo-menu-primary, #c2ef03);
@@ -204,7 +204,7 @@ button {
 }
 
 .mm-listitem:active,
-.mm-listitem_selected > .mm-listitem__text {
+:is(.mm-listitem_selected, .mm-listitem--selected) > .mm-listitem__text {
   background: var(--neo-menu-bg-active) !important;
   color: var(--neo-menu-text-hover) !important;
   box-shadow: var(--neo-menu-shadow-md) !important;
@@ -265,14 +265,14 @@ button {
 }
 
 .mm-listitem:active .sidemenu-icon,
-.mm-listitem_selected .sidemenu-icon {
+:is(.mm-listitem_selected, .mm-listitem--selected) .sidemenu-icon {
   color: var(--neo-menu-text-hover) !important;
 }
 
 /* ===== MENU COUNTERS ===== */
 .mm-counter {
   background: var(--neo-menu-primary) !important;
-  color: #333333 !important;
+  color: var(--neo-form-button-text, #ffffff) !important;
   font-size: 0.75rem !important;
   font-weight: 600 !important;
   padding: 2px 6px !important;
@@ -304,7 +304,7 @@ button {
 }
 
 .mm-listitem:active .mm-counter,
-.mm-listitem_selected .mm-counter {
+:is(.mm-listitem_selected, .mm-listitem--selected) .mm-counter {
   background: #ffffff !important;
   color: #333333 !important;
 }
@@ -354,7 +354,7 @@ button {
 }
 
 .mm-listitem:active .mm-btn--next::after,
-.mm-listitem_selected .mm-btn--next::after {
+:is(.mm-listitem_selected, .mm-listitem--selected) .mm-btn--next::after {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E") !important;
 }
 
@@ -396,7 +396,7 @@ button {
 }
 
 .mm-listitem:active .mm-btn--next::after,
-.mm-listitem_selected .mm-btn--next::after,
+:is(.mm-listitem_selected, .mm-listitem--selected) .mm-btn--next::after,
 .mm-btn--prev:active::before {
   opacity: 1 !important;
   transform: translateY(-50%) scale(1.05) !important;
@@ -457,6 +457,40 @@ button {
 
 .mm-searchfield__cancel:hover {
   color: var(--neo-menu-primary) !important;
+}
+
+/* Mmenu's input is inside this wrapper; styling only the wrapper misses it. */
+#menu2 .mm-searchfield__input input {
+  background: var(--neo-form-input-background, #ffffff);
+  color: var(--neo-menu-text-primary);
+}
+#menu2 .mm-searchfield__input input::placeholder {
+  color: var(--neo-menu-text-muted);
+  opacity: 1;
+}
+#menu2 {
+  --mm-color-icon: var(--neo-menu-text-secondary);
+  --mm-color-focusring: var(--neo-menu-primary);
+}
+#menu2 .menu-version-container {
+  color: var(--neo-menu-text-muted);
+}
+
+/* Navigation glyphs inherit readable text instead of fixed white/lime SVG fills. */
+#menu2 .mm-btn--next::after,
+#menu2 .mm-btn--prev::before {
+  background-image: none !important;
+  background-color: currentColor !important;
+  border: 0 !important;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+}
+#menu2 .mm-btn--next::after {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m9 18 6-6-6-6' fill='none' stroke='black' stroke-width='2'/%3E%3C/svg%3E");
+}
+#menu2 .mm-btn--prev::before {
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='m15 18-6-6 6-6' fill='none' stroke='black' stroke-width='2'/%3E%3C/svg%3E");
 }
 
 /* ===== SCROLLBAR STYLING ===== */
