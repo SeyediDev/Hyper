@@ -77,6 +77,25 @@ try
     await client.Chat.CreateMessageAsync(new ChatMessageRequest(3, "text", new { text = "fixture" }));
     Check(transport.LastUri?.AbsolutePath == "/v1/chats/3/messages" && transport.LastMethod == HttpMethod.Post,
         "chat message uses the scoped official route");
+    await client.Shipping.GetProfilesAsync(vendorId: 71);
+    Check(transport.LastUri?.AbsolutePath == "/v1/shipping/profiles" && transport.LastUri.Query.Contains("vendor_id=71"),
+        "shipping profiles use the official route and vendor filter");
+    await client.Search.SearchProductsAsync(new ProductSearchRequest(Query: "tea", Rows: 10));
+    Check(transport.LastUri?.AbsolutePath == "/v1/products/search" && transport.LastMethod == HttpMethod.Post,
+        "product search uses the official route");
+    await client.Wallet.GetTransactionsAsync(71, page: 2, perPage: 20);
+    Check(transport.LastUri?.AbsolutePath == "/v1/users/71/transactions"
+        && transport.LastUri.Query.Contains("page=2") && transport.LastUri.Query.Contains("per_page=20"),
+        "wallet transactions preserve pagination");
+    await client.Story.UpdateReelAsync(9, new { title = "updated" });
+    Check(transport.LastUri?.AbsolutePath == "/v1/reels/9" && transport.LastMethod == HttpMethod.Put,
+        "story reel update uses the official PUT route");
+    await client.Core.GetCategoryAttributesAsync(4, vendorId: 71);
+    Check(transport.LastUri?.AbsolutePath == "/v1/categories/4/attributes"
+        && transport.LastUri.Query.Contains("vendor_id=71"), "core category attributes preserve vendor context");
+    await client.OrderProcessing.GetCustomerOrderParcelHintsAsync(91);
+    Check(transport.LastUri?.AbsolutePath == "/v1/customer-orders/91/parcel-hints",
+        "order processing parcel hints use the official route");
     transport.ResponseBody = null;
 
     transport.Statuses.Enqueue(HttpStatusCode.ServiceUnavailable);
