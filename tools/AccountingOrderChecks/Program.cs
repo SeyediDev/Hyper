@@ -11,8 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 var input = Environment.GetEnvironmentVariable("ACCOUNTING_TEST_SQL") ?? throw new Exception("ACCOUNTING_TEST_SQL required");
 var database = "HyperAccountingChecks_" + Guid.NewGuid().ToString("N");
-var cs = new SqlConnectionStringBuilder(input) { InitialCatalog = database };
-var options = new DbContextOptionsBuilder<HyperSqlServerContext>().UseSqlServer(cs.ConnectionString)
+var cs = new SqlConnectionStringBuilder(input) { InitialCatalog = database, Pooling = false };
+var options = new DbContextOptionsBuilder<HyperSqlServerContext>().UseSqlServer(cs.ConnectionString, sql => sql.CommandTimeout(120))
     .ReplaceService<IModelCustomizer, FixtureModel>().Options;
 var scope = new AccountingScope(7, "tenant-a");
 var passed = 0;
@@ -24,6 +24,7 @@ await using var setup = new HyperSqlServerContext(options);
 var created = false;
 try
 {
+    Console.WriteLine("Creating isolated fixture " + database);
     await setup.Database.EnsureCreatedAsync(); created = true;
     var services = new ServiceCollection();
     services.AddSingleton<IConfiguration>(new ConfigurationBuilder().Build());
@@ -285,8 +286,10 @@ try
     }
     Check((await Parcel("parcel-concurrent", "shipped")).ErrorCode == "AccountingDeliveryStateNeedsReview",
         "unknown legacy delivery state is not guessed");
+    await ProductChangeChecks.Run(options, scope, products[7].Id, products[6].Id, legacy.Id, Check);
     await using (var db = new HyperSqlServerContext(options))
-        await Handler(db).ApplyExternalProductChangedAsync(new("product", scope, 10, products[7].Id, "ext", null, null, "title", 2, 999, 1), default);
+        Check((await Handler(db).ApplyExternalProductChangedAsync(new("product", scope, 10, products[7].Id, "ext", null, null, "title", 2, 999, 1), default)).Status
+            == AccountingCommandStatus.Applied, "product snapshot actually applies through the accounting handler");
     Check(await Stock(products[7].Id) == 10, "marketplace snapshot cannot overwrite accounting stock");
     // Competing native-style conditional writer uses an independent SQL connection.
     async Task<int> NativeSale()
@@ -308,8 +311,12 @@ try
 }
 finally
 {
-    if (created && setup.Database.GetDbConnection().Database == database && database.StartsWith("HyperAccountingChecks_", StringComparison.Ordinal))
+    if (created && setup.Database.GetDbConnection().Database == database && database.StartsWith("HyperAccountingChecks_", StringComparison.Ordinal)
+        && Guid.TryParseExact(database["HyperAccountingChecks_".Length..], "N", out _))
+    {
         await setup.Database.EnsureDeletedAsync();
+        Console.WriteLine("Removed only this run's disposable accounting fixture.");
+    }
 }
 
 sealed class FixtureModel(ModelCustomizerDependencies dependencies) : ModelCustomizer(dependencies)

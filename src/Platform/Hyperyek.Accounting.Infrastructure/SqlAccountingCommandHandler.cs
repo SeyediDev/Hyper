@@ -418,18 +418,8 @@ public sealed class SqlAccountingCommandHandler(HyperSqlServerContext db,
         return new(AccountingCommandStatus.Applied, order.Saleorderid.ToString());
     }
 
-    public async Task<AccountingCommandResult> ApplyExternalProductChangedAsync(ExternalProductChangedCommand command, CancellationToken ct)
-    {
-        ArgumentNullException.ThrowIfNull(command);
-        var product = await db.TblProducts.SingleOrDefaultAsync(x => x.Id == command.HyperProductId
-            && x.Shopid == command.Scope.ShopId && x.TenantId == command.Scope.TenantId, ct);
-        if (product is null) return new(AccountingCommandStatus.PendingDependency, ErrorCode: "AccountingProductNotFound");
-        product.Name = command.Title; product.Taxcode = command.Sku; if (command.Price is not null) product.Saleprice = command.Price.Value;
-        // Marketplace inventory is an observation, never an authoritative
-        // replacement for accounting stock or an acknowledged stock movement.
-        await db.SaveChangesAsync(ct);
-        return new(AccountingCommandStatus.Applied, product.Id.ToString());
-    }
+    public Task<AccountingCommandResult> ApplyExternalProductChangedAsync(ExternalProductChangedCommand command, CancellationToken ct) =>
+        new SqlAccountingProductChanges(db).ApplyAsync(command, ct);
 
     private Task<SqlTblSaleorder?> FindOrderAsync(AccountingScope scope, long connectionId, string externalOrderId, CancellationToken ct)
     {

@@ -17,6 +17,9 @@ Confirmed cancellation before shipping restores line quantities in the same
 transaction as cancellation. Repeated cancellation cannot restore twice. Shipping
 and delivery require physical return confirmation before stock is restored.
 Marketplace product snapshots never replace accounting stock.
+Product field application now has its own atomic receipt and ordering protocol;
+see [CMD-101 product changes](ACCOUNTING_PRODUCT_CHANGES.md) and its required
+accounting-database schema script before deploying the updated product handler.
 
 `AccountingCommandResult.StockCommitted` is true only for successful/duplicate
 committed orders. Integration consumes its hold on this acknowledgement, including
