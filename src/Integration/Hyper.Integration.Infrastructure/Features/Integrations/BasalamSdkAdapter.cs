@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json;
 using Basalam.SDK;
 using Basalam.SDK.Clients;
 using Basalam.SDK.Models;
@@ -17,7 +18,11 @@ public sealed class BasalamSdkAdapter(IBasalamClient client, BasalamOAuthStore t
 
     public Task<IReadOnlyCollection<ExternalCatalogItem>> ReadCatalogAsync(
         ExternalIntegrationConnection connection, CancellationToken cancellationToken) =>
-        ProviderCall(() => ReadCatalogCoreAsync(connection, cancellationToken));
+        ProviderCall(async () =>
+        {
+            try { return await ReadCatalogCoreAsync(connection, cancellationToken); }
+            catch (JsonException) { throw new IntegrationProviderException("CatalogInvalidResponse", false); }
+        });
 
     private async Task<IReadOnlyCollection<ExternalCatalogItem>> ReadCatalogCoreAsync(
         ExternalIntegrationConnection connection, CancellationToken cancellationToken)
@@ -26,35 +31,45 @@ public sealed class BasalamSdkAdapter(IBasalamClient client, BasalamOAuthStore t
         await SetTokenAsync(connection, cancellationToken);
         var vendorId = int.Parse(connection.AccountIdentifier, CultureInfo.InvariantCulture);
         var result = new List<ExternalCatalogItem>();
+        var productIds = new HashSet<int>();
+        var variantIds = new HashSet<int>();
 
         for (var page = 1; page <= 10000; page++)
         {
             var products = await client.Catalog.GetProductsAsync(vendorId, page, 100, cancellationToken);
+            if (products.Page != page || (products.Data.Count == 0 && products.HasMore))
+                throw new IntegrationProviderException("CatalogInvalidResponse", false);
             if (products.Data.Count == 0) return result;
 
             foreach (var product in products.Data)
             {
+                ValidateVendor(product, connection);
+                if (product.Id <= 0 || !productIds.Add(product.Id))
+                    throw new IntegrationProviderException("CatalogIdentityConflict", false);
                 foreach (var variant in product.Variants)
                 {
-                    Add(new ExternalCatalogItem(
+                    if (variant.Id <= 0 || !variantIds.Add(variant.Id)
+                        || variant.ProductId != product.Id || variant.VendorId != vendorId)
+                        throw new IntegrationProviderException("CatalogIdentityConflict", false);
+                    result.Add(new ExternalCatalogItem(
                         // A Basalam variation is a sellable child of the product.
                         // Keep the parent product id as ExternalProductId and use
                         // the variation id as the discriminator; otherwise stock
                         // publishing would try to load the variation as a product.
-                        product.Id.ToString(),
+                        product.Id.ToString(CultureInfo.InvariantCulture),
                         variant.Sku,
                         string.IsNullOrWhiteSpace(variant.Title)
                             ? product.Name
                             : $"{product.Name} - {variant.Title}",
                         variant.Price ?? product.Price,
                         variant.Stock,
-                        variant.Id.ToString()));
+                        variant.Id.ToString(CultureInfo.InvariantCulture)));
                 }
 
                 if (product.Variants.Count == 0)
                 {
-                    Add(new ExternalCatalogItem(
-                        product.Id.ToString(),
+                    result.Add(new ExternalCatalogItem(
+                        product.Id.ToString(CultureInfo.InvariantCulture),
                         product.Sku,
                         product.Name,
                         product.Price,
@@ -67,11 +82,6 @@ public sealed class BasalamSdkAdapter(IBasalamClient client, BasalamOAuthStore t
         }
 
         throw new IntegrationProviderException("CatalogLimitExceeded", false);
-
-        void Add(ExternalCatalogItem item)
-        {
-            result.Add(item);
-        }
     }
 
     public Task PublishInventoryAsync(ExternalIntegrationConnection connection,

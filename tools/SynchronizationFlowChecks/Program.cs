@@ -80,6 +80,7 @@ static async Task<int> Run()
             new() { AccessToken = "fixture-grant", ExpiresIn = 3600, Scope = "vendor.product.read vendor.product.write" }));
         await db.SaveChangesAsync();
         var adapter = new BasalamSdkAdapter(sdk, new BasalamOAuthStore(db, oauth));
+        await BasalamCatalogChecks.Run(connection, new BasalamOAuthStore(db, oauth), Check);
         var registration = new BasalamWebhookRegistration(db, new BasalamOAuthStore(db, oauth), sdk);
         await registration.RegisterForConnectionAsync(connection.Id, 7, "tenant-a", "71", "https://callback.fixture.invalid/oauth/callback", default);
         Check(providerHttp.WebhookRegistration is { } registered
@@ -131,6 +132,15 @@ static async Task<int> Run()
             "Basalam catalog overrides untrusted webhook fields and missing provider version uses stable job sequence");
         Check(!await queue.ProcessConnectionAsync(connection.Id, default) && accountingHttp.Calls == 1,
             "completed product is not applied again");
+
+        providerHttp.CatalogOverride = """{"data":[],"hasMore":true}""";
+        var invalidCatalog = await ingress.ReceiveAsync(Event("invalid-catalog"));
+        await queue.ProcessConnectionAsync(connection.Id, default);
+        Check(await db.IntegrationWebhookInbox.AsNoTracking().AnyAsync(x => x.Id == invalidCatalog.InboxId
+                && x.Status == 2 && x.Error == "CatalogInvalidResponse" && x.ProcessedAtUtc != null)
+            && accountingHttp.Calls == 1,
+            "invalid catalog ends inbox with safe error and no accounting mutation");
+        providerHttp.CatalogOverride = null;
 
         var missing = await ingress.ReceiveAsync(Event("missing", "99"));
         await queue.ProcessConnectionAsync(connection.Id, default);
@@ -582,6 +592,7 @@ sealed class ProviderTransport : HttpMessageHandler
     public int VendorId = 71;
     public JsonElement? WebhookRegistration;
     public int Requests; public HttpStatusCode? FailStatus;
+    public string? CatalogOverride;
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
     {
         Requests++;
@@ -602,7 +613,7 @@ sealed class ProviderTransport : HttpMessageHandler
         if (request.Method == HttpMethod.Get && request.RequestUri.AbsolutePath == "/v1/vendors/71/products")
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
-                Content = new StringContent("{\"data\":[{\"id\":12,\"vendor\":{\"id\":71},\"title\":\"Fixture product\",\"sku\":\"catalog-sku\",\"price\":125,\"inventory\":3}],\"page\":1,\"total_page\":1}", Encoding.UTF8, "application/json")
+                Content = new StringContent(CatalogOverride ?? "{\"data\":[{\"id\":12,\"vendor\":{\"id\":71},\"title\":\"Fixture product\",\"sku\":\"catalog-sku\",\"price\":125,\"inventory\":3}],\"page\":1,\"total_page\":1}", Encoding.UTF8, "application/json")
             };
         if (request.RequestUri.AbsolutePath != "/v1/products/12") throw new InvalidOperationException("Unexpected Basalam fixture route");
         if (request.Method == HttpMethod.Patch)

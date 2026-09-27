@@ -26,14 +26,28 @@ public sealed class CatalogService(IBasalamHttpClient client, ILogger<CatalogSer
         if (products.Any(product => product.VendorId != vendorId)) throw new JsonException("Catalog vendor mismatch");
         var currentPage = Integer(root, "page") ?? page;
         var totalPages = Integer(root, "total_page", "totalPages");
+        var total = Integer(root, "total_count", "total");
+        var pageSize = Integer(root, "per_page", "perPage") ?? perPage;
+        bool? explicitMore = Value(root, "hasMore") is { } moreValue
+            ? moreValue.ValueKind is JsonValueKind.True or JsonValueKind.False
+                ? moreValue.GetBoolean() : throw new JsonException("Invalid pagination flag")
+            : null;
+        if (currentPage != page || currentPage <= 0 || pageSize <= 0 || totalPages < 0 || total < 0
+            || (totalPages == 0 && products.Count != 0)
+            || (totalPages > 0 && currentPage > totalPages)
+            || (total.HasValue && total.Value < products.Count))
+            throw new JsonException("Invalid catalog pagination");
         var hasMore = totalPages.HasValue ? currentPage < totalPages.Value
-            : root.TryGetProperty("hasMore", out var more) && more.ValueKind is JsonValueKind.True or JsonValueKind.False
-                ? more.GetBoolean() : products.Count != 0;
+            : explicitMore ?? products.Count != 0;
+        if ((explicitMore.HasValue && totalPages.HasValue && explicitMore.Value != hasMore)
+            || (products.Count == 0 && (hasMore || (currentPage == 1 && total > 0)
+                || (currentPage > 1 && totalPages > 0))))
+            throw new JsonException("Incomplete catalog page");
         return new PageResult<CatalogProduct>
         {
-            Data = products, Total = Integer(root, "total_count", "total") ?? products.Count,
-            Page = currentPage, PerPage = Integer(root, "per_page", "perPage") ?? perPage,
-            TotalPages = totalPages ?? 0, HasMore = products.Count != 0 && hasMore
+            Data = products, Total = total ?? products.Count,
+            Page = currentPage, PerPage = pageSize,
+            TotalPages = totalPages ?? 0, HasMore = hasMore
         };
     }
 
