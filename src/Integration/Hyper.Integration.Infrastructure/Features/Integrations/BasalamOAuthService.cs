@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.DataProtection;
+using Hyper.Integration.Domain.Features.Integrations;
 using Microsoft.Extensions.Options;
 using System.Globalization;
 using System.Net.Http.Headers;
@@ -137,9 +138,9 @@ public sealed class BasalamOAuthService(IOptions<BasalamOAuthSettings> options, 
         {
             ["grant_type"] = "refresh_token", ["refresh_token"] = refreshToken,
             ["client_id"] = Settings.ClientId, ["client_secret"] = Settings.ClientSecret!
-        }, ct);
+        }, ct, isRefresh: true);
 
-    private async Task<BasalamTokenResponse> SendTokenAsync(Dictionary<string, string> values, CancellationToken ct)
+    private async Task<BasalamTokenResponse> SendTokenAsync(Dictionary<string, string> values, CancellationToken ct, bool isRefresh = false)
     {
         using var request = new HttpRequestMessage(HttpMethod.Post, Settings.TokenEndpoint)
         {
@@ -149,6 +150,16 @@ public sealed class BasalamOAuthService(IOptions<BasalamOAuthSettings> options, 
         };
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct);
+        // Only refresh belongs to durable worker delivery. Do not replay an
+        // authorization code or expose the OAuth error body/credentials.
+        if (isRefresh && (int)response.StatusCode is 408 or 429 or 500 or 502 or 503 or 504)
+        {
+            TimeSpan? delay = response.Headers.RetryAfter?.Delta;
+            if (delay is null && response.Headers.RetryAfter?.Date is { } date)
+                delay = date - DateTimeOffset.UtcNow;
+            if (delay < TimeSpan.Zero) delay = TimeSpan.Zero;
+            throw new IntegrationProviderException($"OAuthRefreshHttp{(int)response.StatusCode}", true, delay);
+        }
         if (!response.IsSuccessStatusCode) throw new InvalidOperationException("باسلام درخواست دریافت توکن را نپذیرفت.");
         await response.Content.LoadIntoBufferAsync(1024 * 1024, ct);
         var token = JsonSerializer.Deserialize<BasalamTokenResponse>(await response.Content.ReadAsStringAsync(ct));

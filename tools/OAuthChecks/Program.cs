@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 
 var count = 0;
 void Check(bool condition, string name) { if (!condition) throw new Exception(name); count++; Console.WriteLine("PASS " + name); }
+await RefreshRetryChecks.Run(Check);
 void Reject(Action action, string name) { try { action(); } catch (InvalidOperationException) { Check(true,name); return; } throw new Exception(name); }
 async Task RejectAsync(Func<Task> action,string name) { try { await action(); } catch (InvalidOperationException) { Check(true,name); return; } throw new Exception(name); }
 var settings = new BasalamOAuthSettings { ClientId="test-client", ClientSecret="test-secret",

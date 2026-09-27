@@ -58,6 +58,7 @@ static async Task<int> Run(bool oauthVaultOnly)
         if (oauthVaultOnly)
         {
             await OAuthVaultChecks.Run(options, Check);
+            await OAuthRefreshRetryChecks.Run(options, Check);
             Console.WriteLine($"{checks} OAuth vault checks passed. Isolated SQL and controlled HTTP only.");
             return 0;
         }
@@ -532,6 +533,7 @@ static async Task<int> Run(bool oauthVaultOnly)
         await VersionSourceChecks.Run(db, options, resolver, connection.Id, Check);
         await BasalamRetryChecks.Run(db, options, Check);
         await OAuthVaultChecks.Run(options, Check);
+        await OAuthRefreshRetryChecks.Run(options, Check);
         Console.WriteLine($"{checks} synchronization flow checks passed. HTTP/accounting responses are controlled fixtures, not live-provider acceptance.");
         return 0;
     }
