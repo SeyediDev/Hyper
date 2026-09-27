@@ -524,6 +524,7 @@ static async Task<int> Run()
         Check(!await db.Database.SqlQueryRaw<int>("SELECT COUNT(*) AS Value FROM sys.tables WHERE name LIKE 'TBL[_]%' ").AnyAsync(x => x != 0),
             "both paths run with only Integration tables, no accounting tables in Integration database");
         await VersionSourceChecks.Run(db, options, resolver, connection.Id, Check);
+        await BasalamRetryChecks.Run(db, options, Check);
         Console.WriteLine($"{checks} synchronization flow checks passed. HTTP/accounting responses are controlled fixtures, not live-provider acceptance.");
         return 0;
     }
@@ -593,6 +594,8 @@ sealed class ProviderTransport : HttpMessageHandler
     public JsonElement? WebhookRegistration;
     public int Requests; public HttpStatusCode? FailStatus;
     public string? CatalogOverride;
+    public string? RetryAfterHeader;
+    public HttpMethod? FailMethod;
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
     {
         Requests++;
@@ -609,7 +612,12 @@ sealed class ProviderTransport : HttpMessageHandler
             throw new InvalidOperationException("Unexpected Basalam fixture route");
         Authenticated = request.Headers.Authorization?.ToString() == "Bearer fixture-grant";
         if (!Authenticated) throw new InvalidOperationException("Missing connection-specific authentication");
-        if (FailStatus is { } failure) return new HttpResponseMessage(failure) { Content = new StringContent("provider-sensitive-fixture") };
+        if (FailStatus is { } failure && (FailMethod is null || request.Method == FailMethod))
+        {
+            var response = new HttpResponseMessage(failure) { Content = new StringContent("provider-sensitive-fixture") };
+            if (RetryAfterHeader is not null) response.Headers.TryAddWithoutValidation("Retry-After", RetryAfterHeader);
+            return response;
+        }
         if (request.Method == HttpMethod.Get && request.RequestUri.AbsolutePath == "/v1/vendors/71/products")
             return new HttpResponseMessage(HttpStatusCode.OK)
             {

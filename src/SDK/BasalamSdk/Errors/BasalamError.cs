@@ -26,6 +26,8 @@ public class BasalamAPIError(string message, int statusCode, string? responseBod
 {
     public int StatusCode { get; } = statusCode;
     public string? ResponseBody { get; } = responseBody;
+    // Delay requested by the final HTTP response, for durable callers to schedule.
+    public TimeSpan? RetryAfter { get; init; }
 }
 
 public class BasalamAuthError(string message, string? responseBody = null) : BasalamError(message, "auth_error")

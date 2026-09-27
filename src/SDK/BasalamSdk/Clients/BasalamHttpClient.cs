@@ -83,6 +83,10 @@ public sealed class BasalamHttpClient : IBasalamHttpClient, IDisposable
             _logger.LogInformation("Received {StatusCode} from {Url}", (int)response.StatusCode, outgoing.RequestUri);
             if (!IsTransient(response.StatusCode) || attempt >= maxRetries) return response;
 
+            // A provider cooldown belongs to the caller's durable scheduler. Do
+            // not shorten it or hold a worker lease until its timeout hides it.
+            if (ReadRetryAfter(response) is { } cooldown && cooldown > TimeSpan.Zero) return response;
+
             var delay = RetryDelay(response, attempt, delayBase);
             response.Dispose();
             if (delay > TimeSpan.Zero) await Task.Delay(delay, ct);
@@ -96,15 +100,21 @@ public sealed class BasalamHttpClient : IBasalamHttpClient, IDisposable
 
     private static TimeSpan RetryDelay(HttpResponseMessage response, int attempt, int baseMilliseconds)
     {
+        if (ReadRetryAfter(response) is { } delay) return delay;
+        var milliseconds = (long)baseMilliseconds * (1L << Math.Min(attempt, 6));
+        return TimeSpan.FromMilliseconds(Math.Min(milliseconds, 60_000));
+    }
+
+    private static TimeSpan? ReadRetryAfter(HttpResponseMessage response)
+    {
         if (response.Headers.RetryAfter?.Delta is { } delta && delta >= TimeSpan.Zero)
-            return delta > TimeSpan.FromMinutes(1) ? TimeSpan.FromMinutes(1) : delta;
+            return delta;
         if (response.Headers.RetryAfter?.Date is { } date)
         {
             var remaining = date - DateTimeOffset.UtcNow;
-            if (remaining > TimeSpan.Zero) return remaining > TimeSpan.FromMinutes(1) ? TimeSpan.FromMinutes(1) : remaining;
+            return remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero;
         }
-        var milliseconds = (long)baseMilliseconds * (1L << Math.Min(attempt, 6));
-        return TimeSpan.FromMilliseconds(Math.Min(milliseconds, 60_000));
+        return null;
     }
 
     private static async Task<HttpRequestMessage> CloneAsync(HttpRequestMessage source, CancellationToken ct)
@@ -210,7 +220,7 @@ public sealed class BasalamHttpClient : IBasalamHttpClient, IDisposable
             throw new BasalamAPIError(
                 $"HTTP {(int)response.StatusCode}: {response.ReasonPhrase}",
                 (int)response.StatusCode,
-                body);
+                body) { RetryAfter = ReadRetryAfter(response) };
         }
 
         var content = await response.Content.ReadAsStringAsync();

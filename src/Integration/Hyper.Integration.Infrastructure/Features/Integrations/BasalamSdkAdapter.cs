@@ -152,7 +152,7 @@ public sealed class BasalamSdkAdapter(IBasalamClient client, BasalamOAuthStore t
             // Provider response bodies can contain sensitive data. Persist only
             // a stable code understood by queue retry/dead-letter processing.
             throw new IntegrationProviderException($"Http{error.StatusCode}",
-                error.StatusCode is 408 or 429 || error.StatusCode >= 500);
+                error.StatusCode is 408 or 429 || error.StatusCode >= 500, error.RetryAfter);
         }
         catch (BasalamValidationError) { throw new IntegrationProviderException("ProviderValidation", false); }
     }
