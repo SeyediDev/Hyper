@@ -10,7 +10,7 @@
 4. نام مغازه را بررسی کنید و «ورود به باسلام و اعطای مجوز» را بزنید.
 5. در باسلام با حساب صاحب غرفه وارد شوید و مجوزها را تأیید کنید.
 6. باسلام مرورگر را به /api/auth/basalam/callback با code و state برمی‌گرداند.
-7. سرور code را با توکن معاوضه می‌کند؛ توکن در URL مرورگر نیست. شناسه غرفه از GET https://core.basalam.com/v3/users/me و vendor.id خوانده می‌شود.
+7. سرور code را با توکن معاوضه می‌کند؛ توکن در URL مرورگر نیست. شناسه غرفه از `vendor.id` در پاسخ GET به `Basalam:ProfileEndpoint` خوانده می‌شود؛ پیش‌فرض سرویس فعال Integration برابر `https://openapi.basalam.com/v1/users/me` است.
 8. توکن رمز‌شده و اتصال برای همان ShopId/TenantId ذخیره می‌شود. پنل نام غرفه، شناسه و زمان دریافت/انقضا را نشان می‌دهد؛ خود توکن نمایش داده نمی‌شود.
 
 ## مسئولیت فایل‌ها
@@ -35,23 +35,23 @@ callback به cookie ورود ادمین وابسته نیست؛ درخواست 
 - AuthorizationEndpoint: https://basalam.com/accounts/sso
 - TokenEndpoint: https://auth.basalam.com/oauth/token
 - RedirectUri: آدرس دقیق ثبت‌شده برای برنامه؛ برای پروفایل محلی http://localhost:5000/api/auth/basalam/callback. پذیرش localhost را در تنظیمات برنامه باسلام بررسی کنید؛ در صورت نیاز از دامنه HTTPS قابل دسترس استفاده کنید.
-- Scopes: این اتصال فقط `vendor.profile.read` را درخواست می‌کند؛ همین مجوز برای خواندن `vendor.id` از `GET /v3/users/me` کافی است. مجوزهای محصول/سفارش موردنیاز را پس از تأیید در برنامه، مانند `vendor.product.read vendor.product.write vendor.parcel.read` اضافه کنید. نام‌های `inventory.read`/`orders.read`/`products.read` در تنظیمات قدیمی معتبر فرض نمی‌شوند.
+- Scopes: درخواست از `Basalam:Scopes` میزبان خوانده می‌شود؛ مقدار پیش‌فرض کلاس `vendor.profile.read` است و لزوماً مقدار محیط اجرا نیست. مجوزهای سناریوهای محصول/سفارش باید با مجوزهای برنامه و توکن اعطاشده تطبیق داده شوند؛ تست ساختگی کفایت scope واقعی را ثابت نمی‌کند. نام‌های `inventory.read`/`orders.read`/`products.read` در تنظیمات قدیمی معتبر فرض نمی‌شوند.
 - UsePkce: پیش‌فرض false مطابق جریان confidential-client در SDK رسمی. روشن‌کردن منوط به تأیید پشتیبانی برنامه باسلام است.
-- تعویض code با token طبق مستند رسمی باسلام با POST و `Content-Type: application/json` به `https://auth.basalam.com/oauth/token` انجام می‌شود؛ secret فقط روی سرور ارسال می‌شود.
+- سرویس فعال، تعویض code و تمدید را با POST و `Content-Type: application/x-www-form-urlencoded` به `https://auth.basalam.com/oauth/token` انجام می‌دهد؛ secret فقط روی سرور ارسال می‌شود. این توصیف کد جاری است، نه تأیید جدید قرارداد provider.
 - در چند نمونه یا بعد از تعویض سرور، key ring مشترک و پایدار ASP.NET Data Protection با دسترسی محدود لازم است؛ کلیدها برای بازکردن توکن ذخیره‌شده ضروری‌اند.
 - اجرای پشت reverse proxy باید HTTPS و forwarded headers صحیح داشته باشد تا cookie امن تولید شود.
 
 ## دیتابیس
 
 ساختار legacy تغییر نمی‌کند. اسکریپت docs/schema/ensure-external-oauth-tokens.sql فقط جدول جدید توکن را اگر وجود نداشته باشد ایجاد می‌کند.
-اسکریپت را روی Hyperyek اجرا کنید؛ روی جدول موجود ALTER/DROP اجرا نمی‌کند.
+توکن‌های مسیر جدید متعلق به دیتابیس مستقل Integration (`IntegrationConnection`) هستند؛ صرفاً بر اساس راهنمای تاریخی، اسکریپت را روی دیتابیس حسابداری Hyperyek اجرا نکنید. ساختار فعلی tenant-aware باید با provisioner جاری تطبیق داده شود.
 Migration و snapshot دستی قدیمی با configuration اختلاف نوع Provider، TenantId و UpdatedAtUtc داشتند. برای این تحویل از اسکریپت محدود استفاده کنید؛ snapshot کامل Neo قبل از migration عمومی باید تطبیق داده شود.
 نسخه مرکزی EF فعلی 10.0.8 است؛ ادعای قدیمی نیاز به ارتقای EF از 8 مبنای تغییر بسته‌ها نیست.
 
 ## مرز این تحویل
 
-دریافت و ذخیره توکن با فعال‌سازی worker یکی نیست. اتصال OAuth جدید/تمدیدشده غیرفعال می‌ماند؛ هنگام اجرای اتصال فعال، adapter توکن رمز‌شده را از `ExternalOAuthTokens` می‌خواند و در آستانهٔ انقضا refresh می‌کند.
-جدول فعلی تنها یک توکن به ازای ShopId/Provider می‌پذیرد؛ اتصال غرفه دوم برای همان مغازه رد می‌شود تا مدل چندغرفه‌ای جداگانه تصمیم‌گیری شود.
+دریافت و ذخیره توکن با اجرای worker یکی نیست. `SaveAsync` پس از grant موفق اتصال را فعال می‌کند؛ صرف مشاهدهٔ وضعیت در حالت Real اتصال را فعال نمی‌کند. adapter توکن رمز‌شده را از `ExternalOAuthTokens` می‌خواند و در آستانهٔ یک دقیقه تا انقضا refresh می‌کند.
+جدول فعلی تنها یک توکن به ازای ShopId/TenantId/Provider می‌پذیرد؛ اتصال غرفه دوم در همان زمینه رد می‌شود تا مدل چندغرفه‌ای جداگانه تصمیم‌گیری شود.
 تجدید خودکار، لغو دسترسی و تست واقعی با حساب باسلام هنوز معیار پذیرش جداگانه دارند.
 
 ## منابع رسمی مرورشده
@@ -62,7 +62,15 @@ Migration و snapshot دستی قدیمی با configuration اختلاف نوع
 
 ## اعتبارسنجی
 
-وضعیت build و آزمون‌های نهایی در BACKLOG.md ثبت می‌شود. وجود کد یا موفقیت build به‌تنهایی به معنی دریافت واقعی توکن نیست.
+وضعیت جاری build و آزمون‌ها در دیتابیس `WorkManagement` ثبت می‌شود. `tools/OAuthChecks` مستقیماً سرویس فعال Integration را کامپایل می‌کند؛ `tools/SynchronizationFlowChecks/OAuthVaultChecks.cs` ذخیرهٔ رمزنگاری‌شده، جداسازی زمینه، tracking قدیمی، تمدید هم‌زمان و rollback خطا/لغو را در دیتابیس موقت با HTTP کنترل‌شده می‌سنجد. وجود کد یا موفقیت build به‌تنهایی به معنی دریافت واقعی توکن نیست. نتایج زیر تاریخی‌اند و وضعیت تنظیمات/دیتابیس امروز را ثابت نمی‌کنند؛ رفتار جاری تمدید در [قرارداد باسلام](BASALAM_CONTRACT.md) توضیح داده شده است.
+
+پس از build ابزار، برای اجرای مستقل همین تست SQL:
+
+```powershell
+dotnet tools/SynchronizationFlowChecks/bin/Debug/net10.0/SynchronizationFlowChecks.dll --oauth-vault-only
+```
+
+بدون این گزینه، مجموعهٔ کامل سناریوها به‌همراه تست مخزن توکن اجرا می‌شود. هر اجرا دیتابیس موقت مستقل خود را می‌سازد و پاک می‌کند؛ برای اجرای تست، SQL محلی و مجوز ساخت دیتابیس لازم است.
 
 ### نتیجه اعتبارسنجی OAUTH-WEB-215
 - build پس از اصلاح: موفق، صفر خطا و صفر هشدار.

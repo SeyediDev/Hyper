@@ -12,6 +12,7 @@ public sealed class BasalamOAuthStore(HyperIntegrationContext db, BasalamOAuthSe
 {
     public async Task<TokenInfo?> GetTokenAsync(ExternalIntegrationConnection connection, CancellationToken ct)
     {
+        if (connection.Provider != IntegrationProvider.Basalam) return null;
         var row = await db.ExternalOAuthTokens.AsNoTracking().SingleOrDefaultAsync(x =>
             x.ConnectionId == connection.Id && x.ShopId == connection.ShopId &&
             x.TenantId == connection.TenantId && x.Provider == IntegrationProvider.Basalam && x.IsActive, ct);
@@ -29,9 +30,9 @@ public sealed class BasalamOAuthStore(HyperIntegrationContext db, BasalamOAuthSe
                 WHERE ConnectionId = {connection.Id} AND ShopId = {connection.ShopId}
                   AND TenantId = {connection.TenantId} AND Provider = {IntegrationProvider.Basalam}
                   AND IsActive = 1
-                """).SingleOrDefaultAsync(ct);
+                """).AsNoTracking().SingleOrDefaultAsync(ct);
             if (locked is null) return null;
-            if (locked.ExpiresAtUtc > DateTime.UtcNow.AddMinutes(1))
+            if (locked.ExpiresAtUtc is null || locked.ExpiresAtUtc > DateTime.UtcNow.AddMinutes(1))
             {
                 row = locked;
             }
@@ -43,7 +44,18 @@ public sealed class BasalamOAuthStore(HyperIntegrationContext db, BasalamOAuthSe
                 var refreshed = await oauth.RefreshAccessTokenAsync(lockedRefresh, ct);
                 // Refresh is persisted only in the Integration database and remains encrypted.
                 oauth.UpdateTokenEntity(locked, refreshed);
-                await db.SaveChangesAsync(ct);
+                // Read the current database row, not EF's potentially stale tracked
+                // grant. Persist only this locked token; do not flush caller edits.
+                await db.ExternalOAuthTokens.Where(x => x.Id == locked.Id)
+                    .ExecuteUpdateAsync(s => s
+                        .SetProperty(x => x.AccessToken, locked.AccessToken)
+                        .SetProperty(x => x.RefreshToken, locked.RefreshToken)
+                        .SetProperty(x => x.TokenType, locked.TokenType)
+                        .SetProperty(x => x.Scopes, locked.Scopes)
+                        .SetProperty(x => x.ExpiresAtUtc, locked.ExpiresAtUtc)
+                        .SetProperty(x => x.IssuedAtUtc, locked.IssuedAtUtc)
+                        .SetProperty(x => x.UpdatedAtUtc, locked.UpdatedAtUtc)
+                        .SetProperty(x => x.RawTokenResponse, (string?)null), ct);
                 row = locked;
             }
             await transaction.CommitAsync(ct);

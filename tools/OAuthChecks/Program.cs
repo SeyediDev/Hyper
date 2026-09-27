@@ -57,7 +57,7 @@ Check(entity.AccessToken!="fake-access" && service.DecryptToken(entity.AccessTok
     && service.DecryptToken(entity.RefreshToken!)=="fake-refresh" && entity.RawTokenResponse is null,"encrypted credentials; no raw duplicate");
 handler.Json="""{"vendor":{"id":123,"title":"test booth"}}""";
 var vendor=await service.GetVendorAsync(token,default);
-Check(vendor.Id=="123" && handler.LastUri=="https://core.basalam.com/v3/users/me" && handler.Authorization=="Bearer fake-access","vendor identified through token");
+Check(vendor.Id=="123" && handler.LastUri==settings.ProfileEndpoint && handler.Authorization=="Bearer fake-access","vendor identified through token at configured profile endpoint");
 handler.Json="""{"vendor":null}""";
 await RejectAsync(()=>service.GetVendorAsync(token,default),"account without booth rejected");
 handler.Json="""{"access_token":""}""";

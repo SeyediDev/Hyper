@@ -20,10 +20,10 @@ using Microsoft.Extensions.Options;
 using Provider = Hyper.Integration.Domain.Entities.Integrations.IntegrationProvider;
 using ApiProvider = Hyper.Integration.Contracts.IntegrationProvider;
 
-try { return await Run(); }
+try { return await Run(args.Contains("--oauth-vault-only")); }
 catch (Exception ex) { Console.Error.WriteLine($"Flow check failed: {ex}"); return 1; }
 
-static async Task<int> Run()
+static async Task<int> Run(bool oauthVaultOnly)
 {
     var source = Environment.GetEnvironmentVariable("SYNC_CHECKS_CONNECTION")
         ?? "Server=localhost;Integrated Security=true;TrustServerCertificate=true";
@@ -54,6 +54,12 @@ static async Task<int> Run()
             try { await action(); }
             catch (InvalidOperationException ex) when (ex.Message == error) { Check(true, error); return; }
             throw new InvalidOperationException($"Expected {error}");
+        }
+        if (oauthVaultOnly)
+        {
+            await OAuthVaultChecks.Run(options, Check);
+            Console.WriteLine($"{checks} OAuth vault checks passed. Isolated SQL and controlled HTTP only.");
+            return 0;
         }
         await AccountingHttpChecks.Run(Check);
         var connection = new ExternalIntegrationConnection
@@ -525,6 +531,7 @@ static async Task<int> Run()
             "both paths run with only Integration tables, no accounting tables in Integration database");
         await VersionSourceChecks.Run(db, options, resolver, connection.Id, Check);
         await BasalamRetryChecks.Run(db, options, Check);
+        await OAuthVaultChecks.Run(options, Check);
         Console.WriteLine($"{checks} synchronization flow checks passed. HTTP/accounting responses are controlled fixtures, not live-provider acceptance.");
         return 0;
     }
