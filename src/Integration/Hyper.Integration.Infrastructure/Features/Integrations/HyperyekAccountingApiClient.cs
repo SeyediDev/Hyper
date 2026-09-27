@@ -1,4 +1,6 @@
 using System.Net.Http.Json;
+using System.Net;
+using System.Text.Json;
 using Hyperyek.Accounting.Contracts;
 using IntegrationCommandResult = Hyper.Integration.Domain.Features.Integrations.BusinessCommandResult;
 using IntegrationCommandStatus = Hyper.Integration.Domain.Features.Integrations.BusinessCommandStatus;
@@ -47,8 +49,8 @@ public sealed class HyperyekAccountingApiClient(
     public async Task<IReadOnlyList<IntegrationPlatformShop>> GetByIdsAsync(IReadOnlyCollection<int> shopIds,
         CancellationToken ct)
     {
-        var result = await client.PostAsJsonAsync("api/hyperyek/v1/accounting/platform/shops/by-ids", shopIds, ct);
-        result.EnsureSuccessStatusCode();
+        using var result = await client.PostAsJsonAsync("api/hyperyek/v1/accounting/platform/shops/by-ids", shopIds, ct);
+        RequireReadSuccess(result);
         var shops = await result.Content.ReadFromJsonAsync<List<AccountingShopRead>>(cancellationToken: ct) ?? [];
         return shops.Select(ToShop).ToArray();
     }
@@ -57,7 +59,7 @@ public sealed class HyperyekAccountingApiClient(
     {
         using var response = await client.GetAsync($"api/hyperyek/v1/accounting/platform/shops/{shopId}", ct);
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound) return null;
-        response.EnsureSuccessStatusCode();
+        RequireReadSuccess(response);
         var shop = await response.Content.ReadFromJsonAsync<AccountingShopRead>(cancellationToken: ct);
         return shop is null ? null : ToShop(shop);
     }
@@ -124,21 +126,53 @@ public sealed class HyperyekAccountingApiClient(
     private async Task<IntegrationCommandResult> PostAsync<T>(string route, T command, CancellationToken ct)
     {
         using var response = await client.PostAsJsonAsync(route, command, ct);
+        ThrowIfTransient(response);
         if (!response.IsSuccessStatusCode && response.StatusCode != System.Net.HttpStatusCode.Conflict
             && response.StatusCode != System.Net.HttpStatusCode.UnprocessableEntity)
             return new(IntegrationCommandStatus.Rejected, ErrorCode: $"AccountingApi_{(int)response.StatusCode}");
-        var result = await response.Content.ReadFromJsonAsync<AccountingCommandResult>(cancellationToken: ct);
-        return result is null
-            ? new(IntegrationCommandStatus.Rejected, ErrorCode: "AccountingApiEmptyResponse")
-            : new((IntegrationCommandStatus)(byte)result.Status, result.InternalReference, result.ErrorCode, result.StockCommitted);
+        AccountingCommandResult? result;
+        try { result = await response.Content.ReadFromJsonAsync<AccountingCommandResult>(cancellationToken: ct); }
+        catch (JsonException) { throw new IntegrationProviderException("AccountingApiInvalidResponse", false); }
+        var expected = response.StatusCode switch
+        {
+            HttpStatusCode.OK => AccountingCommandStatus.Applied,
+            HttpStatusCode.Conflict => AccountingCommandStatus.Duplicate,
+            HttpStatusCode.Accepted => AccountingCommandStatus.PendingDependency,
+            HttpStatusCode.UnprocessableEntity => AccountingCommandStatus.Rejected,
+            _ => (AccountingCommandStatus)0
+        };
+        if (result is null || expected == 0 || result.Status != expected
+            || result.StockCommitted && result.Status is not (AccountingCommandStatus.Applied or AccountingCommandStatus.Duplicate))
+            throw new IntegrationProviderException("AccountingApiInvalidResponse", false);
+        return new((IntegrationCommandStatus)(byte)result.Status, result.InternalReference, result.ErrorCode, result.StockCommitted);
     }
 
     private async Task<T> GetAsync<T>(string route, CancellationToken ct)
     {
         using var response = await client.GetAsync(route, ct);
-        response.EnsureSuccessStatusCode();
+        RequireReadSuccess(response);
         return await response.Content.ReadFromJsonAsync<T>(cancellationToken: ct)
             ?? throw new InvalidOperationException("AccountingApiEmptyResponse");
+    }
+
+    private static void RequireReadSuccess(HttpResponseMessage response)
+    {
+        ThrowIfTransient(response);
+        if (!response.IsSuccessStatusCode)
+            throw new IntegrationProviderException($"AccountingApi_{(int)response.StatusCode}", false);
+    }
+
+    private static void ThrowIfTransient(HttpResponseMessage response)
+    {
+        // One network attempt here; the durable worker owns scheduling/backoff.
+        // Never include response bodies, credentials or request URLs in the error.
+        if (response.StatusCode is not (HttpStatusCode.RequestTimeout or HttpStatusCode.TooManyRequests
+            or HttpStatusCode.InternalServerError or HttpStatusCode.BadGateway
+            or HttpStatusCode.ServiceUnavailable or HttpStatusCode.GatewayTimeout)) return;
+        var header = response.Headers.RetryAfter;
+        var delay = header?.Delta ?? (header?.Date is { } date ? date - DateTimeOffset.UtcNow : (TimeSpan?)null);
+        if (delay < TimeSpan.Zero) delay = TimeSpan.Zero;
+        throw new IntegrationProviderException($"AccountingApi_{(int)response.StatusCode}", true, delay);
     }
 
     private static IntegrationPlatformShop ToShop(AccountingShopRead shop) =>

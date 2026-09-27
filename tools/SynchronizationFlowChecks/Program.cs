@@ -55,6 +55,7 @@ static async Task<int> Run()
             catch (InvalidOperationException ex) when (ex.Message == error) { Check(true, error); return; }
             throw new InvalidOperationException($"Expected {error}");
         }
+        await AccountingHttpChecks.Run(Check);
         var connection = new ExternalIntegrationConnection
         {
             ShopId = 7, TenantId = "tenant-a", Provider = Provider.Basalam, DisplayName = "fixture-a",
@@ -148,6 +149,52 @@ static async Task<int> Run()
         await queue.ProcessConnectionAsync(connection.Id, default);
         Check(await db.IntegrationWebhookInbox.AsNoTracking().AnyAsync(x => x.Id == retry.InboxId && x.Status == 1 && x.Error == null),
             "successful retry clears inbox error and completes processing");
+        foreach (var code in new[] { HttpStatusCode.ServiceUnavailable, HttpStatusCode.TooManyRequests })
+        {
+            accountingHttp.FailStatus = code;
+            accountingHttp.RetryAfter = TimeSpan.FromMinutes(9);
+            var delayed = await ingress.ReceiveAsync(Event("accounting-http-" + (int)code));
+            var beforeAttempt = DateTime.UtcNow;
+            await queue.ProcessConnectionAsync(connection.Id, default);
+            var pending = await db.IntegrationScenarioJobs.AsNoTracking().SingleAsync(x => x.Id == delayed.ScenarioJobId);
+            var originalCommand = accountingHttp.LastCommand;
+            Check(pending.Status == IntegrationScenarioStatus.Pending && pending.Attempts == 1
+                && pending.ErrorCode == "AccountingApi_" + (int)code && pending.NextAttemptAtUtc >= beforeAttempt.AddMinutes(9)
+                && pending.CompletedAtUtc is null && pending.LeaseId is null
+                && await db.IntegrationWebhookInbox.AsNoTracking().AnyAsync(x => x.Id == delayed.InboxId && x.Status == 0
+                    && x.ProcessedAtUtc == null && x.Error == pending.ErrorCode),
+                "accounting HTTP " + (int)code + " preserves pending SQL inbox/job and Retry-After without response body");
+            var callsBeforeDelay = accountingHttp.Calls;
+            Check(!await queue.ProcessConnectionAsync(connection.Id, default) && accountingHttp.Calls == callsBeforeDelay,
+                "durable accounting retry does not send before its scheduled delay");
+            accountingHttp.FailStatus = null;
+            await db.IntegrationScenarioJobs.Where(x => x.Id == delayed.ScenarioJobId)
+                .ExecuteUpdateAsync(s => s.SetProperty(x => x.NextAttemptAtUtc, DateTime.UtcNow.AddSeconds(-1)));
+            await using (var restarted = new HyperIntegrationContext(options))
+            {
+                var restartedDispatcher = new IntegrationBusinessEventDispatcher(commands, new UnregisteredIntegrationEngagementPort(),
+                    new NoReservations(), restarted, resolver);
+                var restartedProcessor = new IntegrationScenarioProcessor(restarted, resolver, new NoCapture(),
+                    Options.Create(new IntegrationInventoryCaptureOptions()), Options.Create(new BasalamOAuthSettings()), null!, restartedDispatcher, commands);
+                await new IntegrationScenarioQueue(restarted, restartedProcessor).ProcessConnectionAsync(connection.Id, default);
+            }
+            Check(accountingHttp.LastCommand == originalCommand
+                && await db.IntegrationScenarioJobs.AsNoTracking().AnyAsync(x => x.Id == delayed.ScenarioJobId
+                    && x.Status == IntegrationScenarioStatus.Completed && x.Attempts == 2 && x.ErrorCode == null)
+                && await db.IntegrationWebhookInbox.AsNoTracking().AnyAsync(x => x.Id == delayed.InboxId && x.Status == 1 && x.Error == null),
+                "fresh worker context recovers accounting retry with the same command identity/version and acknowledges original inbox");
+        }
+        accountingHttp.FailStatus = HttpStatusCode.ServiceUnavailable;
+        var exhausted = await ingress.ReceiveAsync(Event("accounting-http-exhausted"));
+        await db.IntegrationScenarioJobs.Where(x => x.Id == exhausted.ScenarioJobId)
+            .ExecuteUpdateAsync(s => s.SetProperty(x => x.Attempts, IntegrationRetryPolicy.MaxAttempts - 1));
+        await queue.ProcessConnectionAsync(connection.Id, default);
+        Check(await db.IntegrationScenarioJobs.AsNoTracking().AnyAsync(x => x.Id == exhausted.ScenarioJobId
+                && x.Status == IntegrationScenarioStatus.DeadLetter && x.Attempts == IntegrationRetryPolicy.MaxAttempts)
+            && await db.IntegrationWebhookInbox.AsNoTracking().AnyAsync(x => x.Id == exhausted.InboxId && x.Status == 2),
+            "accounting transient failure respects the existing finite durable retry limit");
+        accountingHttp.FailStatus = null;
+        accountingHttp.RetryAfter = null;
         var loop = await ingress.ReceiveAsync(Event("echo", sourceMarker: "Hyperyek"));
         Check(loop.ScenarioJobId is null && await db.IntegrationWebhookInbox.AsNoTracking().AnyAsync(x => x.Id == loop.InboxId && x.Status == 1),
             "explicit Hyperyek echo is acknowledged without another command");
@@ -500,6 +547,7 @@ sealed class FixtureSchema(ModelCustomizerDependencies dependencies) : ModelCust
 sealed class AccountingTransport : HttpMessageHandler
 {
     public int Calls; public bool Fail; public ExternalProductChangedCommand? LastCommand;
+    public HttpStatusCode? FailStatus; public TimeSpan? RetryAfter;
     public bool CanSell = true; public bool LegacyCatalog; public bool FailCatalog; public string? LastCatalogQuery;
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
     {
@@ -516,6 +564,12 @@ sealed class AccountingTransport : HttpMessageHandler
         Calls++;
         if (Fail) throw new HttpRequestException("Controlled fixture transport failure");
         LastCommand = await request.Content!.ReadFromJsonAsync<ExternalProductChangedCommand>(cancellationToken: ct);
+        if (FailStatus is { } failure)
+        {
+            var response = new HttpResponseMessage(failure) { Content = new StringContent("sensitive-accounting-body") };
+            if (RetryAfter is { } delay) response.Headers.RetryAfter = new System.Net.Http.Headers.RetryConditionHeaderValue(delay);
+            return response;
+        }
         return new HttpResponseMessage(HttpStatusCode.OK) { Content = JsonContent.Create(new AccountingCommandResult(AccountingCommandStatus.Applied, "44")) };
     }
 }
