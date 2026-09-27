@@ -7,8 +7,6 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\WorkManagement\Hyper.WorkManagement.Contracts\Hyper.WorkManagement.Contracts.csproj" />
-    <ProjectReference Include="..\..\WorkManagement\Hyper.WorkManagement.Infrastructure\Hyper.WorkManagement.Infrastructure.csproj" />
 		<PackageReference Include="Ardalis.GuardClauses" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
@@ -142,9 +140,16 @@
 		</ItemGroup>
 		<Copy SourceFiles="@(_ComboItems)" DestinationFolder="wwwroot\Content\common-assets-includes\features\combo\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
 	</Target>
+	<!-- Linked content guarantees the same URL on a clean build/publish, before local copying. -->
+	<ItemGroup>
+		<Content Remove="wwwroot\Content\common-assets-includes\features\filter\ColumnFilter.js" />
+		<Content Include="..\..\..\..\..\Neo-Bpms\src\Neo.Bpms.UI.MVC\CommonAssets\Scripts\Features\Filter\ColumnFilter.js"
+		         Link="wwwroot\Content\common-assets-includes\features\filter\ColumnFilter.js"
+		         CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+	</ItemGroup>
 	<Target Name="CopyFilterAssets" BeforeTargets="Build">
 		<ItemGroup>
-			<_FilterItems Include="..\..\..\..\..\Neo-Bpms\src\Neo.Bpms.UI.MVC\wwwroot\Content\common-assets-includes\features\filter\*.*" />
+			<_FilterItems Include="..\..\..\..\..\Neo-Bpms\src\Neo.Bpms.UI.MVC\CommonAssets\Scripts\Features\Filter\ColumnFilter.js" />
 		</ItemGroup>
 		<Copy SourceFiles="@(_FilterItems)" DestinationFolder="wwwroot\Content\common-assets-includes\features\filter\" SkipUnchangedFiles="true" OverwriteReadOnlyFiles="true" />
 	</Target>
