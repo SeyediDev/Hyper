@@ -20,6 +20,7 @@ public interface IBasalamClient
     ChatService Chat { get; }
     UploadService Uploads { get; }
     AppstoreService Appstore { get; }
+    ShippingService Shipping { get; }
     TokenInfo? Token { get; }
     Task<TokenInfo> RefreshTokenAsync(CancellationToken ct = default);
     void SetToken(TokenInfo? token);
@@ -65,6 +66,7 @@ public sealed class BasalamClient : IBasalamClient, IDisposable
         Chat = new ChatService(httpFactory, logger as ILogger<Services.ChatService>);
         Uploads = new UploadService(httpFactory, logger as ILogger<Services.UploadService>);
         Appstore = new AppstoreService(httpFactory, logger as ILogger<Services.AppstoreService>);
+        Shipping = new ShippingService(httpFactory, logger as ILogger<Services.ShippingService>);
     }
 
     public VendorService Vendors { get; }
@@ -78,6 +80,7 @@ public sealed class BasalamClient : IBasalamClient, IDisposable
     public ChatService Chat { get; }
     public UploadService Uploads { get; }
     public AppstoreService Appstore { get; }
+    public ShippingService Shipping { get; }
 
     public TokenInfo? Token
     {
