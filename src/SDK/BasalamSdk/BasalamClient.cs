@@ -23,6 +23,7 @@ public interface IBasalamClient
     ShippingService Shipping { get; }
     SearchService Search { get; }
     WalletService Wallet { get; }
+    StoryService Story { get; }
     TokenInfo? Token { get; }
     Task<TokenInfo> RefreshTokenAsync(CancellationToken ct = default);
     void SetToken(TokenInfo? token);
@@ -71,6 +72,7 @@ public sealed class BasalamClient : IBasalamClient, IDisposable
         Shipping = new ShippingService(httpFactory, logger as ILogger<Services.ShippingService>);
         Search = new SearchService(httpFactory);
         Wallet = new WalletService(httpFactory);
+        Story = new StoryService(httpFactory);
     }
 
     public VendorService Vendors { get; }
@@ -87,6 +89,7 @@ public sealed class BasalamClient : IBasalamClient, IDisposable
     public ShippingService Shipping { get; }
     public SearchService Search { get; }
     public WalletService Wallet { get; }
+    public StoryService Story { get; }
 
     public TokenInfo? Token
     {
