@@ -4475,3 +4475,78 @@ table[editable='editable'] td select,
     color: var(--neo-menu-text-muted, #aaaaaa) !important;
     background: transparent !important;
 }
+
+/* Generated list controls: host legacy bundles must not restore dark/low-contrast slots. */
+html[data-neo-theme] .modern-settings-btn {
+  background: var(--neo-surface) !important;
+  color: var(--neo-accent) !important;
+  border: 1px solid var(--neo-border) !important;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 10%) !important;
+}
+html[data-neo-theme] .modern-settings-btn:hover,
+html[data-neo-theme] .modern-settings-btn:focus-visible {
+  background: var(--neo-selection) !important;
+  color: var(--neo-text) !important;
+  border-color: var(--neo-accent) !important;
+}
+html[data-neo-theme] .modern-settings-btn.modern-add-btn {
+  background: var(--neo-accent) !important;
+  color: var(--neo-on-accent) !important;
+  border-color: var(--neo-accent) !important;
+}
+html[data-neo-theme] .modern-settings-btn.modern-add-btn:hover {
+  background: var(--neo-accent-hover) !important;
+}
+html[data-neo-theme] .modern-settings-btn.modern-add-btn::before { background: transparent !important; }
+html[data-neo-theme] .modern-title-box .modern-settings-btn :is(svg, svg *) {
+  color: inherit !important;
+  stroke: currentColor !important;
+}
+html[data-neo-theme] .modern-settings-btn svg[fill="none"],
+html[data-neo-theme] .modern-settings-btn svg[fill="none"] * { fill: none !important; }
+html[data-neo-theme] .modern-settings-btn svg:not([fill="none"]),
+html[data-neo-theme] .modern-settings-btn svg:not([fill="none"]) * { fill: currentColor !important; }
+html[data-neo-theme] .pagination .page-item .page-link,
+html[data-neo-theme] .modern-pagination :is(a, span) {
+  background: var(--neo-surface) !important; color: var(--neo-text) !important;
+  border-color: var(--neo-border) !important; box-shadow: none !important;
+}
+html[data-neo-theme] .pagination .page-item .page-link:hover,
+html[data-neo-theme] .modern-pagination a:hover {
+  background: var(--neo-selection) !important; color: var(--neo-text) !important;
+  border-color: var(--neo-accent) !important;
+}
+html[data-neo-theme] .pagination .page-item.active .page-link,
+html[data-neo-theme] .modern-pagination .active {
+  background: var(--neo-accent) !important; color: var(--neo-on-accent) !important;
+  border-color: var(--neo-accent) !important;
+}
+html[data-neo-theme] .pagination .page-item.disabled .page-link {
+  background: var(--neo-canvas) !important; color: var(--neo-muted) !important;
+  border-color: var(--neo-border) !important; transform: none !important;
+}
+/* Both current and earlier Razor SVGs work when a deployed directional bundle is stale. */
+html[data-neo-theme] .neo-column-header-actions {
+  display: flex; align-items: center; justify-content: space-between; gap: .25rem;
+  width: 100%; min-width: 0;
+}
+html[data-neo-theme] .neo-column-header-actions .modern-sort-button { flex: 1 1 auto; min-width: 0; }
+html[data-neo-theme] .neo-column-filter {
+  display: inline-flex; align-items: center; justify-content: center;
+  appearance: none; box-sizing: border-box; flex: 0 0 28px; width: 28px; height: 28px;
+  padding: 5px; margin: 0; border: 1px solid transparent; border-radius: 5px;
+  background: transparent; color: var(--neo-muted); cursor: pointer;
+}
+html[data-neo-theme] .neo-column-filter > svg {
+  display: block; width: 16px; height: 16px; pointer-events: none;
+  fill: none !important; stroke: currentColor; stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+html[data-neo-theme] .neo-column-filter > svg * { fill: none !important; }
+html[data-neo-theme] .neo-column-filter:is(:hover, :focus-visible, .is-active) {
+  background: var(--neo-selection); color: var(--neo-text); border-color: var(--neo-accent);
+}
+html[data-neo-theme] :is(.neo-column-filter, .modern-settings-btn, .page-link):focus-visible {
+  outline: 2px solid var(--neo-accent); outline-offset: 2px;
+}
+html[data-neo-theme] .neo-column-filter:disabled { opacity: .45; cursor: default; }

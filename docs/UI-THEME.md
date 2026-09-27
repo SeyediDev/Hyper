@@ -129,3 +129,22 @@ outputs. Menu acceptance here is based on computed colors, geometry and actual
 plugin interactions. Off-canvas fixture raster captures were not reliable and
 are not used as visual evidence; the user's authenticated screen still needs a
 refresh/visual check.
+
+## Generated list controls (2026-09-27)
+
+The host's later `!important` overrides still painted list toolbar buttons and
+active page numbers charcoal, with dark accents on top. The final scoped list
+adapter in `custom-theme.css` now uses semantic surface/text/accent/on-accent
+pairs for the toolbar, add button and pagination, including hover/focus states.
+Outline SVGs keep `fill: none`; this fixes the grid/settings glyph becoming a
+solid square. Column filter layout, 28px buttons and 16px stroked SVGs work with
+both earlier classless and current Razor SVGs even when deployed RTL/LTR bundles
+lack the newer control rules. Existing header-filter click handlers are retained.
+
+`List.browser.test.cjs` combines the actual host custom CSS and deployed RTL
+bundle with Neo's bridge and ColumnFilter.js. It covers all eight palettes at
+390/1366px, contrast, outline rendering, single-row header alignment, filter focus,
+active-state updates and absence of accidental sorting/form submission. The
+contrast helper handles the browser's `color(srgb ...)` values from color-mix.
+Sample-only DOM is used, not live shop records. Load the static CSS with Ctrl+F5;
+no C# change or IIS restart is required for this fix. Skill/MCP contracts unchanged.
