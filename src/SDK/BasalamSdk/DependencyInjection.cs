@@ -57,6 +57,7 @@ public static class DependencyInjection
         services.TryAddScoped<Services.IWalletService, Services.WalletService>();
         services.TryAddScoped<Services.IStoryService, Services.StoryService>();
         services.TryAddScoped<Services.ICoreService, Services.CoreService>();
+        services.TryAddScoped<Services.IOrderProcessingService, Services.OrderProcessingService>();
 
         return services;
     }

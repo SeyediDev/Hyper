@@ -25,6 +25,7 @@ public interface IBasalamClient
     WalletService Wallet { get; }
     StoryService Story { get; }
     CoreService Core { get; }
+    OrderProcessingService OrderProcessing { get; }
     TokenInfo? Token { get; }
     Task<TokenInfo> RefreshTokenAsync(CancellationToken ct = default);
     void SetToken(TokenInfo? token);
@@ -75,6 +76,7 @@ public sealed class BasalamClient : IBasalamClient, IDisposable
         Wallet = new WalletService(httpFactory);
         Story = new StoryService(httpFactory);
         Core = new CoreService(httpFactory);
+        OrderProcessing = new OrderProcessingService(httpFactory);
     }
 
     public VendorService Vendors { get; }
@@ -93,6 +95,7 @@ public sealed class BasalamClient : IBasalamClient, IDisposable
     public WalletService Wallet { get; }
     public StoryService Story { get; }
     public CoreService Core { get; }
+    public OrderProcessingService OrderProcessing { get; }
 
     public TokenInfo? Token
     {
