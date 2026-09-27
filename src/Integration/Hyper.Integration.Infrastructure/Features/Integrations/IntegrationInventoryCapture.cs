@@ -3,6 +3,7 @@ using System.Text.Json;
 using Hyper.Infrastructure.Data.Repository.Hyper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 using Hyper.Integration.Contracts;
 
 namespace Hyper.Infrastructure.Features.Integrations;
@@ -16,7 +17,7 @@ public sealed class IntegrationInventoryCaptureOptions
 
 public sealed class IntegrationInventoryCapture(HyperIntegrationContext db, IIntegrationOutbox outbox,
     IIntegrationStrategyResolver strategies, IOptions<IntegrationInventoryCaptureOptions> options,
-    IIntegrationPlatformCatalogPort catalog) : IIntegrationInventoryCapture
+    IIntegrationPlatformCatalogPort catalog, ILogger<IntegrationInventoryCapture>? logger = null) : IIntegrationInventoryCapture
 {
     public async Task<int> CaptureAsync(CancellationToken ct)
     {
@@ -42,9 +43,8 @@ public sealed class IntegrationInventoryCapture(HyperIntegrationContext db, IInt
                 cursor = candidate.Id;
                 try { strategies.Resolve(candidate.Provider, candidate.CredentialType); }
                 catch (NotSupportedException) { continue; }
-                try { if (await CaptureOneAsync(candidate.ConnectionId, candidate.Id, ct)) captured++; }
-                catch (InvalidOperationException ex) when (ex.Message is "VersionSourceConflict" or "VersionSourceUnassigned")
-                { /* Source can change after candidate selection; next scan will exclude it. */ }
+                if (await IntegrationInventoryCaptureAttempt.RunAsync(candidate.ConnectionId, candidate.Id,
+                    token => CaptureOneAsync(candidate.ConnectionId, candidate.Id, token), logger, ct)) captured++;
             }
         }
     }

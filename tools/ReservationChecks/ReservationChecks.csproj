@@ -3,6 +3,7 @@
   <!-- Compile the production persistence/handlers directly to isolate these SQL
        checks from the unrelated legacy Neo/Bpms build graph. -->
   <ItemGroup>
+    <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationInventoryCaptureAttempt.cs" Link="Production/IntegrationInventoryCaptureAttempt.cs" />
     <ProjectReference Include="../../src/Integration/Hyper.Integration.Domain/Hyper.Integration.Domain.csproj" />
     <ProjectReference Include="../../src/Platform/Hyperyek.Accounting.Contracts/Hyperyek.Accounting.Contracts.csproj" />
     <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/HyperyekAccountingApiClient.cs" Link="Production/HyperyekAccountingApiClient.cs" />
