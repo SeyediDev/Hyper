@@ -5,6 +5,7 @@ public interface IVariationService
     Task<Variation?> GetVariationAsync(int variationId, CancellationToken ct = default);
     Task<Variation?> CreateVariationAsync(VariationWriteRequest variation, CancellationToken ct = default);
     Task<Variation?> UpdateVariationAsync(int variationId, VariationWriteRequest variation, CancellationToken ct = default);
+    Task<Product?> UpdateProductVariationAsync(int productId, int variationId, VariationWriteRequest variation, CancellationToken ct = default);
     Task PatchStockAsync(int variationId, int stock, CancellationToken ct = default);
 }
 
@@ -27,6 +28,13 @@ public sealed class VariationService(IBasalamHttpClient client, ILogger<Variatio
     {
         ValidateId(variationId); ArgumentNullException.ThrowIfNull(variation); ValidateVariation(variation);
         return client.PatchAsync<Variation>($"/v1/variations/{variationId}", ToWire(variation), ct);
+    }
+
+    public Task<Product?> UpdateProductVariationAsync(int productId, int variationId, VariationWriteRequest variation, CancellationToken ct = default)
+    {
+        ValidateId(productId); ValidateId(variationId);
+        ArgumentNullException.ThrowIfNull(variation); ValidateVariation(variation);
+        return client.PatchAsync<Product>($"/v1/products/{productId}/variations/{variationId}", ToWire(variation), ct);
     }
 
     public async Task PatchStockAsync(int variationId, int stock, CancellationToken ct = default)

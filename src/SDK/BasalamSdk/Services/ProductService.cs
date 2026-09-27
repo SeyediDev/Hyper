@@ -29,7 +29,7 @@ public sealed class ProductService(IBasalamHttpClient client, ILogger<ProductSer
     public Task<Product?> CreateProductAsync(ProductWriteRequest product, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(product); ValidateProduct(product);
-        return client.PostAsync<Product>("/v1/products", ToWire(product), ct);
+        return client.PostAsync<Product>($"/v1/vendors/{product.VendorId}/products", ToWire(product), ct);
     }
 
     public Task<Product?> UpdateProductAsync(int productId, ProductWriteRequest product, CancellationToken ct = default)

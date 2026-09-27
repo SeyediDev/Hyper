@@ -56,6 +56,7 @@ public static class DependencyInjection
         services.TryAddScoped<Services.ISearchService, Services.SearchService>();
         services.TryAddScoped<Services.IWalletService, Services.WalletService>();
         services.TryAddScoped<Services.IStoryService, Services.StoryService>();
+        services.TryAddScoped<Services.ICoreService, Services.CoreService>();
 
         return services;
     }
