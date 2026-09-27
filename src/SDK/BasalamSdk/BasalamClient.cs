@@ -22,6 +22,7 @@ public interface IBasalamClient
     AppstoreService Appstore { get; }
     ShippingService Shipping { get; }
     SearchService Search { get; }
+    WalletService Wallet { get; }
     TokenInfo? Token { get; }
     Task<TokenInfo> RefreshTokenAsync(CancellationToken ct = default);
     void SetToken(TokenInfo? token);
@@ -69,6 +70,7 @@ public sealed class BasalamClient : IBasalamClient, IDisposable
         Appstore = new AppstoreService(httpFactory, logger as ILogger<Services.AppstoreService>);
         Shipping = new ShippingService(httpFactory, logger as ILogger<Services.ShippingService>);
         Search = new SearchService(httpFactory);
+        Wallet = new WalletService(httpFactory);
     }
 
     public VendorService Vendors { get; }
@@ -84,6 +86,7 @@ public sealed class BasalamClient : IBasalamClient, IDisposable
     public AppstoreService Appstore { get; }
     public ShippingService Shipping { get; }
     public SearchService Search { get; }
+    public WalletService Wallet { get; }
 
     public TokenInfo? Token
     {
