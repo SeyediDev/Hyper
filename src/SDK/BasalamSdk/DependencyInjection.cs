@@ -53,6 +53,7 @@ public static class DependencyInjection
         services.TryAddScoped<Services.IUploadService, Services.UploadService>();
         services.TryAddScoped<Services.IAppstoreService, Services.AppstoreService>();
         services.TryAddScoped<Services.IShippingService, Services.ShippingService>();
+        services.TryAddScoped<Services.ISearchService, Services.SearchService>();
 
         return services;
     }
