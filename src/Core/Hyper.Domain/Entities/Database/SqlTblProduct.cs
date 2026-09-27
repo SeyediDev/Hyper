@@ -8,9 +8,14 @@ public sealed class SqlTblProduct : SqlServerEntity<int>
     [DisplayName("شناسه مغازه")]
     [DbMap("SHOPID_")]
     public int Shopid { get; set; }
+    [AssociationMap(nameof(Shopid), nameof(SqlTblShop.Shopid))]
+    public SqlTblShop Shop { get; set; } = null!;
     [DisplayName("شناسه محصول هایپریک")]
     [DbMap("GLOBALID_")]
     public int? Globalid { get; set; }
+    [AssociationMap(nameof(Globalid), nameof(SqlTblGlobalproduct.Globalproductid))]
+    [DisplayName("محصول هایپریک")]
+    public SqlTblGlobalproduct? Globalproduct { get; set; }
     [DisplayName("شناسه یکتای مالیاتی")]
     [DbMap("TAXCODE_")]
     public string? Taxcode { get; set; }
@@ -71,6 +76,8 @@ public sealed class SqlTblProduct : SqlServerEntity<int>
     [DisplayName("شناسه حساب تفصیلی")]
     [DbMap("DETAILACCOUNTID_")]
     public long Detailaccountid { get; set; }
+    [AssociationMap(nameof(Detailaccountid), nameof(SqlTblDetailaccount.Detailaccountid))]
+    public SqlTblDetailaccount Detailaccount { get; set; } = null!;
     [DisplayName("مسیر نسبی تصویر")]
     [DbMap("IMAGERELATIVEURL_")]
     public string? Imagerelativeurl { get; set; }
@@ -89,6 +96,9 @@ public sealed class SqlTblProduct : SqlServerEntity<int>
     [DisplayName("شناسه گروه")]
     [DbMap("GROUPID_")]
     public int? Groupid { get; set; }
+    [AssociationMap(nameof(Groupid), nameof(SqlTblGlobalproductgroup.Groupid))]
+    [DisplayName("گروه محصول هایپریک")]
+    public SqlTblGlobalproductgroup? Group { get; set; }
     [DisplayName("نقطه سفارش مجدد")]
     [DbMap("REORDERPOINT_")]
     public decimal? Reorderpoint { get; set; }
@@ -106,12 +116,16 @@ public sealed class SqlTblProductbarcode : SqlServerEntity
     [DisplayName("شناسه محصول")]
     [DbMap("PRODUCTID_")]
     public int Productid { get; set; }
+    [AssociationMap(nameof(Productid), nameof(SqlTblProduct.Id))]
+    public SqlTblProduct Product { get; set; } = null!;
     [DisplayName("بارکد")]
     [DbMap("BARCODE_")]
     public string Barcode { get; set; } = null!;
     [DisplayName("شناسه مغازه")]
     [DbMap("SHOPID_")]
     public int Shopid { get; set; }
+    [AssociationMap(nameof(Shopid), nameof(SqlTblShop.Shopid))]
+    public SqlTblShop Shop { get; set; } = null!;
     [DisplayName("مستاجر شناسه")]
     [DbMap("TENANT_ID_")]
     public string? TenantId { get; set; }
@@ -186,6 +200,8 @@ public sealed class SqlTblGlobalproductgroup : SqlServerEntity
     [DisplayName("شناسه والد")]
     [DbMap("PARENTID_")]
     public short? Parentid { get; set; }
+    [AssociationMap(nameof(Parentid), nameof(SqlTblGlobalproductgroup.Groupid))]
+    public SqlTblGlobalproductgroup? Parent { get; set; }
     [DisplayName("نام")]
     [DbMap("NAME_")]
     public string Name { get; set; } = null!;
@@ -203,6 +219,8 @@ public sealed class SqlTblGlobalproductmedia : SqlServerEntity
     [DisplayName("شناسه محصول هایپریک")]
     [DbMap("PRODUCTID_")]
     public int Productid { get; set; }
+    [AssociationMap(nameof(Productid), nameof(SqlTblGlobalproduct.Globalproductid))]
+    public SqlTblGlobalproduct Product { get; set; } = null!;
     [DisplayName("آدرس نسبی فایل")]
     [DbMap("FILERELATIVEURL_")]
     public string? Filerelativeurl { get; set; }
@@ -232,9 +250,13 @@ public sealed class SqlTblGlobalproduct : SqlServerEntity
     [DisplayName("شناسه برند")]
     [DbMap("BRANDID_")]
     public short? Brandid { get; set; }
+    [AssociationMap(nameof(Brandid), nameof(SqlTblProductbrand.Brandid))]
+    public SqlTblProductbrand? Brand { get; set; }
     [DisplayName("شناسه واحد اندازه‌گیری")]
     [DbMap("UNITCODE_")]
     public short Unitcode { get; set; }
+    [AssociationMap(nameof(Unitcode), nameof(SqlTblProductunit.Unitcode))]
+    public SqlTblProductunit Unit { get; set; } = null!;
     [DisplayName("فعال است")]
     [DbMap("ISENABLED_")]
     public bool Isenabled { get; set; }
@@ -244,6 +266,8 @@ public sealed class SqlTblGlobalproduct : SqlServerEntity
     [DisplayName("شناسه وضعیت فراوری")]
     [DbMap("REVIEWSTATUSID_")]
     public byte Reviewstatusid { get; set; }
+    [AssociationMap(nameof(Reviewstatusid), nameof(SqlTblProductreviewstatus.Productreviewstatusid))]
+    public SqlTblProductreviewstatus Reviewstatus { get; set; } = null!;
     [DisplayName("زمان ایجاد")]
     [DbMap("CREATETIME_")]
     public DateTime Createtime { get; set; }
@@ -268,6 +292,8 @@ public sealed class SqlTblGlobalproduct : SqlServerEntity
     [DisplayName("شناسه گروه")]
     [DbMap("GROUPID_")]
     public short? Groupid { get; set; }
+    [AssociationMap(nameof(Groupid), nameof(SqlTblGlobalproductgroup.Groupid))]
+    public SqlTblGlobalproductgroup? Group { get; set; }
     [DisplayName("آدرس نسبی فایل تصویر")]
     [DbMap("IMAGERELATIVEURL_")]
     public string? Imagerelativeurl { get; set; }

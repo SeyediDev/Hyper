@@ -8,9 +8,13 @@ public sealed class SqlTblPerson : SqlServerEntity<int>
     [DisplayName("شناسه مغازه")]
     [DbMap("SHOPID_")]
     public int Shopid { get; set; }
+    [AssociationMap(nameof(Shopid), nameof(SqlTblShop.Shopid))]
+    public SqlTblShop Shop { get; set; } = null!;
     [DisplayName("شناسه حساب تفصیلی")]
     [DbMap("DETAILACCOUNTID_")]
     public long Detailaccountid { get; set; }
+    [AssociationMap(nameof(Detailaccountid), nameof(SqlTblDetailaccount.Detailaccountid))]
+    public SqlTblDetailaccount Detailaccount { get; set; } = null!;
     [DisplayName("نام شخص")]
     [DbMap("NAME_")]
     public string? Name { get; set; }

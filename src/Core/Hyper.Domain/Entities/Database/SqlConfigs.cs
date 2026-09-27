@@ -41,6 +41,8 @@ public sealed class SqlTblReleasenoteitem : SqlServerEntity
     [DisplayName("شناسه نسخه")]
     [DbMap("RELEASEID_")]
     public byte Releaseid { get; set; }
+    [AssociationMap(nameof(Releaseid), nameof(SqlTblReleasenote.Releaseid))]
+    public SqlTblReleasenote Release { get; set; } = null!;
     [DisplayName("ترتیب")]
     [DbMap("RELEASEITEMORDER_")]
     public byte Releaseitemorder { get; set; }

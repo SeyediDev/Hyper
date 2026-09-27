@@ -37,7 +37,7 @@
         <nav aria-label="منوی اصلی">
             <a class="@(controller == "AdminDashboard" ? "active" : "")" href="@(preview ? Url.Action("Preview", "AdminDashboard") : Url.Action("Index", "AdminDashboard"))"><svg><use href="#hi-grid"/></svg>نمای کلی</a>
             <a class="@Active("MerchantSimulation", "Index")" asp-controller="MerchantSimulation" asp-action="Index"><svg><use href="#hi-shop"/></svg>مغازه‌دار و اتصال</a>
-            <a class="@Active("MerchantSimulation", "Dashboard")" asp-controller="MerchantSimulation" asp-action="Dashboard"><svg><use href="#hi-sync"/></svg>عملیات یکسان‌سازی</a>
+            <a class="@Active("MerchantSimulation", "Dashboard")" asp-controller="MerchantSimulation" asp-action="Dashboard"><svg><use href="#hi-sync"/></svg>مرکز عملیات اتصال‌ها</a>
             <a class="@Active("MerchantSimulation", "Profile")" asp-controller="MerchantSimulation" asp-action="Profile"><svg><use href="#hi-users"/></svg>یکسان‌سازی پروفایل</a>
             <a class="@Active("WorkManagementPage", "Index")" asp-controller="WorkManagementPage" asp-action="Index"><svg><use href="#hi-file"/></svg>مدیریت کار</a>
         </nav>

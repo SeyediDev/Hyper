@@ -11,6 +11,9 @@ public sealed class SqlTblWarehouse : SqlServerEntity<int>
     [DisplayName("شناسه مغازه")]
     [DbMap("SHOPID_")]
     public int Shopid { get; set; }
+    [AssociationMap(nameof(Shopid), nameof(SqlTblShop.Shopid))]
+    [DisplayName("مغازه")]
+    public SqlTblShop Shop { get; set; } = null!;
     [DisplayName("پیش فرض بودن")]
     [DbMap("ISDEFAULT_")]
     public bool Isdefault { get; set; }
@@ -23,12 +26,18 @@ public sealed class SqlTblWarehouse : SqlServerEntity<int>
     [DisplayName("شناسه حساب تفصیلی")]
     [DbMap("DETAILACCOUNTID_")]
     public long Detailaccountid { get; set; }
+    [AssociationMap(nameof(Detailaccountid), nameof(SqlTblDetailaccount.Detailaccountid))]
+    [DisplayName("حساب تفصیلی")]
+    public SqlTblDetailaccount Detailaccount { get; set; } = null!;
     [DisplayName("توضیحات")]
     [DbMap("DESCRIPTION_")]
     public string? Description { get; set; }
     [DisplayName("شناسه انباردار")]
     [DbMap("PERSONID_")]
     public int Personid { get; set; }
+    [AssociationMap(nameof(Personid), nameof(SqlTblPerson.Id))]
+    [DisplayName("انباردار")]
+    public SqlTblPerson Person { get; set; } = null!;
     [DisplayName("شماره تماس")]
     [DbMap("PHONE_")]
     public string? Phone { get; set; }

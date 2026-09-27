@@ -67,6 +67,14 @@ public sealed class IntegrationDashboardQuery(HyperIntegrationContext db, IInteg
             .OrderByDescending(x => x.Message.Id).Take(30)
             .Select(x => new IntegrationRecentOutbox(x.Message.Id, x.DisplayName, x.Message.Status, x.Message.Attempts,
                 x.Message.CreatedAtUtc, x.Message.NextAttemptAtUtc, x.Message.LastError)).ToListAsync(ct);
+        var jobs = from job in db.IntegrationScenarioJobs.AsNoTracking()
+                   join connection in connections on job.ConnectionId equals connection.Id
+                   select new { Job = job, connection.DisplayName, connection.Provider };
+        var scenarioJobs = await jobs.OrderByDescending(x => x.Job.CreatedAtUtc).ThenByDescending(x => x.Job.Id)
+            .Take(50)
+            .Select(x => new IntegrationRecentScenarioJob(x.Job.Id, x.DisplayName, x.Provider, x.Job.Item,
+                x.Job.Trigger, x.Job.Status, x.Job.Attempts, x.Job.CreatedAtUtc, x.Job.NextAttemptAtUtc,
+                x.Job.CompletedAtUtc, x.Job.ErrorCode)).ToListAsync(ct);
         var now = DateTime.UtcNow;
         var health = await connections.OrderBy(x => x.Id)
             .Select(x => new IntegrationConnectionHealth(x.Id, x.DisplayName, x.Provider, x.IsEnabled,
@@ -77,6 +85,7 @@ public sealed class IntegrationDashboardQuery(HyperIntegrationContext db, IInteg
         return new(connectionCount, enabledCount, mappingCount, runCounts, webhookCounts, recent)
             { Outbox = outboxCounts, RecentOutbox = recentOutbox, ConnectionsHealth = health,
               RecentInbox = recentInbox, FailedInbox = failedInbox, DeadLetterOutbox = deadLetterOutbox,
+              ScenarioJobs = scenarioJobs,
               PriceDifferenceCount = priceDifferences, InventoryDifferenceCount = inventoryDifferences };
     }
 }

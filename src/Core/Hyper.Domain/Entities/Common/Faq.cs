@@ -11,10 +11,12 @@ public class Faq : HyperBaseCoreConfigAuditableEntity<int>
     public int SortIndex { get; set; }
 
     public int FaqCategoryId { get; set; }
+    [AssociationMap(nameof(FaqCategoryId), nameof(FaqCategory.Id))]
     [DisplayName("طبقه بندی")]
     public FaqCategory FaqCategory { get; set; } = null!;
 
     public LanguageId LanguageId { get; set; }
+    [AssociationMap(nameof(LanguageId), nameof(Language.Id))]
     [DisplayName("زبان")]
     public Language Language { get; set; } = null!;
 }

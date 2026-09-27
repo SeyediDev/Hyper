@@ -41,6 +41,9 @@ public sealed class SqlTblShop : SqlServerEntity
     [DisplayName("شناسه نوع فعالیت")]
     [DbMap("ACTIVITYTYPEID_")]
     public byte? Activitytypeid { get; set; }
+    [AssociationMap(nameof(Activitytypeid), nameof(SqlTblShopactivitytype.Activitytypeid))]
+    [DisplayName("نوع فعالیت")]
+    public SqlTblShopactivitytype? Activitytype { get; set; }
     [DisplayName("آدرس نسبی فایل لوگو")]
     [DbMap("LOGORELATIVEURL_")]
     public string? Logorelativeurl { get; set; }

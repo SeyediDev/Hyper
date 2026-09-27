@@ -1,95 +1,28 @@
 @model Hyper.AdminPanel.Web.ViewModels.IntegrationDashboardViewModel
+@using System.Text.Json
+@using System.Text.Json.Serialization
+@using Hyper.Integration.Domain.Entities.Integrations
+@using Hyper.Integration.Domain.Features.Integrations
 @{
     Layout = "_HyperAdminLayout";
-    ViewBag.Title = "آمار یکسان‌سازی | پنل مدیریت هایپریک";
-    string Status(byte status) => status switch { 0 => "در حال اجرا", 1 => "موفق", 2 => "ناموفق", 3 => "نیازمند نگاشت", _ => "نامشخص" };
-    string QueueStatus(byte status) => status switch { 0 => "در انتظار / تلاش مجدد", 1 => "در حال ارسال", 2 => "ارسال‌شده", 3 => "خطای نهایی", _ => "نامشخص" };
+    ViewBag.Title = "مرکز جریان یکسان‌سازی | پنل مدیریت هایپریک";
+    var json = Model.Statistics is null ? "null" : JsonSerializer.Serialize(Model.Statistics, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase, Converters = { new JsonStringEnumConverter() } });
 }
-<link rel="stylesheet" href="~/Content/merchant-simulation.css" />
-<section class="merchant-simulation" dir="rtl">
-    <header class="simulation-heading"><div><span class="simulation-eyebrow">پنل مدیریت هایپریک</span>
-        <h1>آمار یکسان‌سازی</h1><p>سوابق ثبت‌شده برای مغازهٔ انتخاب‌شده؛ تمام زمان‌ها به وقت UTC نمایش داده می‌شوند.</p></div>
-        <a asp-action="Index" class="simulation-secondary">انتخاب / تغییر مغازه</a></header>
-    @if (Model.Selected is { } shop && Model.Statistics is { } stats)
-    {
-        <div class="simulation-selection"><strong>@shop.ShopName</strong> — مغازه‌دار: @shop.MerchantIdentifier — مغازه @shop.ShopId</div>
-        <p class="simulation-help">انتقال واقعی داده به پلتفرم‌ها هنوز در حال توسعه است. آمار زیر نتیجهٔ اجراهای ثبت‌شده در سامانه است.</p>
-        <div class="sync-stat-grid">
-            <article><span>موفق</span><strong>@stats.RunCount(1)</strong></article>
-            <article><span>ناموفق</span><strong>@stats.RunCount(2)</strong></article>
-            <article><span>در حال اجرا</span><strong>@stats.RunCount(0)</strong></article>
-            <article><span>نیازمند نگاشت</span><strong>@stats.RunCount(3)</strong></article>
-        </div>
-        <div class="sync-stat-grid sync-stat-secondary">
-            <article><span>اتصال فعال / کل اتصال‌ها</span><strong>@stats.EnabledConnections / @stats.Connections</strong></article>
-            <article><span>نگاشت معتبر کالا</span><strong>@stats.MappedProducts</strong></article>
-            <article><span>وب‌هوک در انتظار</span><strong>@stats.WebhookCount(0)</strong></article>
-            <article><span>وب‌هوک ناموفق</span><strong>@stats.WebhookCount(2)</strong></article>
-        </div>
-        <div class="sync-stat-grid sync-stat-secondary">
-            <article><span>اختلاف قیمت</span><strong>@stats.PriceDifferenceCount</strong></article>
-            <article><span>اختلاف موجودی</span><strong>@stats.InventoryDifferenceCount</strong></article>
-            <article><span>نگاشت‌های بررسی‌شده</span><strong>@stats.MappedProducts</strong></article>
-            <article><span>اتصال‌های دارای خطا</span><strong>@stats.ConnectionsHealth.Count(x => x.HasError)</strong></article>
-        </div>
-        <div class="sync-stat-grid">
-            <article><span>صف ارسال / تلاش مجدد</span><strong>@stats.OutboxCount(0)</strong></article>
-            <article><span>در حال ارسال به پلتفرم</span><strong>@stats.OutboxCount(1)</strong></article>
-            <article><span>ارسال موفق به پلتفرم</span><strong>@stats.OutboxCount(2)</strong></article>
-            <article><span>خطای نهایی ارسال</span><strong>@stats.OutboxCount(3)</strong></article>
-        </div>
-        <section class="simulation-card"><h2>پیام‌های نیازمند بررسی</h2>
-            <p class="simulation-help">تا ۳۰ خطای اخیر از هر صف؛ ورود پیام‌های موفق، خطاهای قبلی را از این بخش حذف نمی‌کند.</p>
-            <h3>وب‌هوک‌های ناموفق (@stats.WebhookCount(2))</h3>
-            <partial name="_WebhookMessages" model="stats.FailedInbox" />
-            <h3>خطاهای نهایی ارسال (@stats.OutboxCount(3))</h3>
-            @if (stats.DeadLetterOutbox.Count == 0)
-            { <div class="simulation-empty">پیام خروجی با خطای نهایی وجود ندارد.</div> }
-            else
-            {
-                <div class="sync-table-scroll"><table class="sync-runs"><thead><tr><th>شناسه</th><th>اتصال</th><th>تعداد تلاش</th><th>زمان ثبت (UTC)</th><th>خطا</th></tr></thead><tbody>
-                @foreach (var message in stats.DeadLetterOutbox)
-                {
-                    <tr><td>@message.Id</td><td>@message.ConnectionName</td><td>@message.Attempts</td>
-                    <td dir="ltr">@message.CreatedAtUtc.ToString("yyyy-MM-dd HH:mm")</td><td>@(message.LastError ?? "—")</td></tr>
-                }
-                </tbody></table></div>
-            }
-        </section>
-        <section class="simulation-card"><h2>آخرین وب‌هوک‌های دریافتی</h2>
-            <p class="simulation-help">حداکثر ۳۰ پیام، به ترتیب زمان دریافت؛ محتوای خام پیام نمایش داده نمی‌شود.</p>
-            <partial name="_WebhookMessages" model="stats.RecentInbox" />
-        </section>
-        <section class="simulation-card"><h2>آخرین پیام‌های خروجی</h2>
-            @if (stats.RecentOutbox.Count == 0)
-            { <div class="simulation-empty">پیامی برای ارسال ثبت نشده است.</div> }
-            else
-            {
-                <div class="sync-table-scroll"><table class="sync-runs"><thead><tr><th>شناسه</th><th>اتصال</th><th>وضعیت</th><th>تعداد تلاش</th><th>زمان تلاش بعدی (UTC)</th><th>خطا</th></tr></thead><tbody>
-                @foreach (var message in stats.RecentOutbox)
-                {
-                    <tr><td>@message.Id</td><td>@message.ConnectionName</td><td>@QueueStatus(message.Status)</td><td>@message.Attempts</td>
-                    <td dir="ltr">@(message.Status == 0 ? message.NextAttemptAtUtc.ToString("yyyy-MM-dd HH:mm") : "—")</td><td>@(message.LastError ?? "—")</td></tr>
-                }
-                </tbody></table></div>
-            }
-        </section>
-        <section class="simulation-card"><h2>آخرین اجراهای دریافت کالا</h2>
-            @if (stats.RecentRuns.Count == 0)
-            { <div class="simulation-empty">برای این مغازه هنوز اجرای یکسان‌سازی ثبت نشده است.</div> }
-            else
-            {
-                <div class="sync-table-scroll"><table class="sync-runs"><thead><tr><th>اتصال</th><th>پلتفرم</th><th>وضعیت</th><th>شروع (UTC)</th><th>خوانده‌شده</th><th>ثبت‌شده</th><th>خطای اقلام</th><th>توضیح</th></tr></thead><tbody>
-                @foreach (var run in stats.RecentRuns)
-                {
-                    <tr><td>@run.ConnectionName</td><td>@run.Provider</td><td>@Status(run.Status)</td><td dir="ltr">@run.StartedAtUtc.ToString("yyyy-MM-dd HH:mm")</td>
-                    <td>@run.ItemsRead</td><td>@run.ItemsWritten</td><td>@run.ItemsFailed</td><td>@(run.Error ?? "—")</td></tr>
-                }
-                </tbody></table></div>
-            }
-        </section>
-        <a asp-action="Dashboard" class="simulation-link">تازه‌سازی آمار</a>
-    }
+<link rel="stylesheet" href="~/Content/integration-center.css" asp-append-version="true" />
+<section class="integration-center" dir="rtl" data-live-url="@Url.Action("Live", "MerchantSimulation")">
+    <header class="integration-hero"><div><div class="integration-kicker"><span class="live-pulse"></span>مرکز عملیات اتصال‌ها <span class="live-label">LIVE</span></div><h1>جریان یکسان‌سازی</h1><p>حرکت داده بین غرفه، یکسان‌ساز و حسابداری هایپریک؛ با سابقه‌ای که قابل ردیابی و توضیح است.</p></div><div class="hero-actions"><span class="last-seen" id="last-seen">در حال اتصال…</span><a asp-action="Index" class="integration-button ghost">تغییر غرفه</a></div></header>
+    @if (Model.Selected is null || Model.Statistics is null)
+    { <div class="integration-empty"><div class="empty-orbit">↔</div><h2>غرفه‌ای برای پایش انتخاب نشده است</h2><p>برای دیدن جریان زنده، ابتدا یک غرفه‌دار و اتصال را انتخاب کنید.</p><a asp-action="Index" class="integration-button primary">انتخاب غرفه</a></div> }
     else
-    { <div class="simulation-empty">برای دیدن آمار، ابتدا مغازه‌دار و مغازه را انتخاب کنید.</div> }
+    {
+        <div class="scope-bar"><div class="scope-avatar">@(Model.Selected.ShopName.FirstOrDefault())</div><div><strong>@Model.Selected.ShopName</strong><span>پایش اتصال‌های این غرفه · @Model.Selected.MerchantIdentifier</span></div><span class="scope-status"><i></i>در حال پایش</span></div>
+        <div class="metric-strip"><div class="live-metric"><span class="metric-icon violet">✦</span><div><small>در حال پردازش</small><strong id="metric-running">@Model.Statistics.ScenarioJobs.Count(x => x.Status == IntegrationScenarioStatus.Running)</strong><em>جاب فعال</em></div></div><div class="live-metric"><span class="metric-icon amber">↻</span><div><small>در صف انتظار</small><strong id="metric-pending">@Model.Statistics.ScenarioJobs.Count(x => x.Status == IntegrationScenarioStatus.Pending)</strong><em>درخواست</em></div></div><div class="live-metric"><span class="metric-icon green">✓</span><div><small>موفقیت امروز</small><strong id="metric-success">@Model.Statistics.ScenarioJobs.Count(x => x.Status == IntegrationScenarioStatus.Completed)</strong><em>جاب تکمیل‌شده</em></div></div><div class="live-metric"><span class="metric-icon red">!</span><div><small>نیازمند توجه</small><strong id="metric-attention">@Model.Statistics.ScenarioJobs.Count(x => x.Status is IntegrationScenarioStatus.NeedsAttention or IntegrationScenarioStatus.DeadLetter) + @Model.Statistics.FailedInbox.Count + @Model.Statistics.DeadLetterOutbox.Count</strong><em>مورد باز</em></div></div></div>
+        <div class="integration-layout"><section class="flow-card"><header class="section-head"><div><span class="section-eyebrow">TOPOLOGY</span><h2>نقشهٔ زندهٔ ارتباطات</h2><p>آخرین رویدادها روی مسیر واقعی داده نمایش داده می‌شوند.</p></div><span class="event-counter"><b id="event-count">۰</b> رویداد در حال مشاهده</span></header><div class="topology" id="topology"><svg class="flow-lines" viewBox="0 0 900 250" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="flow-grad" x1="0" x2="1"><stop stop-color="#7c3aed"/><stop offset=".5" stop-color="#10b981"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs><path class="flow-path path-a" d="M170 125 C320 35 560 35 730 125"/><path class="flow-path path-b" d="M730 145 C560 225 320 225 170 145"/></svg><div class="system-node node-platform"><span class="node-mark">ب</span><div><strong>پلتفرم</strong><small>باسلام</small></div><i class="node-state"></i></div><div class="system-node node-sync"><span class="node-mark sync-mark">↔</span><div><strong>یکسان‌ساز</strong><small>هماهنگ‌کنندهٔ مرکزی</small></div><i class="node-state"></i></div><div class="system-node node-accounting"><span class="node-mark accounting-mark">₿</span><div><strong>حسابداری هایپریک</strong><small>مرجع کالا و مالی</small></div><i class="node-state"></i></div><div class="flow-event event-left"><span>رویداد ورودی</span><strong>وب‌هوک ←</strong></div><div class="flow-event event-right"><span>ثبت اثر</span><strong>→ حسابداری</strong></div></div><div class="flow-legend"><span><i class="dot green"></i>ارتباط سالم</span><span><i class="dot violet"></i>در حال پردازش</span><span><i class="dot amber"></i>در انتظار</span><span class="topology-updated" id="topology-updated">به‌روزرسانی خودکار هر ۵ ثانیه</span></div></section><aside class="attention-panel"><header><div><span class="section-eyebrow">ACTION REQUIRED</span><h2>نیازمند توجه</h2></div><span class="attention-badge" id="attention-badge">۰</span></header><div id="attention-list" class="attention-list"></div><a href="#job-queue" class="panel-link">مشاهدهٔ صف و خطاها <span>←</span></a></aside></div>
+        <section class="activity-card"><header class="section-head activity-head"><div><span class="section-eyebrow">EVENT STREAM</span><h2>ردیابی رویدادها</h2><p>هر رویداد از لحظهٔ ورود تا اثر نهایی، یک شناسه و مسیر مشخص دارد.</p></div><div class="stream-controls"><button class="filter-chip active" data-filter="all">همه</button><button class="filter-chip" data-filter="webhook">وب‌هوک</button><button class="filter-chip" data-filter="job">جاب‌ها</button><button class="filter-chip" data-filter="outbox">خروجی</button></div></header><div id="activity-feed" class="activity-feed"></div><div class="feed-footer"><span id="feed-status">داده‌ها از SQL خوانده می‌شوند</span><button id="load-more" class="text-button">نمایش سابقهٔ بیشتر ←</button></div></section>
+        <section class="queue-card" id="job-queue"><header class="section-head"><div><span class="section-eyebrow">DURABLE QUEUE</span><h2>صف جاب‌های یکسان‌سازی</h2><p>درخواست‌های لایو، ایونتی، دستی و یکسان‌سازی اولیه در یک صف قابل مشاهده.</p></div><div class="queue-tabs"><span class="queue-tab active">همهٔ درخواست‌ها</span><span class="queue-tab">نیازمند اقدام</span></div></header><div class="table-wrap"><table class="job-table"><thead><tr><th>شناسه / رویداد</th><th>نوع درخواست</th><th>مسیر</th><th>وضعیت</th><th>تلاش</th><th>زمان</th></tr></thead><tbody id="job-table-body"></tbody></table></div></section>
+    }
 </section>
+@if (Model.Statistics is not null)
+{<script>
+(()=>{const initial=@Html.Raw(json),root=document.querySelector('.integration-center');if(!root||!initial)return;const fa=n=>new Intl.NumberFormat('fa-IR').format(n??0),provider=p=>({Basalam:'باسلام',Digikala:'دیجی‌کالا',Torob:'ترب'})[p]||'پلتفرم',item=i=>({Product:'کالا',Inventory:'موجودی',Counterparty:'طرف حساب',Sale:'فروش',Purchase:'خرید',Subscription:'اشتراک',Review:'نظر',Chat:'گفت‌وگو'})[i]||i,trigger=t=>({StoreChanged:'تغییر فروشگاه',BoothChanged:'تغییر غرفه',Initial:'یکسان‌سازی اولیه',Periodic:'دوره‌ای',Manual:'دستی'})[t]||t,status=s=>({Pending:['در انتظار','pending'],Running:['در حال پردازش','running'],Completed:['موفق','success'],NeedsAttention:['نیازمند توجه','attention'],DeadLetter:['خطای نهایی','failed']})[s]||['نامشخص','pending'],time=v=>v?new Date(v).toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit'}):'—';const render=data=>{const s=data.stats||data,jobs=s.scenarioJobs||[],inbox=s.recentInbox||[],outbox=s.recentOutbox||[];document.querySelector('#metric-running').textContent=fa(jobs.filter(x=>x.status==='Running').length);document.querySelector('#metric-pending').textContent=fa(jobs.filter(x=>x.status==='Pending').length);document.querySelector('#metric-success').textContent=fa(jobs.filter(x=>x.status==='Completed').length);const attention=jobs.filter(x=>['NeedsAttention','DeadLetter'].includes(x.status)).length+(s.failedInbox||[]).length+(s.deadLetterOutbox||[]).length;document.querySelector('#metric-attention').textContent=fa(attention);document.querySelector('#attention-badge').textContent=fa(attention);document.querySelector('#event-count').textContent=fa(inbox.length+outbox.length+jobs.length);const feed=[...inbox.map(x=>({kind:'webhook',title:x.eventType||'وب‌هوک پلتفرم',sub:`باسلام · ${x.externalEventId}`,state:x.status===1?'success':x.status===2?'failed':'pending',stateText:x.status===1?'پردازش شد':x.status===2?'ناموفق':'در انتظار',time:x.receivedAtUtc,detail:x.error||'دریافت از نقطهٔ ورودی پلتفرم و تحویل به صف یکسان‌سازی'})),...jobs.slice(0,20).map(x=>({kind:'job',title:`یکسان‌سازی ${item(x.item)}`,sub:`${x.connectionName} · ${trigger(x.trigger)}`,state:status(x.status)[1],stateText:status(x.status)[0],time:x.createdAtUtc,detail:x.errorCode||'جاب در صف پایدار ثبت شده و مسیر اجرای آن قابل پیگیری است'})),...outbox.slice(0,20).map(x=>({kind:'outbox',title:'ارسال اثر به پلتفرم',sub:x.connectionName,state:x.status===2?'success':x.status===3?'failed':x.status===1?'running':'pending',stateText:x.status===2?'تحویل شد':x.status===3?'خطای نهایی':x.status===1?'در حال ارسال':'در صف',time:x.createdAtUtc,detail:x.lastError||`تلاش شمارهٔ ${x.attempts||0}`}))].sort((a,b)=>new Date(b.time)-new Date(a.time));document.querySelector('#activity-feed').innerHTML=feed.slice(0,12).map(x=>`<button class="activity-row" data-kind="${x.kind}"><span class="activity-icon ${x.state}">${x.kind==='webhook'?'↙':x.kind==='outbox'?'↗':'↔'}</span><span class="activity-copy"><strong>${x.title}</strong><small>${x.sub}</small></span><span class="activity-route"><i class="route-dot ${x.state}"></i>${x.detail}</span><span class="activity-state ${x.state}">${x.stateText}</span><time>${time(x.time)}</time><span class="row-chevron">‹</span></button>`).join('')||'<div class="table-empty">هنوز رویدادی ثبت نشده است.</div>';document.querySelector('#job-table-body').innerHTML=jobs.slice(0,20).map(x=>{const st=status(x.status);return `<tr><td><strong>#${x.id}</strong><small>${x.errorCode||'رویداد '+x.id}</small></td><td><span class="job-type">${item(x.item)}</span><small>${trigger(x.trigger)}</small></td><td><span class="path-pill">پلتفرم <b>→</b> یکسان‌ساز <b>→</b> حسابداری</span></td><td><span class="status-pill ${st[1]}"><i></i>${st[0]}</span></td><td>${fa(x.attempts||0)}</td><td>${time(x.createdAtUtc)}</td></tr>`}).join('')||'<tr><td colspan="6" class="table-empty">صف خالی است.</td></tr>';const a=s.failedInbox?.slice(0,2)||[];document.querySelector('#attention-list').innerHTML=a.length?a.map(x=>`<div class="attention-row"><span class="attention-symbol red">!</span><div><strong>${x.eventType||'وب‌هوک ناموفق'}</strong><small>${x.error||'خطا در پردازش'}</small></div><time>${time(x.receivedAtUtc)}</time></div>`).join(''):'<div class="attention-ok"><span>✓</span>همه‌چیز تحت کنترل است</div>';document.querySelector('#last-seen').textContent='آخرین بروزرسانی '+new Date().toLocaleTimeString('fa-IR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});};render(initial);document.querySelectorAll('.filter-chip').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.filter-chip').forEach(x=>x.classList.remove('active'));b.classList.add('active');const f=b.dataset.filter;document.querySelectorAll('.activity-row').forEach(x=>x.hidden=f!=='all'&&x.dataset.kind!==f)}));const poll=async()=>{try{const r=await fetch(root.dataset.liveUrl,{headers:{'X-Requested-With':'XMLHttpRequest'},cache:'no-store'});if(r.ok)render(await r.json())}catch(e){document.querySelector('#last-seen').textContent='اتصال موقتاً قطع شد'}};setInterval(poll,5000)})();
+</script>}

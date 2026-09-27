@@ -7,6 +7,9 @@ public sealed class SqlExternalintegrationconnections : SqlServerEntity<long>
     [DisplayName("مغازه شناسه")]
     [DbMap("ShopId")]
     public int Shopid { get; set; }
+    [AssociationMap(nameof(Shopid), nameof(SqlTblShop.Shopid))]
+    [DisplayName("مغازه")]
+    public SqlTblShop Shop { get; set; } = null!;
     [DisplayName("مستاجر شناسه")]
     [DbMap("TenantId")]
     public string Tenantid { get; set; } = null!;
@@ -48,6 +51,9 @@ public sealed class SqlExternalordermappings : SqlServerEntity<long>
     [DisplayName("اتصال شناسه")]
     [DbMap("ConnectionId")]
     public long Connectionid { get; set; }
+    [AssociationMap(nameof(Connectionid), nameof(SqlExternalintegrationconnections.Id))]
+    [DisplayName("اتصال یکپارچه‌سازی")]
+    public SqlExternalintegrationconnections Connection { get; set; } = null!;
     [DisplayName("مغازه شناسه")]
     [DbMap("ShopId")]
     public int Shopid { get; set; }

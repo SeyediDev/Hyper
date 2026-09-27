@@ -28,6 +28,18 @@ public sealed class MerchantSimulationController(IAdminMerchantSimulationService
     }
 
     [HttpGet]
+    public async Task<IActionResult> Live(CancellationToken ct)
+    {
+        var admin = GetUser();
+        if (!admin.IsAdmin) return StatusCode(403);
+        var selected = ReadTicket(admin.Id, Request.Cookies[CookieName]) is { } id
+            ? await simulations.GetAsync(admin.Id, id, ct) : null;
+        if (selected is null) return Json(new { selected = false });
+        var stats = await dashboard.GetAsync(selected.ShopId, selected.TenantId, ct);
+        return Json(new { selected = true, generatedAtUtc = DateTime.UtcNow, stats });
+    }
+
+    [HttpGet]
     public async Task<IActionResult> Profile(CancellationToken ct)
     {
         var admin = GetUser();

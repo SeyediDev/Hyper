@@ -26,6 +26,8 @@ public sealed class SqlTblSaleorder : SqlServerEntity
     [DisplayName("شناسه مغازه")]
     [DbMap("SHOPID_")]
     public int Shopid { get; set; }
+    [AssociationMap(nameof(Shopid), nameof(SqlTblShop.Shopid))]
+    public SqlTblShop Shop { get; set; } = null!;
     [DisplayName("توضیحات حمل و نقل")]
     [DbMap("SHIPPINGDESCRIPTION_")]
     public string? Shippingdescription { get; set; }
@@ -200,9 +202,13 @@ public sealed class SqlTblSaleorder : SqlServerEntity
     [DisplayName("شناسه شخص خریدار")]
     [DbMap("CUSTOMERID_")]
     public int Customerid { get; set; }
+    [AssociationMap(nameof(Customerid), nameof(SqlTblPerson.Id))]
+    public SqlTblPerson Customer { get; set; } = null!;
     [DisplayName("شناسه شخص فروشنده")]
     [DbMap("SALESPERSONID_")]
     public int? Salespersonid { get; set; }
+    [AssociationMap(nameof(Salespersonid), nameof(SqlTblPerson.Id))]
+    public SqlTblPerson? Salesperson { get; set; }
     [DisplayName("موضوع صورتحساب")]
     [DbMap("INVOICESUBJECT_")]
     public byte Invoicesubject { get; set; }
@@ -239,12 +245,18 @@ public sealed class SqlTblSaleorder : SqlServerEntity
     [DisplayName("شناسه دوره مالی")]
     [DbMap("FISCALPERIODID_")]
     public int Fiscalperiodid { get; set; }
+    [AssociationMap(nameof(Fiscalperiodid), nameof(SqlTblShopfiscalperiod.Fiscalperiodid))]
+    public SqlTblShopfiscalperiod Fiscalperiod { get; set; } = null!;
     [DisplayName("شناسه پروژه")]
     [DbMap("PROJECTID_")]
     public int? Projectid { get; set; }
+    [AssociationMap(nameof(Projectid), nameof(SqlTblProject.Projectid))]
+    public SqlTblProject? Project { get; set; }
     [DisplayName("شناسه انبار")]
     [DbMap("WAREHOUSEID_")]
     public int? Warehouseid { get; set; }
+    [AssociationMap(nameof(Warehouseid), nameof(SqlTblWarehouse.Id))]
+    public SqlTblWarehouse? Warehouse { get; set; }
     [DisplayName("شناسه صورتحساب مرجع")]
     [DbMap("REFERENCESALEORDERID_")]
     public long? Referencesaleorderid { get; set; }
@@ -324,9 +336,13 @@ public sealed class SqlTblSaleorderitem : SqlServerEntity
     [DisplayName("شناسه سفارش فروش")]
     [DbMap("SALEORDERID_")]
     public long Saleorderid { get; set; }
+    [AssociationMap(nameof(Saleorderid), nameof(SqlTblSaleorder.Saleorderid))]
+    public SqlTblSaleorder Saleorder { get; set; } = null!;
     [DisplayName("شناسه محصول")]
     [DbMap("PRODUCTID_")]
     public int Productid { get; set; }
+    [AssociationMap(nameof(Productid), nameof(SqlTblProduct.Id))]
+    public SqlTblProduct Product { get; set; } = null!;
     [DisplayName("تعداد/مقدار")]
     [DbMap("QUANTITY_")]
     public decimal? Quantity { get; set; }
@@ -366,15 +382,23 @@ public sealed class SqlTblSaleorderitem : SqlServerEntity
     [DisplayName("شناسه پروژه")]
     [DbMap("PROJECTID_")]
     public int? Projectid { get; set; }
+    [AssociationMap(nameof(Projectid), nameof(SqlTblProject.Projectid))]
+    public SqlTblProject? Project { get; set; }
     [DisplayName("شناسه انبار")]
     [DbMap("LINEWAREHOUSEID_")]
     public int? Linewarehouseid { get; set; }
+    [AssociationMap(nameof(Linewarehouseid), nameof(SqlTblWarehouse.Id))]
+    public SqlTblWarehouse? Linewarehouse { get; set; }
     [DisplayName("شناسه دوره مالی")]
     [DbMap("FISCALPERIODID_")]
     public int Fiscalperiodid { get; set; }
+    [AssociationMap(nameof(Fiscalperiodid), nameof(SqlTblShopfiscalperiod.Fiscalperiodid))]
+    public SqlTblShopfiscalperiod Fiscalperiod { get; set; } = null!;
     [DisplayName("شناسه مغازه")]
     [DbMap("SHOPID_")]
     public int Shopid { get; set; }
+    [AssociationMap(nameof(Shopid), nameof(SqlTblShop.Shopid))]
+    public SqlTblShop Shop { get; set; } = null!;
     [DisplayName("مبلغ پایه مالیات بر ارزش افزوده")]
     [DbMap("VATBASEAMOUNT_")]
     public decimal? Vatbaseamount { get; set; }
@@ -464,18 +488,28 @@ public sealed class SqlTblSaleorderreturn : SqlServerEntity
     [DisplayName("شناسه مغازه")]
     [DbMap("SHOPID_")]
     public int Shopid { get; set; }
+    [AssociationMap(nameof(Shopid), nameof(SqlTblShop.Shopid))]
+    public SqlTblShop Shop { get; set; } = null!;
     [DisplayName("شناسه دوره مالی")]
     [DbMap("FISCALPERIODID_")]
     public int Fiscalperiodid { get; set; }
+    [AssociationMap(nameof(Fiscalperiodid), nameof(SqlTblShopfiscalperiod.Fiscalperiodid))]
+    public SqlTblShopfiscalperiod Fiscalperiod { get; set; } = null!;
     [DisplayName("شناسه انبار")]
     [DbMap("WAREHOUSEID_")]
     public int? Warehouseid { get; set; }
+    [AssociationMap(nameof(Warehouseid), nameof(SqlTblWarehouse.Id))]
+    public SqlTblWarehouse? Warehouse { get; set; }
     [DisplayName("شناسه پروژه")]
     [DbMap("PROJECTID_")]
     public int? Projectid { get; set; }
+    [AssociationMap(nameof(Projectid), nameof(SqlTblProject.Projectid))]
+    public SqlTblProject? Project { get; set; }
     [DisplayName("شناسه صورتحساب مرجع")]
     [DbMap("REFERENCESALEORDERID_")]
     public long Referencesaleorderid { get; set; }
+    [AssociationMap(nameof(Referencesaleorderid), nameof(SqlTblSaleorder.Saleorderid))]
+    public SqlTblSaleorder ReferenceSaleorder { get; set; } = null!;
     [DisplayName("شماره صورتحساب برگشتی")]
     [DbMap("INVOICENUMBER_")]
     public int Invoicenumber { get; set; }
@@ -544,24 +578,38 @@ public sealed class SqlTblSaleorderreturnitem : SqlServerEntity
     [DisplayName("شناسه آیتم مرجع")]
     [DbMap("REFERENCESALEORDERITEMID_")]
     public long Referencesaleorderitemid { get; set; }
+    [AssociationMap(nameof(Referencesaleorderitemid), nameof(SqlTblSaleorderitem.Saleorderitemid))]
+    public SqlTblSaleorderitem ReferenceSaleorderitem { get; set; } = null!;
     [DisplayName("شناسه صورتحساب برگشتی")]
     [DbMap("SALEORDERRETURNID_")]
     public long Saleorderreturnid { get; set; }
+    [AssociationMap(nameof(Saleorderreturnid), nameof(SqlTblSaleorderreturn.Saleorderreturnid))]
+    public SqlTblSaleorderreturn Saleorderreturn { get; set; } = null!;
     [DisplayName("شناسه مغازه")]
     [DbMap("SHOPID_")]
     public int Shopid { get; set; }
+    [AssociationMap(nameof(Shopid), nameof(SqlTblShop.Shopid))]
+    public SqlTblShop Shop { get; set; } = null!;
     [DisplayName("شناسه دوره مالی")]
     [DbMap("FISCALPERIODID_")]
     public int Fiscalperiodid { get; set; }
+    [AssociationMap(nameof(Fiscalperiodid), nameof(SqlTblShopfiscalperiod.Fiscalperiodid))]
+    public SqlTblShopfiscalperiod Fiscalperiod { get; set; } = null!;
     [DisplayName("شناسه انبار")]
     [DbMap("LINEWAREHOUSEID_")]
     public int? Linewarehouseid { get; set; }
+    [AssociationMap(nameof(Linewarehouseid), nameof(SqlTblWarehouse.Id))]
+    public SqlTblWarehouse? Linewarehouse { get; set; }
     [DisplayName("شناسه پروژه")]
     [DbMap("PROJECTID_")]
     public int? Projectid { get; set; }
+    [AssociationMap(nameof(Projectid), nameof(SqlTblProject.Projectid))]
+    public SqlTblProject? Project { get; set; }
     [DisplayName("شناسه محصول")]
     [DbMap("PRODUCTID_")]
     public int Productid { get; set; }
+    [AssociationMap(nameof(Productid), nameof(SqlTblProduct.Id))]
+    public SqlTblProduct Product { get; set; } = null!;
     [DisplayName("تعداد/مقدار برگشتی")]
     [DbMap("RETURNQUANTITY_")]
     public decimal Returnquantity { get; set; }
