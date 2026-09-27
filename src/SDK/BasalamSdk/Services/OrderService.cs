@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Basalam.SDK.Auth;
 using Basalam.SDK.Errors;
 using Basalam.SDK.Clients;
@@ -57,7 +58,16 @@ public interface IParcelService
     Task<ParcelSnapshot?> UpdateParcelStatusSnapshotAsync(int parcelId, string status,
         CancellationToken ct = default);
     Task<ParcelSnapshot?> GetParcelSnapshotAsync(int parcelId, CancellationToken ct = default);
+    Task<JsonElement> GetVendorParcelsAsync(VendorParcelsQuery? query = null, CancellationToken ct = default);
+    Task<JsonElement> GetVendorParcelAsync(int parcelId, CancellationToken ct = default);
+    Task<JsonElement> SetParcelPreparationAsync(int parcelId, CancellationToken ct = default);
+    Task<JsonElement> SetParcelPostedAsync(int parcelId, object postedData, CancellationToken ct = default);
 }
+
+public sealed record VendorParcelsQuery(string? CreatedAt = null, string? Cursor = null,
+    string? EstimateSendAt = null, string? Ids = null, string? CustomerIds = null,
+    string? OrderIds = null, string? ProductIds = null, string? VendorIds = null,
+    int? PerPage = null, string? Sort = null, IReadOnlyCollection<string>? Statuses = null);
 
 public sealed class ParcelService(IBasalamHttpClient client, ILogger<ParcelService>? logger = null) : IParcelService
 {
@@ -88,6 +98,38 @@ public sealed class ParcelService(IBasalamHttpClient client, ILogger<ParcelServi
         return client.GetAsync<ParcelSnapshot>($"/v1/parcels/{parcelId}", ct);
     }
 
+    public Task<JsonElement> GetVendorParcelsAsync(VendorParcelsQuery? query = null, CancellationToken ct = default)
+    {
+        var q = query ?? new VendorParcelsQuery();
+        if (q.PerPage is < 1 or > 100) throw Invalid("perPage");
+        var url = "/v1/vendor-parcels" + Query(
+            ("created_at", q.CreatedAt), ("cursor", q.Cursor), ("estimate_send_at", q.EstimateSendAt),
+            ("ids", q.Ids), ("items.customer_ids", q.CustomerIds), ("items.order_ids", q.OrderIds),
+            ("items.product_ids", q.ProductIds), ("items.vendor_ids", q.VendorIds),
+            ("per_page", q.PerPage?.ToString()), ("sort", q.Sort),
+            ("statuses", q.Statuses is { Count: > 0 } ? string.Join(',', q.Statuses) : null));
+        return client.GetAsync<JsonElement>(url, ct);
+    }
+
+    public Task<JsonElement> GetVendorParcelAsync(int parcelId, CancellationToken ct = default)
+    {
+        ValidateId(parcelId);
+        return client.GetAsync<JsonElement>($"/v1/vendor-parcels/{parcelId}", ct);
+    }
+
+    public Task<JsonElement> SetParcelPreparationAsync(int parcelId, CancellationToken ct = default)
+    {
+        ValidateId(parcelId);
+        return client.PostAsync<JsonElement>($"/v1/vendor-parcels/{parcelId}/set-preparation", null, ct);
+    }
+
+    public Task<JsonElement> SetParcelPostedAsync(int parcelId, object postedData, CancellationToken ct = default)
+    {
+        ValidateId(parcelId);
+        ArgumentNullException.ThrowIfNull(postedData);
+        return client.PostAsync<JsonElement>($"/v1/vendor-parcels/{parcelId}/set-posted", postedData, ct);
+    }
+
     private static void ValidateId(int id)
     {
         if (id <= 0) throw new BasalamValidationError(new Dictionary<string, IReadOnlyList<string>>
@@ -99,6 +141,16 @@ public sealed class ParcelService(IBasalamHttpClient client, ILogger<ParcelServi
             throw new BasalamValidationError(new Dictionary<string, IReadOnlyList<string>>
             { ["status"] = ["Status is required and must be a short value"] });
     }
+
+    private static string Query(params (string Name, string? Value)[] values)
+    {
+        var parts = values.Where(x => !string.IsNullOrWhiteSpace(x.Value))
+            .Select(x => Uri.EscapeDataString(x.Name) + "=" + Uri.EscapeDataString(x.Value!));
+        var query = string.Join('&', parts);
+        return query.Length == 0 ? string.Empty : "?" + query;
+    }
+    private static BasalamValidationError Invalid(string field) =>
+        new(new Dictionary<string, IReadOnlyList<string>> { [field] = ["Value is invalid"] });
 }
 
 public interface ICustomerService
