@@ -13,7 +13,11 @@ public interface IOrderService
     Task<OrderSnapshot?> CreateOrderSnapshotAsync(object order, CancellationToken ct = default);
     Task<object?> GetOrderAsync(int orderId, CancellationToken ct = default);
     Task<OrderSnapshot?> GetOrderSnapshotAsync(int orderId, CancellationToken ct = default);
+    Task<JsonElement> GetOrderStatsAsync(OrderStatsQuery query, CancellationToken ct = default);
 }
+
+public sealed record OrderStatsQuery(string ResourceCount, int? VendorId = null, int? ProductId = null,
+    int? CustomerId = null, string? CouponCode = null);
 
 public sealed class OrderService(IBasalamHttpClient client, ILogger<OrderService>? logger = null) : IOrderService
 {
@@ -42,6 +46,26 @@ public sealed class OrderService(IBasalamHttpClient client, ILogger<OrderService
     {
         ValidateId(orderId);
         return client.GetAsync<OrderSnapshot>($"/v1/orders/{orderId}", ct);
+    }
+
+    public Task<JsonElement> GetOrderStatsAsync(OrderStatsQuery query, CancellationToken ct = default)
+    {
+        ArgumentNullException.ThrowIfNull(query);
+        if (string.IsNullOrWhiteSpace(query.ResourceCount) || query.ResourceCount.Length > 100)
+            throw new BasalamValidationError(new Dictionary<string, IReadOnlyList<string>>
+            { ["resourceCount"] = ["ResourceCount is required"] });
+        return client.GetAsync<JsonElement>("/v1/orders/stats" + Query(
+            ("resource_count", query.ResourceCount), ("vendor_id", query.VendorId?.ToString()),
+            ("product_id", query.ProductId?.ToString()), ("customer_id", query.CustomerId?.ToString()),
+            ("coupon_code", query.CouponCode)), ct);
+    }
+
+    private static string Query(params (string Name, string? Value)[] values)
+    {
+        var parts = values.Where(x => !string.IsNullOrWhiteSpace(x.Value))
+            .Select(x => Uri.EscapeDataString(x.Name) + "=" + Uri.EscapeDataString(x.Value!));
+        var query = string.Join('&', parts);
+        return query.Length == 0 ? string.Empty : "?" + query;
     }
 
     private static void ValidateId(int id)
