@@ -1,3 +1,5 @@
+using Hyper.Domain.Entities.Common;
+using Neo.Bpms.Domain.Models.Cmmn.UI.Components;
 using Neo.Domain.Entities.Common;
 using User = Hyper.Domain.Entities.Common.User;
 
@@ -29,9 +31,6 @@ public partial class HomePageEntityUiDefinitions
             AddHyperPart("اطلاعات پایه", "Public Info");
             {
                 AddHyperPartItem<CultureTerm>("واژه ها");
-                AddHyperPartItem<Country>("کشورها");
-                AddHyperPartItem<Province>("استان‌ها");
-                AddHyperPartItem<City>("شهرها");
                 EndPart();
             }
             AddHyperPart("مستندات", "DocumentsInfo");

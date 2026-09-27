@@ -577,7 +577,7 @@ public sealed class SqlTblInventoryfifoconsumption : SqlServerEntity<int>
     [DisplayName("شناسه آیتم حواله")]
     [DbMap("STOCKCARDITEMID_")]
     public int Stockcarditemid { get; set; }
-    [AssociationMap(nameof(Stockcarditemid), nameof(SqlTblStockcarditem.Stockcarditemid))]
+    [AssociationMap(nameof(Stockcarditemid), nameof(SqlTblStockcarditem.Id))]
     public SqlTblStockcarditem Stockcarditem { get; set; } = null!;
     [DisplayName("شناسه مغازه")]
     [DbMap("SHOPID_")]
@@ -608,7 +608,7 @@ public sealed class SqlTblInventoryfifolayer : SqlServerEntity<int>
     [DisplayName("شناسه آیتم رسید")]
     [DbMap("STOCKCARDITEMID_")]
     public int Stockcarditemid { get; set; }
-    [AssociationMap(nameof(Stockcarditemid), nameof(SqlTblStockcarditem.Stockcarditemid))]
+    [AssociationMap(nameof(Stockcarditemid), nameof(SqlTblStockcarditem.Id))]
     public SqlTblStockcarditem Stockcarditem { get; set; } = null!;
     [DisplayName("شناسه کالا")]
     [DbMap("PRODUCTID_")]
@@ -1206,8 +1206,6 @@ public sealed class SqlTblShopfiscalperiod : SqlServerEntity
     [DisplayName("شناسه مغازه")]
     [DbMap("SHOPID_")]
     public int Shopid { get; set; }
-    [AssociationMap(nameof(Shopid), nameof(SqlTblShop.Shopid))]
-    public SqlTblShop Shop { get; set; } = null!;
     [AssociationMap(nameof(Shopid), nameof(SqlTblShop.Shopid))]
     public SqlTblShop Shop { get; set; } = null!;
     [DisplayName("شناسه وضعیت دوره مالی")]

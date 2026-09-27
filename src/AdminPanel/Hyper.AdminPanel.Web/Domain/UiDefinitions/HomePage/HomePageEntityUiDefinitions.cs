@@ -1,7 +1,8 @@
 using Hyper.AdminPanel.Domain.UiDefinitions.Database;
 using Hyper.Domain.Entities.Database;
 namespace Hyper.AdminPanel.Domain.UiDefinitions.HomePage;
-public sealed class HomePageEntityUiDefinitions : CRUDDefinition<HomePageEntity>
+
+public partial class HomePageEntityUiDefinitions : CRUDDefinition<HomePageEntity>
 {
     public override List<string>? Roles => [HyperRoles.Admin];
     public sealed class HomePageDashboard : DashboardDefinition
@@ -25,7 +26,7 @@ public sealed class HomePageEntityUiDefinitions : CRUDDefinition<HomePageEntity>
             AddReport<SqlIntegrationwebhookinbox>();
             AddReport<SqlIntegrationsyncruns>();
         }
-public class BusinessDashboard : DashboardConfigDefinition
+        public class BusinessDashboard : DashboardConfigDefinition
         {
             protected override string Title => "نمای کلی کسب‌وکار";
             protected override List<string> Roles => [HyperRoles.Admin];

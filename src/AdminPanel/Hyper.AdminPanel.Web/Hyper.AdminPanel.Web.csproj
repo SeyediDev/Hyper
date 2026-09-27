@@ -9,7 +9,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\WorkManagement\Hyper.WorkManagement.Contracts\Hyper.WorkManagement.Contracts.csproj" />
     <ProjectReference Include="..\..\WorkManagement\Hyper.WorkManagement.Infrastructure\Hyper.WorkManagement.Infrastructure.csproj" />
-		<PackageReference Include="AutoMapper" />
 		<PackageReference Include="Ardalis.GuardClauses" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" />
@@ -80,7 +79,6 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\..\..\..\Neo-Bpms\src\Neo.Bpms.Api\Neo.Bpms.Api.csproj" />
-	  <ProjectReference Include="..\Hyper.AdminPanel.Domain\Hyper.AdminPanel.Domain.csproj" />
 	  <ProjectReference Include="..\..\Core\Hyper.Application\Hyper.Application.csproj" />
 	  <ProjectReference Include="..\..\Core\Hyper.Infrastructure\Hyper.Infrastructure.csproj" />
 	  <ProjectReference Include="..\..\Integration\Hyper.Integration.Api\Hyper.Integration.Api.csproj" />

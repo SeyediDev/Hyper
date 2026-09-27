@@ -51,7 +51,7 @@ public sealed record ShippingProfileProductsListQuery(int? ProfileIdEq = null, i
     string? ProductTitleLike = null, string? Sort = null, int? PerPage = null,
     int? VendorId = null, string? Cursor = null);
 
-public sealed class ShippingService(IBasalamHttpClient client, ILogger<ShippingService>? logger = null) : IShippingService
+public sealed class ShippingService(IBasalamHttpClient client/*, ILogger<ShippingService>? logger = null*/) : IShippingService
 {
     public Task<JsonElement> GetProfilesAsync(int? page = null, int? perPage = null, int? vendorId = null, CancellationToken ct = default) =>
         Get("/v1/shipping/profiles" + Query(("page", page), ("per_page", perPage), ("vendor_id", vendorId)), ct);

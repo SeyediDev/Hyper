@@ -71,7 +71,7 @@ public sealed class BasalamClient : IBasalamClient, IDisposable
         Chat = new ChatService(httpFactory, logger as ILogger<Services.ChatService>);
         Uploads = new UploadService(httpFactory, logger as ILogger<Services.UploadService>);
         Appstore = new AppstoreService(httpFactory, logger as ILogger<Services.AppstoreService>);
-        Shipping = new ShippingService(httpFactory, logger as ILogger<Services.ShippingService>);
+        Shipping = new ShippingService(httpFactory/*, logger as ILogger<Services.ShippingService>*/);
         Search = new SearchService(httpFactory);
         Wallet = new WalletService(httpFactory);
         Story = new StoryService(httpFactory);
