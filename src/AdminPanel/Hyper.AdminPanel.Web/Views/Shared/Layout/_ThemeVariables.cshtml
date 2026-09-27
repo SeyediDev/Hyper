@@ -45,7 +45,8 @@
 
 
 <style>
-    :root {
+    /* Native host colors win over legacy OS-dark defaults, including first paint. */
+    :root[data-theme], :root:not([data-theme]) {
         /* Primary Colors - Dynamic based on user theme */
         --neo-menu-primary: @themeObj.Primary;
         --neo-menu-primary-hover: @themeObj.PrimaryHover;

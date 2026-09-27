@@ -210,22 +210,20 @@ public class ThemeService : IThemeService
     }
 
     /// <summary>
-    /// ایجاد تم سیموتک - سبز لیمویی با پس‌زمینه تیره
+    /// ایجاد تم سیموتک - سبز لیمویی با پس‌زمینه روشن
     /// هارمونی: Analogous با زرد-سبز
     /// </summary>
     private Theme CreateSimotekTheme(ThemePreference preference)
     {
-        var textColors = GetTextColors(isDarkBackground: true);
-        var borderColors = GetBorderColors(isDarkBackground: true);
 
         var theme = new Theme
         {
             Preference = preference,
             Name = "سیموتک",
             // Primary Colors - Lime Green
-            Primary = "#c2ef03",
-            PrimaryHover = "#d8f54a",
-            PrimaryActive = "#b8d900",
+            Primary = "#456f0d",
+            PrimaryHover = "#3f6212",
+            PrimaryActive = "#365314",
             PrimaryLight = "rgba(194, 239, 3, 0.15)",
             // Secondary Colors - Analogous Yellow
             Secondary = "#eab308",
@@ -236,48 +234,45 @@ public class ThemeService : IThemeService
             Warning = "#f59e0b",
             Danger = "#ef4444",
             Info = "#3b82f6",
-            // Background Colors - Material Design Dark
-            BackgroundPrimary = "#1a1f2e",      // Very dark blue-gray
-            BackgroundSecondary = "#0f1419",    // Even darker
-            BackgroundTertiary = "#505563",     // Very subtle white for minimal design
-            BackgroundCard = "#f7f3f330",         // Card background
+            // Opaque light surfaces; color identity stays in accents and subtle tints.
+            BackgroundPrimary = "#ffffff",
+            BackgroundSecondary = "#f7faef",
+            BackgroundTertiary = "#edf5db",
+            BackgroundCard = "#ffffff",
             BackgroundHover = "rgba(194, 239, 3, 0.1)",
             BackgroundActive = "rgba(194, 239, 3, 0.2)",
             BackgroundLight = "rgba(194, 239, 3, 0.05)",
             // Text Colors - High contrast for readability
-            TextPrimary = "#ffffff",
-            TextSecondary = "#cbd5e1",
-            TextMuted = "#64748b",
+            TextPrimary = "#0f172a",
+            TextSecondary = "#334155",
+            TextMuted = "#475569",
             TextOnDark = "#ffffff",
             // Border Colors
-            BorderLight = "rgba(255, 255, 255, 0.1)",
-            BorderMedium = "rgba(255, 255, 255, 0.2)",
-            BorderDark = "rgba(255, 255, 255, 0.3)",
-            // Header & Navigation - Matching theme
-            HeaderBackground = "#0f1419",
-            HeaderText = "#ffffff",
-            HeaderUserBackground = "#1a1f2e",
-            HeaderUserText = "#c2ef03",
-            // Dashboard - Tabs darker than widgets
-            DashboardTabBackground = "#0f1419",      // Darker
-            DashboardTabText = "#ffffff",
-            DashboardWidgetBackground = "#232838",   // Lighter than tabs
-            DashboardWidgetBorder = "rgba(194, 239, 3, 0.3)",
-            // Forms - Material Design
-            FormBackground = "#1a1f2e",
-            FormInputBackground = "#0f1419",
-            FormInputText = "#ffffff",
-            FormInputBorder = "rgba(255, 255, 255, 0.2)",
-            FormInputBorderFocus = "#c2ef03",
-            FormButtonBackground = "#c2ef03",
-            FormButtonText = "#0f1419"
+            BorderLight = "#e2e8f0",
+            BorderMedium = "#cbd5e1",
+            BorderDark = "#94a3b8",
+            HeaderBackground = "#ffffff",
+            HeaderText = "#0f172a",
+            HeaderUserBackground = "#edf5db",
+            HeaderUserText = "#456f0d",
+            DashboardTabBackground = "#edf5db",
+            DashboardTabText = "#334155",
+            DashboardWidgetBackground = "#ffffff",
+            DashboardWidgetBorder = "#cbd5e1",
+            FormBackground = "#ffffff",
+            FormInputBackground = "#ffffff",
+            FormInputText = "#0f172a",
+            FormInputBorder = "#94a3b8",
+            FormInputBorderFocus = "#456f0d",
+            FormButtonBackground = "#456f0d",
+            FormButtonText = "#ffffff"
         };
 
-        return CompleteThemeWithChartAndReport(theme, isDarkBackground: true);
+        return CompleteThemeWithChartAndReport(theme, isDarkBackground: false);
     }
 
     /// <summary>
-    /// ایجاد تم بنفش - بنفش روشن با پس‌زمینه تیره
+    /// ایجاد تم بنفش - بنفش روشن با پس‌زمینه روشن
     /// هارمونی: Monochromatic با صورتی
     /// </summary>
     private Theme CreatePurpleTheme(ThemePreference preference)
@@ -286,9 +281,9 @@ public class ThemeService : IThemeService
         {
             Preference = preference,
             Name = "بنفش",
-            Primary = "#a855f7",
-            PrimaryHover = "#c084fc",
-            PrimaryActive = "#9333ea",
+            Primary = "#7e22ce",
+            PrimaryHover = "#6b21a8",
+            PrimaryActive = "#581c87",
             PrimaryLight = "rgba(168, 85, 247, 0.15)",
             Secondary = "#e879f9",
             SecondaryHover = "#f0abfc",
@@ -297,42 +292,42 @@ public class ThemeService : IThemeService
             Warning = "#f59e0b",
             Danger = "#ef4444",
             Info = "#3b82f6",
-            BackgroundPrimary = "#2d1b4e",
-            BackgroundSecondary = "#1a1033",
-            BackgroundTertiary = "#ebd4fa",
-            BackgroundCard = "#f9f9fa30",
+            BackgroundPrimary = "#ffffff",
+            BackgroundSecondary = "#faf7fd",
+            BackgroundTertiary = "#f3e8ff",
+            BackgroundCard = "#ffffff",
             BackgroundHover = "rgba(168, 85, 247, 0.1)",
             BackgroundActive = "rgba(168, 85, 247, 0.2)",
             BackgroundLight = "rgba(168, 85, 247, 0.05)",
-            TextPrimary = "#ffffff",
-            TextSecondary = "#e9d5ff",
-            TextMuted = "#a855f7",
+            TextPrimary = "#0f172a",
+            TextSecondary = "#334155",
+            TextMuted = "#475569",
             TextOnDark = "#ffffff",
-            BorderLight = "rgba(233, 213, 255, 0.1)",
-            BorderMedium = "rgba(233, 213, 255, 0.2)",
-            BorderDark = "rgba(233, 213, 255, 0.3)",
-            HeaderBackground = "#1a1033",
-            HeaderText = "#ffffff",
-            HeaderUserBackground = "#2d1b4e",
-            HeaderUserText = "#e879f9",
-            DashboardTabBackground = "#1a1033",
-            DashboardTabText = "#ffffff",
-            DashboardWidgetBackground = "#3d2169",
-            DashboardWidgetBorder = "rgba(168, 85, 247, 0.3)",
-            FormBackground = "#2d1b4e",
-            FormInputBackground = "#1a1033",
-            FormInputText = "#ffffff",
-            FormInputBorder = "rgba(233, 213, 255, 0.2)",
-            FormInputBorderFocus = "#a855f7",
-            FormButtonBackground = "#a855f7",
+            BorderLight = "#e2e8f0",
+            BorderMedium = "#cbd5e1",
+            BorderDark = "#94a3b8",
+            HeaderBackground = "#ffffff",
+            HeaderText = "#0f172a",
+            HeaderUserBackground = "#f3e8ff",
+            HeaderUserText = "#7e22ce",
+            DashboardTabBackground = "#f3e8ff",
+            DashboardTabText = "#334155",
+            DashboardWidgetBackground = "#ffffff",
+            DashboardWidgetBorder = "#cbd5e1",
+            FormBackground = "#ffffff",
+            FormInputBackground = "#ffffff",
+            FormInputText = "#0f172a",
+            FormInputBorder = "#94a3b8",
+            FormInputBorderFocus = "#7e22ce",
+            FormButtonBackground = "#7e22ce",
             FormButtonText = "#ffffff"
         };
 
-        return CompleteThemeWithChartAndReport(theme, isDarkBackground: true);
+        return CompleteThemeWithChartAndReport(theme, isDarkBackground: false);
     }
 
     /// <summary>
-    /// ایجاد تم نارنجی - نارنجی روشن با پس‌زمینه تیره
+    /// ایجاد تم نارنجی - نارنجی روشن با پس‌زمینه روشن
     /// هارمونی: Warm Analogous با قرمز-نارنجی
     /// </summary>
     private Theme CreateOrangeTheme(ThemePreference preference)
@@ -341,9 +336,9 @@ public class ThemeService : IThemeService
         {
             Preference = preference,
             Name = "نارنجی",
-            Primary = "#f97316",
-            PrimaryHover = "#fb923c",
-            PrimaryActive = "#ea580c",
+            Primary = "#c2410c",
+            PrimaryHover = "#9a3412",
+            PrimaryActive = "#7c2d12",
             PrimaryLight = "rgba(249, 115, 22, 0.15)",
             Secondary = "#f43f5e",
             SecondaryHover = "#fb7185",
@@ -352,42 +347,42 @@ public class ThemeService : IThemeService
             Warning = "#eab308",
             Danger = "#dc2626",
             Info = "#3b82f6",
-            BackgroundPrimary = "#2d1a0f",
-            BackgroundSecondary = "#1a0f08",
-            BackgroundTertiary = "#ffdec3",
-            BackgroundCard = "#f8ebe030",
+            BackgroundPrimary = "#ffffff",
+            BackgroundSecondary = "#fff9f5",
+            BackgroundTertiary = "#ffedd5",
+            BackgroundCard = "#ffffff",
             BackgroundHover = "rgba(249, 115, 22, 0.1)",
             BackgroundActive = "rgba(249, 115, 22, 0.2)",
             BackgroundLight = "rgba(249, 115, 22, 0.05)",
-            TextPrimary = "#ffffff",
-            TextSecondary = "#fed7aa",
-            TextMuted = "#f97316",
+            TextPrimary = "#0f172a",
+            TextSecondary = "#334155",
+            TextMuted = "#475569",
             TextOnDark = "#ffffff",
-            BorderLight = "rgba(254, 215, 170, 0.1)",
-            BorderMedium = "rgba(254, 215, 170, 0.2)",
-            BorderDark = "rgba(254, 215, 170, 0.3)",
-            HeaderBackground = "#1a0f08",
-            HeaderText = "#ffffff",
-            HeaderUserBackground = "#2d1a0f",
-            HeaderUserText = "#fb923c",
-            DashboardTabBackground = "#1a0f08",
-            DashboardTabText = "#ffffff",
-            DashboardWidgetBackground = "#3d2214",
-            DashboardWidgetBorder = "rgba(249, 115, 22, 0.3)",
-            FormBackground = "#2d1a0f",
-            FormInputBackground = "#1a0f08",
-            FormInputText = "#ffffff",
-            FormInputBorder = "rgba(254, 215, 170, 0.2)",
-            FormInputBorderFocus = "#f97316",
-            FormButtonBackground = "#f97316",
+            BorderLight = "#e2e8f0",
+            BorderMedium = "#cbd5e1",
+            BorderDark = "#94a3b8",
+            HeaderBackground = "#ffffff",
+            HeaderText = "#0f172a",
+            HeaderUserBackground = "#ffedd5",
+            HeaderUserText = "#c2410c",
+            DashboardTabBackground = "#ffedd5",
+            DashboardTabText = "#334155",
+            DashboardWidgetBackground = "#ffffff",
+            DashboardWidgetBorder = "#cbd5e1",
+            FormBackground = "#ffffff",
+            FormInputBackground = "#ffffff",
+            FormInputText = "#0f172a",
+            FormInputBorder = "#94a3b8",
+            FormInputBorderFocus = "#c2410c",
+            FormButtonBackground = "#c2410c",
             FormButtonText = "#ffffff"
         };
 
-        return CompleteThemeWithChartAndReport(theme, isDarkBackground: true);
+        return CompleteThemeWithChartAndReport(theme, isDarkBackground: false);
     }
 
     /// <summary>
-    /// ایجاد تم قرمز - قرمز روشن با پس‌زمینه تیره
+    /// ایجاد تم قرمز - قرمز روشن با پس‌زمینه روشن
     /// هارمونی: Complementary with cyan accents
     /// </summary>
     private Theme CreateRedTheme(ThemePreference preference)
@@ -396,9 +391,9 @@ public class ThemeService : IThemeService
         {
             Preference = preference,
             Name = "قرمز",
-            Primary = "#ef4444",
-            PrimaryHover = "#f87171",
-            PrimaryActive = "#dc2626",
+            Primary = "#b91c1c",
+            PrimaryHover = "#991b1b",
+            PrimaryActive = "#7f1d1d",
             PrimaryLight = "rgba(239, 68, 68, 0.15)",
             Secondary = "#06b6d4",
             SecondaryHover = "#22d3ee",
@@ -407,42 +402,42 @@ public class ThemeService : IThemeService
             Warning = "#f59e0b",
             Danger = "#dc2626",
             Info = "#06b6d4",
-            BackgroundPrimary = "#2d0f0f",
-            BackgroundSecondary = "#1a0808",
-            BackgroundTertiary = "#fcb7b7",
-            BackgroundCard = "#f8e2e230",
+            BackgroundPrimary = "#ffffff",
+            BackgroundSecondary = "#fff7f7",
+            BackgroundTertiary = "#fee2e2",
+            BackgroundCard = "#ffffff",
             BackgroundHover = "rgba(239, 68, 68, 0.1)",
             BackgroundActive = "rgba(239, 68, 68, 0.2)",
             BackgroundLight = "rgba(239, 68, 68, 0.05)",
-            TextPrimary = "#ffffff",
-            TextSecondary = "#fecaca",
-            TextMuted = "#ef4444",
+            TextPrimary = "#0f172a",
+            TextSecondary = "#334155",
+            TextMuted = "#475569",
             TextOnDark = "#ffffff",
-            BorderLight = "rgba(254, 202, 202, 0.1)",
-            BorderMedium = "rgba(254, 202, 202, 0.2)",
-            BorderDark = "rgba(254, 202, 202, 0.3)",
-            HeaderBackground = "#1a0808",
-            HeaderText = "#ffffff",
-            HeaderUserBackground = "#2d0f0f",
-            HeaderUserText = "#f87171",
-            DashboardTabBackground = "#1a0808",
-            DashboardTabText = "#ffffff",
-            DashboardWidgetBackground = "#3d1515",
-            DashboardWidgetBorder = "rgba(239, 68, 68, 0.3)",
-            FormBackground = "#2d0f0f",
-            FormInputBackground = "#1a0808",
-            FormInputText = "#ffffff",
-            FormInputBorder = "rgba(254, 202, 202, 0.2)",
-            FormInputBorderFocus = "#ef4444",
-            FormButtonBackground = "#ef4444",
+            BorderLight = "#e2e8f0",
+            BorderMedium = "#cbd5e1",
+            BorderDark = "#94a3b8",
+            HeaderBackground = "#ffffff",
+            HeaderText = "#0f172a",
+            HeaderUserBackground = "#fee2e2",
+            HeaderUserText = "#b91c1c",
+            DashboardTabBackground = "#fee2e2",
+            DashboardTabText = "#334155",
+            DashboardWidgetBackground = "#ffffff",
+            DashboardWidgetBorder = "#cbd5e1",
+            FormBackground = "#ffffff",
+            FormInputBackground = "#ffffff",
+            FormInputText = "#0f172a",
+            FormInputBorder = "#94a3b8",
+            FormInputBorderFocus = "#b91c1c",
+            FormButtonBackground = "#b91c1c",
             FormButtonText = "#ffffff"
         };
 
-        return CompleteThemeWithChartAndReport(theme, isDarkBackground: true);
+        return CompleteThemeWithChartAndReport(theme, isDarkBackground: false);
     }
 
     /// <summary>
-    /// ایجاد تم فیروزه‌ای - فیروزه‌ای با پس‌زمینه تیره
+    /// ایجاد تم فیروزه‌ای - فیروزه‌ای با پس‌زمینه روشن
     /// هارمونی: Analogous with blue-green
     /// </summary>
     private Theme CreateTealTheme(ThemePreference preference)
@@ -451,9 +446,9 @@ public class ThemeService : IThemeService
         {
             Preference = preference,
             Name = "فیروزه‌ای",
-            Primary = "#14b8a6",
-            PrimaryHover = "#2dd4bf",
-            PrimaryActive = "#0d9488",
+            Primary = "#0f766e",
+            PrimaryHover = "#115e59",
+            PrimaryActive = "#134e4a",
             PrimaryLight = "rgba(20, 184, 166, 0.15)",
             Secondary = "#0ea5e9",
             SecondaryHover = "#38bdf8",
@@ -462,42 +457,42 @@ public class ThemeService : IThemeService
             Warning = "#f59e0b",
             Danger = "#ef4444",
             Info = "#0ea5e9",
-            BackgroundPrimary = "#0f2927",
-            BackgroundSecondary = "#081a19",
-            BackgroundTertiary = "#cbf1fd",
-            BackgroundCard = "#e8faff30",
+            BackgroundPrimary = "#ffffff",
+            BackgroundSecondary = "#f3faf9",
+            BackgroundTertiary = "#dff4f0",
+            BackgroundCard = "#ffffff",
             BackgroundHover = "rgba(20, 184, 166, 0.1)",
             BackgroundActive = "rgba(20, 184, 166, 0.2)",
             BackgroundLight = "rgba(20, 184, 166, 0.05)",
-            TextPrimary = "#ffffff",
-            TextSecondary = "#99f6e4",
-            TextMuted = "#14b8a6",
+            TextPrimary = "#0f172a",
+            TextSecondary = "#334155",
+            TextMuted = "#475569",
             TextOnDark = "#ffffff",
-            BorderLight = "rgba(153, 246, 228, 0.1)",
-            BorderMedium = "rgba(153, 246, 228, 0.2)",
-            BorderDark = "rgba(153, 246, 228, 0.3)",
-            HeaderBackground = "#081a19",
-            HeaderText = "#ffffff",
-            HeaderUserBackground = "#0f2927",
-            HeaderUserText = "#2dd4bf",
-            DashboardTabBackground = "#081a19",
-            DashboardTabText = "#ffffff",
-            DashboardWidgetBackground = "#153835",
-            DashboardWidgetBorder = "rgba(20, 184, 166, 0.3)",
-            FormBackground = "#0f2927",
-            FormInputBackground = "#081a19",
-            FormInputText = "#ffffff",
-            FormInputBorder = "rgba(153, 246, 228, 0.2)",
-            FormInputBorderFocus = "#14b8a6",
-            FormButtonBackground = "#14b8a6",
+            BorderLight = "#e2e8f0",
+            BorderMedium = "#cbd5e1",
+            BorderDark = "#94a3b8",
+            HeaderBackground = "#ffffff",
+            HeaderText = "#0f172a",
+            HeaderUserBackground = "#dff4f0",
+            HeaderUserText = "#0f766e",
+            DashboardTabBackground = "#dff4f0",
+            DashboardTabText = "#334155",
+            DashboardWidgetBackground = "#ffffff",
+            DashboardWidgetBorder = "#cbd5e1",
+            FormBackground = "#ffffff",
+            FormInputBackground = "#ffffff",
+            FormInputText = "#0f172a",
+            FormInputBorder = "#94a3b8",
+            FormInputBorderFocus = "#0f766e",
+            FormButtonBackground = "#0f766e",
             FormButtonText = "#ffffff"
         };
 
-        return CompleteThemeWithChartAndReport(theme, isDarkBackground: true);
+        return CompleteThemeWithChartAndReport(theme, isDarkBackground: false);
     }
 
     /// <summary>
-    /// ایجاد تم نیلی - نیلی روشن با پس‌زمینه تیره
+    /// ایجاد تم نیلی - نیلی روشن با پس‌زمینه روشن
     /// هارمونی: Monochromatic with purple
     /// </summary>
     private Theme CreateIndigoTheme(ThemePreference preference)
@@ -506,9 +501,9 @@ public class ThemeService : IThemeService
         {
             Preference = preference,
             Name = "نیلی",
-            Primary = "#6366f1",
-            PrimaryHover = "#818cf8",
-            PrimaryActive = "#4f46e5",
+            Primary = "#4338ca",
+            PrimaryHover = "#3730a3",
+            PrimaryActive = "#312e81",
             PrimaryLight = "rgba(99, 102, 241, 0.15)",
             Secondary = "#8b5cf6",
             SecondaryHover = "#a78bfa",
@@ -517,42 +512,42 @@ public class ThemeService : IThemeService
             Warning = "#f59e0b",
             Danger = "#ef4444",
             Info = "#3b82f6",
-            BackgroundPrimary = "#1e1b3a",
-            BackgroundSecondary = "#12102b",
-            BackgroundTertiary = "#bddaf5",
-            BackgroundCard = "#bddaf530",
+            BackgroundPrimary = "#ffffff",
+            BackgroundSecondary = "#f7f8fe",
+            BackgroundTertiary = "#e9eafe",
+            BackgroundCard = "#ffffff",
             BackgroundHover = "rgba(99, 102, 241, 0.1)",
             BackgroundActive = "rgba(99, 102, 241, 0.2)",
             BackgroundLight = "rgba(99, 102, 241, 0.05)",
-            TextPrimary = "#ffffff",
-            TextSecondary = "#c7d2fe",
-            TextMuted = "#6366f1",
+            TextPrimary = "#0f172a",
+            TextSecondary = "#334155",
+            TextMuted = "#475569",
             TextOnDark = "#ffffff",
-            BorderLight = "rgba(199, 210, 254, 0.1)",
-            BorderMedium = "rgba(199, 210, 254, 0.2)",
-            BorderDark = "rgba(199, 210, 254, 0.3)",
-            HeaderBackground = "#12102b",
-            HeaderText = "#ffffff",
-            HeaderUserBackground = "#1e1b3a",
-            HeaderUserText = "#818cf8",
-            DashboardTabBackground = "#12102b",
-            DashboardTabText = "#ffffff",
-            DashboardWidgetBackground = "#28234d",
-            DashboardWidgetBorder = "rgba(99, 102, 241, 0.3)",
-            FormBackground = "#1e1b3a",
-            FormInputBackground = "#12102b",
-            FormInputText = "#ffffff",
-            FormInputBorder = "rgba(199, 210, 254, 0.2)",
-            FormInputBorderFocus = "#6366f1",
-            FormButtonBackground = "#6366f1",
+            BorderLight = "#e2e8f0",
+            BorderMedium = "#cbd5e1",
+            BorderDark = "#94a3b8",
+            HeaderBackground = "#ffffff",
+            HeaderText = "#0f172a",
+            HeaderUserBackground = "#e9eafe",
+            HeaderUserText = "#4338ca",
+            DashboardTabBackground = "#e9eafe",
+            DashboardTabText = "#334155",
+            DashboardWidgetBackground = "#ffffff",
+            DashboardWidgetBorder = "#cbd5e1",
+            FormBackground = "#ffffff",
+            FormInputBackground = "#ffffff",
+            FormInputText = "#0f172a",
+            FormInputBorder = "#94a3b8",
+            FormInputBorderFocus = "#4338ca",
+            FormButtonBackground = "#4338ca",
             FormButtonText = "#ffffff"
         };
 
-        return CompleteThemeWithChartAndReport(theme, isDarkBackground: true);
+        return CompleteThemeWithChartAndReport(theme, isDarkBackground: false);
     }
 
     /// <summary>
-    /// ایجاد تم زمردی - زمردی روشن با پس‌زمینه تیره
+    /// ایجاد تم زمردی - زمردی روشن با پس‌زمینه روشن
     /// هارمونی: Monochromatic with green
     /// </summary>
     private Theme CreateEmeraldTheme(ThemePreference preference)
@@ -561,9 +556,9 @@ public class ThemeService : IThemeService
         {
             Preference = preference,
             Name = "زمردی",
-            Primary = "#10b981",
-            PrimaryHover = "#34d399",
-            PrimaryActive = "#059669",
+            Primary = "#047857",
+            PrimaryHover = "#065f46",
+            PrimaryActive = "#064e3b",
             PrimaryLight = "rgba(16, 185, 129, 0.15)",
             Secondary = "#84cc16",
             SecondaryHover = "#a3e635",
@@ -572,42 +567,42 @@ public class ThemeService : IThemeService
             Warning = "#f59e0b",
             Danger = "#ef4444",
             Info = "#3b82f6",
-            BackgroundPrimary = "#0f261e",
-            BackgroundSecondary = "#081912",
-            BackgroundTertiary = "#e3f3d7",
-            BackgroundCard = "#dbffc230",
+            BackgroundPrimary = "#ffffff",
+            BackgroundSecondary = "#f3faf6",
+            BackgroundTertiary = "#e0f2e9",
+            BackgroundCard = "#ffffff",
             BackgroundHover = "rgba(16, 185, 129, 0.1)",
             BackgroundActive = "rgba(16, 185, 129, 0.2)",
             BackgroundLight = "rgba(16, 185, 129, 0.05)",
-            TextPrimary = "#ffffff",
-            TextSecondary = "#a7f3d0",
-            TextMuted = "#10b981",
+            TextPrimary = "#0f172a",
+            TextSecondary = "#334155",
+            TextMuted = "#475569",
             TextOnDark = "#ffffff",
-            BorderLight = "rgba(167, 243, 208, 0.1)",
-            BorderMedium = "rgba(167, 243, 208, 0.2)",
-            BorderDark = "rgba(167, 243, 208, 0.3)",
-            HeaderBackground = "#081912",
-            HeaderText = "#ffffff",
-            HeaderUserBackground = "#0f261e",
-            HeaderUserText = "#34d399",
-            DashboardTabBackground = "#081912",
-            DashboardTabText = "#ffffff",
-            DashboardWidgetBackground = "#15362b",
-            DashboardWidgetBorder = "rgba(16, 185, 129, 0.3)",
-            FormBackground = "#0f261e",
-            FormInputBackground = "#081912",
-            FormInputText = "#ffffff",
-            FormInputBorder = "rgba(167, 243, 208, 0.2)",
-            FormInputBorderFocus = "#10b981",
-            FormButtonBackground = "#10b981",
+            BorderLight = "#e2e8f0",
+            BorderMedium = "#cbd5e1",
+            BorderDark = "#94a3b8",
+            HeaderBackground = "#ffffff",
+            HeaderText = "#0f172a",
+            HeaderUserBackground = "#e0f2e9",
+            HeaderUserText = "#047857",
+            DashboardTabBackground = "#e0f2e9",
+            DashboardTabText = "#334155",
+            DashboardWidgetBackground = "#ffffff",
+            DashboardWidgetBorder = "#cbd5e1",
+            FormBackground = "#ffffff",
+            FormInputBackground = "#ffffff",
+            FormInputText = "#0f172a",
+            FormInputBorder = "#94a3b8",
+            FormInputBorderFocus = "#047857",
+            FormButtonBackground = "#047857",
             FormButtonText = "#ffffff"
         };
 
-        return CompleteThemeWithChartAndReport(theme, isDarkBackground: true);
+        return CompleteThemeWithChartAndReport(theme, isDarkBackground: false);
     }
 
     /// <summary>
-    /// ایجاد تم آبی آسمانی - آبی روشن با پس‌زمینه تیره
+    /// ایجاد تم آبی آسمانی - آبی روشن با پس‌زمینه روشن
     /// هارمونی: Analogous with cyan-blue
     /// </summary>
     private Theme CreateCyanTheme(ThemePreference preference)
@@ -616,9 +611,9 @@ public class ThemeService : IThemeService
         {
             Preference = preference,
             Name = "آبی آسمانی",
-            Primary = "#06b6d4",
-            PrimaryHover = "#22d3ee",
-            PrimaryActive = "#0891b2",
+            Primary = "#0e7490",
+            PrimaryHover = "#155e75",
+            PrimaryActive = "#164e63",
             PrimaryLight = "rgba(6, 182, 212, 0.15)",
             Secondary = "#3b82f6",
             SecondaryHover = "#60a5fa",
@@ -627,38 +622,38 @@ public class ThemeService : IThemeService
             Warning = "#f59e0b",
             Danger = "#ef4444",
             Info = "#3b82f6",
-            BackgroundPrimary = "#0d2832",
-            BackgroundSecondary = "#081b22",
-            BackgroundTertiary = "#c0e1fc",
-            BackgroundCard = "#c0e1fc30",
+            BackgroundPrimary = "#ffffff",
+            BackgroundSecondary = "#f3fafc",
+            BackgroundTertiary = "#e0f2fe",
+            BackgroundCard = "#ffffff",
             BackgroundHover = "rgba(6, 182, 212, 0.1)",
             BackgroundActive = "rgba(6, 182, 212, 0.2)",
             BackgroundLight = "rgba(6, 182, 212, 0.05)",
-            TextPrimary = "#ffffff",
-            TextSecondary = "#a5f3fc",
-            TextMuted = "#06b6d4",
+            TextPrimary = "#0f172a",
+            TextSecondary = "#334155",
+            TextMuted = "#475569",
             TextOnDark = "#ffffff",
-            BorderLight = "rgba(165, 243, 252, 0.1)",
-            BorderMedium = "rgba(165, 243, 252, 0.2)",
-            BorderDark = "rgba(165, 243, 252, 0.3)",
-            HeaderBackground = "#081b22",
-            HeaderText = "#ffffff",
-            HeaderUserBackground = "#0d2832",
-            HeaderUserText = "#22d3ee",
-            DashboardTabBackground = "#081b22",
-            DashboardTabText = "#ffffff",
-            DashboardWidgetBackground = "#123843",
-            DashboardWidgetBorder = "rgba(6, 182, 212, 0.3)",
-            FormBackground = "#0d2832",
-            FormInputBackground = "#081b22",
-            FormInputText = "#ffffff",
-            FormInputBorder = "rgba(165, 243, 252, 0.2)",
-            FormInputBorderFocus = "#06b6d4",
-            FormButtonBackground = "#06b6d4",
+            BorderLight = "#e2e8f0",
+            BorderMedium = "#cbd5e1",
+            BorderDark = "#94a3b8",
+            HeaderBackground = "#ffffff",
+            HeaderText = "#0f172a",
+            HeaderUserBackground = "#e0f2fe",
+            HeaderUserText = "#0e7490",
+            DashboardTabBackground = "#e0f2fe",
+            DashboardTabText = "#334155",
+            DashboardWidgetBackground = "#ffffff",
+            DashboardWidgetBorder = "#cbd5e1",
+            FormBackground = "#ffffff",
+            FormInputBackground = "#ffffff",
+            FormInputText = "#0f172a",
+            FormInputBorder = "#94a3b8",
+            FormInputBorderFocus = "#0e7490",
+            FormButtonBackground = "#0e7490",
             FormButtonText = "#ffffff"
         };
 
-        return CompleteThemeWithChartAndReport(theme, isDarkBackground: true);
+        return CompleteThemeWithChartAndReport(theme, isDarkBackground: false);
     }
 
     #endregion

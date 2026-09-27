@@ -31,6 +31,13 @@ Hyper.Backend/
 - 📝 **Surveys & Feedback** - Customer surveys, feedback management
 - 💬 **Forum & Community** - Discussion forums, Q&A
 
+### AdminPanel themes
+
+Eight coordinated light color palettes cover dashboard cards, forms, reports and
+chart surfaces. Readable accent shades preserve each color family without a black
+canvas. See [theme behavior and validation](docs/UI-THEME.md) and
+[palette regression tests](tests/Hyper.ThemePalette.Tests/README.md).
+
 ### Technical Features
 - ✅ Clean Architecture with DDD
 - ✅ CQRS with MediatR

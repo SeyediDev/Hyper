@@ -56,3 +56,45 @@ assets and the host adapter present. The signed-in dashboard had been observed
 before this restart; a post-restart authenticated report/filter acceptance run
 was not completed because the in-app browser tab could not reattach. This remains
 separate from the passing isolated column-filter regression suite.
+
+## Native color palettes (2026-09-27)
+
+All eight persisted `ThemePreference` values select a **light color family**.
+`ThemeService` now supplies white, opaque cards/inputs, a softly tinted canvas
+and title strip, and dark neutral text. Primary accents use darker shades of
+lime/green, purple, orange, red, teal, indigo, emerald and cyan so counters, links
+and white button labels remain readable. Success/warning/danger/info colors and
+secondary series colors retain their existing values. No preference IDs, saved
+user choices, API shape or business behavior changed.
+
+Previously every family emitted near-black canvas/input colors and translucent
+cards, and completed chart/report colors as dark. The shared bridge correctly
+classified these native palettes as dark; the mismatch was in the host palette.
+The native Razor variable block now also outranks the legacy OS-dark selector
+before the theme API responds. This avoids a dark first palette when the OS is
+dark. Neo's standalone light/dark/system preferences remain supported; Hyper does
+not currently expose a separate native dark preference.
+
+Validation: 683 source-linked C# palette assertions and 16 isolated Edge cases
+(eight real palettes × two OS modes) pass. Cases load the actual legacy dashboard
+CSS, Bootstrap, shared bridge and MVC adapter; cover native CSS precedence before
+JavaScript, text/button/tab/counter contrast, both header gradient endpoints,
+white cards, unchanged sample chart fill and draft retention on palette changes.
+The teal sample also exercises a narrow viewport. Domain compilation passed with
+zero warnings/errors using existing dependency outputs. These fixtures do not
+validate authenticated dashboards, real charts/data, or every generated control.
+See [repeatable commands](../tests/Hyper.ThemePalette.Tests/README.md).
+
+Rebuild/restart the AdminPanel host to load the changed Hyper.Domain assembly,
+then refresh the page. A process already running at port 44301 keeps its old
+assembly until restarted; this change does not stop the user's Visual Studio.
+No Skill/MCP contract changed: this is a native host palette correction, not a
+new shared Neo theme API or tool.
+
+Host validation detail: the normal targeted AdminPanel build could not copy the
+new Hyper.Domain.dll into the running host (MSB3027/MSB3021: Visual Studio and IIS
+Express held the destination). A subsequent `dotnet build ... --no-restore
+--disable-build-servers -m:1 -t:Compile -p:BuildProjectReferences=false
+-p:UseSharedCompilation=false` passed with zero warnings/errors. This verifies
+the compile target, including Razor, without replacing the running host binary;
+it is not a deployment or a successful complete host build.
