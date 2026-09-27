@@ -11,9 +11,10 @@ requested shop/tenant. Both supported claim types are exercised.
 dotnet run --project tools/EndpointIsolationChecks --artifacts-path .artifacts/isolation
 ```
 
-All 14 protected actions are covered: connection list/create/enable/disable,
+All 17 protected actions are covered: connection list/create/enable/disable,
 webhook replay, mapping list/create/deactivate, sync, token request/list/revoke,
-dashboard and accounting inventory ingress. Anonymous, wrong-shop, wrong-tenant,
+dashboard, accounting inventory/product ingress and version-source read/change.
+Anonymous, wrong-shop, wrong-tenant,
 Admin-without-scope and mixed authenticated/unauthenticated identities must be
 rejected. Positive owner cases prevent a blanket-deny implementation passing.
 The sole anonymous webhook action must delegate to webhook ingress; provider
@@ -61,3 +62,10 @@ Verified after the fixes on 2026-09-26:
   exited 0: **106 passed, 0 failed**; SQL checks explicitly skipped.
 - A separate read-only `sys.databases` check found no remaining database with
   the `HyperIsolationChecks_` prefix after the failed SQL attempt.
+
+Integration verification on 2026-09-27: the first run on current develop exposed
+three newly added actions missing from this fixture's endpoint inventory. Added
+product-changed and version-source GET/PUT cases with the same seven identities;
+the final targeted build had zero warnings/errors and the executable exited 0
+with **127 passed, 0 failed**. SQL checks remained explicitly skipped. This updates
+the test inventory, not the production authentication contract.

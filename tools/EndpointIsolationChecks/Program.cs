@@ -82,6 +82,10 @@ object? Respond(MethodInfo method, object?[]? arguments)
         "ListAsync" => Task.FromResult<IReadOnlyList<IntegrationTokenStatus>>([]),
         "GetDashboardAsync" => Task.FromResult(new IntegrationDashboardResponse(0, 0, 0, [], [], [], [])),
         "ReceiveInventoryChangedAsync" => Task.FromResult<AccountingInventoryChangedResponse?>(new(81, "Queued")),
+        "ReceiveAsync" when method.DeclaringType == typeof(IIntegrationAccountingProductEventIngress) =>
+            Task.FromResult(new AccountingProductChangedResponse(82, "Queued")),
+        "ReadAsync" or "ChangeAsync" => Task.FromResult<IntegrationVersionSourceResult?>(
+            new("Ready", Hyper.Integration.Contracts.IntegrationVersionSource.AccountingEvents, 1, 0)),
         "ReceiveAsync" => Task.FromResult(new WebhookIngressResult(WebhookIngressStatus.Invalid)),
         _ => throw new InvalidOperationException("UnexpectedApiCall")
     };
@@ -92,6 +96,8 @@ builder.Services.AddSingleton(Probe.Create<IIntegrationSyncApi>(Respond));
 builder.Services.AddSingleton(Probe.Create<IIntegrationTokenApi>(Respond));
 builder.Services.AddSingleton(Probe.Create<IIntegrationDashboardApi>(Respond));
 builder.Services.AddSingleton(Probe.Create<IIntegrationAccountingEventIngress>(Respond));
+builder.Services.AddSingleton(Probe.Create<IIntegrationAccountingProductEventIngress>(Respond));
+builder.Services.AddSingleton(Probe.Create<IIntegrationVersionSourceApi>(Respond));
 builder.Services.AddSingleton(Probe.Create<IIntegrationWebhookIngress>(Respond));
 await using var app = builder.Build();
 app.UseAuthentication();
@@ -117,7 +123,12 @@ try
         new("List", "GET", root + "/tokens", null, "ListAsync"),
         new("Revoke", "DELETE", root + "/tokens/41", null, "RevokeAsync"),
         new("Get", "GET", root + "/dashboard?shopId=7", null, "GetDashboardAsync"),
-        new("InventoryChanged", "POST", root + "/accounting/events/inventory-changed", new AccountingInventoryChangedRequest(7, "tenant-a", 41, "fixture", null, 1, 1), "ReceiveInventoryChangedAsync")
+        new("InventoryChanged", "POST", root + "/accounting/events/inventory-changed", new AccountingInventoryChangedRequest(7, "tenant-a", 41, "fixture", null, 1, 1), "ReceiveInventoryChangedAsync"),
+        new("ProductChanged", "POST", root + "/accounting/events/product-changed", new AccountingProductChangedRequest(7, "tenant-a", 41, "fixture", null, 1, "Fixture product", 1), "ReceiveAsync"),
+        new("Read", "GET", root + "/connections/41/mappings/61/version-source", null, "ReadAsync"),
+        new("Change", "PUT", root + "/connections/41/mappings/61/version-source", new IntegrationVersionSourceChange(
+            Hyper.Integration.Contracts.IntegrationVersionSource.AccountingEvents,
+            Hyper.Integration.Contracts.IntegrationVersionSource.Unassigned, 0), "ChangeAsync")
     ];
     var endpoints = ((IEndpointRouteBuilder)app).DataSources.SelectMany(x => x.Endpoints)
         .Where(x => x.Metadata.GetMetadata<ControllerActionDescriptor>() is not null).ToArray();
