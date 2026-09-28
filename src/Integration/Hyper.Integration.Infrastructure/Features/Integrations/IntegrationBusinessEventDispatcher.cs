@@ -10,7 +10,8 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
     IIntegrationEngagementPort engagement,
     IIntegrationInventoryReservation reservations,
     HyperIntegrationContext db,
-    IIntegrationStrategyResolver? strategies = null)
+    IIntegrationStrategyResolver? strategies = null,
+    IIntegrationProductPreparationCollector? productPreparation = null)
 {
     public async Task<IntegrationScenarioResult> DispatchAsync(IntegrationScenarioJob job,
         ExternalIntegrationConnection connection, CancellationToken ct)
@@ -136,7 +137,11 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
             x.ConnectionId == connection.Id && x.ShopId == connection.ShopId
             && x.ExternalProductId == externalProductId && x.ExternalVariantId == variantId && x.IsActive, ct);
         if (mapping is null || mapping.HyperProductId <= 0)
+        {
+            if (productPreparation is not null && variantId is null)
+                await productPreparation.CollectAsync(new(job.ShopId, job.TenantId), connection.Id, null, externalProductId, ct);
             throw new IntegrationProviderException("ProductMappingUnavailable", false);
+        }
         if (connection.Provider == IntegrationProvider.Basalam)
         {
             if (strategies is null || job.Id <= 0)

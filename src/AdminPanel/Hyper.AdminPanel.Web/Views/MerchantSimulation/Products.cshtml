@@ -1,0 +1,83 @@
+@model Hyper.AdminPanel.Web.ViewModels.ProductReadinessViewModel
+@using Hyper.Integration.Contracts
+@using Hyper.Integration.Domain.Features.Integrations
+@using System.Text.Json
+@{
+    Layout = "_HyperAdminLayout";
+    ViewBag.Title = "رفع نقص و آماده‌سازی کالا";
+    var connections = (IReadOnlyList<IntegrationScenarioConnection>)ViewBag.ProductConnections;
+    string Status(string value) => value switch { "Completed" => "ثبت و تأیید شده", "NeedsAttention" => "نیازمند رسیدگی", "Pending" => "در صف", "Sending" => "در حال ارسال", "Verifying" => "در حال استعلام", _ => value };
+    string Direction(ProductTransferDirection value) => value == ProductTransferDirection.ToPlatform ? "حسابداری ← مبدأ | پلتفرم ← مقصد" : "پلتفرم ← مبدأ | حسابداری ← مقصد";
+    string Issue(string code) => code switch {
+        "RequiredPositiveCategory" => "دسته‌بندی معتبر مقصد را مشخص کنید.",
+        "RequiredNonnegativeDays" => "تعداد روز آماده‌سازی را وارد کنید؛ صفر هم مجاز است.",
+        "RequiredPositiveWeight" => "وزن صحیح بسته را وارد کنید.",
+        "InvalidPhoto" => "شناسه عکس آپلودشده معتبر نیست.",
+        "DescriptionTooLong" => "توضیح بیش از ۱۰هزار نویسه است؛ اصلاح کنید یا کوتاه‌سازی را صریحاً مجاز کنید.",
+        "SourceProductUnavailable" => "کالا در حسابداری پیدا نشد یا غیرفعال است.",
+        "InvalidAccountingIdentity" => "شناسه کالای حسابداری باید عدد مثبت معتبر باشد.",
+        "InvalidPrimaryPrice" => "قیمت مبدأ معتبر نیست؛ در حسابداری اصلاح شود.",
+        "InvalidProductTitle" => "عنوان مبدأ خالی یا بیش از حد طولانی است؛ در حسابداری اصلاح شود.",
+        "ConnectionNotReady" => "اتصال غیرفعال یا اطلاعات دسترسی ناقص/منقضی است.",
+        "UnmappedProductRequiresMetadata" => "کالا نگاشت ندارد؛ مشخصات مقصد را تکمیل کنید.",
+        "AccountingCreationNotAvailable" => "قابلیت ساخت کالا در API حسابداری هنوز آماده نیست.",
+        "PlatformCreationNotAvailable" => "قابلیت ساخت کالا برای این پلتفرم هنوز آماده نیست.",
+        "ProductAlreadyMapped" => "این کالا قبلاً نگاشت شده است؛ از مسیر همگام‌سازی کالای موجود استفاده کنید.",
+        "ExistingCreationRequiresReview" => "رسید ساخت قبلی وجود دارد؛ پیش از اقدام مجدد آن را بررسی کنید.",
+        "CreationOutcomeUnknown" => "نتیجه ساخت نامعلوم است؛ مقصد باید بررسی شود. ارسال دوباره مجاز نیست.",
+        _ => code };
+}
+<style>
+.product-preparation{padding:24px;direction:rtl}.product-preparation article{background:var(--surface,#fff);border:1px solid #ddd;border-radius:12px;padding:18px;margin:16px 0}.product-preparation form{display:flex;gap:14px;flex-wrap:wrap;align-items:end}.product-preparation label{display:flex;flex-direction:column;gap:6px}.product-preparation input,.product-preparation select,.product-preparation textarea{padding:8px;border:1px solid #aaa;border-radius:6px}.product-preparation .wide{width:100%}.product-preparation textarea{width:100%}.product-preparation pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:350px;overflow:auto;direction:ltr}.product-preparation button{padding:10px 16px;cursor:pointer}.product-preparation .metrics{display:flex;gap:24px;flex-wrap:wrap}.product-preparation .notice{padding:12px;background:#fff2c8}
+</style>
+<section class="product-preparation">
+<h1>رفع نقص و آماده‌سازی کالا</h1><p>@Model.ShopName · <a asp-action="Index">انتخاب مغازه / دریافت توکن</a></p>
+@if (TempData["SimulationNotice"] is { } notice) { <p class="notice">@notice</p> }
+<form method="get" asp-action="Products">
+    <label>اتصال <select name="connectionId">@foreach(var c in connections){<option value="@c.Id" selected="@(Model.ConnectionId==c.Id)">@c.DisplayName (@c.Provider)</option>}</select></label>
+    <label>جهت <select name="direction"><option value="1" selected="@(Model.Direction==ProductTransferDirection.ToPlatform)">به پلتفرم</option><option value="2" selected="@(Model.Direction==ProductTransferDirection.ToAccounting)">به حسابداری</option></select></label>
+    <button type="submit">نمایش</button>
+</form>
+@if(Model.Board is null) { <p>اتصالی ثبت نشده است. ابتدا اتصال معتبر مغازه را ایجاد کنید.</p> }
+else
+{
+    <article class="metrics"><span>کل: @Model.Board.Total</span><span>نیازمند رسیدگی: @Model.Board.NeedsAttention</span><span>در صف / پردازش: @Model.Board.Queued</span><span>تأییدشده: @Model.Board.Completed</span><strong>تأییدشده با اصلاح: @Model.Board.AdaptedCompleted</strong></article>
+    <p>آمار کلِ هر دو جهت این اتصال است. در صف بودن به معنی ثبت در مقصد نیست؛ «با اصلاح» فقط پس از استعلام و تأیید مقصد محاسبه می‌شود.</p>
+    <article><h2>سیاست جهت انتخاب‌شده</h2>
+    <form method="post" asp-action="ProductPolicy">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="contextTicket" value="@Model.ContextTicket" /><input type="hidden" name="connectionId" value="@Model.ConnectionId" /><input type="hidden" name="direction" value="@((byte)Model.Direction)" />
+        <label>رویکرد <select name="policy.Mode"><option value="1" selected="@(Model.Policy.Mode==ProductPreparationMode.Hold)">توقف و ثبت نقص</option><option value="2" selected="@(Model.Policy.Mode==ProductPreparationMode.Adapt)">اصلاح مجاز و ادامه</option></select></label>
+        <label><span><input type="checkbox" name="policy.TrimDescription" value="true" checked="@Model.Policy.TrimDescription" />حذف فاصله ابتدا و انتهای توضیح</span><input type="hidden" name="policy.TrimDescription" value="false" /></label>
+        <label><span><input type="checkbox" name="policy.TruncateDescription" value="true" checked="@Model.Policy.TruncateDescription" />کوتاه‌کردن توضیح به حداکثر ۱۰هزار نویسه</span><input type="hidden" name="policy.TruncateDescription" value="false" /></label>
+        <button type="submit">ذخیره سیاست</button>
+    </form><p>فقط قواعد انتخاب‌شده اجرا می‌شوند؛ قیمت، موجودی، هویت، دسته‌بندی و وزن حدس زده نمی‌شوند. ساخت حسابداری و دیگر پلتفرم‌ها تا آماده‌شدن آداپتور، در کارتابل باقی می‌ماند.</p></article>
+    <article><h2>بررسی کالای جدید</h2><p>در صورت کامل بودن اطلاعات، درخواست ساخت پیش‌نویس باسلام بلافاصله در صف ثبت می‌شود؛ انتشار عمومی انجام نمی‌شود.</p>
+    <form method="post" asp-action="PrepareProduct">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="contextTicket" value="@Model.ContextTicket" /><input type="hidden" name="connectionId" value="@Model.ConnectionId" /><input type="hidden" name="expectedRevision" value="0" />
+        <partial name="_ProductPreparationFields" model="@(new ProductPreparationInput(Model.Direction, string.Empty))" />
+        <button type="submit">بررسی و ارسال در صورت رفع نقص</button>
+    </form></article>
+    @foreach(var item in Model.Board.Items)
+    {
+        <article><h2>کالای @item.Input.SourceProductId — @Status(item.Status)</h2><p>@Direction(item.Input.Direction) · نسخه @item.Revision · کار صف: @item.JobId · شناسه مقصد: @item.ExternalProductId</p>
+        @foreach(var issue in item.Issues){<p class="notice">@Issue(issue.Code) <small dir="ltr">(@issue.Field / @issue.Code)</small></p>}
+        @if(item.Changes.Count>0){<details><summary>اصلاحات اعمال‌شده (@item.Changes.Count)</summary>@foreach(var change in item.Changes){<p>@change.Field / @change.Rule</p><pre>قبل: @change.Before</pre><pre>بعد: @change.After</pre>}</details>}
+        @if(item.JobId is null)
+        {
+            <form method="post" asp-action="PrepareProduct">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="contextTicket" value="@Model.ContextTicket" /><input type="hidden" name="connectionId" value="@Model.ConnectionId" /><input type="hidden" name="expectedRevision" value="@item.Revision" />
+                <partial name="_ProductPreparationFields" model="item.Input" />
+                <button type="submit">رفع نقص و بررسی مجدد</button>
+            </form>
+        }
+        else { <p>درخواست ارسال‌شده قابل بازنویسی نیست. خطای نتیجه نامعلوم نیازمند بررسی مقصد است؛ ارسال خودکار مجدد نمی‌شود.</p> }
+        <details><summary>سابقه بررسی، سیاست و مقادیر قبل و بعد</summary>@foreach(var entry in item.History){<p>نسخه @entry.Revision · @entry.AtUtc.ToString("u") · @entry.Actor</p><pre>@JsonSerializer.Serialize(entry, new JsonSerializerOptions { WriteIndented = true })</pre>}</details>
+        </article>
+    }
+    @if(Model.Skip>0){<a asp-action="Products" asp-route-connectionId="@Model.ConnectionId" asp-route-direction="@Model.Direction" asp-route-skip="@Math.Max(0,Model.Skip-25)">صفحه قبل</a>}
+    @if(Model.Skip+25<Model.Board.Total){<a asp-action="Products" asp-route-connectionId="@Model.ConnectionId" asp-route-direction="@Model.Direction" asp-route-skip="@(Model.Skip+25)">صفحه بعد</a>}
+}
+</section>

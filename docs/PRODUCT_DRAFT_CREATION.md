@@ -8,6 +8,10 @@ Rice `60438766` and Hyper's vacuum bag are different products; do not map them.
 
 ## Deploy and call
 
+For hold/adapt policy, durable missing-data worklist, repair UI and audited
+corrections use [product readiness](PRODUCT_READINESS.md). The route below remains
+the strict low-level draft API; it does not guess required metadata.
+
 Apply [the additive Integration schema](schema/ensure-integration-product-creations.sql)
 on the **Integration database**, before deploying the API/worker/mapping service.
 The table is Integration-owned and does not touch accounting. No Neo.Bpms service

@@ -180,6 +180,10 @@ Explicit accounting-to-Basalam creation uses the separate
 additive Integration receipt schema, approved creation metadata and a valid booth
 grant; uncertain creation responses are never automatically posted again.
 
+[Product readiness and remediation](docs/PRODUCT_READINESS.md) adds per-connection
+hold/adapt policies, automatic unmapped-parent collection, a repair dashboard at
+`MerchantSimulation/Products`, revision audit and verified-only correction counts.
+
 This is a private repository. For contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License

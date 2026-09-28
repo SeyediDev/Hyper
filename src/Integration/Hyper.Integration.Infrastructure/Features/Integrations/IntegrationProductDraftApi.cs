@@ -25,7 +25,9 @@ public sealed class IntegrationProductDraftApi(HyperIntegrationContext db, IInte
             || request.CategoryId <= 0 || request.PreparationDays is null or < 0 || request.PackageWeight <= 0
             || request.PhotoId is <= 0 || request.Description?.Length > 10000)
             throw new ArgumentException("InvalidProductDraft");
-        await using var tx = await db.Database.BeginTransactionAsync(ct);
+        // The readiness workflow may own the transaction so preparation, audit,
+        // receipt and queue are committed together. Standalone callers still own one.
+        await using var tx = db.Database.CurrentTransaction is null ? await db.Database.BeginTransactionAsync(ct) : null;
         var connection = await db.ExternalIntegrationConnections.FromSqlInterpolated(
             $"SELECT * FROM dbo.ExternalIntegrationConnections WITH (UPDLOCK,HOLDLOCK) WHERE Id={request.ConnectionId}")
             .AsNoTracking().SingleOrDefaultAsync(ct);
@@ -37,7 +39,7 @@ public sealed class IntegrationProductDraftApi(HyperIntegrationContext db, IInte
         {
             if (existing.RequestJson != requestJson) throw new InvalidOperationException("DraftRequestConflict");
             var status = await Status(existing, ct);
-            await tx.CommitAsync(ct);
+            if (tx is not null) await tx.CommitAsync(ct);
             return status;
         }
         IntegrationConnectionReadiness.Validate(connection, DateTime.UtcNow);
@@ -60,7 +62,8 @@ public sealed class IntegrationProductDraftApi(HyperIntegrationContext db, IInte
         db.Add(row); await db.SaveChangesAsync(ct);
         row.JobId = await queue.EnqueueAsync(new(request.ShopId, request.TenantId), connection.Id,
             new("product-create:" + request.RequestId.ToString("N"), IntegrationSyncItem.ProductCreation, IntegrationSyncTrigger.Manual), ct);
-        await db.SaveChangesAsync(ct); await tx.CommitAsync(ct);
+        await db.SaveChangesAsync(ct);
+        if (tx is not null) await tx.CommitAsync(ct);
         return await Status(row, ct);
     }
 

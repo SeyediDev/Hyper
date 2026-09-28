@@ -9,7 +9,8 @@ public sealed class IntegrationScenarioProcessor(HyperIntegrationContext db, IIn
     IIntegrationInventoryCapture inventory, IOptions<IntegrationInventoryCaptureOptions> options,
     IOptions<BasalamOAuthSettings> basalamOptions, BasalamDemoProvisioner demoProvisioner,
     IntegrationBusinessEventDispatcher businessEvents, IIntegrationPlatformCatalogPort catalog,
-    IIntegrationProductCreationProcessor? productCreation = null)
+    IIntegrationProductCreationProcessor? productCreation = null,
+    IIntegrationProductPreparationCollector? productPreparation = null)
 {
     public async Task<IntegrationScenarioResult> ProcessAsync(IntegrationScenarioJob job, CancellationToken ct)
     {
@@ -77,6 +78,10 @@ public sealed class IntegrationScenarioProcessor(HyperIntegrationContext db, IIn
             await snapshot.CommitAsync(ct);
         }
         var result = IntegrationCatalogComparison.Compare(local, remote, mappings, job.Item);
+        if (job.Item == IntegrationSyncItem.Product && productPreparation is not null)
+            foreach (var missing in result.Differences.Where(x => x.VariantId is null && x.Code is "LocalProductUnmapped" or "ExternalProductUnmapped"))
+                await productPreparation.CollectAsync(new(job.ShopId, job.TenantId), connection.Id,
+                    missing.HyperProductId, missing.ExternalProductId, ct);
         // Read back after ACK, without automatically resending failed messages or
         // overwriting intervening changes. A new explicit job may reconcile again.
         if (delivered)

@@ -11,10 +11,11 @@ requested shop/tenant. Both supported claim types are exercised.
 dotnet run --project tools/EndpointIsolationChecks --artifacts-path .artifacts/isolation
 ```
 
-All 20 protected actions are covered: connection list/create/enable/disable,
+All 24 protected actions are covered: connection list/create/enable/disable,
 webhook replay, mapping list/create/deactivate, sync, token request/list/revoke,
 dashboard, accounting inventory/product ingress, version-source read/change,
-the paired catalog reconciliation start/status request, and product-draft start/read.
+the paired catalog reconciliation start/status request, product-draft start/read,
+and product-readiness board, policy read/change and preparation.
 Anonymous, wrong-shop, wrong-tenant,
 Admin-without-scope and mixed authenticated/unauthenticated identities must be
 rejected. Positive owner cases prevent a blanket-deny implementation passing.
@@ -76,3 +77,11 @@ the current executable with `--sql` exited 0 with **178 passed, 0 failed**
 (150 HTTP/controller checks and 28 SQL service checks). The disposable SQL
 database was removed. The targeted build exited 0 with no warnings or errors.
 These checks still do not constitute live provider or deployed-host acceptance.
+
+Product-readiness verification later on 2026-09-28: the default-output build
+(`dotnet build tools/EndpointIsolationChecks/EndpointIsolationChecks.csproj
+--no-restore -m:1 -p:NuGetAudit=false`) exited0, zero warnings/errors. Running
+`dotnet tools/EndpointIsolationChecks/bin/Debug/net10.0/EndpointIsolationChecks.dll --sql`
+with the local integrated-security fixture environment exited0: **206 passed,
+0 failed** (178 HTTP/controller +28 SQL); the disposable database was removed.
+The isolated artifact-path build requires its own package restore first.

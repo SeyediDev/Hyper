@@ -1,4 +1,5 @@
 using Hyper.AdminPanel.Web.ViewModels;
+using IIntegrationProductReadinessApi = Hyper.Integration.Contracts.IIntegrationProductReadinessApi;
 using Hyper.Infrastructure.Features.Integrations;
 using Microsoft.Data.SqlClient;
 using Hyper.Integration.Domain.Entities.Integrations;
@@ -9,9 +10,10 @@ using Neo.Bpms.UI.MVC.Controllers.Public;
 namespace Hyper.AdminPanel.Web.Controllers;
 
 [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-public sealed class MerchantSimulationController(IAdminMerchantSimulationService simulations,
+public sealed partial class MerchantSimulationController(IAdminMerchantSimulationService simulations,
     AdminSimulationTickets tickets, IIntegrationDashboardQuery dashboard,
-    BasalamOAuthService oauth, BasalamOAuthStore oauthStore, IIntegrationScenarioQueue scenarios) : ControllerBaseMVC
+    BasalamOAuthService oauth, BasalamOAuthStore oauthStore, IIntegrationScenarioQueue scenarios,
+    IIntegrationProductReadinessApi readiness) : ControllerBaseMVC
 {
     private const string CookieName = "Hyper.AdminMerchantSimulation";
     private const string CorrelationCookie = "Hyper.Basalam.Correlation";

@@ -40,6 +40,10 @@ static async Task<int> Run()
         var creationSchema = await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "ensure-integration-product-creations.sql"));
         await db.Database.ExecuteSqlRawAsync(creationSchema);
         await db.Database.ExecuteSqlRawAsync(creationSchema);
+        await db.Database.ExecuteSqlRawAsync("DROP TABLE dbo.IntegrationProductPreparationHistory; DROP TABLE dbo.IntegrationProductPreparations; DROP TABLE dbo.IntegrationProductPreparationPolicies;");
+        var preparationSchema = await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "ensure-integration-product-preparation.sql"));
+        await db.Database.ExecuteSqlRawAsync(preparationSchema);
+        await db.Database.ExecuteSqlRawAsync(preparationSchema);
         var connection = new ExternalIntegrationConnection { ShopId = 7, TenantId = "tenant-a", Provider = IntegrationProvider.Basalam,
             CredentialType = IntegrationCredentialType.BearerToken, AccountIdentifier = "71", DisplayName = "fixture", CredentialsJson = "{}" };
         db.ExternalIntegrationConnections.Add(connection);
@@ -229,6 +233,7 @@ static async Task<int> Run()
         Check(job.Status == IntegrationScenarioStatus.NeedsAttention && job.ResultJson!.Contains("ExternalProductUnmapped") && await Messages() == count,
             "unmapped product requires explicit mapping, not guessed creation");
         await ProductCreationChecks.Run(options, Check);
+        await ProductReadinessChecks.Run(options, Check);
         Console.WriteLine($"{checks} catalog reconciliation checks passed. SQL fixture and controlled ports only; no real provider/accounting writes.");
         return 0;
     }

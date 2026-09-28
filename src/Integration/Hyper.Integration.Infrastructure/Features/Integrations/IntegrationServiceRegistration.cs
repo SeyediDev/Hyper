@@ -20,6 +20,8 @@ public static class IntegrationServiceRegistration
         services.AddScoped<IIntegrationScenarioQueue, IntegrationScenarioQueue>();
         services.AddScoped<IntegrationScenarioProcessor>();
         services.AddScoped<IIntegrationProductDraftApi, IntegrationProductDraftApi>();
+        services.AddScoped<IIntegrationProductReadinessApi, IntegrationProductReadinessApi>();
+        services.AddScoped<IIntegrationProductPreparationCollector, IntegrationProductPreparationCollector>();
         services.AddScoped<IIntegrationProductCreationProcessor, IntegrationProductCreationProcessor>();
         services.AddScoped<IntegrationBusinessEventDispatcher>();
         services.AddScoped<IIntegrationEngagementPort, UnregisteredIntegrationEngagementPort>();

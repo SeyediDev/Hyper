@@ -24,3 +24,7 @@ Also covers explicit product draft creation: scoped source snapshot, atomic
 receipt/job, concurrent duplicate requests, retained ambiguous-send guard,
 read-back-only retries and mapping confirmation. See
 [draft creation](../../docs/PRODUCT_DRAFT_CREATION.md).
+
+Also exercises [readiness policies and remediation](../../docs/PRODUCT_READINESS.md):
+real additive schema deployment, hold/adapt, revisions, audit, atomic queueing,
+concurrency, collection and confirmed-only adaptation metrics.

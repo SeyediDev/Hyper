@@ -31,6 +31,26 @@ public sealed class HyperIntegrationContext(DbContextOptions<HyperIntegrationCon
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<IntegrationProductPreparation>(e =>
+        {
+            e.ToTable("IntegrationProductPreparations", "dbo"); e.HasKey(x => x.Id);
+            e.Property(x => x.SourceProductId).HasMaxLength(128).UseCollation("Latin1_General_100_BIN2");
+            e.HasIndex(x => new { x.ConnectionId, x.Direction, x.SourceProductId }).IsUnique();
+            e.HasOne<ExternalIntegrationConnection>().WithMany().HasForeignKey(x => x.ConnectionId).OnDelete(DeleteBehavior.NoAction);
+        });
+        modelBuilder.Entity<IntegrationProductPreparationHistory>(e =>
+        {
+            e.ToTable("IntegrationProductPreparationHistory", "dbo"); e.HasKey(x => x.Id);
+            e.HasIndex(x => new { x.PreparationId, x.Revision }).IsUnique();
+            e.HasOne<IntegrationProductPreparation>().WithMany().HasForeignKey(x => x.PreparationId).OnDelete(DeleteBehavior.NoAction);
+        });
+        modelBuilder.Entity<IntegrationProductPreparationPolicy>(e =>
+        {
+            e.ToTable("IntegrationProductPreparationPolicies", "dbo"); e.HasKey(x => x.Id);
+            e.Property(x => x.UpdatedBy).HasMaxLength(256);
+            e.HasIndex(x => new { x.ConnectionId, x.Direction }).IsUnique();
+            e.HasOne<ExternalIntegrationConnection>().WithMany().HasForeignKey(x => x.ConnectionId).OnDelete(DeleteBehavior.NoAction);
+        });
         modelBuilder.Entity<IntegrationProductCreation>(entity =>
         {
             entity.ToTable("IntegrationProductCreations", "dbo");

@@ -8,6 +8,7 @@ public partial class HyperMenuDefinitions : MenuDefinition
         AddMenu<HomePageEntity, HomePageEntityUiDefinitions.HomePageDashboard>("داشبورد هایپریک", "home-dashboard");
         AddMenu("مغازه‌دار و اتصال", "building-organization", "MerchantSimulation", "Index");
         AddMenu("عملیات یکسان‌سازی", "activity-monitor", "MerchantSimulation", "Dashboard");
+        AddMenu("رفع نقص و آماده‌سازی کالا", "task-list", "MerchantSimulation", "Products");
         AddMenu("یکسان‌سازی پروفایل", "user-circle", "MerchantSimulation", "Profile");
         AddMenu("مدیریت کار", "task-list", "WorkManagementPage", "Index");
         AddMenu("اطلاعات پایه مغازه", "database", "HyperCategory0", "");

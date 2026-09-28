@@ -71,6 +71,10 @@ object? Respond(MethodInfo method, object?[]? arguments)
     calls.Add((method.Name, arguments ?? []));
     return method.Name switch
     {
+        "BoardAsync" => Task.FromResult<ProductPreparationBoard?>(new(0,0,0,0,0,[])),
+        "PolicyAsync" => Task.FromResult<ProductPreparationPolicy?>(new()),
+        "SetPolicyAsync" => Task.FromResult(true),
+        "PrepareAsync" => Task.FromResult<ProductPreparationItem?>(new(1,1,new(ProductTransferDirection.ToPlatform,"44"),new(ProductTransferDirection.ToPlatform,"44"),"NeedsAttention",[],[],null,null,null,[])),
         "ListConnectionsAsync" => Task.FromResult<IReadOnlyList<IntegrationConnectionSummary>>([]),
         "CreateConnectionAsync" => Task.FromResult<IntegrationConnectionResponse?>(new(new(41, 7, "tenant-a", Provider.Custom, "fixture", false, null, null))),
         "SetConnectionEnabledAsync" or "DeactivateProductMappingAsync" or "RevokeAsync" => Task.FromResult(true),
@@ -99,6 +103,7 @@ builder.Services.AddSingleton(Probe.Create<IIntegrationManagementApi>(Respond));
 builder.Services.AddSingleton(Probe.Create<IIntegrationMappingApi>(Respond));
 builder.Services.AddSingleton(Probe.Create<IIntegrationSyncApi>(Respond));
 builder.Services.AddSingleton(Probe.Create<IIntegrationProductDraftApi>(Respond));
+builder.Services.AddSingleton(Probe.Create<IIntegrationProductReadinessApi>(Respond));
 builder.Services.AddSingleton(Probe.Create<IIntegrationTokenApi>(Respond));
 builder.Services.AddSingleton(Probe.Create<IIntegrationDashboardApi>(Respond));
 builder.Services.AddSingleton(Probe.Create<IIntegrationAccountingEventIngress>(Respond));
@@ -116,6 +121,10 @@ try
     const string root = "/api/integrations/v1";
     EndpointCase[] cases =
     [
+        new("Board","GET",root+"/connections/41/product-readiness",null,"BoardAsync"),
+        new("Policy","GET",root+"/connections/41/product-readiness/policy/1",null,"PolicyAsync"),
+        new("SetPolicy","PUT",root+"/connections/41/product-readiness/policy/1",new ProductPreparationPolicy(),"SetPolicyAsync"),
+        new("Prepare","POST",root+"/connections/41/product-readiness",new ProductPreparationCommand(new(ProductTransferDirection.ToPlatform,"44")),"PrepareAsync"),
         new("CreateDraft", "POST", root + "/connections/41/product-drafts",
             new IntegrationProductDraftRequest(7,"tenant-a",41,Guid.NewGuid(),44,100,2,200),"StartAsync"),
         new("ReadDraft", "GET", root + "/connections/41/product-drafts/ae475351-42f0-4a2a-967f-cf78be311c64",null,"ReadAsync"),

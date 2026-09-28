@@ -1,0 +1,8 @@
+@model Hyper.Integration.Contracts.ProductPreparationInput
+<input type="hidden" name="input.Direction" value="@((byte)Model.Direction)" />
+<label>شناسه کالا در مبدأ <input name="input.SourceProductId" value="@Model.SourceProductId" required maxlength="128" readonly="@(!string.IsNullOrEmpty(Model.SourceProductId))" /></label>
+<label>شناسه دسته‌بندی باسلام <input type="number" name="input.CategoryId" value="@Model.CategoryId" min="1" /></label>
+<label>زمان آماده‌سازی (روز) <input type="number" name="input.PreparationDays" value="@Model.PreparationDays" min="0" /></label>
+<label>وزن بسته (گرم) <input type="number" name="input.PackageWeight" value="@Model.PackageWeight" min="1" /></label>
+<label>شناسه عکس آپلودشده <input type="number" name="input.PhotoId" value="@Model.PhotoId" min="1" /></label>
+<label class="wide">توضیحات <textarea name="input.Description" maxlength="50000" rows="3">@Model.Description</textarea></label>
