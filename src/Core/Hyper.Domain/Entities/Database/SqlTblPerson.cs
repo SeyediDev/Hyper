@@ -5,6 +5,14 @@ namespace Hyper.Domain.Entities.Database;
 [DbMap("TBL_Person")]
 public sealed class SqlTblPerson : SqlServerEntity<int>
 {
+    [DisplayName("شناسه")]
+    [DbMap("ID_")]
+    public new int Id
+    {
+        get => base.Id;
+        set => base.Id = value;
+    }
+
     [DisplayName("شناسه مغازه")]
     [DbMap("SHOPID_")]
     public int Shopid { get; set; }
