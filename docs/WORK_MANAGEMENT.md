@@ -1,145 +1,139 @@
-# Work Management Domain
+# Hyper work coordination
 
-The work-management domain is the shared coordination layer for multi-chat and multi-agent development. It is separate from Integration, Accounting and Neo.Bpms. The AdminPanel may consume its API, but task ownership and logs are not stored in panel entities.
+The configured independent Neo board is the operational source of truth. Hyper's
+WorkManagementPageController redirects to AgentOrchestration:WebUrl and no longer
+hosts the old work-management API. Current local Web: http://localhost:5181/;
+API: http://localhost:5180/; database: NeoAgentOrchestration; schema: nao.
+Resolve configuration and verify the live catalog before acting. These local
+addresses are not deployment defaults.
 
-The operational source of truth is the `WorkManagement` database. The active backlog from `docs/BACKLOG.md` is seeded idempotently by `WorkManagementSchemaProvisioner`; the document remains the architectural/release history, not a second task board.
+docs/BACKLOG.md, the root BACKLOG.md and the old WorkManagement database are
+historical context. Do not seed, recreate or maintain a second operational board.
 
-## Repository entry points
+## Entry point and continuous execution
 
-[AGENTS.md](../AGENTS.md) requires implementation chats to read the canonical
+[AGENTS.md](../AGENTS.md) requires the canonical
 [hyper-work-management skill](../.agents/skills/hyper-work-management/SKILL.md).
-The old `.codex/skills/hyper-work-management/SKILL.md` is a compatibility pointer.
-Open the repository at `Backend` (the Git root), or a directory below it, so the
-repository instructions and skill are in scope. Chats already running should
-explicitly reload `AGENTS.md` and the skill; their earlier context is not evidence
-that updated instructions were loaded. No personal/global Codex settings are
-changed. This is agent guidance, not database-enforced mutual exclusion.
+The .codex/skills/hyper-work-management/SKILL.md file is a compatibility pointer.
+Open the repository at Backend or below and reread instructions after a restart
+or handoff. Query current ownership; do not infer it from history or timestamps.
 
-## Session handshake
+The user requested continuous execution: after each completed task, refresh the
+board and immediately take the next eligible unfinished Hyper task by explicit
+user priority, then Critical > High > Normal > Low. At equal priority prefer work
+that unlocks dependencies, then older work. Review and Backlog participate after
+their remaining acceptance work and dependencies are reassessed. Do not stop
+after one task while eligible authorized work remains. Record a real blocker and
+continue another eligible task when necessary; do not fabricate completion or
+repeatedly retry an unchanged external dependency. A user pause or scope change
+overrides this request. This is an execution loop, not a scheduler or permission
+to publish/deploy outside the authorized scope.
 
-Each chat starts with: `Role Key`, `Agent Id`, `Chat Id`, active `Task Key`, branch and scope. If no task is active, query `/api/work-management/v1/roles` and claim the highest-priority matching item through `/items/{id}/claim`.
+## Scope, ownership and intake
 
-Every new chat follows this order: select exactly one available role, claim one Ready item, record the chat and branch, append progress logs, attach the commit SHA and test evidence, then move the item to Review/Done or Blocked with a reason. A new request becomes a task only through `chat-intake`.
+Announce project/domain, task key, role, agent/chat, branch and file scope. The
+user-designated main chat stays on develop; concurrent implementation workers use
+separate branches/worktrees. Preserve other changes and the shared index.
 
-## Concurrency gate
+Read catalog, all board pages, details, dependencies, children, history/evidence
+and runs. Role availability is workspace-wide, across projects. Claim one Ready
+task for an enabled idle role; verify subject/chat, branch, version and the single
+open timer. Never take another chat's InProgress task or overwrite its files.
+An old timer is not authorization to release ownership.
 
-Before editing, query the board for the exact `Task Key` and its `OwnerRole`, `OwnerAgent`, `ChatId`, `Branch` and status. If the item is `InProgress` for another chat/agent, do not start it, do not edit its files and do not claim it; choose another Ready item or request a handoff. Also inspect the other task's branch/worktree for file overlap. A task may be reassigned only after an explicit handoff log or `Blocked`/`Review` transition.
+New actionable requests use scoped POST items. Preserve the original request in
+Description; append subsequent decisions through logs. Reconcile the project/key
+and existing records before retrying uncertain creation. Neo has no separate
+idempotent chat-intake endpoint. The authenticated subject determines AgentId;
+send the real chat ID through X-Orchestration-Chat.
 
-Each item carries both `ProjectKey` and `Domain`. A work item may have a `ParentWorkItemId`; subtasks use the same claim, status, dependency, evidence and time-tracking rules as their parent. Time is recorded as start/stop entries in `WorkItemTimeEntries`, while the API exposes accumulated and currently running seconds.
+## Current API
 
-Time endpoints: `POST /api/work-management/v1/items/{id}/time/start` and `POST /api/work-management/v1/items/{id}/time/stop`. Starting time requires an owned `InProgress` item; stopping time closes the open entry and adds its duration to the item total.
+Base route:
+`/api/orchestration/v1/organizations/{organizationId}/workspaces/{workspaceId}`.
 
-## Statuses
+Use configured workspace authentication. An already enabled loopback Development
+host supports X-Orchestration-Local: true, yielding subject local-web. Do not
+change authentication or enable this mode to gain access. Every mutation also
+needs the actual chat ID in X-Orchestration-Chat.
 
-`Backlog → Ready → InProgress → Review → Done`; use `Blocked` when an external dependency prevents progress and `Cancelled` only with an explicit decision. A role has at most one `InProgress` item.
-
-## Concurrency
-
-One task has one branch. Concurrent tasks use `git worktree add` with separate directories. Shared contracts/schema are serialized through `architecture-lead`; all other work must avoid overlapping files. A commit is required for each coherent stage and its SHA belongs in the task record.
-
-The user-designated main chat is explicitly allowed to stay on `develop`.
-Other workers still use separate worktrees/branches; the exception never permits
-overlapping file edits or blanket staging. Build output directories may still be
-shared through Neo project references: a file lock is not permission to kill
-another worker or delete its outputs. Report targeted validation accurately.
-
-## Chat intake
-
-`POST /api/work-management/v1/chat-intake` creates a WorkItem and preserves the original message. Follow-up messages are appended through the log endpoint; the task description is never silently replaced.
-
-## Current API and implementation limits
-
-Routes below are relative to `/api/work-management/v1` and require the AdminPanel
-host's authentication. Never disable authentication to automate coordination.
-Source of truth for route/DTO changes:
-`src/AdminPanel/Hyper.AdminPanel.Web/Controllers/WorkManagementController.cs`,
-`src/WorkManagement/Hyper.WorkManagement.Contracts/WorkManagementContracts.cs`,
-and `src/WorkManagement/Hyper.WorkManagement.Infrastructure/WorkManagementService.cs`.
-
-| Operation | Route / request fields |
+| Operation | Route and request |
 | --- | --- |
-| Read board / roles | `GET /board?project=HYPER&domain=...&role=...&includeArchived=false`, `GET /roles` (board returns filter options and time metrics) |
-| Read item, logs, tests, children and dependencies | `GET /items/{id}` |
-| Managed chat intake | `POST /chat-intake`: `ChatId`, `Author`, `Message`, optional `SuggestedTitle`, `Domain` |
-| Create explicit project/subtask | `POST /items`: `ProjectKey`, `Key`, `Title`, `Domain`, `Priority`, `Description`, `ParentWorkItemId` |
-| Claim | `POST /items/{id}/claim`: `RoleKey`, `AgentId`, `ChatId`, `Branch` |
-| Append context | `POST /items/{id}/logs`: `Author`, `Message`, `ChatId` |
-| Attach evidence | `POST /items/{id}/commits`: `Sha`, `Message`; `POST /items/{id}/tests`: `TestName`, `Result`, `Details` |
-| Add dependency | `POST /items/{id}/dependencies`: `DependsOnWorkItemId` |
-| Change status | `POST /items/{id}/status`: `Status`, `Author`, `Message` |
-| Start/stop elapsed time | `POST /items/{id}/time/start` or `/time/stop`: optional `Note` |
-| Archive / restore | `POST /items/{id}/archive` or `/unarchive`; only Blocked/Done items can be archived |
-| Set forecast | `PUT /items/{id}/estimate`: `{ "estimatedSeconds": 3600 }` |
-| Orchestration snapshot | `GET /orchestration` |
-| Agent profile / transition | `POST /orchestration/profiles`, `POST /orchestration/transitions` |
-| Agent runs | `GET /items/{id}/orchestration/runs`, `POST /items/{id}/orchestration/dispatch` |
-| Harness callback | `POST /orchestration/runs/{id}/callback` with `X-Agent-Harness-Key`; terminal statuses are `Succeeded`, `Failed` or `NeedsInput` |
+| Catalog: projects, roles, profiles, workflows | GET catalog |
+| Board | GET items?projectId=...&includeArchived=true&skip=0&take=200; page until total is covered |
+| Details | GET items/{id}: children, dependencies, logs, evidence, time, former owners |
+| Create | POST items: ProjectId, Key, Title, Domain, Priority, Description, optional ParentWorkItemId/EstimatedSeconds |
+| Claim | POST items/{id}/claim: RoleId, ExpectedVersion, Branch |
+| Status | POST items/{id}/status: ExpectedVersion, Status, Note |
+| Log | POST items/{id}/logs: ExpectedVersion, Message |
+| Evidence | POST items/{id}/evidence: ExpectedVersion, Kind, Reference, Outcome, Details, optional CommitSha |
+| Dependency | POST items/{id}/dependencies: ExpectedVersion, DependsOnWorkItemId |
+| Time | POST items/{id}/time/start or /time/stop: ExpectedVersion |
+| Archive / restore | POST items/{id}/archive or /restore: ExpectedVersion |
+| Forecast | PUT items/{id}/estimate: ExpectedVersion, Seconds |
+| Runs | GET items/{id}/runs; managed execution requires its own authorized workflow |
 
-Persisted status values: Backlog=1, Ready=2, InProgress=3, Blocked=4, Review=5,
-Done=6, Cancelled=7. Priority: Low=1, Normal=2, High=3, Critical=4.
-Current chat intake defaults to project `HYPER`; it has no `ProjectKey` field.
-Do not claim that this endpoint handles arbitrary project selection. Explicit
-item creation supports projects and same-project parents.
+Use the newest returned GUID version. On 409, reload and reassess; do not blindly
+replay against a newer version. Neo enforces owner/version, dependency and role
+availability rules in serialized workspace transactions. Still inspect file
+overlap in other worktrees and projects before editing.
 
-The current service does not provide an ownership lease/CAS token, enforce all
-dependency/status-transition policies, or safely reject every attempt to reclaim
-an active item. Therefore a successful claim response alone is not proof of
-exclusive ownership. Follow the skill's pre/post ownership checks and serialize
-competing claims; if exclusive ownership cannot be established, do not edit.
-The schema provisioner's optional claim mode is not a concurrency-safe task
-client and must not replace this gate.
+Contract sources in sibling Neo/products/Neo.AgentOrchestration/src:
+Neo.AgentOrchestration.Api/WorkItemsController.cs,
+Neo.AgentOrchestration.Application/Work/WorkItemHandlers.cs,
+Neo.AgentOrchestration.Domain/Work/WorkItem.Lifecycle.cs.
+The product skill and docs/API.md describe managed runs and additional routes.
 
-## Agent orchestration
+## Status and evidence limits
 
-`AgentProfiles` describe the role-facing agent instructions, provider, model and
-skill path. `WorkflowTransitions` define a gated handoff from a previous status
-and role to a next role. When a matching status change has its prerequisites
-(optional tests and commits), the service creates one queued `AgentRun` and
-assigns the next role. Duplicate queued/dispatched runs for the same work item
-and target role are ignored.
+Persisted status: Backlog=1, Ready=2, InProgress=3, Blocked=4, Review=5, Done=6,
+Cancelled=7. Priority: Low=1, Normal=2, High=3, Critical=4.
+These numeric values are for SQL storage; HTTP requests use enum names such as
+Ready, Test and Passed, not numbers or numeric strings.
 
-`AgentRuns` are durable records. The HTTP Harness adapter dispatches them only
-when `AgentOrchestration:Harness:Enabled` and an endpoint are configured; with
-the default disabled setting the run is retained as `NeedsConfiguration`, never
-pretending that Codex or a cloud agent executed. The endpoint is provider-neutral
-so a Codex SDK gateway, Agents API worker, or an internal MCP bridge can implement
-the external execution contract. The Work Management database remains the source
-of truth for task state and evidence; the Harness owns agent context and execution.
+Claim is Ready -> InProgress. Normal status changes allow Backlog -> Ready/Cancelled;
+Ready -> Blocked/Cancelled; InProgress -> Review/Blocked/Cancelled;
+Blocked -> Ready/Cancelled; Review -> Ready/Done/Blocked/Cancelled.
+The current API has no return-to-Backlog, reopen-Done or delete operation.
+Archive accepts only Blocked/Done. Cancellation/archival does not delete a task.
+Ownership also applies to notes/evidence and stopped tasks retaining their owner.
 
-## Local database fallback
+EvidenceKind: Commit=1, Test=2, Artifact=3.
+EvidenceOutcome: NotApplicable=0, Passed=1, Failed=2, Skipped=3.
+Commit references require a full Git SHA and NotApplicable; Test requires a
+nonzero outcome. Record the commit first when binding test/artifact CommitSha.
+Imported records may have enum mapping defects: verify actual source/logs before
+repairing classification; never invent a passing result or a commit.
 
-Prefer the API when an authenticated host is available. Within authorized local
-database access, a guarded SQL transaction can maintain the same records without
-starting the panel. This is an audited fallback, not a separate backlog or a new
-public API. Inspect the current schema before writing; do not expose credentials.
-`WorkItems.ProjectId` joins `Projects.Id`; `ProjectKey` is an API field, not a
-`WorkItems` column. Do not run the schema provisioner just to query the board.
+Done requires actual acceptance, completed dependencies and required children.
+Record exact test command, result and scope. A build is not a browser check;
+a fixture is not a live provider test; code existence alone is not acceptance.
+Claim starts tracking; resume never creates a second interval. Completion or
+handoff stops it. Verify persisted status, evidence and closed time entries.
+Keep uncertainty about time spent during outages explicit.
 
-- Use `SET XACT_ABORT ON`, a transaction, ownership/status predicates and
-  appropriate `UPDLOCK,HOLDLOCK` reads for the task and role's active items.
-  Check the role is enabled and idle and the item is eligible. Abort on conflict;
-  never overwrite another chat's claim. Other clients must still cooperate with
-  the workflow; a fallback transaction is not a global lease mechanism.
-- For intake preserve the user's original message in `ChatWorkIntakes`, link it
-  to the created `WorkItems` row, and record scope/decisions in `WorkItemLogs`.
-  Check for a prior intake/task before retrying an uncertain operation.
-- Claim with the actual project/domain, role, agent, chat and branch; create only
-  one open `WorkItemTimeEntries` row and set `StartedAtUtc` consistently.
-- On completion/handoff, lock and verify the exact owner first; close the open
-  interval, add its duration once to `AccumulatedSeconds`, clear `StartedAtUtc`,
-  update status/timestamps, and attach commit/test/log records in the transaction.
-  Use the timestamps actually recorded and investigate multiple open intervals.
-- Re-read final status, evidence and timer rows after commit. Wait for SQL exit
-  status; absence of output or a truncated result is not evidence of success.
-  If neither API nor authorized SQL is available, report the coordination blocker
-  and limit work to read-only inspection until ownership can be verified.
+## Explicit administrative backlog reconciliation
 
-## Workflow validation
+For an authorized audit inspect every status, including archived/completed items.
+Return Blocked to Backlog when requested, preserving reasons and dependencies for
+reevaluation. Preserve unrelated active ownership. Merge only confirmed duplicate
+acceptance scopes; retain distinct parents, children and acceptance tests.
 
-When maintaining the skill, validate its frontmatter using skill-creator's
-`scripts/quick_validate.py` if available, resolve its relative links and check
-the API examples against the controller/contracts above. Review these cases:
-an item owned by another chat, a resumed own item with an open timer, a database
-access failure, a parent with unfinished subtasks, a partial build, and completion
-with evidence. They must not imply takeover, duplicate timing, unclaimed edits
-or untested success. Documentation changes do not require live Basalam calls.
+Prefer the API for supported operations. A user-authorized local SQL maintenance
+transaction may handle unsupported reconciliation without changing the public API
+or impersonating an owner. Inspect actual schema/FKs, save a recoverable before
+snapshot and explicit changes/reasons. Use parameterized commands, SET XACT_ABORT
+ON, a transaction and the same application lock as Neo:
+neo-orchestration:workspace:{workspaceId}, Exclusive, Transaction owner.
+Recheck expected versions under row locks; abort on concurrent change. Preserve
+active assignments/timers. Append audit logs and refresh Version/UpdatedAtUtc for
+changed aggregates. Never expose credentials or connection strings in artifacts.
+
+Before duplicate deletion retain unique descriptions, logs, evidence and time;
+rewire children and incoming/outgoing dependencies without cycles, self-edges or
+duplicate pairs. Inspect AgentRuns, deliveries, receipts and approvals; never
+erase execution history. Check evidence sequence uniqueness and referential
+integrity. Retain a merge record naming removed and canonical keys.
+After commit, re-read through the API and verify mutations, owners/timers and no
+orphans. An audit snapshot is evidence of one operation, not a parallel board.
+Only completed commands and persisted reads prove success.

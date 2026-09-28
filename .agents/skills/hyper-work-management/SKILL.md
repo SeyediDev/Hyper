@@ -1,15 +1,16 @@
 ---
 name: hyper-work-management
-description: Coordinate Hyper repository implementation across chats using WorkManagement tasks, role ownership, dependencies, time entries, commits and handoffs. Use when starting or resuming development, taking backlog work, or recording task progress; read-only advice does not create or claim work.
+description: Coordinate Hyper implementation through the current Neo work board, ownership, dependencies, evidence and time. Use when starting or resuming development, auditing backlog status, or continuously completing unfinished tasks in priority order; advice alone does not authorize execution.
 ---
 
 # Hyper work management
 
 Read [the operational reference](../../../docs/WORK_MANAGEMENT.md) before task
 actions. Paths in that reference are relative to the repository root. The database
-is the operational source of truth; `docs/BACKLOG.md` is architectural/release
-context, not a parallel board. Do not introduce another database or MCP server
-just to follow this workflow.
+behind the configured Neo API is the operational source of truth;
+`docs/BACKLOG.md` is architectural/release context, not a parallel board.
+Hyper now redirects to the independent Neo board. Do not resume writes to the
+legacy `WorkManagement` database or run its seed/provisioner for coordination.
 
 ## Start or resume
 
@@ -27,8 +28,8 @@ just to follow this workflow.
 4. Check file overlap with other active items and their branches/worktrees before
    claiming. Re-read ownership after the claim and before edits, commits and
    completion. If another chat owns it, leave it untouched and select other work
-   or request a documented handoff. Do not assume the current claim API prevents
-   every takeover/race; see the reference's implementation limits.
+   or request a documented handoff. Supply the latest ExpectedVersion for every
+   existing-item mutation; on conflict, reload and reassess instead of blindly retrying.
 
 If the board cannot be reached, diagnose read-only within available permissions.
 Do not infer that SQL Server is stopped from a sandbox, authentication or network
@@ -47,13 +48,51 @@ only within the user's authorized database access.
 - Keep each item associated with its project and domain. Subtasks use the same
   ownership, dependencies, logs, evidence and time rules; owning a parent does
   not grant ownership of its children.
-- For a new actionable chat request, use managed chat intake; preserve the
+- For a new actionable chat request, use scoped task creation; preserve the
   original message. Append follow-up decisions, progress and user clarifications
   to logs instead of replacing the original description. Avoid duplicate intake
   after retries/restarts. Never put tokens, passwords or full connection strings
   in task descriptions, logs, commits or evidence.
 - Prioritize the requested working scenario. Do not expand routine work into
   architecture tests, unrelated hardening or infrastructure without need.
+
+## Continuous priority execution
+
+The user has requested continuous execution of unfinished Hyper backlog tasks.
+After finishing a task, immediately refresh the live board and start the next
+eligible task without asking whether to continue. Apply the same loop when the
+user asks to resume or work through the backlog; a read-only question does not
+start execution. A later pause or scope change overrides this standing request.
+
+- Order by explicit user priority, then Critical, High, Normal, Low; at equal
+  priority prefer dependencies that unblock other work, then the older task.
+  Consider Backlog and Review as well as Ready: reevaluate their actual remaining
+  acceptance work, move eligible work to Ready, and claim it before editing.
+- Inspect all pages, dependencies, children, evidence and current source. Done
+  means the acceptance scope is met, not that a title resembles implemented code.
+  Preserve a correct Done status; repair an incorrect one with an audit reason.
+- Finish required validation, record actual evidence and elapsed time, persist
+  the outcome and verify the timer is stopped before claiming the next task.
+  Keep only one active task per role. Independent read-only subagent reviews
+  may share the parent audit; implementation workers need separate claims/scopes.
+- Reassess old blockers. For an explicit backlog audit requesting it, return
+  Blocked items to Backlog with their blocker history intact, then test whether
+  the dependency is resolved. Backlog placement does not resolve a dependency.
+- If a task needs an unavailable external contract, an unanswered material user
+  decision, or another chat's owned files, record the precise next action and
+  continue with other eligible work. Do not repeatedly retry the same blocker
+  or mark it Done. Stop only when no eligible authorized work remains, the user
+  pauses, or an actual execution limit prevents continuation; report what remains.
+- Merge only demonstrated duplicate acceptance scopes, retaining the canonical
+  task's evidence and incoming/outgoing links. Parent/child tasks, implementation
+  versus acceptance tests, and similarly named distinct outcomes are not duplicates.
+
+This loop authorizes work within the requested project scope. It does not itself
+schedule background executions, publish externally, or grant a missing business
+decision. Use the operational reference for API limitations and audited maintenance.
+
+ProjectKey and RoleKey identify the human-facing scope; resolve their ProjectId
+and RoleId GUIDs from the current catalog before sending API requests.
 
 ## Evidence, time and handoff
 
@@ -81,7 +120,7 @@ Mark Done only when this item's acceptance scope is met and required subtasks ar
 complete. Use Review for pending review and Blocked for a documented dependency
 or missing authority; do not cancel work without an explicit decision. Verify
 the persisted status, commit/evidence and stopped timer: no open time entry,
-`StartedAtUtc` cleared, elapsed duration included in `AccumulatedSeconds`.
+each closed interval has its real DurationSeconds and IsTracking is false.
 Then check role availability before taking another task. Report completion and
 remaining limits plainly; never claim that documentation provides a server-side
 lock or guarantees another running chat has loaded updated instructions.
