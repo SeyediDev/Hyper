@@ -100,3 +100,20 @@ passed** (178 HTTP/controller +28 SQL). Both exited0 and removed their own fixtu
 databases. AdminPanel build with project references completed with zero warnings
 and errors. Local `HyperyekIntegration` has all three new tables, initially empty.
 No live product creation, host restart/deployment or browser acceptance was done.
+
+Follow-up MVC verification on 2026-09-28: [ProductReadinessMvcChecks](../tools/ProductReadinessMvcChecks/README.md)
+adds real form/Razor tests and a bounded loopback browser fixture. All17 checks
+passed with exit0: Neo login redirect, non-admin denial, actual form binding,
+antiforgery, selected-context scope, checkbox semantics, encoded input, expiry and
+queued results. Browser interaction with the synthetic repair form showed
+attention1 becoming queued1 while completed and adapted-completed remained0.
+This is the compiled production controller/view in a labelled fixture shell,
+not acceptance of a deployed host or real merchant account.
+
+A fresh full-graph build encountered missing RestSharp/SqlManagementObjects
+references under Neo-Bpms (resolved package paths point at absent net10.0 assets).
+`UseBuiltPanel=true` built the fixture against the previously compiled panel;
+no shared Neo source or package cache was changed to work around that failure.
+A fresh full panel build after restore remains to be repaired and verified
+separately. The earlier successful build above is historical evidence, not a
+claim that the later full-graph build passed.
