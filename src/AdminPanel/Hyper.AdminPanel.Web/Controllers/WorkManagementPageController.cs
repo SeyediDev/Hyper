@@ -17,11 +17,6 @@ public sealed class WorkManagementPageController(IConfiguration configuration) :
         if (Uri.TryCreate(neoUrl, UriKind.Absolute, out var target) &&
             (target.Scheme == Uri.UriSchemeHttp || target.Scheme == Uri.UriSchemeHttps))
             return Redirect(target.ToString());
-        ViewBag.AdminDisplayName = admin.UserName;
-        ViewBag.Domain = domain;
-        ViewBag.Project = project;
-        ViewBag.Role = role;
-        ViewBag.IncludeArchived = includeArchived;
-        return View(await api.GetBoardAsync(domain, project, role, includeArchived, ct));
+        return NotFound("مدیریت کار در سرویس Neo انجام می‌شود و نشانی آن تنظیم نشده است.");
     }
 }
