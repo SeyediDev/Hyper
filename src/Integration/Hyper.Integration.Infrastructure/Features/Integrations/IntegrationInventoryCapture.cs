@@ -17,7 +17,7 @@ public sealed class IntegrationInventoryCaptureOptions
 
 public sealed class IntegrationInventoryCapture(HyperIntegrationContext db, IIntegrationOutbox outbox,
     IIntegrationStrategyResolver strategies, IOptions<IntegrationInventoryCaptureOptions> options,
-    IIntegrationPlatformCatalogPort catalog, ILogger<IntegrationInventoryCapture>? logger = null) : IIntegrationInventoryCapture
+    IIntegrationPlatformCatalogPort catalog, ILogger<IntegrationInventoryCapture>? logger = null) : IIntegrationInventoryCapture, IIntegrationCatalogReconciliation
 {
     public async Task<int> CaptureAsync(CancellationToken ct)
     {
@@ -52,14 +52,21 @@ public sealed class IntegrationInventoryCapture(HyperIntegrationContext db, IInt
     public Task<bool> ReconcileOneAsync(long connectionId, long mappingId, CancellationToken ct) => CaptureOneAsync(connectionId, mappingId, ct, true);
 
     public async Task<bool> CaptureOneAsync(long connectionId, long mappingId, CancellationToken ct, bool forceResend = false)
+        => (await CaptureInventoryAsync(connectionId, mappingId, ct, forceResend)).Created;
+
+    public async Task<long?> ReconcileInventoryAsync(long connectionId, long mappingId, CancellationToken ct)
+        => (await CaptureInventoryAsync(connectionId, mappingId, ct, true)).MessageId;
+
+    private async Task<(long? MessageId, bool Created)> CaptureInventoryAsync(long connectionId, long mappingId,
+        CancellationToken ct, bool forceResend)
     {
-        if (!options.Value.AccountingStockSourceVerified) return false;
+        if (!options.Value.AccountingStockSourceVerified) return (null, false);
         await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
         var mapping = await db.ExternalProductMappings.FromSqlInterpolated($"SELECT * FROM dbo.ExternalProductMappings WITH (UPDLOCK,HOLDLOCK) WHERE Id={mappingId}")
             .AsNoTracking().SingleOrDefaultAsync(ct);
         var connection = await db.ExternalIntegrationConnections.AsNoTracking().SingleOrDefaultAsync(x => x.Id == connectionId, ct);
         if (mapping is null || connection is null || !mapping.IsActive || mapping.ConnectionId != connectionId || mapping.ShopId != connection.ShopId)
-            return false;
+            return (null, false);
         IntegrationConnectionReadiness.Validate(connection, DateTime.UtcNow);
         var sourceFloor = await IntegrationVersionSourceGuard.RequireAsync(db, mappingId, IntegrationVersionSource.InventoryCapture, false, ct);
         await IntegrationInventoryReadLock.AcquireAsync(db, connection.ShopId, ct);
@@ -67,7 +74,7 @@ public sealed class IntegrationInventoryCapture(HyperIntegrationContext db, IInt
         // holds are read here; the two databases never need a cross-domain join.
         var source = (await catalog.GetProductsAsync(connection.ShopId, connection.TenantId, ct))
             .SingleOrDefault(x => x.ProductId == mapping.HyperProductId);
-        if (source is null) return false;
+        if (source is null) return (null, false);
         var reserved = await db.InventoryReservationLogs.Where(x => x.ShopId == connection.ShopId
                 && x.HyperProductId == mapping.HyperProductId && x.Status == 0 && x.ReleasedAtUtc == null)
             .SumAsync(x => x.Quantity, ct);
@@ -77,16 +84,50 @@ public sealed class IntegrationInventoryCapture(HyperIntegrationContext db, IInt
             .OrderByDescending(x => x.SourceVersion).FirstOrDefaultAsync(ct);
         var update = new ExternalInventoryUpdate(mapping.ExternalProductId, mapping.ExternalVariantId, quantity);
         if (latest is not null && latest.PayloadJson == JsonSerializer.Serialize(update)
-            && (!forceResend || latest.Status is 0 or 1)) return false;
+            && (!forceResend || latest.Status is 0 or 1))
+            return (latest.Status is 0 or 1 ? latest.Id : null, false);
         // The existing unique key/version stream is shared by all operations for a mapping.
         var lastVersion = await db.IntegrationOutbox.Where(x => x.MappingId == mappingId)
             .MaxAsync(x => (long?)x.SourceVersion, ct) ?? 0;
         var version = checked(Math.Max(lastVersion, sourceFloor) + 1);
         if (outbox is not IIntegrationCapturedInventoryOutbox capturedOutbox)
             throw new InvalidOperationException("CapturedInventoryOutboxUnavailable");
-        await capturedOutbox.EnqueueCapturedInventoryAsync(connectionId, mappingId, version, quantity, ct);
+        var messageId = await capturedOutbox.EnqueueCapturedInventoryAsync(connectionId, mappingId, version, quantity, ct);
         await transaction.CommitAsync(ct);
-        return true;
+        return (messageId, true);
+    }
+
+    public async Task<long?> ReconcileProductAsync(long connectionId, long mappingId, CancellationToken ct)
+    {
+        await using var transaction = await db.Database.BeginTransactionAsync(IsolationLevel.Serializable, ct);
+        var mapping = await db.ExternalProductMappings.FromSqlInterpolated($"SELECT * FROM dbo.ExternalProductMappings WITH (UPDLOCK,HOLDLOCK) WHERE Id={mappingId}")
+            .AsNoTracking().SingleOrDefaultAsync(ct);
+        var connection = await db.ExternalIntegrationConnections.AsNoTracking().SingleOrDefaultAsync(x => x.Id == connectionId, ct);
+        if (mapping is null || connection is null || !mapping.IsActive || mapping.ConnectionId != connectionId
+            || mapping.ShopId != connection.ShopId || mapping.HyperProductId <= 0) return null;
+        IntegrationConnectionReadiness.Validate(connection, DateTime.UtcNow);
+        if (mapping.ExternalVariantId is not null) throw new IntegrationProviderException("ProductVariantUpdateUnsupported", false);
+        var floor = await IntegrationVersionSourceGuard.RequireAsync(db, mappingId, IntegrationVersionSource.InventoryCapture, false, ct);
+        // Only the accounting API supplies title/price. No stock assumption,
+        // marketplace snapshot, SKU write or implicit currency conversion here.
+        var source = (await catalog.GetProductsAsync(connection.ShopId, connection.TenantId, ct))
+            .SingleOrDefault(x => x.ProductId == mapping.HyperProductId);
+        if (source is null) return null;
+        var update = new ExternalProductUpdate(mapping.ExternalProductId, null, source.Name, source.Price);
+        if (update.ValidationError() is { } error) throw new IntegrationProviderException(error, false);
+        var payload = JsonSerializer.Serialize(update);
+        var latest = await db.IntegrationOutbox.AsNoTracking().Where(x => x.MappingId == mappingId
+                && x.Operation == IntegrationOutbox.ProductOperation && x.SourceVersion > floor)
+            .OrderByDescending(x => x.SourceVersion).FirstOrDefaultAsync(ct);
+        if (latest is not null && latest.PayloadJson == payload && latest.Status is 0 or 1) return latest.Id;
+        var lastVersion = await db.IntegrationOutbox.Where(x => x.MappingId == mappingId)
+            .MaxAsync(x => (long?)x.SourceVersion, ct) ?? 0;
+        if (outbox is not IIntegrationCapturedProductOutbox captured)
+            throw new InvalidOperationException("CapturedProductOutboxUnavailable");
+        var id = await captured.EnqueueCapturedProductAsync(connectionId, mappingId,
+            checked(Math.Max(lastVersion, floor) + 1), update, ct);
+        await transaction.CommitAsync(ct);
+        return id;
     }
 
 }

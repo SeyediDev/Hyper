@@ -9,7 +9,10 @@ references one mapping and stores Source, VersionFloor and UpdatedAtUtc.
 - `1` AccountingEvents: inventory-changed and product-changed share one externally
   coordinated, monotonically increasing SourceVersion stream.
 - `2` InventoryCapture: verified accounting-catalog polling allocates inventory
-  versions. Product event requests are also rejected in this mode.
+  versions. Explicit accounting-catalog product reconciliation allocates title/
+  base-price versions under the same mapping lock. External `product-changed`
+  event requests are still rejected in this mode; they belong to AccountingEvents.
+  See [the paired catalog scenario](CATALOG_RECONCILIATION.md).
 
 The first successful enqueue in a **new empty stream** claims its source in the
 same SQL transaction as its Outbox message. The mapping's UPDLOCK/HOLDLOCK serializes

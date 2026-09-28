@@ -48,4 +48,20 @@ public sealed class IntegrationOperationsController(
         var result = await sync.TriggerAsync(new(shopId, tenantId, connectionId), cancellationToken);
         return result is null ? NotFound(new { error = "ConnectionNotFound" }) : Accepted(result);
     }
+
+    [HttpPost("catalog/reconcile")]
+    public async Task<IActionResult> ReconcileCatalog(long connectionId,
+        [FromBody] IntegrationCatalogReconciliationRequest request, CancellationToken cancellationToken)
+    {
+        if (request.ConnectionId != connectionId) return BadRequest(new { error = "ConnectionIdentityConflict" });
+        if (!await scope.CanAccessAsync(User, request.ShopId, request.TenantId, cancellationToken)) return Forbid();
+        if (request.RequestId == Guid.Empty) return BadRequest(new { error = "InvalidReconciliationRequestId" });
+        try
+        {
+            var result = await sync.ReconcileCatalogAsync(request, cancellationToken);
+            return result is null ? NotFound(new { error = "ConnectionNotFound" }) : Accepted(result);
+        }
+        catch (ArgumentException) { return BadRequest(new { error = "InvalidReconciliationRequest" }); }
+        catch (InvalidOperationException) { return Conflict(new { error = "ReconciliationUnavailable" }); }
+    }
 }

@@ -82,9 +82,39 @@ public sealed class IntegrationMappingApi(HyperIntegrationContext db) : IIntegra
             x.ExternalVariantId, x.LastExternalPrice, x.LastExternalInventory, x.LastSyncAtUtc, x.IsActive);
 }
 
-public sealed class IntegrationSyncApi(HyperIntegrationContext db, IIntegrationSynchronizationService synchronization)
+public sealed class IntegrationSyncApi(HyperIntegrationContext db, IIntegrationSynchronizationService synchronization,
+    IIntegrationScenarioQueue? scenarios = null)
     : IIntegrationSyncApi
 {
+    public async Task<IntegrationCatalogReconciliationResponse?> ReconcileCatalogAsync(
+        IntegrationCatalogReconciliationRequest request, CancellationToken ct)
+    {
+        if (request.RequestId == Guid.Empty) throw new ArgumentException("InvalidReconciliationRequestId");
+        var connection = await db.ExternalIntegrationConnections.AsNoTracking().SingleOrDefaultAsync(x =>
+            x.Id == request.ConnectionId && x.ShopId == request.ShopId && x.TenantId == request.TenantId, ct);
+        if (connection is null) return null;
+        IntegrationConnectionReadiness.Validate(connection, DateTime.UtcNow);
+        if (scenarios is null) throw new InvalidOperationException("ScenarioQueueUnavailable");
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+        var shop = new OwnedIntegrationShop(request.ShopId, request.TenantId);
+        // Stable identities plus one transaction make a repeated start/poll safe;
+        // no provider call or incomplete single-job pair is exposed by ingress.
+        var prefix = $"catalog:{request.RequestId:N}:";
+        var productId = await scenarios.EnqueueAsync(shop, connection.Id,
+            new(prefix + "product", IntegrationSyncItem.Product, IntegrationSyncTrigger.Manual), ct);
+        var inventoryId = await scenarios.EnqueueAsync(shop, connection.Id,
+            new(prefix + "inventory", IntegrationSyncItem.Inventory, IntegrationSyncTrigger.Manual), ct);
+        var jobs = await db.IntegrationScenarioJobs.AsNoTracking()
+            .Where(x => x.Id == productId || x.Id == inventoryId).ToListAsync(ct);
+        IntegrationCatalogJobStatus Status(long id)
+        {
+            var job = jobs.Single(x => x.Id == id);
+            return new(job.Id, job.Status.ToString(), job.ErrorCode, job.CompletedAtUtc);
+        }
+        await transaction.CommitAsync(ct);
+        return new(request.RequestId, Status(productId), Status(inventoryId));
+    }
+
     public async Task<IntegrationSyncTriggerResponse?> TriggerAsync(IntegrationSyncTriggerRequest request, CancellationToken ct)
     {
         var connection = await db.ExternalIntegrationConnections.AsNoTracking().SingleOrDefaultAsync(x =>

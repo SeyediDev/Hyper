@@ -93,6 +93,8 @@ public sealed record IntegrationSyncTriggerRequest(int ShopId, string TenantId, 
 public sealed record IntegrationSyncTriggerResponse(long RunId, string Status);
 public interface IIntegrationSyncApi
 {
+    Task<IntegrationCatalogReconciliationResponse?> ReconcileCatalogAsync(IntegrationCatalogReconciliationRequest request,
+        CancellationToken cancellationToken = default);
     Task<IntegrationSyncTriggerResponse?> TriggerAsync(IntegrationSyncTriggerRequest request,
         CancellationToken cancellationToken = default);
 }

@@ -89,16 +89,22 @@ public sealed class IntegrationScenarioQueue(HyperIntegrationContext db, Integra
         string? resultJson = null, errorCode = null;
         TimeSpan? retryAfter = null;
         var retry = false;
+        var awaitingDelivery = false;
+        var resultProduced = false;
         try
         {
             if (job.Attempts > IntegrationRetryPolicy.MaxAttempts) throw new IntegrationProviderException("AttemptsExhausted", false);
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
             timeout.CancelAfter(TimeSpan.FromMinutes(3));
             var result = await processor.ProcessAsync(job, timeout.Token);
+            resultProduced = true;
+            awaitingDelivery = result.AwaitingDelivery;
             // Bound the persisted summary. A detailed page/export can be added separately.
             resultJson = JsonSerializer.Serialize(new { result.Compared, result.Enqueued,
-                DifferenceCount = result.Differences.Count, Differences = result.Differences.Take(500) });
-            if (result.Differences.Count != 0) { status = IntegrationScenarioStatus.NeedsAttention; errorCode = "DifferencesDetected"; }
+                DifferenceCount = result.Differences.Count, Differences = result.Differences.Take(500),
+                result.OutboxMessageIds, result.AwaitingDelivery });
+            if (awaitingDelivery) { status = IntegrationScenarioStatus.Pending; errorCode = "AwaitingOutboxDelivery"; }
+            else if (result.Differences.Count != 0) { status = IntegrationScenarioStatus.NeedsAttention; errorCode = "DifferencesDetected"; }
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested) { throw; }
         catch (IntegrationProviderException ex) { errorCode = ex.Code; retry = ex.Retryable; retryAfter = ex.RetryAfter; }
@@ -110,15 +116,21 @@ public sealed class IntegrationScenarioQueue(HyperIntegrationContext db, Integra
         catch (InvalidOperationException ex) when (ex.Message is "VersionSourceConflict" or "VersionSourceUnassigned") { errorCode = ex.Message; }
         catch (InvalidOperationException) { errorCode = "ConnectionOrSourceUnavailable"; }
         var finished = DateTime.UtcNow;
-        if (errorCode is not null && resultJson is null)
+        if (errorCode is not null && !resultProduced)
             status = errorCode is "ProductMappingUnavailable" or "ProductMappingAmbiguous" or "AccountingCustomerMappingUnavailable" or "VersionSourceConflict" or "VersionSourceUnassigned"
                 ? IntegrationScenarioStatus.NeedsAttention
                 : retry && job.Attempts < IntegrationRetryPolicy.MaxAttempts ? IntegrationScenarioStatus.Pending : IntegrationScenarioStatus.DeadLetter;
-        var next = status == IntegrationScenarioStatus.Pending ? finished + IntegrationRetryPolicy.Delay(job.Attempts, retryAfter) : finished;
+        // Preserve delivery identity during transient read-back errors. Waiting
+        // for the independent outbox is not a failed attempt and must not exhaust
+        // the business retry budget while the provider asks the outbox to wait.
+        resultJson ??= job.ResultJson;
+        var next = awaitingDelivery ? finished.AddSeconds(5)
+            : status == IntegrationScenarioStatus.Pending ? finished + IntegrationRetryPolicy.Delay(job.Attempts, retryAfter) : finished;
         await using var completion = db.Database.CurrentTransaction is null
             ? await db.Database.BeginTransactionAsync(CancellationToken.None) : null;
         var acknowledged = await db.IntegrationScenarioJobs.Where(x => x.Id == job.Id && x.Status == IntegrationScenarioStatus.Running && x.LeaseId == lease)
             .ExecuteUpdateAsync(s => s.SetProperty(x => x.Status, status).SetProperty(x => x.ErrorCode, errorCode)
+                .SetProperty(x => x.Attempts, x => awaitingDelivery ? x.Attempts - 1 : x.Attempts)
                 .SetProperty(x => x.ResultJson, resultJson).SetProperty(x => x.NextAttemptAtUtc, next)
                 .SetProperty(x => x.CompletedAtUtc, status == IntegrationScenarioStatus.Pending ? (DateTime?)null : finished)
                 .SetProperty(x => x.LeaseId, (Guid?)null).SetProperty(x => x.LeaseExpiresAtUtc, (DateTime?)null), CancellationToken.None);

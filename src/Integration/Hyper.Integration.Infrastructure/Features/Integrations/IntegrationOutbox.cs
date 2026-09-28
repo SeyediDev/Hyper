@@ -6,7 +6,7 @@ using Hyper.Integration.Contracts;
 
 namespace Hyper.Infrastructure.Features.Integrations;
 
-public sealed class IntegrationOutbox(HyperIntegrationContext db, IIntegrationStrategyResolver strategies) : IIntegrationOutbox, IIntegrationProductOutbox, IIntegrationCapturedInventoryOutbox
+public sealed class IntegrationOutbox(HyperIntegrationContext db, IIntegrationStrategyResolver strategies) : IIntegrationOutbox, IIntegrationProductOutbox, IIntegrationCapturedInventoryOutbox, IIntegrationCapturedProductOutbox
 {
     public const string InventoryOperation = "inventory.set.v1";
     public const string ProductOperation = "product.patch.v1";
@@ -27,10 +27,18 @@ public sealed class IntegrationOutbox(HyperIntegrationContext db, IIntegrationSt
 
     public Task<long> EnqueueProductAsync(long connectionId, long mappingId, long sourceVersion,
         ExternalProductUpdate update, CancellationToken ct)
+        => EnqueueProductCoreAsync(connectionId, mappingId, sourceVersion, update, IntegrationVersionSource.AccountingEvents, ct);
+
+    public Task<long> EnqueueCapturedProductAsync(long connectionId, long mappingId, long sourceVersion,
+        ExternalProductUpdate update, CancellationToken ct)
+        => EnqueueProductCoreAsync(connectionId, mappingId, sourceVersion, update, IntegrationVersionSource.InventoryCapture, ct);
+
+    private Task<long> EnqueueProductCoreAsync(long connectionId, long mappingId, long sourceVersion,
+        ExternalProductUpdate update, IntegrationVersionSource source, CancellationToken ct)
     {
         if (sourceVersion <= 0) throw new ArgumentException("Positive source version is required.");
         if (update.ValidationError() is { } error) throw new IntegrationProviderException(error, false);
-        return EnqueueAsync(connectionId, mappingId, sourceVersion, ProductOperation, IntegrationVersionSource.AccountingEvents, mapping =>
+        return EnqueueAsync(connectionId, mappingId, sourceVersion, ProductOperation, source, mapping =>
         {
             if (mapping.ExternalProductId != update.ExternalProductId || mapping.ExternalVariantId != update.VariantId)
                 throw new IntegrationProviderException("MappingChanged", false);

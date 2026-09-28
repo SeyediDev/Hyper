@@ -78,6 +78,8 @@ object? Respond(MethodInfo method, object?[]? arguments)
         "ListProductMappingsAsync" => Task.FromResult<IReadOnlyList<IntegrationProductMappingSummary>>([]),
         "CreateProductMappingAsync" => Task.FromResult<IntegrationProductMappingSummary?>(new(61, 41, 7, 1, "fixture", null, null, null, null, null, true)),
         "TriggerAsync" => Task.FromResult<IntegrationSyncTriggerResponse?>(new(71, "Accepted")),
+        "ReconcileCatalogAsync" => Task.FromResult<IntegrationCatalogReconciliationResponse?>(new(Guid.NewGuid(),
+            new(72, "Pending", null, null), new(73, "Pending", null, null))),
         "RequestAsync" => Task.FromResult<IntegrationTokenRequestStatus?>(new(Guid.NewGuid(), 0, DateTime.UtcNow)),
         "ListAsync" => Task.FromResult<IReadOnlyList<IntegrationTokenStatus>>([]),
         "GetDashboardAsync" => Task.FromResult(new IntegrationDashboardResponse(0, 0, 0, [], [], [], [])),
@@ -119,6 +121,8 @@ try
         new("CreateMapping", "POST", root + "/connections/41/mappings", new IntegrationProductMappingRequest(7, "tenant-a", 41, 1, "fixture"), "CreateProductMappingAsync"),
         new("DeactivateMapping", "DELETE", root + "/connections/41/mappings/61", null, "DeactivateProductMappingAsync"),
         new("Sync", "POST", root + "/connections/41/sync", null, "TriggerAsync"),
+        new("ReconcileCatalog", "POST", root + "/connections/41/catalog/reconcile",
+            new IntegrationCatalogReconciliationRequest(7, "tenant-a", 41, Guid.NewGuid()), "ReconcileCatalogAsync"),
         new("RequestToken", "POST", root + "/tokens/requests", new IntegrationTokenRequestCommand(Guid.NewGuid(), 7, "tenant-a", Provider.Basalam, 1), "RequestAsync"),
         new("List", "GET", root + "/tokens", null, "ListAsync"),
         new("Revoke", "DELETE", root + "/tokens/41", null, "RevokeAsync"),
@@ -165,6 +169,20 @@ try
         using var request = new HttpRequestMessage(HttpMethod.Post, root + "/connections/41/mappings");
         request.Headers.Add("X-Fixture-Identity", "owner");
         request.Content = JsonContent.Create(new IntegrationProductMappingRequest(7, "tenant-a", 999, 1, "fixture"));
+        using var response = await client.SendAsync(request);
+        return response.StatusCode == HttpStatusCode.BadRequest && calls.Count == 0;
+    });
+    foreach (var invalid in new[]
+    {
+        new IntegrationCatalogReconciliationRequest(7, "tenant-a", 999, Guid.NewGuid()),
+        new IntegrationCatalogReconciliationRequest(7, "tenant-a", 41, Guid.Empty)
+    })
+    await checks.Test("catalog start rejects invalid route/request identity before service", async () =>
+    {
+        calls.Clear();
+        using var request = new HttpRequestMessage(HttpMethod.Post, root + "/connections/41/catalog/reconcile");
+        request.Headers.Add("X-Fixture-Identity", "owner");
+        request.Content = JsonContent.Create(invalid);
         using var response = await client.SendAsync(request);
         return response.StatusCode == HttpStatusCode.BadRequest && calls.Count == 0;
     });

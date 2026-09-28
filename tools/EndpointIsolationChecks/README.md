@@ -11,9 +11,10 @@ requested shop/tenant. Both supported claim types are exercised.
 dotnet run --project tools/EndpointIsolationChecks --artifacts-path .artifacts/isolation
 ```
 
-All 17 protected actions are covered: connection list/create/enable/disable,
+All 18 protected actions are covered: connection list/create/enable/disable,
 webhook replay, mapping list/create/deactivate, sync, token request/list/revoke,
-dashboard, accounting inventory/product ingress and version-source read/change.
+dashboard, accounting inventory/product ingress, version-source read/change,
+and the paired catalog reconciliation start/status request.
 Anonymous, wrong-shop, wrong-tenant,
 Admin-without-scope and mixed authenticated/unauthenticated identities must be
 rejected. Positive owner cases prevent a blanket-deny implementation passing.

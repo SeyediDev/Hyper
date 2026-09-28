@@ -7,7 +7,8 @@ public enum IntegrationScenarioStatus : byte { Pending = 0, Running = 1, Complet
 public sealed record IntegrationScenarioRequest(string EventId, IntegrationSyncItem Item, IntegrationSyncTrigger Trigger);
 public sealed record IntegrationScenarioConnection(long Id, string DisplayName, IntegrationProvider Provider, bool IsEnabled);
 public sealed record IntegrationDifference(int? HyperProductId, string? ExternalProductId, string? VariantId, string Code);
-public sealed record IntegrationScenarioResult(int Compared, IReadOnlyList<IntegrationDifference> Differences, int Enqueued = 0);
+public sealed record IntegrationScenarioResult(int Compared, IReadOnlyList<IntegrationDifference> Differences, int Enqueued = 0,
+    IReadOnlyList<long>? OutboxMessageIds = null, bool AwaitingDelivery = false);
 
 public interface IIntegrationScenarioQueue
 {
@@ -68,9 +69,8 @@ public static class IntegrationCatalogComparison
             if (item == IntegrationSyncItem.Product && !string.IsNullOrWhiteSpace(source.Sku)
                 && !string.Equals(source.Sku.Trim(), target.Sku?.Trim(), StringComparison.OrdinalIgnoreCase))
                 Add("ProductSkuMismatch");
-            if (item == IntegrationSyncItem.Product && source.Price is { } localPrice
-                && target.Price is { } remotePrice && localPrice != remotePrice)
-                Add("ProductPriceMismatch");
+            if (item == IntegrationSyncItem.Product && source.Price is { } localPrice && localPrice != target.Price)
+                Add(target.Price is null ? "ExternalPriceUnknown" : "ProductPriceMismatch");
             if (item == IntegrationSyncItem.Inventory && source.AvailableInventory != target.Inventory)
                 Add(target.Inventory is null ? "ExternalInventoryUnknown" : "InventoryMismatch");
             void Add(string code) => differences.Add(new(mapping.HyperProductId, mapping.ExternalProductId, mapping.ExternalVariantId, code));
