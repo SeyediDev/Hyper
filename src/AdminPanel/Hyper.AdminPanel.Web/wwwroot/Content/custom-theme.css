@@ -4550,3 +4550,31 @@ html[data-neo-theme] :is(.neo-column-filter, .modern-settings-btn, .page-link):f
   outline: 2px solid var(--neo-accent); outline-offset: 2px;
 }
 html[data-neo-theme] .neo-column-filter:disabled { opacity: .45; cursor: default; }
+
+/* Report uses legacy toolbar anchors, separate from the form toolbar buttons. */
+html[data-neo-theme] body.page-ready :is(.reportHeader, .top-page) .top-bar-anchor-icon {
+  display: inline-flex !important; align-items: center; justify-content: center;
+  background: var(--neo-surface) !important; color: var(--neo-accent) !important;
+  border: 1px solid var(--neo-border) !important;
+}
+html[data-neo-theme] body.page-ready :is(.reportHeader, .top-page) .top-bar-anchor-icon:is(:hover, :focus-visible, .active) {
+  background: var(--neo-selection) !important; color: var(--neo-text) !important;
+  border-color: var(--neo-accent) !important;
+}
+html[data-neo-theme] body.page-ready :is(.reportHeader, .top-page) .top-bar-anchor-icon:focus-visible {
+  outline: 2px solid var(--neo-accent); outline-offset: 2px;
+}
+/* Keep deliberate filled dots and outline paths distinct. */
+html[data-neo-theme] .top-bar-anchor-icon svg[fill="none"],
+html[data-neo-theme] .top-bar-anchor-icon svg [fill="none"] { fill: none !important; }
+html[data-neo-theme] #filterTooltipPanel {
+  background: var(--neo-surface) !important; color: var(--neo-text) !important;
+  border-color: var(--neo-border) !important;
+}
+html[data-neo-theme] #filterTooltipPanel #submit-filter {
+  background: var(--neo-accent) !important; color: var(--neo-on-accent) !important;
+  border-color: var(--neo-accent) !important;
+}
+html[data-neo-theme] #filterTooltipPanel #submit-filter:hover {
+  background: var(--neo-accent-hover) !important;
+}

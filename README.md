@@ -186,3 +186,7 @@ This is a private repository. For contribution guidelines, see [CONTRIBUTING.md]
 © 2024 Hyper Platform
 
 
+
+Report header filters share the existing filter controls. The host copies and
+publishes their canonical Neo-Bpms script; toolbar colors and popup bounds are
+covered by the [Report regression checks](tests/Hyper.ThemePalette.Tests/README.md).

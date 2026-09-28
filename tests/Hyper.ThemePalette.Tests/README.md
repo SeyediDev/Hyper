@@ -56,3 +56,14 @@ Uses the same palette JSON and Node/Playwright setup. Tests eight palettes at
 mobile/desktop widths, actual deployed host CSS, semantic bridge and column-filter
 script. Verifies contrast and outline SVGs as well as column-filter focus/state,
 header alignment and no unintended sort or submit. Sample data only.
+
+## Report asset delivery, toolbar and popup
+
+Run `dotnet msbuild src/AdminPanel/Hyper.AdminPanel.Web/Hyper.AdminPanel.Web.csproj -t:CopyFilterAssets`
+then `node --test tests/Hyper.ThemePalette.Tests/Report.browser.test.cjs` with the
+same palette export and Node/Edge environment. This fixture reads the **host copy**
+of ColumnFilter.js and checks it against the canonical source. It uses the real
+Report toolbar markup, inline CSS, toggle and outside-click handler. It checks
+all eight palettes at 390/1366px, contrast, outline/filled SVG parts, popup bounds,
+click/Space focus, preservation of values and absence of sorting/submission.
+It does not render a live authenticated Report or exercise its database query.

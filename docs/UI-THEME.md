@@ -148,3 +148,45 @@ active-state updates and absence of accidental sorting/form submission. The
 contrast helper handles the browser's `color(srgb ...)` values from color-mix.
 Sample-only DOM is used, not live shop records. Load the static CSS with Ctrl+F5;
 no C# change or IIS restart is required for this fix. Skill/MCP contracts unchanged.
+
+## Report filter delivery and legacy forms (2026-09-27)
+
+The running HTTPS host returned 404 for the ColumnFilter.js URL requested by
+form, report and dashboard Views. CopyFilterAssets referenced a nonexistent
+Neo-Bpms wwwroot folder. It now copies the canonical CommonAssets script. Linked
+Content also includes that file in build/publish output, including a clean checkout.
+The generated host copy is ignored. After copying, the same public URL returned
+200 JavaScript and the host/source SHA256 hashes matched. MSBuild Content evaluation
+confirmed one linked item with PreserveNewest for output and publishing.
+
+Report has a separate legacy anchor toolbar. Its hard-coded green failed the
+isolated contrast check at 2.96:1. The host adapter now gives those controls semantic
+surface/accent, hover and focus colors without turning outlined SVGs into solids.
+The Report filter surface and apply button use matching semantic colors.
+
+Neo-Bpms also clamps the Report popup to viewport dimensions instead of imposing
+1800/2160px minimum widths, and corrects six legacy form Views (bulk create/edit/work
+item, command, custom and iframe) to the same versioned controls-modern.css URL as
+Report. The previous legacy CSS URL returned 404; the shared URL returned 200.
+Those Razor changes require rebuilding the host with the updated Neo-Bpms dependency.
+Static host CSS and the copied filter script can be loaded now with Ctrl+F5.
+
+Report.browser.test.cjs is isolated sample markup, not authenticated UI acceptance.
+These fixes do not change Skill/MCP contracts, so no tool schema was rewritten.
+
+The full Report inline CSS exposed another runtime issue: focus ran during the
+visibility transition's initial hidden frame. ColumnFilter now waits for layout
+before choosing/focusing the existing control, still waiting for jQuery animations
+and preserving widget instances and values. The Report fixture reproduced the
+failure before the fix and passed the mobile/desktop focus checks after it.
+
+Validation completed on 2026-09-28: the combined Edge run passed all 33 tests
+(17 shared column-filter tests, 16 Report palette/viewport cases), exit code 0.
+Neo.Bpms.UI.MVC Compile target passed with zero warnings/errors and existing
+references. Hyper Compile was blocked by CS0103 (`api` undefined) in the concurrently
+modified WorkManagementPageController.cs:25; that unrelated file was not changed
+by this task. No full host rebuild/deployment or authenticated Report acceptance
+is claimed. Earlier exploratory test runs exposed the visibility timing failure;
+final tests use the bounded frame wait and close their own browser connection.
+The csproj delivery change was included in concurrent Hyper commit b1246cd;
+the remaining owned changes are committed separately.

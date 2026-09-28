@@ -72,3 +72,6 @@ node_modules/
 
 
 /.artifacts/e2e102-panel
+
+# Generated from the canonical Neo-Bpms filter script during build.
+/src/AdminPanel/Hyper.AdminPanel.Web/wwwroot/Content/common-assets-includes/features/filter/ColumnFilter.js
