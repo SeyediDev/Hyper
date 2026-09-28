@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType></PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="../../src/Integration/Hyper.Integration.Domain/Hyper.Integration.Domain.csproj" />
+    <ProjectReference Include="../../src/Integration/Hyper.Integration.Contracts/Hyper.Integration.Contracts.csproj" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <Using Include="Hyper.Integration.Domain.Entities.Integrations" />
+    <Using Include="Hyper.Integration.Domain.Features.Integrations" />
+    <!-- Compile the production queue, processor and persistence, not copies of their SQL. -->
+    <Compile Include="../../src/Core/Hyper.Infrastructure/Data/Repository/Hyper/HyperIntegrationContext.cs" Link="Production/HyperIntegrationContext.cs" />
+    <Compile Include="../../src/Core/Hyper.Infrastructure/Data/Configurations/External*Configuration.cs;../../src/Core/Hyper.Infrastructure/Data/Configurations/Integration*Configuration.cs;../../src/Core/Hyper.Infrastructure/Data/Configurations/InventoryReservationLogConfiguration.cs;../../src/Core/Hyper.Infrastructure/Data/Configurations/IIntegrationEntityConfiguration.cs" Link="Production/%(Filename)%(Extension)" />
+    <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationScenarioQueue.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationScenarioScheduling.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationScenarioProcessor.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationBusinessEventDispatcher.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationWebhookIngress.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationWebhookVerifier.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/BasalamWebhookEvents.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationInventoryCapture.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationInventoryCaptureAttempt.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationOutbox.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationVersionSourceApi.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/BasalamDemoProvisioner.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/BasalamOAuthService.cs" Link="Production/%(Filename)%(Extension)" />
+  </ItemGroup>
+</Project>

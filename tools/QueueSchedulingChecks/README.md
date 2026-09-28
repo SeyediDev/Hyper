@@ -16,6 +16,12 @@ inbox acknowledgement atomicity or exactly-once financial effects. The queue's
 existing event identity and lease acknowledgement mechanisms are unchanged.
 Ordering is by durable queue ID, not a provider timestamp/version.
 
+The separate [QueueSqlChecks](../QueueSqlChecks/README.md) executable exercises the
+production queue, processor and dispatcher against an explicitly authorized,
+disposable SQL fixture for session locking, FIFO, lease recovery and atomic
+inbox acknowledgement. It requires an explicit SQL switch and environment
+connection; building either executable does not run SQL.
+
 Deployment must drain/stop every old scenario processor (including any panel
 host that processes the queue) before starting the new version. Old builds use
 connection-scoped application locks and cannot coordinate with the new shop key;
