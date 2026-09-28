@@ -1,6 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework></PropertyGroup>
   <ItemGroup>
+    <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationParcelApi.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationParcelCommandProcessor.cs" Link="Production/%(Filename)%(Extension)" />
+    <None Include="../../docs/schema/ensure-integration-parcel-commands.sql" Link="ensure-integration-parcel-commands.sql" CopyToOutputDirectory="PreserveNewest" />
     <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationScenarioScheduling.cs" Link="Production/IntegrationScenarioScheduling.cs" />
     <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationInventoryCaptureAttempt.cs" Link="Production/IntegrationInventoryCaptureAttempt.cs" />
     <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationVersionSourceApi.cs" Link="Production/IntegrationVersionSourceApi.cs" />

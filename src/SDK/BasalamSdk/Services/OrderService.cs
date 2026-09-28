@@ -95,6 +95,13 @@ public sealed record VendorParcelsQuery(string? CreatedAt = null, string? Cursor
 
 public sealed class ParcelService(IBasalamHttpClient client, ILogger<ParcelService>? logger = null) : IParcelService
 {
+    public async Task<VendorParcelSnapshot> ReadVendorParcelSnapshotAsync(int parcelId, CancellationToken ct = default)
+    {
+        ValidateId(parcelId);
+        var body = await client.GetAsync<JsonElement>($"/v1/vendor-parcels/{parcelId}", ct);
+        return VendorParcelSnapshot.Parse(body, parcelId);
+    }
+
     public async Task<object?> GetParcelAsync(int parcelId, CancellationToken ct = default)
     {
         ValidateId(parcelId);
@@ -144,14 +151,25 @@ public sealed class ParcelService(IBasalamHttpClient client, ILogger<ParcelServi
     public Task<JsonElement> SetParcelPreparationAsync(int parcelId, CancellationToken ct = default)
     {
         ValidateId(parcelId);
-        return client.PostAsync<JsonElement>($"/v1/vendor-parcels/{parcelId}/set-preparation", null, ct);
+        return PostOnce($"/v1/vendor-parcels/{parcelId}/set-preparation", null, ct);
     }
 
     public Task<JsonElement> SetParcelPostedAsync(int parcelId, object postedData, CancellationToken ct = default)
     {
         ValidateId(parcelId);
         ArgumentNullException.ThrowIfNull(postedData);
-        return client.PostAsync<JsonElement>($"/v1/vendor-parcels/{parcelId}/set-posted", postedData, ct);
+        return PostOnce($"/v1/vendor-parcels/{parcelId}/set-posted", postedData, ct);
+    }
+
+    private async Task<JsonElement> PostOnce(string path, object? body, CancellationToken ct)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, path);
+        if (body is not null) request.Content = System.Net.Http.Json.JsonContent.Create(body);
+        request.Options.Set(BasalamHttpClient.DisableRetries, true);
+        using var response = await client.SendAsync(request, ct);
+        if (!response.IsSuccessStatusCode) throw new BasalamAPIError("Parcel command failed", (int)response.StatusCode, null);
+        var content = await response.Content.ReadAsStringAsync(ct);
+        return string.IsNullOrWhiteSpace(content) ? default : JsonSerializer.Deserialize<JsonElement>(content);
     }
 
     private static void ValidateId(int id)

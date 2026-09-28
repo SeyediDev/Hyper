@@ -9,8 +9,43 @@ using Hyper.Integration.Domain.Features.Integrations;
 
 namespace Hyper.Infrastructure.Features.Integrations;
 
-public sealed class BasalamSdkAdapter(IBasalamClient client, BasalamOAuthStore tokenStore) : IExternalIntegrationAdapter, IExternalProductPublisher, IExternalProductCreator
+public sealed class BasalamSdkAdapter(IBasalamClient client, BasalamOAuthStore tokenStore) : IExternalIntegrationAdapter, IExternalProductPublisher, IExternalProductCreator, IExternalParcelLifecycle
 {
+    public Task<ExternalParcelState> ReadParcelAsync(ExternalIntegrationConnection connection, string parcelId, CancellationToken ct) =>
+        ProviderCall(async () =>
+        {
+            Validate(connection); Identifier(parcelId); await SetTokenAsync(connection, ct);
+            VendorParcelSnapshot parcel;
+            try { parcel = await client.Parcels.ReadVendorParcelSnapshotAsync(int.Parse(parcelId, CultureInfo.InvariantCulture), ct); }
+            catch (Exception e) when (e is JsonException or InvalidOperationException or KeyNotFoundException)
+            { throw new IntegrationProviderException("ParcelInvalidResponse", false); }
+            if (parcel.VendorId.ToString(CultureInfo.InvariantCulture) != connection.AccountIdentifier)
+                throw new IntegrationProviderException("VendorMismatch", false);
+            // Exception/cancellation codes must not be treated as delivered merely
+            // because the response also carries a historical delivery flag.
+            var state = parcel.StatusId switch
+            {
+                3739 when !parcel.IsDelivered => "new",
+                3237 when !parcel.IsDelivered => "preparing",
+                3238 => parcel.IsDelivered ? "delivered" : "shipped",
+                3195 when parcel.IsDelivered => "delivered",
+                _ => null
+            };
+            return new ExternalParcelState(parcel.Id.ToString(CultureInfo.InvariantCulture),
+                parcel.OrderId.ToString(CultureInfo.InvariantCulture), state, parcel.TrackingCode, parcel.ShippingMethod,
+                state is null ? "ParcelStatusNeedsReview" : null);
+        });
+
+    public Task SendParcelAsync(ExternalIntegrationConnection connection, string parcelId, bool posted,
+        int? shippingMethod, string? trackingCode, CancellationToken ct) => ProviderCall(async () =>
+    {
+        Validate(connection); Identifier(parcelId); await SetTokenAsync(connection, ct);
+        var id = int.Parse(parcelId, CultureInfo.InvariantCulture);
+        return posted
+            ? await client.Parcels.SetParcelPostedAsync(id, new { shipping_method = shippingMethod, tracking_code = trackingCode }, ct)
+            : await client.Parcels.SetParcelPreparationAsync(id, ct);
+    });
+
     public async Task PrepareCreationAsync(ExternalIntegrationConnection connection, CancellationToken ct)
     {
         Validate(connection);

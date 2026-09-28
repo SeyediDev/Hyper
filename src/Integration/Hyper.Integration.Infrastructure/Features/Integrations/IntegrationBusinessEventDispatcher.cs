@@ -24,6 +24,26 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
         if (IsParcelEvent(inbox.EventType))
         {
             root = Envelope(root);
+            if (connection.Provider == IntegrationProvider.Basalam)
+            {
+                if (strategies?.Resolve(connection.Provider, connection.CredentialType) is not IExternalParcelLifecycle lifecycle)
+                    throw new IntegrationProviderException("ParcelLifecycleUnavailable", false);
+                // Notifications can be thin or stale. Payload order/status/tracking
+                // are not authoritative and order_item_id is never an order ID.
+                var identity = RequiredAny(root, "externalParcelId", "parcel_id", "parcelId", "id");
+                var current = await lifecycle.ReadParcelAsync(connection, identity, ct);
+                if (current.State is not ("preparing" or "shipped" or "delivered"))
+                    return new(1, [new(null, null, null, current.AttentionCode ?? "ParcelStatusNeedsReview")]);
+                // The current invoice contract has one tracking field per order.
+                // Require an explicit parcel binding; never promote one parcel of
+                // a multi-parcel order to the status of the entire invoice.
+                var binding = await db.ExternalOrderMappings.AsNoTracking().SingleOrDefaultAsync(x =>
+                    x.ConnectionId == connection.Id && x.ShopId == job.ShopId && x.ExternalOrderId == current.OrderId, ct);
+                if (binding?.HyperSaleOrderId is not > 0 || binding.ExternalParcelId != current.ParcelId)
+                    return new(1, [new(null, null, null, "ParcelInvoiceMappingRequired")]);
+                return Result(await commands.ApplyParcelStatusAsync(new(job.EventId, job.ShopId, job.TenantId,
+                    job.ConnectionId, current.OrderId, current.ParcelId, current.State, current.TrackingCode), ct));
+            }
             var parcel = await commands.ApplyParcelStatusAsync(new(job.EventId, job.ShopId, job.TenantId,
                 job.ConnectionId,
                 RequiredAny(root, "externalOrderId", "order_id", "orderId", "order_item_id"),
@@ -120,7 +140,7 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
         result.Status is BusinessCommandStatus.Rejected
             ? throw new IntegrationProviderException(result.ErrorCode ?? "AccountingCommandRejected", false)
             : new(1, result.Status == BusinessCommandStatus.PendingDependency
-                ? [new(null, null, null, "AccountingDependencyPending")] : []);
+                ? [new(null, null, null, result.ErrorCode ?? "AccountingDependencyPending")] : []);
 
     private Task<BusinessCommandResult> CounterpartyAsync(IntegrationScenarioJob job, JsonElement root, CancellationToken ct) =>
         commands.ApplyCounterpartyAsync(new(job.EventId, job.ShopId, job.TenantId,
@@ -261,9 +281,8 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
     }
 
     private static bool IsParcelEvent(string eventType) =>
-        eventType.Contains("parcel", StringComparison.OrdinalIgnoreCase)
-        && (eventType.Contains("status", StringComparison.OrdinalIgnoreCase)
-            || eventType.Equals("VENDOR_PARCEL_CHANGES", StringComparison.OrdinalIgnoreCase));
+        eventType.Trim().Equals("parcel.status_changed", StringComparison.OrdinalIgnoreCase)
+        || eventType.Trim().Equals("VENDOR_PARCEL_CHANGES", StringComparison.OrdinalIgnoreCase);
 
     private static bool IsCancellationEvent(string eventType, JsonElement root)
     {

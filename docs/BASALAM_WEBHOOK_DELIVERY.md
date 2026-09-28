@@ -63,7 +63,10 @@ and successive updates to the same entity. Registration alone is not acceptance.
 - The production engagement owner is still unregistered. Text normalization
   does not implement a chat/review domain: default processing remains actionable
   with `EngagementOwnerApiNotRegistered`.
-- Review and thin order/item/parcel payload hydration still need authoritative
+- Parcel changes now use authoritative provider detail reads and scoped invoice
+  bindings; preparation/posting use durable commands with GET-only recovery.
+  See [FLOW-C](PARCEL_LIFECYCLE.md) for exact supported states and remaining live gates.
+- Review and thin order/item payload hydration still need authoritative
   samples, ownership checks and scenario-specific mapping. Routing their event
   names to a queue does not mean those business scenarios are complete.
 

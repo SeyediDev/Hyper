@@ -11,11 +11,12 @@ requested shop/tenant. Both supported claim types are exercised.
 dotnet run --project tools/EndpointIsolationChecks --artifacts-path .artifacts/isolation
 ```
 
-All 24 protected actions are covered: connection list/create/enable/disable,
+All 26 protected actions are covered: connection list/create/enable/disable,
 webhook replay, mapping list/create/deactivate, sync, token request/list/revoke,
 dashboard, accounting inventory/product ingress, version-source read/change,
 the paired catalog reconciliation start/status request, product-draft start/read,
-and product-readiness board, policy read/change and preparation.
+product-readiness board, policy read/change and preparation, and parcel command
+start/status.
 Anonymous, wrong-shop, wrong-tenant,
 Admin-without-scope and mixed authenticated/unauthenticated identities must be
 rejected. Positive owner cases prevent a blanket-deny implementation passing.
@@ -85,3 +86,11 @@ Product-readiness verification later on 2026-09-28: the default-output build
 with the local integrated-security fixture environment exited0: **206 passed,
 0 failed** (178 HTTP/controller +28 SQL); the disposable database was removed.
 The isolated artifact-path build requires its own package restore first.
+
+FLOW-C verification on 2026-09-29: the full project-reference build at the default
+output path exited0 with zero warnings/errors. Running the default-output
+executable with `--sql` exited0: **220 passed, 0 failed** (192 controller checks
+and28 SQL checks). The two parcel routes use the same denied/allowed identity
+matrix. Their SQL receipt and provider-recovery behavior is covered separately
+by `SynchronizationFlowChecks`; the SQL section here does not certify live
+parcel delivery. The disposable database was removed.

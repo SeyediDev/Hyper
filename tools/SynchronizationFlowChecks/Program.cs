@@ -535,6 +535,7 @@ static async Task<int> Run(bool oauthVaultOnly)
         await BasalamRetryChecks.Run(db, options, Check);
         await OAuthVaultChecks.Run(options, Check);
         await OAuthRefreshRetryChecks.Run(options, Check);
+        await ParcelLifecycleChecks.Run(options, Check);
         Console.WriteLine($"{checks} synchronization flow checks passed. HTTP/accounting responses are controlled fixtures, not live-provider acceptance.");
         return 0;
     }

@@ -82,6 +82,8 @@ object? Respond(MethodInfo method, object?[]? arguments)
         "ListProductMappingsAsync" => Task.FromResult<IReadOnlyList<IntegrationProductMappingSummary>>([]),
         "CreateProductMappingAsync" => Task.FromResult<IntegrationProductMappingSummary?>(new(61, 41, 7, 1, "fixture", null, null, null, null, null, true)),
         "TriggerAsync" => Task.FromResult<IntegrationSyncTriggerResponse?>(new(71, "Accepted")),
+        "StartAsync" or "ReadAsync" when method.DeclaringType == typeof(IIntegrationParcelApi) =>
+            Task.FromResult<ParcelCommandStatus?>(new(Guid.NewGuid(),75,"Pending",null)),
         "StartAsync" => Task.FromResult<IntegrationProductDraftStatus?>(new(Guid.NewGuid(),74,"Pending",null,null,null)),
         "ReadAsync" when method.DeclaringType == typeof(IIntegrationProductDraftApi) =>
             Task.FromResult<IntegrationProductDraftStatus?>(new(Guid.NewGuid(),74,"Pending",null,null,null)),
@@ -103,6 +105,7 @@ builder.Services.AddSingleton(Probe.Create<IIntegrationManagementApi>(Respond));
 builder.Services.AddSingleton(Probe.Create<IIntegrationMappingApi>(Respond));
 builder.Services.AddSingleton(Probe.Create<IIntegrationSyncApi>(Respond));
 builder.Services.AddSingleton(Probe.Create<IIntegrationProductDraftApi>(Respond));
+builder.Services.AddSingleton(Probe.Create<IIntegrationParcelApi>(Respond));
 builder.Services.AddSingleton(Probe.Create<IIntegrationProductReadinessApi>(Respond));
 builder.Services.AddSingleton(Probe.Create<IIntegrationTokenApi>(Respond));
 builder.Services.AddSingleton(Probe.Create<IIntegrationDashboardApi>(Respond));
@@ -121,6 +124,8 @@ try
     const string root = "/api/integrations/v1";
     EndpointCase[] cases =
     [
+        new("Start","POST",root+"/connections/41/parcels/commands",new ParcelCommandRequest(Guid.NewGuid(),"70","700",ParcelCommandTarget.Preparing),"StartAsync"),
+        new("Read","GET",root+"/connections/41/parcels/commands/ae475351-42f0-4a2a-967f-cf78be311c64",null,"ReadAsync"),
         new("Board","GET",root+"/connections/41/product-readiness",null,"BoardAsync"),
         new("Policy","GET",root+"/connections/41/product-readiness/policy/1",null,"PolicyAsync"),
         new("SetPolicy","PUT",root+"/connections/41/product-readiness/policy/1",new ProductPreparationPolicy(),"SetPolicyAsync"),

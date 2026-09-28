@@ -33,9 +33,15 @@ integration_scope=shop:{ShopId};tenant:{TenantId}
 | POST | `/api/integrations/v1/connections/{id}/mappings` | ایجاد mapping |
 | DELETE | `/api/integrations/v1/connections/{id}/mappings/{mappingId}` | غیرفعال‌سازی mapping |
 | POST | `/api/integrations/v1/connections/{id}/sync` | شروع sync |
+| POST | `/api/integrations/v1/connections/{id}/parcels/commands` | صف فرمان آماده‌سازی یا ارسال مرسوله با رسید پایدار |
+| GET | `/api/integrations/v1/connections/{id}/parcels/commands/{requestId}` | استعلام تأیید فرمان مرسوله و خطای قابل پیگیری |
 | GET | `/api/integrations/v1/dashboard?shopId=...` | metrics و runهای Integration |
 
 Credential و token در هیچ DTO این API ارسال یا بازگردانده نمی‌شود. OAuth و Vault مسیر مالک مدیریت credential هستند.
+
+قرارداد ورودی، حدود انتقال وضعیت و پیش‌نیازهای واقعی مسیر مرسوله در
+[FLOW-C](PARCEL_LIFECYCLE.md) آمده است. پاسخ 202 فقط پذیرش در صف است؛ پس از
+پاسخ نامطمئن باسلام، Worker فقط وضعیت را می‌خواند و فرمان ارسال را تکرار نمی‌کند.
 
 ## هویت اتصال و توکن در scope
 

@@ -31,6 +31,16 @@ public sealed class HyperIntegrationContext(DbContextOptions<HyperIntegrationCon
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<IntegrationParcelCommand>(e =>
+        {
+            e.ToTable("IntegrationParcelCommands", "dbo"); e.HasKey(x => x.Id);
+            e.Property(x => x.ParcelId).HasMaxLength(128).UseCollation("Latin1_General_100_BIN2");
+            e.Property(x => x.AccountIdentifier).HasMaxLength(200); e.Property(x => x.Actor).HasMaxLength(256);
+            e.Property(x => x.ErrorCode).HasMaxLength(100);
+            e.HasIndex(x => new { x.ConnectionId, x.RequestId }).IsUnique();
+            e.HasIndex(x => new { x.ConnectionId, x.ParcelId, x.Target }).IsUnique();
+            e.HasOne<ExternalIntegrationConnection>().WithMany().HasForeignKey(x => x.ConnectionId).OnDelete(DeleteBehavior.NoAction);
+        });
         modelBuilder.Entity<IntegrationProductPreparation>(e =>
         {
             e.ToTable("IntegrationProductPreparations", "dbo"); e.HasKey(x => x.Id);
