@@ -190,3 +190,26 @@ is claimed. Earlier exploratory test runs exposed the visibility timing failure;
 final tests use the bounded frame wait and close their own browser connection.
 The csproj delivery change was included in concurrent Hyper commit b1246cd;
 the remaining owned changes are committed separately.
+
+## Report filter lifecycle (2026-09-28)
+
+Report's outside-click/submit paths removed only the show class while inline
+!important visibility remained enabled. All filter close paths now use
+closeReportFilter, which hides the panel and synchronizes toolbar/ARIA state.
+Escape and the close control return focus to the opener; outside clicks and submit
+retain their intended focus. Body-mounted combo/calendar interaction is exempt
+from outside dismissal, and open widgets receive Escape before the parent filter.
+Positioning is shared between open and resize, without resetting controls or values.
+
+The existing Report keyboard event manager is reused; no second key handler or
+filter UI is added. Regression fixtures exercise actual close/position/key code.
+Changes live in Neo-Bpms Razor partials and need a consuming host rebuild.
+Skill/MCP APIs and recipes are unaffected; both repository usage docs are updated.
+
+Validation: 21 shared filter tests and 16 Report theme tests passed (37 total),
+both processes exited 0 after slow browser teardown. Targeted Compile builds for
+Neo.Bpms.UI.MVC and Hyper.AdminPanel.Web both passed with zero warnings/errors,
+using existing project-reference outputs. The earlier WorkManagementPageController
+api error was resolved in the intervening source by its owner. This is not a full
+build, deployment or authenticated UI acceptance; rebuild/restart the consuming
+host normally to load these Razor changes.

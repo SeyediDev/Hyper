@@ -53,8 +53,8 @@ function action(name) {
  assert.ok(markup, name); return markup.replace(/@ViewTexts\.\w+/g,'Action');
 }
 const toggleSource=partial('_Scripts.toggles.cshtml');
-const toggleStart=toggleSource.indexOf('window.toggleFilterTooltip = function');
-const toggle=toggleSource.slice(toggleStart,toggleSource.indexOf('\n};',toggleStart)+3);
+const toggleStart=toggleSource.indexOf('// Report filter lifecycle:');
+const toggle=toggleSource.slice(toggleStart,toggleSource.indexOf('\n};',toggleSource.indexOf('window.toggleFilterTooltip = function'))+3);
 const events=partial('_Scripts.event-manager.cshtml');
 const eventStart=events.indexOf("document.addEventListener('click', function(e)");
 const outside=events.slice(eventStart,events.indexOf('\n    });',eventStart)+8);
