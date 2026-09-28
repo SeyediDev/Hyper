@@ -32,9 +32,13 @@ public sealed class IntegrationMappingApi(HyperIntegrationContext db) : IIntegra
         if (request.ShopId <= 0 || request.ConnectionId <= 0 || tenantId is null || request.HyperProductId <= 0
             || externalProductId is null || !externalSku.Valid || !externalVariantId.Valid)
             return null;
-        var connection = await db.ExternalIntegrationConnections.SingleOrDefaultAsync(x => x.Id == request.ConnectionId
-            && x.ShopId == request.ShopId && x.TenantId == tenantId, ct);
-        if (connection is null) return null;
+        await using var tx = await db.Database.BeginTransactionAsync(ct);
+        var connection = await db.ExternalIntegrationConnections.FromSqlInterpolated(
+            $"SELECT * FROM dbo.ExternalIntegrationConnections WITH (UPDLOCK,HOLDLOCK) WHERE Id={request.ConnectionId}")
+            .AsNoTracking().SingleOrDefaultAsync(ct);
+        if (connection is null || connection.ShopId != request.ShopId || connection.TenantId != tenantId) return null;
+        if (await db.Set<IntegrationProductCreation>().AnyAsync(x => x.ConnectionId == connection.Id && x.State != 3
+            && (x.HyperProductId == request.HyperProductId || x.ExternalProductId == externalProductId), ct)) return null;
         var mapping = new ExternalProductMapping
         {
             ConnectionId = connection.Id, ShopId = request.ShopId, HyperProductId = request.HyperProductId,
@@ -43,6 +47,7 @@ public sealed class IntegrationMappingApi(HyperIntegrationContext db) : IIntegra
         };
         db.ExternalProductMappings.Add(mapping);
         try { await db.SaveChangesAsync(ct); } catch (DbUpdateException) { return null; }
+        await tx.CommitAsync(ct);
         return ToSummary(mapping);
     }
 

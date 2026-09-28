@@ -19,6 +19,8 @@ public static class IntegrationServiceRegistration
         services.AddScoped<IIntegrationSynchronizationService, IntegrationSynchronizationService>();
         services.AddScoped<IIntegrationScenarioQueue, IntegrationScenarioQueue>();
         services.AddScoped<IntegrationScenarioProcessor>();
+        services.AddScoped<IIntegrationProductDraftApi, IntegrationProductDraftApi>();
+        services.AddScoped<IIntegrationProductCreationProcessor, IntegrationProductCreationProcessor>();
         services.AddScoped<IntegrationBusinessEventDispatcher>();
         services.AddScoped<IIntegrationEngagementPort, UnregisteredIntegrationEngagementPort>();
         services.AddScoped<MediatR.INotificationHandler<IntegrationScenarioRequested>, IntegrationScenarioSubscriber>();

@@ -1,7 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><OutputType>Exe</OutputType></PropertyGroup>
   <ItemGroup>
+    <None Include="../../docs/schema/ensure-integration-product-creations.sql" Link="ensure-integration-product-creations.sql" CopyToOutputDirectory="PreserveNewest" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationProductDraftApi.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationProductCreationProcessor.cs" Link="Production/%(Filename)%(Extension)" />
     <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationOperationsApi.cs" Link="Production/IntegrationOperationsApi.cs" />
     <ProjectReference Include="../../src/Integration/Hyper.Integration.Domain/Hyper.Integration.Domain.csproj" />
     <ProjectReference Include="../../src/Integration/Hyper.Integration.Contracts/Hyper.Integration.Contracts.csproj" />

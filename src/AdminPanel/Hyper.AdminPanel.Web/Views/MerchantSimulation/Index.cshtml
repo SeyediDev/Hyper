@@ -127,7 +127,7 @@
                     @if (ViewBag.ScenarioJobs is IEnumerable<Hyper.Integration.Domain.Entities.Integrations.IntegrationScenarioJob> jobs)
                     {
                         <h4>آخرین رویدادها</h4><ul>@foreach (var job in jobs.Take(10)) { <li>
-                            <strong>درخواست @job.Id</strong> — @(job.Item switch { IntegrationSyncItem.Product => "کالا", IntegrationSyncItem.Inventory => "موجودی", IntegrationSyncItem.Counterparty => "طرف حساب", IntegrationSyncItem.Sale => "فروش", _ => "خرید" })
+                            <strong>درخواست @job.Id</strong> — @(job.Item switch { IntegrationSyncItem.Product => "کالا", IntegrationSyncItem.Inventory => "موجودی", IntegrationSyncItem.Counterparty => "طرف حساب", IntegrationSyncItem.Sale => "فروش", IntegrationSyncItem.Purchase => "خرید", IntegrationSyncItem.ProductCreation => "ایجاد پیش‌نویس کالا", _ => job.Item.ToString() })
                             — @(job.Status switch { IntegrationScenarioStatus.Pending => "در صف", IntegrationScenarioStatus.Running => "در حال پردازش", IntegrationScenarioStatus.Completed => "تطبیق بدون مغایرت", IntegrationScenarioStatus.NeedsAttention => "دارای مغایرت", _ => "خطای نهایی" })
                             @if (job.ErrorCode is not null) { <bdi>@job.ErrorCode</bdi> }
                             @if (job.ResultJson is not null) { <details><summary>جزئیات تطبیق</summary><pre dir="ltr">@job.ResultJson</pre></details> }

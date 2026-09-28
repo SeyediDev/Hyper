@@ -1,6 +1,6 @@
 namespace Hyper.Integration.Domain.Features.Integrations;
 
-public enum IntegrationSyncItem : byte { Product = 1, Inventory = 2, Counterparty = 3, Sale = 4, Purchase = 5, Subscription = 6, Review = 7, Chat = 8 }
+public enum IntegrationSyncItem : byte { Product = 1, Inventory = 2, Counterparty = 3, Sale = 4, Purchase = 5, Subscription = 6, Review = 7, Chat = 8, ProductCreation = 9 }
 public enum IntegrationSyncTrigger : byte { StoreChanged = 1, BoothChanged = 2, Initial = 3, Periodic = 4, Manual = 5 }
 public enum IntegrationScenarioStatus : byte { Pending = 0, Running = 1, Completed = 2, NeedsAttention = 3, DeadLetter = 4 }
 

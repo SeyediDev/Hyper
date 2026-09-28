@@ -22,6 +22,7 @@ try
 {
     await CatalogPageChecks.Run(Check);
     await RetryAfterChecks.Run(Check);
+    await ProductDraftChecks.Run(Check);
     // Capture all HTTP in memory: these checks never contact a provider.
     var transport = new Capture();
     using var http = new HttpClient(transport);

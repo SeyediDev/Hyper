@@ -8,7 +8,8 @@ namespace Hyper.Infrastructure.Features.Integrations;
 public sealed class IntegrationScenarioProcessor(HyperIntegrationContext db, IIntegrationStrategyResolver strategies,
     IIntegrationInventoryCapture inventory, IOptions<IntegrationInventoryCaptureOptions> options,
     IOptions<BasalamOAuthSettings> basalamOptions, BasalamDemoProvisioner demoProvisioner,
-    IntegrationBusinessEventDispatcher businessEvents, IIntegrationPlatformCatalogPort catalog)
+    IntegrationBusinessEventDispatcher businessEvents, IIntegrationPlatformCatalogPort catalog,
+    IIntegrationProductCreationProcessor? productCreation = null)
 {
     public async Task<IntegrationScenarioResult> ProcessAsync(IntegrationScenarioJob job, CancellationToken ct)
     {
@@ -16,6 +17,10 @@ public sealed class IntegrationScenarioProcessor(HyperIntegrationContext db, IIn
             x.Id == job.ConnectionId && x.ShopId == job.ShopId && x.TenantId == job.TenantId, ct)
             ?? throw new IntegrationProviderException("ConnectionScopeChanged", false);
         IntegrationConnectionReadiness.Validate(connection, DateTime.UtcNow);
+        if (job.Item == IntegrationSyncItem.ProductCreation)
+            return productCreation is null
+                ? throw new IntegrationProviderException("ProductCreationUnavailable", false)
+                : await productCreation.ProcessAsync(job, connection, ct);
         if (job.Item == IntegrationSyncItem.Product)
         {
             // Only real notifications need an inbox. Initial/manual/store-side

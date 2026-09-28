@@ -175,6 +175,11 @@ name/base-price updates; HTTP 202 is not proof of remote completion. Real booth
 OAuth consent, an explicit test product and accounting-origin event delivery are
 required separately from the SQL/HTTP fixture checks.
 
+Explicit accounting-to-Basalam creation uses the separate
+[unpublished product-draft API](docs/PRODUCT_DRAFT_CREATION.md). It requires the
+additive Integration receipt schema, approved creation metadata and a valid booth
+grant; uncertain creation responses are never automatically posted again.
+
 This is a private repository. For contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License

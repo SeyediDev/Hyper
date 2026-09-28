@@ -31,6 +31,21 @@ public sealed class HyperIntegrationContext(DbContextOptions<HyperIntegrationCon
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<IntegrationProductCreation>(entity =>
+        {
+            entity.ToTable("IntegrationProductCreations", "dbo");
+            entity.HasKey(x => x.Id);
+            entity.Property(x => x.RequestJson).IsRequired();
+            entity.Property(x => x.PayloadJson).IsRequired();
+            entity.Property(x => x.AccountIdentifier).HasMaxLength(200).IsRequired();
+            entity.Property(x => x.ExternalProductId).HasMaxLength(200);
+            entity.Property(x => x.ErrorCode).HasMaxLength(100);
+            entity.HasIndex(x => new { x.ConnectionId, x.RequestId }).IsUnique();
+            // Includes failed/ambiguous attempts: a new request ID must never
+            // bypass an uncertain remote creation for the same source product.
+            entity.HasIndex(x => new { x.ConnectionId, x.HyperProductId }).IsUnique();
+            entity.HasOne<ExternalIntegrationConnection>().WithMany().HasForeignKey(x => x.ConnectionId).OnDelete(DeleteBehavior.NoAction);
+        });
         modelBuilder.Entity<IntegrationScenarioJob>(entity =>
         {
             entity.ToTable("IntegrationScenarioJobs", "dbo");

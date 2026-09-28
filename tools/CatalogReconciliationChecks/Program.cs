@@ -33,6 +33,13 @@ static async Task<int> Run()
             sql => sql.CommandTimeout(120)).ReplaceService<IModelCustomizer, FixtureSchema>().Options;
         await using var db = new HyperIntegrationContext(options);
         await db.Database.EnsureCreatedAsync();
+        // Exercise the actual upgrade from a pre-creation schema, not only EF's
+        // generated model. This database is uniquely generated above for this run.
+        if (db.Database.GetDbConnection().Database != name) throw new InvalidOperationException("Unsafe migration test target");
+        await db.Database.ExecuteSqlRawAsync("DROP TABLE dbo.IntegrationProductCreations; ALTER TABLE dbo.IntegrationScenarioJobs ADD CONSTRAINT CK_IntegrationScenarioJobs_Item CHECK (Item BETWEEN 1 AND 8);");
+        var creationSchema = await File.ReadAllTextAsync(Path.Combine(AppContext.BaseDirectory, "ensure-integration-product-creations.sql"));
+        await db.Database.ExecuteSqlRawAsync(creationSchema);
+        await db.Database.ExecuteSqlRawAsync(creationSchema);
         var connection = new ExternalIntegrationConnection { ShopId = 7, TenantId = "tenant-a", Provider = IntegrationProvider.Basalam,
             CredentialType = IntegrationCredentialType.BearerToken, AccountIdentifier = "71", DisplayName = "fixture", CredentialsJson = "{}" };
         db.ExternalIntegrationConnections.Add(connection);
@@ -221,6 +228,7 @@ static async Task<int> Run()
         job = await Process(await Enqueue(IntegrationSyncItem.Product));
         Check(job.Status == IntegrationScenarioStatus.NeedsAttention && job.ResultJson!.Contains("ExternalProductUnmapped") && await Messages() == count,
             "unmapped product requires explicit mapping, not guessed creation");
+        await ProductCreationChecks.Run(options, Check);
         Console.WriteLine($"{checks} catalog reconciliation checks passed. SQL fixture and controlled ports only; no real provider/accounting writes.");
         return 0;
     }

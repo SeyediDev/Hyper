@@ -28,6 +28,7 @@ public interface IBasalamHttpClient
 
 public sealed class BasalamHttpClient : IBasalamHttpClient, IDisposable
 {
+    public static readonly HttpRequestOptionsKey<bool> DisableRetries = new("Basalam.DisableRetries");
     private readonly System.Net.Http.HttpClient _httpClient;
     private readonly BasalamConfig _config;
     private readonly ILogger<BasalamHttpClient> _logger;
@@ -70,7 +71,8 @@ public sealed class BasalamHttpClient : IBasalamHttpClient, IDisposable
         if (token != null)
             request.Headers.Authorization = new AuthenticationHeaderValue(token.TokenType, token.AccessToken);
 
-        var maxRetries = Math.Clamp(_config.MaxRetries, 0, 10);
+        var maxRetries = request.Options.TryGetValue(DisableRetries, out var disabled) && disabled
+            ? 0 : Math.Clamp(_config.MaxRetries, 0, 10);
         var delayBase = Math.Clamp(_config.RetryDelayMilliseconds, 0, 60_000);
         for (var attempt = 0; ; attempt++)
         {

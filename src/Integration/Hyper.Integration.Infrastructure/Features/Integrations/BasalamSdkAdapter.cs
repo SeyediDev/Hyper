@@ -9,8 +9,36 @@ using Hyper.Integration.Domain.Features.Integrations;
 
 namespace Hyper.Infrastructure.Features.Integrations;
 
-public sealed class BasalamSdkAdapter(IBasalamClient client, BasalamOAuthStore tokenStore) : IExternalIntegrationAdapter, IExternalProductPublisher
+public sealed class BasalamSdkAdapter(IBasalamClient client, BasalamOAuthStore tokenStore) : IExternalIntegrationAdapter, IExternalProductPublisher, IExternalProductCreator
 {
+    public async Task PrepareCreationAsync(ExternalIntegrationConnection connection, CancellationToken ct)
+    {
+        Validate(connection);
+        if (client.Products is not Basalam.SDK.Services.IProductDraftService)
+            throw new IntegrationProviderException("ProductCreationUnsupported", false);
+        await SetTokenAsync(connection, ct);
+    }
+    public async Task<string> CreateDraftAsync(ExternalIntegrationConnection connection, ExternalProductDraft draft, CancellationToken ct)
+    {
+        Validate(connection);
+        await SetTokenAsync(connection, ct);
+        if (client.Products is not Basalam.SDK.Services.IProductDraftService service)
+            throw new IntegrationProviderException("ProductCreationUnsupported", false);
+        return (await ProviderCall(() => service.CreateDraftAsync(int.Parse(connection.AccountIdentifier, CultureInfo.InvariantCulture),
+            new(draft.Name, draft.PrimaryPrice, draft.CategoryId, draft.PreparationDays, draft.PackageWeight, draft.Description, draft.PhotoId), ct)))
+            .ToString(CultureInfo.InvariantCulture);
+    }
+
+    public Task<ExternalCatalogItem> ReadCreatedAsync(ExternalIntegrationConnection connection, string productId, CancellationToken ct) =>
+        ProviderCall(async () =>
+        {
+            Validate(connection); Identifier(productId); await SetTokenAsync(connection, ct);
+            var product = await client.Catalog.GetProductAsync(int.Parse(productId, CultureInfo.InvariantCulture), ct)
+                ?? throw new IntegrationProviderException("CreatedProductMissing", false);
+            ValidateVendor(product, connection);
+            if (product.Variants.Count != 0) throw new IntegrationProviderException("CreatedProductHasVariants", false);
+            return new ExternalCatalogItem(productId, product.Sku, product.Name, product.Price, product.Stock, null);
+        });
     public IntegrationProvider Provider => IntegrationProvider.Basalam;
     public bool IsImplemented => true;
     public bool SupportsCredentialType(IntegrationCredentialType type) =>

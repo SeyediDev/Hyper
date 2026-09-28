@@ -19,3 +19,8 @@ conflict, permanent delivery failure, transient read-back recovery, unsupported
 SKU/variant details and missing mappings.
 
 See [the operational contract](../../docs/CATALOG_RECONCILIATION.md).
+
+Also covers explicit product draft creation: scoped source snapshot, atomic
+receipt/job, concurrent duplicate requests, retained ambiguous-send guard,
+read-back-only retries and mapping confirmation. See
+[draft creation](../../docs/PRODUCT_DRAFT_CREATION.md).

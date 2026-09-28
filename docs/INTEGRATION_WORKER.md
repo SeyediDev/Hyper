@@ -15,6 +15,11 @@ dotnet run --project src/IntegrationWorker/Hyper.IntegrationWorker.Host
 
 ## ورودی و وضعیت
 
+ایجاد صریح پیش‌نویس کالا از مسیر `product-drafts` وارد همین صف سناریو (نوع ۹)
+می‌شود. ارسال غیرقابل‌تکرار آن رسید مستقل دارد و پس از پاسخ مبهم خودکار تکرار
+نمی‌شود؛ جزئیات استقرار و بازیابی در [ایجاد پیش‌نویس کالا](PRODUCT_DRAFT_CREATION.md).
+قبل از استقرار، اسکریپت جدول رسید اجرا و پردازش‌گرهای قدیمی متوقف/تخلیه شوند.
+
 `POST connections/{id}/inventory` زیر مسیر integration موجود، MappingId، SourceVersion و Quantity مطلق دریافت می‌کند. هویت و tenant/shop اتصال از مجوز سمت سرور محدود می‌شود. SourceVersion باید برای همان mapping افزایشی و پایدار باشد. تکرار همان نسخه/بدنه همان MessageId را برمی‌گرداند؛ نسخه قدیمی یا بدنه متفاوت رد می‌شود. این API باید از مقدار قطعی هایپریک تغذیه شود.
 
 `GET connections/{id}/outbox` وضعیت را بدون payload یا credential می‌دهد. `POST connections/{id}/outbox/{messageId}/retry` تنها خطای نهاییِ آخرین نسخه را دوباره صف می‌کند؛ پیام قدیمی پس از نسخه جدید قابل replay نیست.

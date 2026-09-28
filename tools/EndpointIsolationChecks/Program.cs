@@ -78,6 +78,9 @@ object? Respond(MethodInfo method, object?[]? arguments)
         "ListProductMappingsAsync" => Task.FromResult<IReadOnlyList<IntegrationProductMappingSummary>>([]),
         "CreateProductMappingAsync" => Task.FromResult<IntegrationProductMappingSummary?>(new(61, 41, 7, 1, "fixture", null, null, null, null, null, true)),
         "TriggerAsync" => Task.FromResult<IntegrationSyncTriggerResponse?>(new(71, "Accepted")),
+        "StartAsync" => Task.FromResult<IntegrationProductDraftStatus?>(new(Guid.NewGuid(),74,"Pending",null,null,null)),
+        "ReadAsync" when method.DeclaringType == typeof(IIntegrationProductDraftApi) =>
+            Task.FromResult<IntegrationProductDraftStatus?>(new(Guid.NewGuid(),74,"Pending",null,null,null)),
         "ReconcileCatalogAsync" => Task.FromResult<IntegrationCatalogReconciliationResponse?>(new(Guid.NewGuid(),
             new(72, "Pending", null, null), new(73, "Pending", null, null))),
         "RequestAsync" => Task.FromResult<IntegrationTokenRequestStatus?>(new(Guid.NewGuid(), 0, DateTime.UtcNow)),
@@ -95,6 +98,7 @@ object? Respond(MethodInfo method, object?[]? arguments)
 builder.Services.AddSingleton(Probe.Create<IIntegrationManagementApi>(Respond));
 builder.Services.AddSingleton(Probe.Create<IIntegrationMappingApi>(Respond));
 builder.Services.AddSingleton(Probe.Create<IIntegrationSyncApi>(Respond));
+builder.Services.AddSingleton(Probe.Create<IIntegrationProductDraftApi>(Respond));
 builder.Services.AddSingleton(Probe.Create<IIntegrationTokenApi>(Respond));
 builder.Services.AddSingleton(Probe.Create<IIntegrationDashboardApi>(Respond));
 builder.Services.AddSingleton(Probe.Create<IIntegrationAccountingEventIngress>(Respond));
@@ -112,6 +116,9 @@ try
     const string root = "/api/integrations/v1";
     EndpointCase[] cases =
     [
+        new("CreateDraft", "POST", root + "/connections/41/product-drafts",
+            new IntegrationProductDraftRequest(7,"tenant-a",41,Guid.NewGuid(),44,100,2,200),"StartAsync"),
+        new("ReadDraft", "GET", root + "/connections/41/product-drafts/ae475351-42f0-4a2a-967f-cf78be311c64",null,"ReadAsync"),
         new("List", "GET", root + "/connections?shopId=7", null, "ListConnectionsAsync"),
         new("Create", "POST", root + "/connections", new IntegrationConnectionCreateRequest(7, "tenant-a", Provider.Custom, "fixture", "fixture", 1), "CreateConnectionAsync"),
         new("Enable", "POST", root + "/connections/41/enable", null, "SetConnectionEnabledAsync"),

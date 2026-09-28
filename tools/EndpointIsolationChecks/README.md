@@ -11,10 +11,10 @@ requested shop/tenant. Both supported claim types are exercised.
 dotnet run --project tools/EndpointIsolationChecks --artifacts-path .artifacts/isolation
 ```
 
-All 18 protected actions are covered: connection list/create/enable/disable,
+All 20 protected actions are covered: connection list/create/enable/disable,
 webhook replay, mapping list/create/deactivate, sync, token request/list/revoke,
 dashboard, accounting inventory/product ingress, version-source read/change,
-and the paired catalog reconciliation start/status request.
+the paired catalog reconciliation start/status request, and product-draft start/read.
 Anonymous, wrong-shop, wrong-tenant,
 Admin-without-scope and mixed authenticated/unauthenticated identities must be
 rejected. Positive owner cases prevent a blanket-deny implementation passing.
@@ -49,9 +49,9 @@ Baseline at `f87524f`, before production fixes: the initial non-SQL suite exited
 1 with **88 passed, 18 failed**, reproducing mixed-identity claim acceptance,
 control characters in tenant scope and token request simulation tenant mismatch.
 
-SQL execution in the sandbox failed at the SQL TLS connection, before test
+Historical limitation on 2026-09-26: SQL execution in the sandbox failed at the SQL TLS connection, before test
 assertions. Execution outside the sandbox was not approved. SQL coverage is
-therefore **not verified**; this includes the connection-owner predicates added
+therefore **not verified at that stage**; this included the connection-owner predicates added
 to token revocation and accounting inventory ingress. These changes require
 SQL review/verification before acceptance. No SQL pass count is claimed.
 
@@ -70,3 +70,9 @@ product-changed and version-source GET/PUT cases with the same seven identities;
 the final targeted build had zero warnings/errors and the executable exited 0
 with **127 passed, 0 failed**. SQL checks remained explicitly skipped. This updates
 the test inventory, not the production authentication contract.
+
+Verification on 2026-09-28 supersedes the historical SQL limitation above:
+the current executable with `--sql` exited 0 with **178 passed, 0 failed**
+(150 HTTP/controller checks and 28 SQL service checks). The disposable SQL
+database was removed. The targeted build exited 0 with no warnings or errors.
+These checks still do not constitute live provider or deployed-host acceptance.

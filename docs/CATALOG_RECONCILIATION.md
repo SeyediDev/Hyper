@@ -2,6 +2,8 @@
 
 This is the main **existing mapped product** path. It does not create products,
 guess mappings, change fiscal units, write SKU to Basalam, or enable stock capture.
+For explicit creation of a separate unpublished Basalam product, use the
+[product-draft workflow](PRODUCT_DRAFT_CREATION.md), not reconciliation.
 Integration reads accounting through `IIntegrationPlatformCatalogPort`, queues
 typed Outbox messages, and publishes through the provider adapter. No accounting
 tables or Neo.Bpms services are used by this orchestration.

@@ -17,7 +17,7 @@ public interface IProductService
         string? endTime = null, CancellationToken ct = default);
 }
 
-public sealed class ProductService(IBasalamHttpClient client, ILogger<ProductService>? logger = null) : IProductService
+public sealed partial class ProductService(IBasalamHttpClient client, ILogger<ProductService>? logger = null) : IProductService
 {
     public async Task<Product?> GetProductAsync(int productId, CancellationToken ct = default)
     {

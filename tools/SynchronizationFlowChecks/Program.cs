@@ -88,6 +88,7 @@ static async Task<int> Run(bool oauthVaultOnly)
         await db.SaveChangesAsync();
         var adapter = new BasalamSdkAdapter(sdk, new BasalamOAuthStore(db, oauth));
         await BasalamCatalogChecks.Run(connection, new BasalamOAuthStore(db, oauth), Check);
+        await BasalamDraftChecks.Run(connection, new BasalamOAuthStore(db, oauth), Check);
         var registration = new BasalamWebhookRegistration(db, new BasalamOAuthStore(db, oauth), sdk);
         await registration.RegisterForConnectionAsync(connection.Id, 7, "tenant-a", "71", "https://callback.fixture.invalid/oauth/callback", default);
         Check(providerHttp.WebhookRegistration is { } registered
