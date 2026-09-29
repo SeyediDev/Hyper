@@ -11,8 +11,14 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
     IIntegrationInventoryReservation reservations,
     HyperIntegrationContext db,
     IIntegrationStrategyResolver? strategies = null,
-    IIntegrationProductPreparationCollector? productPreparation = null)
+    IIntegrationProductPreparationCollector? productPreparation = null,
+    IIntegrationOrderMappingReceipt? orderMappingReceipt = null)
 {
+    // The production default always persists the receipt. The explicit boundary
+    // lets orchestration-only fixtures observe the calls without pretending an
+    // in-memory EF provider verifies SQL locking or persistence.
+    private readonly IIntegrationOrderMappingReceipt receipts = orderMappingReceipt ?? new IntegrationOrderMappingReceipt(db);
+
     public async Task<IntegrationScenarioResult> DispatchAsync(IntegrationScenarioJob job,
         ExternalIntegrationConnection connection, CancellationToken ct)
     {
@@ -194,7 +200,7 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
     {
         root = Envelope(root);
         var lines = await ResolveMappedLinesAsync(job, connection, Lines(root), ct);
-        return await SaleCoreAsync(job, root, lines, ct);
+        return await SaleCoreAsync(job, connection, root, lines, ct);
     }
 
     private async Task<IReadOnlyCollection<IntegrationOrderLineCommand>> ResolveMappedLinesAsync(
@@ -221,7 +227,7 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
         return resolved;
     }
 
-    private async Task<BusinessCommandResult> SaleCoreAsync(IntegrationScenarioJob job, JsonElement root,
+    private async Task<BusinessCommandResult> SaleCoreAsync(IntegrationScenarioJob job, ExternalIntegrationConnection connection, JsonElement root,
         IReadOnlyCollection<IntegrationOrderLineCommand> lines, CancellationToken ct)
     {
         var payment = PaymentStatus(root);
@@ -238,12 +244,17 @@ public sealed class IntegrationBusinessEventDispatcher(IIntegrationBusinessComma
         var command = new IntegrationVendorOrderCommand(job.EventId, job.ShopId, job.TenantId, job.ConnectionId,
             externalOrderId, OptionalAny(root, "externalParcelId", "parcel_id", "parcelId"), externalCustomerId,
             lines, DecimalAny(root, "totalAmount", "total_amount", "total", "amount"), payment, mapping.PersonId);
+        await receipts.PreflightAsync(connection, command, ct);
         await reservations.ReserveAsync(shop, reservationKey, lines, ct);
         // A timeout or error does not prove the remote write failed. Retain the hold
         // for idempotent replay; only an acknowledged cancellation releases it.
         var result = await commands.ApplyVendorOrderAsync(command, ct);
         if (result.StockCommitted && result.Status is BusinessCommandStatus.Applied or BusinessCommandStatus.Duplicate)
             await reservations.CommitAsync(shop, reservationKey, ct);
+        // A confirmed stock debit must consume its hold even if the following
+        // local receipt fails. Duplicate replay repairs the mapping without
+        // cancelling the remote invoice or adding another stock debit.
+        await receipts.RecordAsync(connection, command, result, ct);
         return result;
     }
 

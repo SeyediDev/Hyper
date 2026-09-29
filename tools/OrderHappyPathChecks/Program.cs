@@ -31,7 +31,9 @@ db.AddRange(new ExternalProductMapping { ConnectionId = connection.Id, ShopId = 
     new IntegrationCustomerMapping { ShopId = shop.ShopId, TenantId = shop.TenantId,
         ExternalCustomerId = "buyer-a", PersonId = 91 });
 await db.SaveChangesAsync();
-var dispatcher = new IntegrationBusinessEventDispatcher(commands, new UnregisteredIntegrationEngagementPort(), reservations, db);
+var receipts = new ReceiptProbe(steps, connection);
+var dispatcher = new IntegrationBusinessEventDispatcher(commands, new UnregisteredIntegrationEngagementPort(), reservations, db,
+    orderMappingReceipt: receipts);
 
 async Task Dispatch(string eventId, string eventType, IntegrationSyncItem item, object payload)
 {
@@ -48,7 +50,7 @@ object Sale(string orderId) => new { externalOrderId = orderId, externalCustomer
 
 await Dispatch("sale-held", "order.vendor.created", IntegrationSyncItem.Sale, Sale("order-held"));
 var heldKey = IntegrationReservationIdentity.ForOrder(shop, connection.Id, "order-held");
-Check(steps.SequenceEqual(["reserve", "http:vendor-orders"]) && reservations.Held.Contains(heldKey)
+Check(steps.SequenceEqual(["preflight", "reserve", "http:vendor-orders", "receipt"]) && reservations.Held.Contains(heldKey)
     && reservations.LastShop == shop && reservations.LastLines.Single().HyperProductId == 41,
     "paid sale resolves product mapping and reserves before accounting");
 using (var body = JsonDocument.Parse(transport.LastBody))
@@ -73,9 +75,11 @@ steps.Clear();
 transport.StockCommitted = true;
 await Dispatch("sale-committed", "order.vendor.created", IntegrationSyncItem.Sale, Sale("order-committed"));
 var committedKey = IntegrationReservationIdentity.ForOrder(shop, connection.Id, "order-committed");
-Check(steps.SequenceEqual(["reserve", "http:vendor-orders", "commit"])
+Check(steps.SequenceEqual(["preflight", "reserve", "http:vendor-orders", "commit", "receipt"])
     && reservations.Committed.Contains(committedKey) && !reservations.Held.Contains(committedKey),
     "acknowledged stock write consumes the hold");
+Check(receipts.Preflights == 2 && receipts.Receipts == 2,
+    "each sale preflights its scope and records its acknowledged invoice");
 
 steps.Clear();
 await Dispatch("purchase", "order.customer.created", IntegrationSyncItem.Purchase,
@@ -98,6 +102,37 @@ sealed class ReservationProbe(List<string> steps) : IIntegrationInventoryReserva
     public Task CommitAsync(OwnedIntegrationShop shop, string key, CancellationToken ct)
     { steps.Add("commit"); LastShop = shop; LastKey = key; Held.Remove(key); Committed.Add(key); return Task.CompletedTask; }
 }
+// This observer checks orchestration only. OrderMappingChecks exercises the
+// production SQL receipt store and its concurrency/identity guarantees.
+sealed class ReceiptProbe(List<string> steps, ExternalIntegrationConnection expected) : IIntegrationOrderMappingReceipt
+{
+    public int Preflights;
+    public int Receipts;
+    public Task PreflightAsync(ExternalIntegrationConnection connection, IntegrationVendorOrderCommand command, CancellationToken ct)
+    {
+        Scope(connection, command);
+        steps.Add("preflight");
+        Preflights++;
+        return Task.CompletedTask;
+    }
+    public Task RecordAsync(ExternalIntegrationConnection connection, IntegrationVendorOrderCommand command,
+        BusinessCommandResult result, CancellationToken ct)
+    {
+        Scope(connection, command);
+        if (result.Status != BusinessCommandStatus.Applied || result.InternalReference != "12001")
+            throw new InvalidOperationException("UnexpectedAccountingReceipt");
+        steps.Add("receipt");
+        Receipts++;
+        return Task.CompletedTask;
+    }
+    private void Scope(ExternalIntegrationConnection connection, IntegrationVendorOrderCommand command)
+    {
+        if (connection.Id != expected.Id || command.ConnectionId != expected.Id
+            || command.ShopId != expected.ShopId || command.TenantId != expected.TenantId
+            || command.ExternalOrderId is not ("order-held" or "order-committed"))
+            throw new InvalidOperationException("UnexpectedReceiptScope");
+    }
+}
 sealed class AccountingReply(List<string> steps) : HttpMessageHandler
 {
     public bool StockCommitted;
@@ -114,6 +149,6 @@ sealed class AccountingReply(List<string> steps) : HttpMessageHandler
         steps.Add("http:" + route);
         LastBody = await request.Content!.ReadAsStringAsync(ct);
         return new(HttpStatusCode.OK) { Content = new StringContent(JsonSerializer.Serialize(new
-        { status = 1, internalReference = "fixture-invoice", stockCommitted = StockCommitted }), Encoding.UTF8, "application/json") };
+        { status = 1, internalReference = "12001", stockCommitted = StockCommitted }), Encoding.UTF8, "application/json") };
     }
 }

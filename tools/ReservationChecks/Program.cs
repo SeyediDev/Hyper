@@ -132,7 +132,7 @@ sealed class Commands : IIntegrationBusinessCommandPort
 {
     public bool Timeout; public bool StockCommitted; public int Calls; public int LastProduct;
     public Task<BusinessCommandResult> ApplyVendorOrderAsync(IntegrationVendorOrderCommand c, CancellationToken ct)
-    { Calls++; LastProduct = c.Lines.Single().HyperProductId; if (Timeout) throw new HttpRequestException(); return Task.FromResult(new BusinessCommandResult(BusinessCommandStatus.Duplicate, StockCommitted: StockCommitted)); }
+    { Calls++; LastProduct = c.Lines.Single().HyperProductId; if (Timeout) throw new HttpRequestException(); return Task.FromResult(new BusinessCommandResult(BusinessCommandStatus.Duplicate, "12001", StockCommitted: StockCommitted)); }
     public Task<BusinessCommandResult> ApplyCounterpartyAsync(IntegrationCounterpartyCommand c, CancellationToken ct) => throw new NotSupportedException();
     public Task<BusinessCommandResult> ApplyCustomerOrderAsync(IntegrationCustomerOrderCommand c, CancellationToken ct) => throw new NotSupportedException();
     public Task<BusinessCommandResult> CancelOrderAsync(IntegrationOrderCancellationCommand c, CancellationToken ct) => throw new NotSupportedException();
