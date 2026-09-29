@@ -1,12 +1,11 @@
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
 
 namespace Hyper.Infrastructure.Features.Integrations;
 
 /// <summary>Hyper's explicit custom webhook protocol. Not a Basalam/Digikala/Torob protocol.</summary>
-public sealed class IntegrationWebhookVerifier : IIntegrationWebhookVerifier
+public sealed class IntegrationWebhookVerifier(IntegrationCredentialVault vault) : IIntegrationWebhookVerifier
 {
     public const string Scheme = "hyper-hmac-v1";
     public WebhookValidationResult Verify(ExternalIntegrationConnection connection,
@@ -29,15 +28,12 @@ public sealed class IntegrationWebhookVerifier : IIntegrationWebhookVerifier
         catch (FormatException) { return WebhookValidationResult.Invalid; }
         try
         {
-            using var json = JsonDocument.Parse(connection.CredentialsJson);
-            if (json.RootElement.ValueKind != JsonValueKind.Object
-                || !json.RootElement.TryGetProperty("webhookSignatureScheme", out var scheme)
-                || scheme.ValueKind != JsonValueKind.String || scheme.GetString() != Scheme)
+            var credentials = vault.Read(connection);
+            if (credentials.WebhookSignatureScheme != Scheme)
                 return WebhookValidationResult.Unsupported;
-            if (!json.RootElement.TryGetProperty("webhookSecret", out var secret)
-                || secret.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(secret.GetString()))
+            if (credentials.WebhookSecret is not { } secret)
                 return WebhookValidationResult.Invalid;
-            var key = Encoding.UTF8.GetBytes(secret.GetString()!);
+            var key = Encoding.UTF8.GetBytes(secret);
             if (key.Length < 32) return WebhookValidationResult.Invalid;
             try
             {
@@ -51,23 +47,20 @@ public sealed class IntegrationWebhookVerifier : IIntegrationWebhookVerifier
             }
             finally { CryptographicOperations.ZeroMemory(key); }
         }
-        catch (JsonException) { return WebhookValidationResult.Invalid; }
+        catch (IntegrationCredentialException) { return WebhookValidationResult.Invalid; }
     }
 
-    private static WebhookValidationResult VerifyBasalam(ExternalIntegrationConnection connection,
+    private WebhookValidationResult VerifyBasalam(ExternalIntegrationConnection connection,
         IntegrationWebhookRequest request)
     {
         string? expectedAuthorization = null;
         try
         {
-            using var credentials = JsonDocument.Parse(connection.CredentialsJson);
-            if (credentials.RootElement.ValueKind == JsonValueKind.Object
-                && credentials.RootElement.TryGetProperty("webhookSecret", out var secret)
-                && secret.ValueKind == JsonValueKind.String
-                && !string.IsNullOrWhiteSpace(secret.GetString()))
-                expectedAuthorization = $"Bearer {secret.GetString()}";
+            var credentials = vault.Read(connection);
+            if (credentials.WebhookSecret is { } secret)
+                expectedAuthorization = $"Bearer {secret}";
         }
-        catch (JsonException) { return WebhookValidationResult.Invalid; }
+        catch (IntegrationCredentialException) { return WebhookValidationResult.Invalid; }
         if (!connection.IsEnabled || !ValidHeader(request.EventId) || !ValidHeader(request.EventType)
             || string.IsNullOrWhiteSpace(expectedAuthorization) || string.IsNullOrWhiteSpace(request.Authorization))
             return WebhookValidationResult.Invalid;

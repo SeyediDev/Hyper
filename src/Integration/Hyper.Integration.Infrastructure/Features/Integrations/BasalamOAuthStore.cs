@@ -8,7 +8,8 @@ using System.Text.Json;
 namespace Hyper.Infrastructure.Features.Integrations;
 
 // OAuth state belongs to the Integration database and never uses Hyperyek's core context.
-public sealed class BasalamOAuthStore(HyperIntegrationContext db, BasalamOAuthService oauth)
+public sealed class BasalamOAuthStore(HyperIntegrationContext db, BasalamOAuthService oauth,
+    IntegrationCredentialVault credentials)
 {
     public async Task<TokenInfo?> GetTokenAsync(ExternalIntegrationConnection connection, CancellationToken ct)
     {
@@ -99,13 +100,16 @@ public sealed class BasalamOAuthStore(HyperIntegrationContext db, BasalamOAuthSe
             && x.Provider == IntegrationProvider.Basalam && x.AccountIdentifier == vendor.Id, ct);
         if (connection is not null && connection.TenantId != selected.TenantId)
             throw new InvalidOperationException("زمینه اتصال با مغازه تطابق ندارد.");
+        var isNew = connection is null;
         if (connection is null)
         {
             connection = new ExternalIntegrationConnection
             {
                 ShopId = selected.ShopId, TenantId = selected.TenantId, Provider = IntegrationProvider.Basalam,
                 DisplayName = vendor.Title, AccountIdentifier = vendor.Id, CredentialType = IntegrationCredentialType.OAuth2,
-                CredentialsJson = JsonSerializer.Serialize(new { webhookSecret = BasalamOAuthService.CreateWebhookSecret() }), IsEnabled = true
+                // Obtain the scope ID inside this transaction without ever
+                // flushing a plaintext secret, then protect before commit.
+                CredentialsJson = "{}", IsEnabled = true
             };
             db.ExternalIntegrationConnections.Add(connection);
             await db.SaveChangesAsync(ct);
@@ -115,9 +119,18 @@ public sealed class BasalamOAuthStore(HyperIntegrationContext db, BasalamOAuthSe
             && x.Provider == IntegrationProvider.Basalam, ct);
         if (previous is not null && (previous.TenantId != selected.TenantId || previous.ConnectionId != connection.Id))
             throw new InvalidOperationException("برای این مغازه توکن غرفه دیگری ثبت شده است؛ ابتدا اتصال قبلی را تعیین تکلیف کنید.");
-        if (string.IsNullOrWhiteSpace(connection.CredentialsJson)
-            || !connection.CredentialsJson.Contains("webhookSecret", StringComparison.Ordinal))
-            connection.CredentialsJson = JsonSerializer.Serialize(new { webhookSecret = BasalamOAuthService.CreateWebhookSecret() });
+        if (isNew)
+            connection.CredentialsJson = credentials.Protect(connection,
+                JsonSerializer.Serialize(new { webhookSecret = BasalamOAuthService.CreateWebhookSecret() }));
+        else
+        {
+            // Only a genuinely absent field in a valid document permits initial
+            // provisioning. Invalid/corrupt credentials must never rotate a secret.
+            var document = credentials.Read(connection);
+            var json = document.WebhookSecret is null
+                ? document.WithWebhookSecret(BasalamOAuthService.CreateWebhookSecret()) : document.Json;
+            connection.CredentialsJson = credentials.Protect(connection, json);
+        }
         var token = oauth.CreateTokenEntity(connection.Id, selected.ShopId, selected.TenantId, IntegrationProvider.Basalam, response);
         if (previous is null) db.ExternalOAuthTokens.Add(token);
         else

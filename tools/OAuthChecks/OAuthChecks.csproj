@@ -6,4 +6,8 @@
   <ProjectReference Include="../../src/Integration/Hyper.Integration.Domain/Hyper.Integration.Domain.csproj" />
   <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/BasalamOAuthService.cs" Link="BasalamOAuthService.cs" />
  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../CredentialVaultChecks/FixtureProtection.cs" Link="FixtureProtection.cs" />
+    <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationProtection.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationCredentialVault.cs" Link="Production/%(Filename)%(Extension)" />
+  </ItemGroup>
 </Project>

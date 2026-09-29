@@ -20,7 +20,7 @@ internal static class BasalamRetryChecks
         using var http = new HttpClient(provider, disposeHandler: false);
         using var sdk = new BasalamClient(new BasalamConfig(), httpClient: http);
         var oauth = new BasalamOAuthService(Options.Create(new BasalamOAuthSettings()), http,
-            new EphemeralDataProtectionProvider());
+            new EphemeralDataProtectionProvider(), FixtureProtection.Provider());
         var connection = new ExternalIntegrationConnection
         {
             ShopId = 17, TenantId = "retry-tenant", Provider = Provider.Basalam, DisplayName = "retry-fixture",
@@ -40,7 +40,7 @@ internal static class BasalamRetryChecks
         using var accounting = new AccountingTransport();
         using var accountingHttp = new HttpClient(accounting) { BaseAddress = new Uri("https://accounting.fixture.invalid/") };
         var commands = new HyperyekAccountingApiClient(accountingHttp);
-        var ingress = new IntegrationWebhookIngress(db, new IntegrationWebhookVerifier());
+        var ingress = new IntegrationWebhookIngress(db, new IntegrationWebhookVerifier(FixtureProtection.LegacyVault()));
         var queue = Queue(db, resolver);
         long version = 0;
 
@@ -141,7 +141,7 @@ internal static class BasalamRetryChecks
         }
 
         IntegrationStrategyResolver Resolver(HyperIntegrationContext context, BasalamClient client) =>
-            new([new BasalamSdkAdapter(client, new BasalamOAuthStore(context, oauth))]);
+            new([new BasalamSdkAdapter(client, new BasalamOAuthStore(context, oauth, FixtureProtection.LegacyVault()))]);
         IntegrationScenarioQueue Queue(HyperIntegrationContext context, IntegrationStrategyResolver strategies) =>
             new(context, new IntegrationScenarioProcessor(context, strategies, new NoCapture(),
                 Options.Create(new IntegrationInventoryCaptureOptions()), Options.Create(new BasalamOAuthSettings()), null!,

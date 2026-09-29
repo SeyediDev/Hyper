@@ -16,7 +16,7 @@ var settings = new BasalamOAuthSettings { ClientId="test-client", ClientSecret="
     RedirectUri="http://localhost:5000/api/auth/basalam/callback" };
 var keys = new EphemeralDataProtectionProvider();
 var handler = new FakeHttp();
-var service = new BasalamOAuthService(Options.Create(settings),new HttpClient(handler),keys);
+var service = new BasalamOAuthService(Options.Create(settings),new HttpClient(handler),keys,FixtureProtection.Provider(keys));
 Check(service.ConfigurationError() is null,"valid configuration");
 var nonce = BasalamOAuthService.Nonce();
 var requestId = Guid.NewGuid();
@@ -36,7 +36,7 @@ Reject(()=>service.ReadState(null,nonce),"missing state rejected");
 var expired = keys.CreateProtector("Hyper.Basalam.Authorization.v2").ToTimeLimitedDataProtector()
     .Protect(JsonSerializer.Serialize(state),DateTimeOffset.UtcNow.AddSeconds(-1));
 Reject(()=>service.ReadState(expired,nonce),"expired state rejected");
-var second = new BasalamOAuthService(Options.Create(settings),new HttpClient(handler),keys);
+var second = new BasalamOAuthService(Options.Create(settings),new HttpClient(handler),keys,FixtureProtection.Provider(keys));
 Check(second.ReadState(query["state"],nonce).RequestId==requestId,"state survives new service instance without memory cache");
 settings.RedirectUri="https://example.org/api/auth/basalam/callback";
 Reject(()=>service.ReadState(query["state"],nonce),"changed redirect rejected");

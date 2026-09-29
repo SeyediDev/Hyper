@@ -20,4 +20,8 @@
     <None Include="../../docs/schema/ensure-integration-database.sql" Link="schema/integration.sql" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../docs/schema/ensure-external-oauth-tokens.sql" Link="schema/oauth.sql" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../CredentialVaultChecks/FixtureProtection.cs" Link="FixtureProtection.cs" />
+    <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationProtection.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationCredentialVault.cs" Link="Production/%(Filename)%(Extension)" />
+  </ItemGroup>
 </Project>

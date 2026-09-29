@@ -14,6 +14,12 @@ public static class IntegrationServiceRegistration
         string platformConnectionString, string? integrationConnectionString = null,
         IConfiguration? configuration = null)
     {
+        services.AddOptions<IntegrationProtectionOptions>();
+        if (configuration is not null)
+            services.Configure<IntegrationProtectionOptions>(configuration.GetSection("IntegrationProtection"));
+        services.AddSingleton<IIntegrationProtectionProvider, IntegrationProtectionProvider>();
+        services.AddSingleton<IntegrationCredentialVault>();
+        services.AddScoped<IntegrationCredentialMigration>();
         services.AddDbContext<HyperIntegrationContext>(options => options.UseSqlServer(
             string.IsNullOrWhiteSpace(integrationConnectionString) ? platformConnectionString : integrationConnectionString));
         services.AddScoped<IIntegrationSynchronizationService, IntegrationSynchronizationService>();

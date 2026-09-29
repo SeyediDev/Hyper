@@ -16,7 +16,7 @@ internal static class OAuthVaultChecks
         using var transport = new RefreshTransport();
         using var http = new HttpClient(transport);
         var oauth = new BasalamOAuthService(Options.Create(new BasalamOAuthSettings
-        { ClientId = "vault-fixture-client", ClientSecret = "vault-fixture-secret" }), http, new EphemeralDataProtectionProvider());
+        { ClientId = "vault-fixture-client", ClientSecret = "vault-fixture-secret" }), http, new EphemeralDataProtectionProvider(), FixtureProtection.Provider());
         var first = Connection("vault-a");
         var other = Connection("vault-b");
         db.ExternalIntegrationConnections.AddRange(first, other);
@@ -27,7 +27,7 @@ internal static class OAuthVaultChecks
             new() { AccessToken = "vault-access-b", RefreshToken = "vault-refresh-b", ExpiresIn = 3600 });
         db.ExternalOAuthTokens.AddRange(token, otherToken);
         await db.SaveChangesAsync();
-        var store = new BasalamOAuthStore(db, oauth);
+        var store = new BasalamOAuthStore(db, oauth, FixtureProtection.LegacyVault());
         check((await store.GetTokenAsync(first, default))?.AccessToken == "vault-access-a"
             && (await store.GetTokenAsync(other, default))?.AccessToken == "vault-access-b" && transport.Calls == 0,
             "vault selects tenant-specific grant even when shop/vendor IDs match");
@@ -104,12 +104,12 @@ internal static class OAuthVaultChecks
         await using (var workerB = new HyperIntegrationContext(options))
         {
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
-            var a = new BasalamOAuthStore(workerA, oauth).GetTokenAsync(first, timeout.Token);
+            var a = new BasalamOAuthStore(workerA, oauth, FixtureProtection.LegacyVault()).GetTokenAsync(first, timeout.Token);
             Task<TokenInfo?>? b = null;
             try
             {
                 await transport.Entered!.Task.WaitAsync(timeout.Token);
-                b = new BasalamOAuthStore(workerB, oauth).GetTokenAsync(first, timeout.Token);
+                b = new BasalamOAuthStore(workerB, oauth, FixtureProtection.LegacyVault()).GetTokenAsync(first, timeout.Token);
             }
             finally { transport.Release!.TrySetResult(); }
             var grants = await Task.WhenAll(a, b!);

@@ -35,7 +35,7 @@ var customTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
 var customEventId = "security-event-1";
 var customEventType = "product.updated";
 var customSignature = SignCustomWebhook(customConnection.Id, customSecret, customTimestamp, customEventId, customEventType, customBody);
-var customVerifier = new IntegrationWebhookVerifier();
+var customVerifier = new IntegrationWebhookVerifier(FixtureProtection.LegacyVault());
 var customRequest = new IntegrationWebhookRequest(customBody, customEventId, customEventType, customTimestamp, customSignature, null);
 Check(customVerifier.Verify(customConnection, customRequest, DateTimeOffset.UtcNow) == WebhookValidationResult.Valid,
     "custom HMAC signature accepted");
@@ -72,8 +72,8 @@ Check(customVerifier.Verify(new ExternalIntegrationConnection
     CredentialsJson = "{\"webhookSignatureScheme\":\"hyper-hmac-v1\",\"webhookSecret\":\"short\"}", IsEnabled = true
 }, customRequest, DateTimeOffset.UtcNow)
     == WebhookValidationResult.Invalid, "short webhook secret rejected");
-Check(typeof(IntegrationConnectionCreateRequest).GetProperty("CredentialsJson") is null
-    && typeof(IntegrationConnectionSummary).GetProperty("CredentialsJson") is null,
+Check(typeof(Hyper.Integration.Contracts.IntegrationConnectionCreateRequest).GetProperty("CredentialsJson") is null
+    && typeof(Hyper.Integration.Contracts.IntegrationConnectionSummary).GetProperty("CredentialsJson") is null,
     "management contracts do not expose credentials");
 
 var scope = new OwnedIntegrationShop(100, "shop:100");
@@ -82,7 +82,7 @@ var webhookConnection = new ExternalIntegrationConnection
     Id = 7, ShopId = 100, TenantId = "shop:100", Provider = IntegrationProvider.Basalam,
     AccountIdentifier = "9001", CredentialsJson = "{\"webhookSecret\":\"secret-1\"}", IsEnabled = true
 };
-var webhookVerifier = new IntegrationWebhookVerifier();
+var webhookVerifier = new IntegrationWebhookVerifier(FixtureProtection.LegacyVault());
 var validWebhook = new IntegrationWebhookRequest([], "evt-1", "VENDOR_NEW_ORDER", null, null, "Bearer secret-1");
 Check(webhookVerifier.Verify(webhookConnection, validWebhook, DateTimeOffset.UtcNow) == WebhookValidationResult.Valid,
     "Basalam webhook authorization accepted");

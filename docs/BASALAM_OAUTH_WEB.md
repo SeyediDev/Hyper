@@ -30,6 +30,12 @@ callback به cookie ورود ادمین وابسته نیست؛ درخواست 
 
 ## تنظیمات لازم
 
+تنظیمات مشترک `IntegrationProtection` برای پنل و Worker اکنون الزامی است؛
+نام برنامه و مسیر کلید باید با هویت قبلی حفاظت توکن سازگار بماند. توکن‌ها از
+provider اختصاصی Integration استفاده می‌کنند؛ cookie و state زمان‌دار پنل
+همان provider قبلی را دارند. جزئیات تنظیمات، حفاظت کلید، حفظ راز وب‌هوک و
+مهاجرت کنترل‌شده در [راهنمای مخزن اطلاعات اتصال](INTEGRATION_CREDENTIAL_VAULT.md) است.
+
 بخش Basalam در پیکربندی میزبان:
 - ClientId و ClientSecret: مقادیر واقعی برنامه ثبت‌شده در باسلام؛ مقادیر your-client-* نمونه‌اند. secret را در user-secrets یا متغیر محیطی Basalam__ClientSecret بگذارید، نه در Git.
 - AuthorizationEndpoint: https://basalam.com/accounts/sso

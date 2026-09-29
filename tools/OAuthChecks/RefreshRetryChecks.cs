@@ -13,7 +13,7 @@ internal static class RefreshRetryChecks
         using var http = new HttpClient(handler);
         var service = new BasalamOAuthService(Options.Create(new BasalamOAuthSettings
         { ClientId = "fixture-client", ClientSecret = "fixture-secret", RedirectUri = "http://localhost/api/auth/basalam/callback" }),
-            http, new EphemeralDataProtectionProvider());
+            http, new EphemeralDataProtectionProvider(), FixtureProtection.Provider());
         foreach (var code in new[] { 408, 429, 500, 502, 503, 504 })
         {
             handler.Status = code; handler.Header = "540";

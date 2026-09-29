@@ -4,6 +4,12 @@
 
 ## تنظیمات
 
+علاوه بر اتصال SQL، تنظیمات `IntegrationProtection` باید مسیر مطلق کلید،
+نام برنامهٔ سازگار با توکن‌های قبلی و روش صریح رمزگذاری کلید را مشخص کند.
+خواندن فایل تنظیمات مشترک به‌تنهایی هویت Data Protection را مشترک نمی‌کند.
+Worker از provider اختصاصی Integration استفاده می‌کند؛ راه‌اندازی و مهاجرت
+در [راهنمای مخزن اطلاعات اتصال](INTEGRATION_CREDENTIAL_VAULT.md) آمده است.
+
 ConnectionStrings__Domain را در محیط اجرای سرویس تنظیم کنید، یا HYPER_SETTINGS_FILE را به فایل تنظیمات امنِ موجود دارای ConnectionStrings.Domain اشاره دهید. رمز در مستندات یا appsettings جدید Worker تکثیر نشده است. برای معماری جدا، `ConnectionStrings__IntegrationConnection` باید دیتابیس مستقل Integration را انتخاب کند. دادهٔ حسابداری از HTTP API خوانده می‌شود؛ Worker نباید برای خواندن `TBL_*` مستقیماً به دیتابیس حسابداری متصل شود. نبود IntegrationConnection هنوز fallback قدیمی Domain را فعال می‌کند؛ در استقرار جدید آن را صریح تنظیم کنید.
 
 ```powershell

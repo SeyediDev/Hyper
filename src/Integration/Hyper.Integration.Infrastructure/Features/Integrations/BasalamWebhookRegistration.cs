@@ -1,8 +1,5 @@
 using Hyper.Integration.Domain.Entities.Integrations;
 using Basalam.SDK;
-using Basalam.SDK.Auth;
-using Microsoft.Extensions.Options;
-using System.Text.Json;
 using Hyper.Infrastructure.Data.Repository.Hyper;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,7 +11,8 @@ public interface IBasalamWebhookRegistration
         string vendorId, string callbackBaseUri, CancellationToken ct);
 }
 
-public sealed class BasalamWebhookRegistration(HyperIntegrationContext db, BasalamOAuthStore tokens, IBasalamClient client)
+public sealed class BasalamWebhookRegistration(HyperIntegrationContext db, BasalamOAuthStore tokens,
+    IBasalamClient client, IntegrationCredentialVault credentials)
     : IBasalamWebhookRegistration
 {
     // Keep registration and ingress routing on the same provider catalog.
@@ -29,23 +27,22 @@ public sealed class BasalamWebhookRegistration(HyperIntegrationContext db, Basal
         if (!long.TryParse(vendorId, out var parsedVendor) || parsedVendor <= 0)
             throw new InvalidOperationException("Basalam vendor identifier is invalid.");
 
-        var connection = new ExternalIntegrationConnection
-        {
-            Id = connectionId, ShopId = shopId, TenantId = tenantId,
-            Provider = IntegrationProvider.Basalam, AccountIdentifier = vendorId,
-            CredentialType = IntegrationCredentialType.OAuth2, IsEnabled = true
-        };
-        var token = await tokens.GetTokenAsync(connection, ct)
+        // Validate persisted ordinal scope and credentials before GetTokenAsync,
+        // because token retrieval may initiate a remote refresh.
+        var stored = await db.ExternalIntegrationConnections.AsNoTracking()
+            .SingleOrDefaultAsync(x => x.Id == connectionId, ct);
+        if (stored is null || stored.ShopId != shopId || stored.TenantId != tenantId
+            || stored.Provider != IntegrationProvider.Basalam || !stored.IsEnabled
+            || stored.CredentialType != IntegrationCredentialType.OAuth2 || stored.AccountIdentifier != vendorId)
+            throw new IntegrationCredentialException("IntegrationCredentialsScopeInvalid");
+        var document = credentials.Read(stored);
+        if (document.WebhookSecret is not { } secret)
+            throw new IntegrationCredentialException("IntegrationWebhookSecretMissing");
+        var token = await tokens.GetTokenAsync(stored, ct)
             ?? throw new InvalidOperationException("Basalam token is unavailable after OAuth.");
         client.SetToken(token);
         var callback = new Uri(baseUri, $"/api/integrations/v1/webhooks/basalam/{parsedVendor}");
-        var stored = await db.ExternalIntegrationConnections.AsNoTracking()
-            .SingleAsync(x => x.Id == connectionId && x.ShopId == shopId && x.TenantId == tenantId, ct);
-        using var credentials = JsonDocument.Parse(stored.CredentialsJson);
-        if (!credentials.RootElement.TryGetProperty("webhookSecret", out var secret)
-            || secret.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(secret.GetString()))
-            throw new InvalidOperationException("Basalam webhook authorization is not configured for connection.");
         await client.Webhooks.CreateOfficialWebhookAsync(callback.AbsoluteUri, EventIds,
-            $"Bearer {secret.GetString()}", ct);
+            $"Bearer {secret}", ct);
     }
 }

@@ -12,4 +12,9 @@
     <Compile Include="../../src/Core/Hyper.Infrastructure/Data/Configurations/Integration*Configuration.cs;../../src/Core/Hyper.Infrastructure/Data/Configurations/External*Configuration.cs;../../src/Core/Hyper.Infrastructure/Data/Configurations/InventoryReservationLogConfiguration.cs;../../src/Core/Hyper.Infrastructure/Data/Configurations/IIntegrationEntityConfiguration.cs" Link="Production/%(Filename)%(Extension)" />
     <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationWebhookVerifier.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationWebhookIngress.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationScopeAuthorization.cs" Link="Production/%(Filename)%(Extension)" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../CredentialVaultChecks/FixtureProtection.cs" Link="FixtureProtection.cs" />
+    <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationProtection.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationCredentialVault.cs" Link="Production/%(Filename)%(Extension)" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
 </Project>

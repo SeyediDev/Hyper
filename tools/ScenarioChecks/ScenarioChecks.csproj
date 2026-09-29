@@ -5,4 +5,8 @@
     <ProjectReference Include="../../src/Integration/Hyper.Integration.Domain/Hyper.Integration.Domain.csproj" />
     <ProjectReference Include="../../src/Integration/Hyper.Integration.Infrastructure/Hyper.Integration.Infrastructure.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../CredentialVaultChecks/FixtureProtection.cs" Link="FixtureProtection.cs" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
 </Project>

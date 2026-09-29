@@ -40,7 +40,7 @@ public sealed record BasalamAuthorizationState(Guid RequestId, Guid SimulationId
     string BrowserNonce, string? CodeVerifier, string RedirectUri);
 
 public sealed class BasalamOAuthService(IOptions<BasalamOAuthSettings> options, HttpClient client,
-    IDataProtectionProvider protection)
+    IDataProtectionProvider protection, IIntegrationProtectionProvider persistentProtection)
 {
     private BasalamOAuthSettings Settings => options.Value;
     public string Scopes => Settings.Scopes;
@@ -71,6 +71,11 @@ public sealed class BasalamOAuthService(IOptions<BasalamOAuthSettings> options, 
             || Settings.Scopes.Split(' ', StringSplitOptions.RemoveEmptyEntries)
                 .Any(s => s is "inventory.read" or "orders.read" or "products.read"))
             return "مجوزهای برنامه باید از scopeهای رسمی باسلام انتخاب شوند.";
+        try { persistentProtection.CreateProtector("Basalam.OAuth.Token"); }
+        catch (IntegrationCredentialException)
+        {
+            return "تنظیمات حفاظت اطلاعات اتصال (IntegrationProtection) معتبر یا قابل دسترسی نیست.";
+        }
         return null;
     }
 
@@ -214,9 +219,9 @@ public sealed class BasalamOAuthService(IOptions<BasalamOAuthSettings> options, 
         target.IsActive = true;
     }
 
-    public string DecryptToken(string token) => protection.CreateProtector("Basalam.OAuth.Token").Unprotect(token);
+    public string DecryptToken(string token) => persistentProtection.CreateProtector("Basalam.OAuth.Token").Unprotect(token);
     public static string CreateWebhookSecret() => Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
-    private string EncryptToken(string token) => protection.CreateProtector("Basalam.OAuth.Token").Protect(token);
+    private string EncryptToken(string token) => persistentProtection.CreateProtector("Basalam.OAuth.Token").Protect(token);
     public static string Nonce() => Base64Url(RandomNumberGenerator.GetBytes(32));
     private static string Base64Url(byte[] value) => Convert.ToBase64String(value).TrimEnd('=').Replace('+', '-').Replace('/', '_');
 }

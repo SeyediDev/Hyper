@@ -36,7 +36,7 @@ try
     await Sql(sql, schema);
     var options = new DbContextOptionsBuilder<HyperIntegrationContext>().UseSqlServer(testBuilder.ConnectionString).Options;
     using var http = new HttpClient(new NoNetwork());
-    var oauth = new BasalamOAuthService(Options.Create(new BasalamOAuthSettings()), http, new EphemeralDataProtectionProvider());
+    var oauth = new BasalamOAuthService(Options.Create(new BasalamOAuthSettings()), http, new EphemeralDataProtectionProvider(), FixtureProtection.Provider());
     const int shopId = 991;
     const string vendor = "registry-vendor";
 
@@ -97,7 +97,7 @@ try
     }
     await using (var db = new HyperIntegrationContext(options))
     {
-        var api = new IntegrationManagementApi(db);
+        var api = new IntegrationManagementApi(db, FixtureProtection.LegacyVault());
         var listed = await api.ListConnectionsAsync(new(shopId, "tenant-a"));
         Check(listed.Count == 1 && listed[0].Id == aId, "listing isolates tenant and failed OAuth rolls back its connection");
         Check(!await api.SetConnectionEnabledAsync(new(shopId, "tenant-a", bId), false), "cross-tenant disable rejected");
@@ -121,7 +121,7 @@ try
     async Task<IntegrationConnectionResponse?> Register(string tenant)
     {
         await using var db = new HyperIntegrationContext(options);
-        return await new IntegrationManagementApi(db).CreateConnectionAsync(new(shopId, tenant,
+        return await new IntegrationManagementApi(db, FixtureProtection.LegacyVault()).CreateConnectionAsync(new(shopId, tenant,
             Hyper.Integration.Contracts.IntegrationProvider.Basalam, "Registry checks", vendor, 1));
     }
     async Task<long> Authorize(string tenant, string vendorId, string access)
@@ -133,7 +133,7 @@ try
             CredentialType = IntegrationCredentialType.OAuth2, Status = 1 };
         db.AddRange(simulation, request);
         await db.SaveChangesAsync();
-        return await new BasalamOAuthStore(db, oauth).SaveAsync(
+        return await new BasalamOAuthStore(db, oauth, FixtureProtection.LegacyVault()).SaveAsync(
             new(request.Id, simulation.Id, simulation.AdminUserId, "nonce", null, "http://localhost/callback"), simulation,
             new(vendorId, "Registry checks"), new() { AccessToken = access, RefreshToken = "test-refresh", ExpiresIn = 3600 }, default);
     }

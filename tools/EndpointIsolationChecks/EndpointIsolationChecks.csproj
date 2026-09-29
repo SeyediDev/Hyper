@@ -10,4 +10,8 @@
     <Compile Include="../../src/Core/Hyper.Infrastructure/Data/Configurations/Integration*Configuration.cs;../../src/Core/Hyper.Infrastructure/Data/Configurations/External*Configuration.cs;../../src/Core/Hyper.Infrastructure/Data/Configurations/InventoryReservationLogConfiguration.cs;../../src/Core/Hyper.Infrastructure/Data/Configurations/IIntegrationEntityConfiguration.cs" Link="Production/%(Filename)%(Extension)" />
     <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationScopeAuthorization.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationTokenApi.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationOperationsApi.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationManagementApi.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationAccountingEventIngress.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationDashboardQuery.cs" Link="Production/%(Filename)%(Extension)" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../CredentialVaultChecks/FixtureProtection.cs" Link="FixtureProtection.cs" />
+    <Compile Include="../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationProtection.cs;../../src/Integration/Hyper.Integration.Infrastructure/Features/Integrations/IntegrationCredentialVault.cs" Link="Production/%(Filename)%(Extension)" />
+  </ItemGroup>
 </Project>

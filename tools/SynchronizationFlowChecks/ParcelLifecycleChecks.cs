@@ -27,19 +27,19 @@ static class ParcelLifecycleChecks
         db.Add(connection);await db.SaveChangesAsync();
         var remote=new Remote();using var http=new HttpClient(remote);
         using var sdk=new BasalamClient(new BasalamConfig {MaxRetries=3,RetryDelayMilliseconds=0},httpClient:http);
-        var oauth=new BasalamOAuthService(Options.Create(new BasalamOAuthSettings()),http,new EphemeralDataProtectionProvider());
+        var oauth=new BasalamOAuthService(Options.Create(new BasalamOAuthSettings()),http,new EphemeralDataProtectionProvider(), FixtureProtection.Provider());
         db.Add(oauth.CreateTokenEntity(connection.Id,888,"parcel-fixture",Provider.Basalam,
             new(){AccessToken="parcel-grant",ExpiresIn=3600,Scope="vendor.parcel.read vendor.parcel.write"}));
         db.Add(new ExternalOrderMapping {ConnectionId=connection.Id,ShopId=888,ExternalOrderId="700",ExternalParcelId="70",HyperSaleOrderId=99});
         await db.SaveChangesAsync();
-        var adapter=new BasalamSdkAdapter(sdk,new BasalamOAuthStore(db,oauth));
+        var adapter=new BasalamSdkAdapter(sdk,new BasalamOAuthStore(db, oauth, FixtureProtection.LegacyVault()));
         var resolver=new IntegrationStrategyResolver([adapter]);
         var owner=new Owner();using var ownerHttp=new HttpClient(owner){BaseAddress=new Uri("https://accounting.fixture.invalid/")};
         var commands=new HyperyekAccountingApiClient(ownerHttp);
         var dispatcher=new IntegrationBusinessEventDispatcher(commands,new UnregisteredIntegrationEngagementPort(),null!,db,resolver);
         var queue=new IntegrationScenarioQueue(db,new(db,resolver,null!,Options.Create(new IntegrationInventoryCaptureOptions()),
             Options.Create(new BasalamOAuthSettings()),null!,dispatcher,commands,parcelCommands:new IntegrationParcelCommandProcessor(db,resolver)));
-        var ingress=new IntegrationWebhookIngress(db,new IntegrationWebhookVerifier());
+        var ingress=new IntegrationWebhookIngress(db,new IntegrationWebhookVerifier(FixtureProtection.LegacyVault()));
         var index=0;
         async Task<IntegrationScenarioJob> Deliver(string body="{\"id\":70}")
         {

@@ -34,7 +34,7 @@ async Task Test(string name, Func<Task<bool>> action)
 Task Check(string name, Func<bool> action) => Test(name, () => Task.FromResult(action()));
 var now = DateTimeOffset.FromUnixTimeSeconds(1_800_000_000);
 const string secret = "fixture-key-0123456789-ABCDEFGHIJK";
-var verifier = new IntegrationWebhookVerifier();
+var verifier = new IntegrationWebhookVerifier(FixtureProtection.LegacyVault());
 ExternalIntegrationConnection Connection(long id = 42) => new()
 {
     Id = id, ShopId = 7, TenantId = "tenant-a", Provider = DomainProvider.Custom,

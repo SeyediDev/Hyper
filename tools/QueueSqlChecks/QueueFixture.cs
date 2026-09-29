@@ -100,7 +100,7 @@ internal sealed class QueueFixture : IAsyncDisposable
         string eventId, int rating = 4)
     {
         await using var db = Open();
-        var ingress = new IntegrationWebhookIngress(db, new IntegrationWebhookVerifier());
+        var ingress = new IntegrationWebhookIngress(db, new IntegrationWebhookVerifier(FixtureProtection.LegacyVault()));
         return await ingress.ReceiveAsync(new(Hyper.Integration.Contracts.IntegrationProvider.Basalam,
             connection.AccountIdentifier, eventId, "review.created", null, null, Body(eventId, rating),
             Authorization: "Bearer " + Secret));

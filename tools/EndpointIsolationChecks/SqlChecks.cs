@@ -49,7 +49,7 @@ static class SqlChecks
             db.AddRange(inconsistentMapping, inconsistentToken);
             await db.SaveChangesAsync();
 
-            var management = new IntegrationManagementApi(db);
+            var management = new IntegrationManagementApi(db, FixtureProtection.LegacyVault());
             var mappingApi = new IntegrationMappingApi(db);
             var syncCalls = 0;
             var sync = new IntegrationSyncApi(db, Probe.Create<IIntegrationSynchronizationService>((_, _) =>

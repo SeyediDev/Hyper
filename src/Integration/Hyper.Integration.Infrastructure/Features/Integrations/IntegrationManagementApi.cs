@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Hyper.Infrastructure.Features.Integrations;
 
 /// <summary>Application boundary for the versioned Integration management API.</summary>
-public sealed class IntegrationManagementApi(HyperIntegrationContext db) : IIntegrationManagementApi
+public sealed class IntegrationManagementApi(HyperIntegrationContext db, IntegrationCredentialVault credentials) : IIntegrationManagementApi
 {
     public async Task<IReadOnlyList<IntegrationConnectionSummary>> ListConnectionsAsync(
         IntegrationConnectionListRequest request, CancellationToken cancellationToken = default)
@@ -50,8 +50,15 @@ public sealed class IntegrationManagementApi(HyperIntegrationContext db) : IInte
             CredentialsJson = "{}",
             IsEnabled = false
         };
+        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
         db.ExternalIntegrationConnections.Add(connection);
-        try { await db.SaveChangesAsync(cancellationToken); }
+        try
+        {
+            await db.SaveChangesAsync(cancellationToken);
+            connection.CredentialsJson = credentials.Protect(connection, "{}");
+            await db.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+        }
         catch (DbUpdateException) { return null; }
         return new(ToSummary(connection));
     }

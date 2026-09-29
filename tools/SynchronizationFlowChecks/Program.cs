@@ -21,21 +21,34 @@ using Provider = Hyper.Integration.Domain.Entities.Integrations.IntegrationProvi
 using ApiProvider = Hyper.Integration.Contracts.IntegrationProvider;
 
 try { return await Run(args.Contains("--oauth-vault-only")); }
-catch (Exception ex) { Console.Error.WriteLine($"Flow check failed: {ex}"); return 1; }
+catch (Exception ex)
+{
+    Console.Error.WriteLine(ex is SqlException sql
+        ? $"Flow SQL check failed: Number={sql.Number} State={sql.State} Class={sql.Class}"
+        : "Flow check failed: " + ex.GetType().Name);
+    return 1;
+}
 
 static async Task<int> Run(bool oauthVaultOnly)
 {
-    var source = Environment.GetEnvironmentVariable("SYNC_CHECKS_CONNECTION")
-        ?? "Server=localhost;Integrated Security=true;TrustServerCertificate=true";
+    var source = Environment.GetEnvironmentVariable("SYNC_CHECKS_CONNECTION");
+    if (oauthVaultOnly && string.IsNullOrWhiteSpace(source))
+    {
+        Console.Error.WriteLine("Set SYNC_CHECKS_CONNECTION securely for --oauth-vault-only; only an owned fixture database is used.");
+        return 2;
+    }
+    source ??= "Server=localhost;Integrated Security=true;TrustServerCertificate=true";
     var database = "HyperSyncChecks_" + Guid.NewGuid().ToString("N");
     var sqlOptions = new SqlConnectionStringBuilder(source) { InitialCatalog = database, Pooling = false };
     var masterOptions = new SqlConnectionStringBuilder(source) { InitialCatalog = "master", Pooling = false };
     await using var master = new SqlConnection(masterOptions.ConnectionString);
     await master.OpenAsync();
+    var createAcknowledged = false;
     try
     {
         Console.WriteLine("Creating isolated SQL fixture " + database);
         await Execute(master, $"CREATE DATABASE [{database}]");
+        createAcknowledged = true;
         var options = new DbContextOptionsBuilder<HyperIntegrationContext>().UseSqlServer(sqlOptions.ConnectionString, sql => sql.CommandTimeout(120))
             .ReplaceService<IModelCustomizer, FixtureSchema>().Options;
         await using var db = new HyperIntegrationContext(options);
@@ -82,14 +95,14 @@ static async Task<int> Run(bool oauthVaultOnly)
         using var basalamHttp = new HttpClient(providerHttp);
         using var sdk = new BasalamClient(new BasalamConfig(), httpClient: basalamHttp);
         var oauth = new BasalamOAuthService(Options.Create(new BasalamOAuthSettings()), basalamHttp,
-            new EphemeralDataProtectionProvider());
+            new EphemeralDataProtectionProvider(), FixtureProtection.Provider());
         db.ExternalOAuthTokens.Add(oauth.CreateTokenEntity(connection.Id, 7, "tenant-a", Provider.Basalam,
             new() { AccessToken = "fixture-grant", ExpiresIn = 3600, Scope = "vendor.product.read vendor.product.write" }));
         await db.SaveChangesAsync();
-        var adapter = new BasalamSdkAdapter(sdk, new BasalamOAuthStore(db, oauth));
-        await BasalamCatalogChecks.Run(connection, new BasalamOAuthStore(db, oauth), Check);
-        await BasalamDraftChecks.Run(connection, new BasalamOAuthStore(db, oauth), Check);
-        var registration = new BasalamWebhookRegistration(db, new BasalamOAuthStore(db, oauth), sdk);
+        var adapter = new BasalamSdkAdapter(sdk, new BasalamOAuthStore(db, oauth, FixtureProtection.LegacyVault()));
+        await BasalamCatalogChecks.Run(connection, new BasalamOAuthStore(db, oauth, FixtureProtection.LegacyVault()), Check);
+        await BasalamDraftChecks.Run(connection, new BasalamOAuthStore(db, oauth, FixtureProtection.LegacyVault()), Check);
+        var registration = new BasalamWebhookRegistration(db, new BasalamOAuthStore(db, oauth, FixtureProtection.LegacyVault()), sdk, FixtureProtection.LegacyVault());
         await registration.RegisterForConnectionAsync(connection.Id, 7, "tenant-a", "71", "https://callback.fixture.invalid/oauth/callback", default);
         Check(providerHttp.WebhookRegistration is { } registered
             && registered.GetProperty("event_ids").EnumerateArray().Select(x => x.GetInt32()).SequenceEqual(Enumerable.Range(1, 9))
@@ -106,7 +119,7 @@ static async Task<int> Run(bool oauthVaultOnly)
         var processor = new IntegrationScenarioProcessor(db, resolver, new NoCapture(),
             Options.Create(new IntegrationInventoryCaptureOptions()), Options.Create(new BasalamOAuthSettings()), null!, dispatcher, commands);
         var queue = new IntegrationScenarioQueue(db, processor);
-        var ingress = new IntegrationWebhookIngress(db, new IntegrationWebhookVerifier());
+        var ingress = new IntegrationWebhookIngress(db, new IntegrationWebhookVerifier(FixtureProtection.LegacyVault()));
         await WebhookContractChecks.Run(ingress, Check);
         WebhookIngressRequest Event(string id, string product = "12", string? sourceMarker = null) =>
             new(ApiProvider.Basalam, "71", id, "product.updated", null, null,
@@ -392,7 +405,7 @@ static async Task<int> Run(bool oauthVaultOnly)
             && await db.IntegrationOutbox.MaxAsync(x => x.SourceVersion) == version + 1,
             "inventory capture allocates a version after product messages in the shared stream");
         // Repair a missing mapping, then prove replay wakes the original worker job.
-        var management = new IntegrationManagementApi(db);
+        var management = new IntegrationManagementApi(db, FixtureProtection.LegacyVault());
         var managementController = new IntegrationManagementController(management, new IntegrationScopeAuthorization())
         { ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() } };
         var scope = new IntegrationConnectionCommandRequest(7, "tenant-a", connection.Id);
@@ -544,8 +557,12 @@ static async Task<int> Run(bool oauthVaultOnly)
         if (!database.StartsWith("HyperSyncChecks_", StringComparison.Ordinal)
             || !Guid.TryParseExact(database["HyperSyncChecks_".Length..], "N", out _)
             || sqlOptions.InitialCatalog != database) throw new InvalidOperationException("Unsafe fixture cleanup target");
-        await Execute(master, $"IF DB_ID(N'{database}') IS NOT NULL DROP DATABASE [{database}]");
-        Console.WriteLine("Removed only this run's disposable SQL fixture database.");
+        if (createAcknowledged)
+        {
+            await Execute(master, $"IF DB_ID(N'{database}') IS NOT NULL DROP DATABASE [{database}]");
+            Console.WriteLine("Removed only this run's disposable SQL fixture database.");
+        }
+        else Console.Error.WriteLine("CREATE not acknowledged; cleanup cannot prove fixture ownership.");
     }
 }
 

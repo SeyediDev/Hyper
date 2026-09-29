@@ -27,7 +27,9 @@ public static class DependencyInjection
             Directory.CreateDirectory(keysPath);
             services.AddDataProtection()
                 .PersistKeysToFileSystem(new DirectoryInfo(keysPath))
-                .SetApplicationName("Hyper.AdminPanel");
+                .SetApplicationName("Hyper.AdminPanel")
+                .ApplySharedKeyRingEncryption(configuration.GetSection("IntegrationProtection")
+                    .Get<IntegrationProtectionOptions>() ?? new(), keysPath);
 
             // Neo defaults the panel cookie to SecurePolicy.Always. Local HTTP
             // development must be able to send the cookie back to AdminDashboard.

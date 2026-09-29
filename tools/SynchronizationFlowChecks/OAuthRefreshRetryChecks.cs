@@ -20,7 +20,7 @@ internal static class OAuthRefreshRetryChecks
         using var auth = new RefreshTransport { InnerHandler = provider };
         using var http = new HttpClient(auth, disposeHandler: false);
         using var sdk = new BasalamClient(new BasalamConfig(), httpClient: http);
-        var oauth = new BasalamOAuthService(Options.Create(new BasalamOAuthSettings()), http, new EphemeralDataProtectionProvider());
+        var oauth = new BasalamOAuthService(Options.Create(new BasalamOAuthSettings()), http, new EphemeralDataProtectionProvider(), FixtureProtection.Provider());
         var connection = new ExternalIntegrationConnection
         {
             ShopId = 47, TenantId = "refresh-retry", Provider = Provider.Basalam, DisplayName = "refresh fixture",
@@ -38,7 +38,7 @@ internal static class OAuthRefreshRetryChecks
         using var accounting = new AccountingTransport();
         using var accountingHttp = new HttpClient(accounting) { BaseAddress = new Uri("https://accounting.fixture.invalid/") };
         var commands = new HyperyekAccountingApiClient(accountingHttp);
-        var ingress = new IntegrationWebhookIngress(db, new IntegrationWebhookVerifier());
+        var ingress = new IntegrationWebhookIngress(db, new IntegrationWebhookVerifier(FixtureProtection.LegacyVault()));
         var queue = Queue(db, sdk);
         long version = 0;
 
@@ -117,7 +117,7 @@ internal static class OAuthRefreshRetryChecks
 
         Task<ExternalOAuthToken> Snapshot() => db.ExternalOAuthTokens.AsNoTracking().SingleAsync(x => x.Id == token.Id);
         Task<int> Expire() => db.ExternalOAuthTokens.Where(x => x.Id == token.Id).ExecuteUpdateAsync(s => s.SetProperty(x => x.ExpiresAtUtc, DateTime.UtcNow.AddMinutes(-1)));
-        IntegrationStrategyResolver Resolver(HyperIntegrationContext context, BasalamClient client) => new([new BasalamSdkAdapter(client, new BasalamOAuthStore(context, oauth))]);
+        IntegrationStrategyResolver Resolver(HyperIntegrationContext context, BasalamClient client) => new([new BasalamSdkAdapter(client, new BasalamOAuthStore(context, oauth, FixtureProtection.LegacyVault()))]);
         IntegrationScenarioQueue Queue(HyperIntegrationContext context, BasalamClient client)
         {
             var resolver = Resolver(context, client);

@@ -6,6 +6,13 @@ The old `/services/webhook` documentation URL returns 404; the current path incl
 
 ## Registration and routing
 
+Connection credentials are read through the scoped encrypted vault. Registration
+validates stored scope and credentials before retrieving a token that may refresh;
+verification never migrates rows. Same-secret storage rewrap preserves registered
+authorization and requires no provider update. Required shared-key configuration,
+strict/temporary legacy behavior and controlled migration are documented in
+[Integration credential protection](INTEGRATION_CREDENTIAL_VAULT.md).
+
 `BasalamWebhookEvents` is the shared event-type catalog used by registration and
 Ingress. The official event IDs are **types**, not unique notification IDs:
 
