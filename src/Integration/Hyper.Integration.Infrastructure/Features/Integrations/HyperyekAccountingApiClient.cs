@@ -16,6 +16,8 @@ namespace Hyper.Infrastructure.Features.Integrations;
 
 public sealed class HyperyekAccountingApiOptions
 {
+    // Development-only escape hatch. Keep authentication enabled by default.
+    public bool AuthenticationEnabled { get; set; } = true;
     public string BaseAddress { get; set; } = "http://localhost:5100/";
     public string TokenEndpoint { get; set; } = "";
     public string ClientId { get; set; } = "";

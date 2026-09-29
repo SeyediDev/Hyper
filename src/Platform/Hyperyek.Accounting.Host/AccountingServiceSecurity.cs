@@ -8,15 +8,16 @@ public static class AccountingServiceSecurity
 {
     public static IServiceCollection AddAccountingServiceSecurity(this IServiceCollection services, IConfiguration configuration)
     {
+        var authenticationEnabled = configuration.GetValue("AccountingApiSecurity:AuthenticationEnabled", true);
         var authority = configuration["IdpSetting:Authority"];
         var audience = configuration["IdpSetting:ClientId"];
         var clients = configuration.GetSection("AccountingApiSecurity:AllowedClientIds").Get<string[]>() ?? [];
         var scope = configuration["AccountingApiSecurity:RequiredScope"] ?? "hyperyek.accounting";
-        if (!string.Equals(configuration["IdpSetting:TokenProvider"], "Keycloak", StringComparison.OrdinalIgnoreCase)
+        if (authenticationEnabled && (!string.Equals(configuration["IdpSetting:TokenProvider"], "Keycloak", StringComparison.OrdinalIgnoreCase)
             || !Uri.TryCreate(authority, UriKind.Absolute, out var issuer) || issuer.Scheme != Uri.UriSchemeHttps
             || !string.IsNullOrEmpty(issuer.UserInfo) || !string.IsNullOrEmpty(issuer.Query) || !string.IsNullOrEmpty(issuer.Fragment)
             || string.IsNullOrWhiteSpace(audience) || clients.Length == 0 || clients.Any(string.IsNullOrWhiteSpace)
-            || string.IsNullOrWhiteSpace(scope) || scope.Any(char.IsWhiteSpace))
+            || string.IsNullOrWhiteSpace(scope) || scope.Any(char.IsWhiteSpace)))
             throw new InvalidOperationException("AccountingAuthenticationConfigurationInvalid");
 
         services.AddNeoAuthentication(configuration);
@@ -33,7 +34,8 @@ public static class AccountingServiceSecurity
         });
         services.AddAuthorization(options =>
         {
-            options.DefaultPolicy = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
+            options.DefaultPolicy = authenticationEnabled
+                ? new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
                 .RequireAuthenticatedUser().RequireAssertion(context =>
                 {
                     var ids = context.User.FindAll("azp").Concat(context.User.FindAll("client_id")).Select(x => x.Value).ToArray();
@@ -41,7 +43,8 @@ public static class AccountingServiceSecurity
                         && clients.Contains(ids[0], StringComparer.Ordinal)
                         && context.User.FindAll("scope").Any(x => x.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries)
                             .Contains(scope, StringComparer.Ordinal));
-                }).Build();
+                }).Build()
+                : new AuthorizationPolicyBuilder().RequireAssertion(_ => true).Build();
             options.FallbackPolicy = options.DefaultPolicy;
         });
         return services;

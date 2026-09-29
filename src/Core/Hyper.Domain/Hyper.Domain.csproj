@@ -16,7 +16,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\Neo\src\Neo.Common\Neo.Common.csproj" />
     <ProjectReference Include="..\..\..\..\..\Neo\src\Neo.Domain\Neo.Domain.csproj" />
-    <ProjectReference Include="..\..\..\..\..\Neo-Bpms\src\Neo.Bpms.Domain\Neo.Bpms.Domain.csproj" />
   </ItemGroup>
 
   <!-- Integration owns its own domain assembly. These legacy files remain in place

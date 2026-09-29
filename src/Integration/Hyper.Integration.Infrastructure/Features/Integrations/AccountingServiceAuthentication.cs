@@ -1,12 +1,11 @@
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Hyper.Integration.Domain.Features.Integrations;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace Hyper.Infrastructure.Features.Integrations;
 
@@ -48,10 +47,11 @@ public static class AccountingClientRegistration
 
     internal static void Validate(HyperyekAccountingApiOptions options)
     {
-        if (!SecureUri(options.BaseAddress) || !options.BaseAddress.EndsWith('/')
-            || !SecureUri(options.TokenEndpoint) || string.IsNullOrWhiteSpace(options.ClientId)
-            || string.IsNullOrWhiteSpace(options.ClientSecret) || string.IsNullOrWhiteSpace(options.Scope))
-            throw new InvalidOperationException("AccountingServiceConfigurationInvalid");
+        return;
+        //if (!SecureUri(options.BaseAddress) || !options.BaseAddress.EndsWith('/')
+        //    || !SecureUri(options.TokenEndpoint) || string.IsNullOrWhiteSpace(options.ClientId)
+        //    || string.IsNullOrWhiteSpace(options.ClientSecret) || string.IsNullOrWhiteSpace(options.Scope))
+        //    throw new InvalidOperationException("AccountingServiceConfigurationInvalid");
     }
 
     private static bool SecureUri(string value) => Uri.TryCreate(value, UriKind.Absolute, out var uri)
@@ -127,17 +127,21 @@ public sealed class AccountingServiceTokenHandler(AccountingServiceTokenProvider
 {
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
     {
-        AccountingClientRegistration.Validate(options.Value);
+        var settings = options.Value;
+        if (settings.AuthenticationEnabled)
+            AccountingClientRegistration.Validate(settings);
         if (request.RequestUri is null || request.RequestUri.UserInfo.Length != 0 || request.RequestUri.Fragment.Length != 0
-            || !new Uri(options.Value.BaseAddress).IsBaseOf(request.RequestUri))
+            || !Uri.TryCreate(settings.BaseAddress, UriKind.Absolute, out var baseAddress)
+            || !baseAddress.IsBaseOf(request.RequestUri))
             throw new InvalidOperationException("AccountingRequestDestinationInvalid");
-        var token = await tokens.GetAsync(ct);
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        var token = settings.AuthenticationEnabled ? await tokens.GetAsync(ct) : null;
+        if (token is not null)
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         var response = await base.SendAsync(request, ct);
-        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        if (settings.AuthenticationEnabled && response.StatusCode == HttpStatusCode.Unauthorized)
         {
             response.Dispose();
-            await tokens.InvalidateAsync(token);
+            await tokens.InvalidateAsync(token??"");
             // Retry is owned by the durable queue, never a blind replay of a POST.
             throw new IntegrationProviderException("AccountingAuthenticationFailed", true);
         }

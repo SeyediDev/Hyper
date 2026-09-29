@@ -58,6 +58,37 @@ static class ProductReadinessChecks
         check((await Prepare(s,adapted.Input,adapted.Revision))!.JobId==adapted.JobId && remote.Creates==1,"repeat after completion cannot resend");
         await Conflict(async()=>await Prepare(s,adapted.Input with {CategoryId=999},adapted.Revision));
 
+        s=await Scope();
+        await Policy(s,new(ProductPreparationMode.Hold,true,true));
+        var untouched=(await Prepare(s,input with {Description="  keep spaces  ",CategoryId=null}))!;
+        check(untouched.Prepared.Description==untouched.Input.Description && untouched.Changes.Count==0,
+            "hold policy ignores adaptation switches and preserves original whitespace");
+        await Policy(s,new(ProductPreparationMode.Adapt,true,false));
+        var trimOnly=(await Prepare(s,input with {Description="  "+input.Description+"  "},untouched.Revision))!;
+        check(trimOnly.JobId is null && trimOnly.Prepared.Description==input.Description
+            && trimOnly.Changes.Single().Rule=="TrimWhitespace" && trimOnly.Issues.Any(x=>x.Code=="DescriptionTooLong"),
+            "adaptation without explicit truncation permission retains oversized text for remediation");
+        check((await Board(s))!.AdaptedCompleted==0 && (await Board(s))!.NeedsAttention==1,
+            "partially corrected but invalid data is attention, never completed");
+        await Policy(s,new(ProductPreparationMode.Adapt,false,true));
+        var crossingPair=new string('x',9999)+char.ConvertFromUtf32(0x1F600)+"suffix";
+        var unicode=(await Prepare(s,input with {Description=crossingPair},trimOnly.Revision))!;
+        check(unicode.Prepared.Description==new string('x',9999) && unicode.Changes.Single().Before==crossingPair
+            && unicode.History.Last().Input.Description==crossingPair,
+            "truncation never splits an emoji surrogate pair and retains exact original in audit");
+        await Process(s);
+        check((await Board(s))!.AdaptedCompleted==1 && remote.Draft!.Description==unicode.Prepared.Description,
+            "worker submits precisely the audited prepared description before confirmed adaptation count");
+
+        s=await Scope(); await Policy(s,new(ProductPreparationMode.Adapt,false,true));
+        var exactBoundary=new string('x',9998)+char.ConvertFromUtf32(0x1F600);
+        var exact=(await Prepare(s,input with {Description=exactBoundary}))!;
+        check(exact.JobId>0 && exact.Prepared.Description==exactBoundary && exact.Changes.Count==0,
+            "exactly 10000 UTF16 units with a complete emoji are neither truncated nor marked adapted");
+        await Process(s);
+        check((await Board(s))!.Completed==1 && (await Board(s))!.AdaptedCompleted==0,
+            "adapt policy alone does not inflate corrected completion statistics");
+
         s=await Scope(); await Policy(s,new(ProductPreparationMode.Adapt,true,true));
         var missing=(await Prepare(s,new(ProductTransferDirection.ToPlatform,"44")))!;
         check(missing.JobId is null && missing.Issues.Count==3,"adapt mode never invents category preparation or package weight");

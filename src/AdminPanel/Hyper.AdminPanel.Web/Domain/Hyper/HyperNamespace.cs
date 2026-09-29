@@ -186,6 +186,10 @@ public class HyperNamespace : ModelDefinition<HyperNamespace>
         DefineEntity<SqlVwMarketingsubscriptionmonthly>();
         DefineEntity<SqlVwMarketinggmvmonthly>();
         DefineEntity<SqlVwIntegrationdashboard>();
+
+        // Hyper.Domain carries neutral metadata for non-panel consumers. The
+        // legacy panel model is rebuilt here at its explicit boundary.
+        HyperDomainMetadataAdapter.Apply();
     }
     private void AddArchivePartitionScheme(string name) => AddPartitionScheme($"Archive_{name}", "pfArchive", FileGroupSelectionType.FromList, "", name, $"{name}_Archive");
 }

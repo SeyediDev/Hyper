@@ -5,7 +5,6 @@ namespace Hyper.Domain.Entities.Database;
 /// composite keys and keyless views must not acquire an artificial Id column.
 /// </summary>
 [DataProvider("Domain")]
-[Neo.Bpms.Domain.Models.Attributes.EntityAttributes.DontSync]
 public abstract class SqlServerEntity : IEntity, IDomainEventEntity
 {
     private readonly List<BaseEvent> _domainEvents = [];

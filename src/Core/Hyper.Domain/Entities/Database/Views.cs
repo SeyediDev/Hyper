@@ -49,7 +49,6 @@ public sealed class SqlViewDetailaccountbalance : SqlServerEntity
 /// مشتری جدید فقط اولین درخواست پولی هر مغازه است و retention
 /// مغازه‌هایی را می‌شمارد که در ماه قبل نیز اشتراک پولی داشته‌اند.
 /// </summary>
-[Neo.Bpms.Domain.Models.Attributes.EntityAttributes.View(SqlVwMarketingsubscriptionmonthlyQuery.Sql, true)]
 [DisplayName("تحلیل ماهانه اشتراک بازاریابی")]
 [DbMap("vw_SqlVwMarketingsubscriptionmonthly")]
 public sealed class SqlVwMarketingsubscriptionmonthly : SqlServerEntity
@@ -87,7 +86,7 @@ public sealed class SqlVwMarketingsubscriptionmonthly : SqlServerEntity
     public decimal Retentionrate { get; set; }
 }
 
-internal static class SqlVwMarketingsubscriptionmonthlyQuery
+public static class SqlVwMarketingsubscriptionmonthlyQuery
 {
     public const string Sql = """
 WITH MonthSeries AS (
@@ -132,7 +131,6 @@ LEFT JOIN ActiveByMonth pa ON pa.TenantId = t.TenantId AND pa.MonthStart = DATEA
 """;
 }
 
-[Neo.Bpms.Domain.Models.Attributes.EntityAttributes.View(SqlVwMarketinggmvmonthlyQuery.Sql, true)]
 [DisplayName("گزارش ماهانه GMV خرید و فروش")]
 [DbMap("vw_SqlVwMarketinggmvmonthly")]
 public sealed class SqlVwMarketinggmvmonthly : SqlServerEntity
@@ -149,7 +147,7 @@ public sealed class SqlVwMarketinggmvmonthly : SqlServerEntity
     [DisplayName("حجم کالای فروش")][DbMap("SaleQuantity")] public decimal Salequantity { get; set; }
 }
 
-internal static class SqlVwMarketinggmvmonthlyQuery
+public static class SqlVwMarketinggmvmonthlyQuery
 {
     public const string Sql = """
 WITH MonthSeries AS (
